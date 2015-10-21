@@ -1,9 +1,9 @@
+/* global ResizeSensor,L*/
 /**
  * Copyright 2013 Marc J. Schmidt. See the LICENSE file at the top-level
  * directory of this distribution and at
  * https://github.com/marcj/css-element-queries/blob/master/LICENSE.
  */
-;
 (function() {
 
     this.L = this.L || {};
@@ -81,7 +81,7 @@
              */
             this.addOption = function(option) {
                 this.options.push(option);
-            }
+            };
 
             var attributes = ['min-width', 'min-height', 'max-width', 'max-height'];
 
@@ -111,7 +111,7 @@
                         attrValue += option.value;
                     }
 
-                    if (!attrValues[attrName]) attrValues[attrName] = '';
+                    if (!attrValues[attrName]) {attrValues[attrName] = '';}
                     if (attrValue && -1 === (' '+attrValues[attrName]+' ').indexOf(' ' + attrValue + ' ')) {
                         attrValues[attrName] += ' ' + attrValue;
                     }
@@ -152,9 +152,9 @@
          */
         function queueQuery(selector, mode, property, value) {
             var query;
-            if (document.querySelectorAll) query = document.querySelectorAll.bind(document);
-            if (!query && 'undefined' !== typeof $$) query = $$;
-            if (!query && 'undefined' !== typeof jQuery) query = jQuery;
+            if (document.querySelectorAll) {query = document.querySelectorAll.bind(document);}
+            if (!query && 'undefined' !== typeof $$) {query = $$;}
+            if (!query && 'undefined' !== typeof jQuery) {query = jQuery;}
 
             if (!query) {
                 throw 'No document.querySelectorAll, jQuery or Mootools\'s $$ found.';
@@ -221,8 +221,8 @@
             for (var i = 0, j = document.styleSheets.length; i < j; i++) {
                 readRules(document.styleSheets[i].cssText || document.styleSheets[i].cssRules || document.styleSheets[i].rules);
             }
-        }
-    }
+        };
+    };
 
     function init() {
         new L.ElementQueries().init();
@@ -390,6 +390,6 @@
         } else {
             attachResizeEvent(element, callback);
         }
-    }
+    };
 
 })();

@@ -1,4 +1,4 @@
-/* global io */
+/* global io,L,Woogeen,Erizo*/
 
 /**
  * @class Woogeen.ConferenceClient

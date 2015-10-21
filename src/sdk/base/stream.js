@@ -1,4 +1,4 @@
-/* global webkitURL, chrome */
+/* global webkitURL, chrome,Woogeen */
 (function () {
   'use strict';
 /**

@@ -1,4 +1,4 @@
-/*global console*/
+/*global console,L*/
 
 /*
  * API to write logs based on traditional logging mechanisms: debug, trace, info, warning, error

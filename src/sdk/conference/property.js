@@ -1,4 +1,5 @@
-var Woogeen = (function() {
+/* exported L,Woogeen,Erizo*/
+var Woogeen = (function() { /*jshint ignore:line*/ //Woogeen is defined.
   'use strict';
 
   var Woogeen = {};
@@ -15,5 +16,5 @@ var Woogeen = (function() {
   return Woogeen;
 })();
 
-var L = {};
+var L = {};   /*jshint ignore:line*/ //L is defined.
 var Erizo = {};

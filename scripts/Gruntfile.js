@@ -3,25 +3,32 @@
 module.exports = function(grunt) {
 
   var srcFiles = [
-    '../conference/property.js',
-    '../base/3rdparty/L.Base64.js',
-    '../base/3rdparty/L.Logger.js',
-    '../base/stream.js',
-    '../base/events.js',
-    '../conference/conference.js',
-    '../conference/webrtc-stacks/ChromeStableStack.js',
-    '../conference/webrtc-stacks/FirefoxStack.js',
-    '../conference/webrtc-stacks/IEStableStack.js'
+    '../src/sdk/conference/property.js',
+    '../src/sdk/base/events.js',
+    '../src/sdk/base/L.Base64.js',
+    '../src/sdk/base/L.Logger.js',
+    '../src/sdk/base/stream.js',
+   // '../src/sdk/conference/adapter.js',
+    '../src/sdk/conference/conference.js',
+    '../src/sdk/conference/ieMediaStream.js',
+    '../src/sdk/conference/webrtc-stacks/ChromeStableStack.js',
+    '../src/sdk/conference/webrtc-stacks/FirefoxStack.js',
+    '../src/sdk/conference/webrtc-stacks/IEStableStack.js',
+   // '../src/sdk/p2p/adapter.p2p.js',
+    '../src/sdk/p2p/errors.js',
+    '../src/sdk/p2p/gab.proxy.js',
+    '../src/sdk/p2p/ieMediaStream.p2p.js',
+    '../src/sdk/p2p/peer.js'
   ];
 
   var uiSrcFiles = [
-    '../ui/3rdparty/L.Resizer.js',
-    '../ui/AudioPlayer.js',
-    '../ui/Bar.js',
-    '../ui/Speaker.js',
-    '../ui/VideoPlayer.js',
-    '../ui/View.js',
-    '../ui/ui.js'
+    '../src/sdk/ui/AudioPlayer.js',
+    '../src/sdk/ui/Bar.js',
+    '../src/sdk/ui/L.Resizer.js',
+    '../src/sdk/ui/Speaker.js',
+    '../src/sdk/ui/View.js',
+    '../src/sdk/ui/VideoPlayer.js',
+    '../src/sdk/ui/ui.js'
   ];
 
   // Project configuration.
@@ -65,7 +72,7 @@ window.L = L;\n\
         nonull: true
       },
       merge: {
-        src: ['dist/<%= pkg.name %>-<%= pkg.version %>.js', '../base/3rdparty/socket.io.js'],
+        src: 'dist/<%= pkg.name %>-<%= pkg.version %>.js',
         dest: 'dist/<%= pkg.name %>-<%= pkg.version %>.js',
         nonull: true
       }
@@ -97,10 +104,11 @@ window.L = L;\n\
         files: {
           'dist/<%= pkg.name %>-<%= pkg.version %>.min.js': ['dist/<%= pkg.name %>-<%= pkg.version %>.js'],
           'dist/<%= pkg.name %>.ui-<%= pkg.version %>.min.js': ['dist/<%= pkg.name %>.ui-<%= pkg.version %>.js']
+        },
+        options: {
+          banner: '<%= meta.banner %>',
+	  sourceMap:true
         }
-      },
-      options: {
-        banner: '<%= meta.banner %>'
       }
     }
   });

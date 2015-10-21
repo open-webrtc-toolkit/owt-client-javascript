@@ -1,4 +1,4 @@
-/* global window, mozRTCSessionDescription, mozRTCPeerConnection */
+/* global L,Erizo,window, mozRTCSessionDescription, mozRTCPeerConnection */
 
 Erizo.FirefoxStack = function (spec) {
     'use strict';

@@ -1,4 +1,4 @@
-/* global window, RTCSessionDescription, webkitRTCPeerConnection */
+/* global L,Erizo,window, RTCSessionDescription, webkitRTCPeerConnection */
 
 Erizo.ChromeStableStack = function (spec) {
     'use strict';

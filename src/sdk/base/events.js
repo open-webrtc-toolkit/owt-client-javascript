@@ -1,3 +1,4 @@
+/*global Woogeen*/
 /*
  * Class EventDispatcher provides event handling to sub-classes.
  * It is inherited from Publisher, Room, etc.

@@ -1,7 +1,7 @@
-/*global window, console, RTCSessionDescription, webkitRTCPeerConnection*/
+/*global L,Erizo,window, console, RTCSessionDescription, webkitRTCPeerConnection*/
 
 Erizo.IEStableStack = function (spec) {
-  var that = {}, 
+  var that = {},
         WebkitRTCPeerConnection = webkitRTCPeerConnection;
 
   that.pc_config = {

@@ -1,8 +1,11 @@
+/* global SignalingChannel,L*/
+/* exported Gab*/
 /**
  * @class Gab
  * @classDesc A proxy to bridge old gab to new signaling channel.
  */
-function Gab(loginInfo){
+function Gab(loginInfo){ /*jshint ignore:line*/ //loginInfo is unused.
+  'use strict';
 
   var self=this;
 
@@ -66,39 +69,47 @@ function Gab(loginInfo){
   this.onAuthenticated=null;
 
   sc.onMessage=function(data,from){
-    dataObj=JSON.parse(data);
+    var dataObj=JSON.parse(data);
     switch(dataObj.type){
       case 'chat-invitation':
-        if(self.onChatInvitation)
+        if(self.onChatInvitation){
           self.onChatInvitation(from);
+        }
         break;
       case 'chat-accepted':
-        if(self.onChatAccepted)
+        if(self.onChatAccepted){
           self.onChatAccepted(from);
+        }
         break;
       case 'chat-denied':
-        if(self.onChatDenied)
+        if(self.onChatDenied){
           self.onChatDenied(from);
+        }
         break;
       case 'chat-closed':
-        if(self.onChatStopped)
+        if(self.onChatStopped){
           self.onChatStopped(from);
+        }
         break;
       case 'stream-type':
-        if(self.onStreamType)
+        if(self.onStreamType){
           self.onStreamType(dataObj.data,from);
+        }
         break;
       case 'chat-signal':
-        if(self.onChatSignal)
+        if(self.onChatSignal){
           self.onChatSignal(dataObj.data,from);
+        }
         break;
       case 'chat-negotiation-needed':
-        if(self.onNegotiationNeeded)
+        if(self.onNegotiationNeeded){
           self.onNegotiationNeeded(from);
+        }
         break;
       case 'chat-negotiation-accepted':
-        if(self.onNegotiationAccepted)
+        if(self.onNegotiationAccepted){
           self.onNegotiationAccepted(from);
+        }
         break;
       default:
         L.Logger.error('Received unkown message');
@@ -106,8 +117,9 @@ function Gab(loginInfo){
   };
 
   sc.onServerDisconnected=function(){
-    if(self.onDisconnected)
+    if(self.onDisconnected){
       self.onDisconnected();
+    }
   };
 
   /**
@@ -118,7 +130,7 @@ function Gab(loginInfo){
   this.sendChatInvitation= function(uid, successCallback, failureCallback){
     var msg={type:'chat-closed'};
     sc.sendMessage(JSON.stringify(msg),uid);
-    var msg={type:'chat-invitation'};
+    msg={type:'chat-invitation'};
     sc.sendMessage(JSON.stringify(msg),uid, successCallback, failureCallback);
   };
 
@@ -208,12 +220,15 @@ function Gab(loginInfo){
    */
   this.connect=function(loginInfo, successCallback, failureCallback){
     sc.connect(loginInfo,function(id){
-      if(self.onConnected)
+      if(self.onConnected){
         self.onConnected();
-      if(self.onAuthenticated)
+      }
+      if(self.onAuthenticated){
         self.onAuthenticated(id);
-      if(successCallback)
+      }
+      if(successCallback){
         successCallback(id);
+      }
     },failureCallback);
   };
 }

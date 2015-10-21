@@ -65,20 +65,15 @@ div#videocontainer {
 </style>
 </head>
 <body>
-  <script src="../sdk/ieMediaStream.p2p.js" type="text/javascript"></script>
   <script src="js/jquery-1.10.2.min.js" type="text/javascript"></script>
   <script src="js/utils.js" type="text/javascript"></script>
-  <script src="../sdk/dependencies/adapter.p2p.js" type="text/javascript"></script>
-  <script src="../sdk/dependencies/socket.io.js" type="text/javascript"></script>
-  <script src="../sdk/sc.websocket.js" type="text/javascript"></script>
+  <script src="js/adapter.p2p.js" type="text/javascript"></script>
+  <script src="js/socket.io.js" type="text/javascript"></script>
+  <script src="js/sc.websocket.js" type="text/javascript"></script>
   <!-- SDK -->
   <!-- Please do NOT remove "SDK" and "SDK Stops". They're used by packing scripts. -->
-  <script src="../sdk/gab.proxy.js" type="text/javascript"></script>
-  <script src="../sdk/woogeen.sdk.js" type="text/javascript"></script>
-  <script src="../sdk/errors.js" type="text/javascript"></script>
-  <script src="../sdk/peer.js" type="text/javascript"></script>
+ <script src="../../../scripts/dist/woogeen.sdk-2.8.0.min.js" type="text/javascript"></script>
   <!-- SDK Stops -->
-  <script src="../sdk/dependencies/socket.io.js"></script>
   <h1>Intel<sup>&reg;</sup> Collaboration Suite for WebRTC</h1>
   <h2>P2P Direct Call Sample</h2>
   <div id="description">
@@ -127,7 +122,7 @@ div#videocontainer {
   <div id="infoDiv"></div>
   <script type="text/javascript">
   var isVideo=1;
-  var serverAddress='http://jianjun-dev.sh.intel.com:8095';  // Please change it to signaling server's address.
+  var serverAddress='http://zhaoxiaoyun.sh.intel.com:8095';  // Please change it to signaling server's address.
   var p2p=new Woogeen.PeerClient({
     iceServers : [ {
       urls : "stun:61.152.239.60"

@@ -1,7 +1,7 @@
-
+/* global L,Gab,room,RTCIceCandidate,RTCPeerConnection,RTCSessionDescription,getPeerConnectionStats,getPeerConnectionAudioLevels,remoteIceCandidates*/
 /* Depend on woogeen.js, gab-websocket.js, WooGeen.Error.js*/
 
-;var Woogeen = Woogeen || {};
+var Woogeen = Woogeen || {}; /*jshint ignore:line*/ //Woogeen is defined.
 /**
  * @class Woogeen.PeerClient
  * @classDesc Sets up one-to-one video chat for two clients. It provides methods to initialize or stop a video call or to join a P2P chat room. This object can start a chat when another client joins the same chat room.
@@ -46,6 +46,8 @@ var p2p=new Woogeen.PeerClient({
 });
  */
 Woogeen.PeerClient=function (pcConfig) {
+  'use strict';
+
   var that = Woogeen.EventDispatcher({});
 
   var PeerState={
@@ -63,7 +65,7 @@ Woogeen.PeerClient=function (pcConfig) {
     REQUESTED:2,
     ACCEPTED:3,
     NEGOTIATING:4
-  }
+  };
 
   var DataChannelLabel={
     MESSAGE:'message',
@@ -134,8 +136,9 @@ Woogeen.PeerClient=function (pcConfig) {
   // Set configuration for PeerConnection
   if(pcConfig){
     config={};
-    if(pcConfig.iceServers)
+    if(pcConfig.iceServers){
       config.iceServers=parseIceServers(pcConfig.iceServers);
+    }
   }
 
   /*
@@ -156,13 +159,16 @@ Woogeen.PeerClient=function (pcConfig) {
 
   // Do stop chat locally.
   var stopChatLocally=function(peer,originatorId){
-    if(peer.state==PeerState.CONNECTED||peer.state==PeerState.CONNECTING){
-      if(peer.sendDataChannel)
+    if(peer.state===PeerState.CONNECTED||peer.state===PeerState.CONNECTING){
+      if(peer.sendDataChannel){
         peer.sendDataChannel.close();
-      if(peer.receiveDataChannel)
+      }
+      if(peer.receiveDataChannel){
         peer.receiveDataChannel.close();
-      if(peer.connection&&peer.connection.iceConnectionState!=='closed')
+      }
+      if(peer.connection&&peer.connection.iceConnectionState!=='closed'){
         peer.connection.close();
+      }
       if(peer.state!==PeerState.READY){
         peer.state=PeerState.READY;
         that.dispatchEvent(new Woogeen.ChatEvent({type: 'chat-stopped',peerId:peer.id, senderId: originatorId}));
@@ -183,8 +189,9 @@ Woogeen.PeerClient=function (pcConfig) {
   };
 
   var connectFailedHandler=function(){
-    if(connectFailureCallback)
+    if(connectFailureCallback){
       connectFailureCallback();
+    }
     connectSuccessCallback = undefined;
     connectFailureCallback = undefined;
   };
@@ -220,10 +227,12 @@ Woogeen.PeerClient=function (pcConfig) {
     var peer=peers[senderId];
     if(peer&&peer.connection){
       // Close PeerConnection if it has been established for this sender.
-      if(peer.sendDataChannel)
+      if(peer.sendDataChannel){
          peer.sendDataChannel.close();
-      if(peer.receiveDataChannel)
+       }
+      if(peer.receiveDataChannel){
          peer.receiveDataChannel.close();
+       }
       peer.connection.close();
     }
     // Delete this peer's information from peers list since the
@@ -255,28 +264,31 @@ Woogeen.PeerClient=function (pcConfig) {
 
   var chatSignalHandler=function(message, senderId){
     var peer=peers[senderId];
-    if(peer&&peer.state===PeerState.CONNECTING)
-      if(!peer.connection)
+    if(peer&&peer.state===PeerState.CONNECTING){
+      if(!peer.connection){
         createPeerConnection(peer);
+      }
+    }
       SignalingMessageHandler(peer,message);
   };
 
-  var streamTypeHandler=function(message, senderId){
+  var streamTypeHandler=function(message, senderId){/*jshint ignore:line*/ //sendId is unused.
     streams[message.streamId] = message.type;
     L.Logger.debug('remote stream ID:'+ message.streamId + ',type:'+streams[message.streamId]);
   };
 
   var authenticatedHandler=function(uid){
     myId=uid;
-    if(connectSuccessCallback)
+    if(connectSuccessCallback){
       connectSuccessCallback(uid);
+    }
     connectSuccessCallback = undefined;
     connectFailureCallback = undefined;
   };
 
   var forceDisconnectHandler=function(){
     stop();
-  }
+  };
 
   var onNegotiationneeded=function(peer){
     L.Logger.debug('On negotiation needed.');
@@ -298,8 +310,9 @@ Woogeen.PeerClient=function (pcConfig) {
   };
 
   var onRemoteIceCandidate=function(peer,event){
-    if(peer)
+    if(peer){
       L.Logger.debug('On remote ice candidate from peer '+peer.id);
+    }
     if(peer&&(peer.state===PeerState.OFFERED||peer.state===PeerState.CONNECTING||peer.state===PeerState.CONNECTED)){
       var candidate = new RTCIceCandidate({
         candidate : event.message.candidate,
@@ -312,8 +325,9 @@ Woogeen.PeerClient=function (pcConfig) {
       }
       else{
         L.Logger.debug('Cache remote ice candidates.');
-        if(!peer.remoteIceCandidates)
+        if(!peer.remoteIceCandidates){
           peer.remoteIceCandidates=[];
+        }
         peer.remoteIceCandidates.push(candidate);
       }
     }
@@ -329,7 +343,7 @@ Woogeen.PeerClient=function (pcConfig) {
       case PeerState.OFFERED:
       case PeerState.MATCHED:
         peer.state=PeerState.CONNECTING;
-        createPeerConnection(peer);
+        createPeerConnection(peer);/*jshint ignore:line*/ //Expected a break before case.
       case PeerState.CONNECTING:
       case PeerState.CONNECTED:
         L.Logger.debug('About to set remote description. Signaling state: '+peer.connection.signalingState);
@@ -360,18 +374,22 @@ Woogeen.PeerClient=function (pcConfig) {
 
   var createRemoteStream=function(mediaStream,peer){
     var type;
-    if(navigator.mozGetUserMedia) // MediaStream in FireFox doesn't have label property, so all streams are treated as video.
+    if(navigator.mozGetUserMedia){ // MediaStream in FireFox doesn't have label property, so all streams are treated as video.
       type='video';
-    else
+    }
+    else{
       type=streams[mediaStream.id];
+    }
     if(!type){
       return null;
     }else{
       var streamSpec = {video:{}, audio:true};
-      if(type == 'screen')
+      if(type === 'screen'){
         streamSpec.video.device='screen';
-      else
+      }
+      else{
         streamSpec.video.device='camera';
+      }
       var stream= new Woogeen.RemoteStream(streamSpec);
       stream.mediaStream=mediaStream;
       stream.from=peer.id;
@@ -408,13 +426,14 @@ Woogeen.PeerClient=function (pcConfig) {
     }
   };
 
-  var onIceConnectionStateChange=function(peer,event){
+  var onIceConnectionStateChange=function(peer,event){ /*jshint ignore:line*/ //event is unused.
     if(peer){
       L.Logger.debug('Ice connection state changed. State: '+peer.connection.iceConnectionState);
       if(peer.connection.iceConnectionState==='closed'&&peer.state===PeerState.CONNECTED){
         stopChatLocally(peer, peer.id);
-        if(gab)
+        if(gab){
           gab.sendChatStopped(peer.id);
+        }
         delete peers[peer.id];
       }
       if(peer.connection.iceConnectionState==='connected' || peer.connection.iceConnectionState==='completed'){
@@ -434,8 +453,9 @@ Woogeen.PeerClient=function (pcConfig) {
             L.Logger.debug('Disconnect timeout.');
             stopChatLocally(peer, peer.id);
             // peers[peer.id] may be a new instance, we only want to delete the old one from peer list.
-            if(peer===peers[peer.id])
+            if(peer===peers[peer.id]){
               delete peers[peer.id];
+            }
           }
         }, pcDisconnectTimeout);
       }
@@ -473,8 +493,9 @@ Woogeen.PeerClient=function (pcConfig) {
 
   // Return true if create PeerConnection successfully.
   var createPeerConnection=function(peer){
-    if(!peer||peer.connection)
+    if(!peer||peer.connection){
       return true;
+    }
     try {
       peer.connection = new RTCPeerConnection(config, pcConstraints);
       peer.connection.onicecandidate = function(event){onLocalIceCandidate(peer,event);};
@@ -510,9 +531,9 @@ Woogeen.PeerClient=function (pcConfig) {
   };
 
   var bindEventsToDataChannel=function(channel,peer){
-    channel.onmessage = function(event){onDataChannelMessage(peer,event)};
-    channel.onopen = function(event){onDataChannelOpen(peer,event)};
-    channel.onclose = function(event){onDataChannelClose(peer,event)};
+    channel.onmessage = function(event){onDataChannelMessage(peer,event);};
+    channel.onopen = function(event){onDataChannelOpen(peer,event);};
+    channel.onclose = function(event){onDataChannelClose(peer,event);};
     channel.onerror = function(error){
       L.Logger.debug("Data Channel Error:", error);
     };
@@ -546,20 +567,10 @@ Woogeen.PeerClient=function (pcConfig) {
     createAndSendOffer(peer);
   };
 
-  var switchStream=function(stream1, stream2, peerId, successCallback, failureCallback){
-    var peer=peers[peerId];
-    if (stream1!==null) {
-       peer.connection.removeStream(stream1.stream);
-    }
-    sendStreamType(stream2,peer);
-    peer.connection.addStream(stream2.stream);
-    if(successCallback)
-      successCallback();
-  };
-
   var createPeer=function(peerId){
-    if(!peers[peerId])
+    if(!peers[peerId]){
       peers[peerId]={state:PeerState.READY, id:peerId, pendingStreams:[], pendingUnpublishStreams:[], remoteIceCandidates:[], dataChannels:{}, pendingMessages:[], negotiationState:NegotiationState.READY, lastDisconnect:(new Date('2099/12/31')).getTime(),publishedStreams:[]};
+    }
     return peers[peerId];
   };
 
@@ -649,16 +660,19 @@ p2p.disconnect();
 */
   var disconnect=function(successCallback, failureCallback){
     if(!isConnectedToSignalingChannel){
-      if(failureCallback)
+      if(failureCallback){
         failureCallback(Woogeen.Error.P2P_CLIENT_INVALID_STATE);
+      }
       return;
     }
     stop();
-    if(gab)
+    if(gab){
       gab.finalize();
+    }
     gab=null;
-    if(successCallback)
+    if(successCallback){
       successCallback();
+    }
   };
 
 /**
@@ -678,34 +692,40 @@ p2p.invite('user2');
 */
   var invite = function(peerId, successCallback, failureCallback) {
     if(!gab){
-      if(failureCallback)
+      if(failureCallback){
         failureCallback(Woogeen.Error.P2P_CONN_CLIENT_NOT_INITIALIZED);
+      }
       return;
     }
     if(peerId===myId){
-      if(failureCallback)
+      if(failureCallback){
         failureCallback(Woogeen.Error.P2P_CLIENT_ILLEGAL_ARGUMENT);
+      }
       return;
     }
-    if(!peers[peerId])
+    if(!peers[peerId]){
       createPeer(peerId);
+    }
     var peer=peers[peerId];
     if(peer.state===PeerState.READY||peer.state===PeerState.OFFERED){
       L.Logger.debug('Send invitation to '+peerId);
       peer.state=PeerState.OFFERED;
       gab.sendChatInvitation(peerId, function(){
-        if(successCallback)
+        if(successCallback){
           successCallback();
+        }
       }, function(err){
         peer.state=PeerState.READY;
-        if(failureCallback)
+        if(failureCallback){
           failureCallback(Woogeen.Error.getErrorByCode(err));
+        }
       });
     }
     else{
       L.Logger.debug('Invalid state. Will not send invitation.');
-      if(failureCallback)
+      if(failureCallback){
         failureCallback(Woogeen.Error.P2P_CLIENT_INVALID_STATE);
+      }
     }
   };
 /**
@@ -752,8 +772,9 @@ p2p.addEventListener('chat-invited',function(e){
     if(!gab){
       failureCallback(Woogeen.Error.P2P_CONN_CLIENT_NOT_INITIALIZED);
     }
-    if(!peers[peerId])
+    if(!peers[peerId]){
       createPeer(peerId);
+    }
     var peer=peers[peerId];
     if(peer.state===PeerState.PENDING){
       peer.state=PeerState.MATCHED;
@@ -764,8 +785,9 @@ p2p.addEventListener('chat-invited',function(e){
     }
     else{
       L.Logger.debug('Invalid state. Will not send acceptance.');
-      if(failureCallback)
+      if(failureCallback){
         failureCallback(Woogeen.Error.P2P_CLIENT_INVALID_STATE);
+      }
     }
   };
 /**
@@ -804,8 +826,9 @@ p2p.addEventListener('chat-invited',function(e){
     }
     drainPendingStreams(peer);
     // Create data channel before first offer to avoid remote video disappear when renegotiation.
-    if(peer.pendingMessages.length&&!peer.dataChannels[DataChannelLabel.MESSAGE])
+    if(peer.pendingMessages.length&&!peer.dataChannels[DataChannelLabel.MESSAGE]){
       doCreateDataChannel(peer.id);
+    }
     // If the client is FireFox and publish without stream.
     if(navigator.mozGetUserMedia&&!peer.pendingStreams.length&&!peer.connection.getLocalStreams().length){
       createDataChannel(peer.id);
@@ -815,8 +838,9 @@ p2p.addEventListener('chat-invited',function(e){
       peer.connection.setLocalDescription(desc,function(){
         L.Logger.debug('Set local descripiton successfully.');
         changeNegotiationState(peer,NegotiationState.READY);
-        if(gab)
+        if(gab){
           gab.sendSignalMessage(peer.id, desc);
+        }
       },function(errorMessage){
         L.Logger.debug('Set local description failed. Message: '+JSON.stringify(errorMessage));
       });
@@ -829,8 +853,9 @@ p2p.addEventListener('chat-invited',function(e){
     if (peer&&peer.connection&&peer.remoteIceCandidates&&peer.remoteIceCandidates.length!==0) {
       for(var i=0;i<peer.remoteIceCandidates.length;i++){
         L.Logger.debug("remoteIce, length:" + remoteIceCandidates.length + ", current:" +i);
-        if(peer.state===PeerState.CONNECTED||peer.state===PeerState.CONNECTING)
+        if(peer.state===PeerState.CONNECTED||peer.state===PeerState.CONNECTING){
           peer.connection.addIceCandidate(remoteIceCandidates[i],onAddIceCandidateSuccess,onAddIceCandidateFailure);
+        }
       }
       peer.remoteIceCandidates=[];
     }
@@ -842,21 +867,24 @@ p2p.addEventListener('chat-invited',function(e){
       L.Logger.debug('Peer connection is ready for draining pending streams.');
       for(var i=0;i<peer.pendingStreams.length;i++){
         var stream=peer.pendingStreams[i];
-        if(!stream.mediaStream)  // The stream has been closed. Skip it.
+        if(!stream.mediaStream){  // The stream has been closed. Skip it.
           continue;
+        }
         bindStreamAndPeer(stream, peer);
-        if(!stream.onClose)
-          stream.onClose=function(){onLocalStreamEnded(stream);};
+        if(!stream.onClose){
+          stream.onClose=function(){onLocalStreamEnded(stream);};/*jshint ignore:line*/ //Function within a loop.
+        }
         sendStreamType(stream,peer);
         L.Logger.debug('Sent stream type.');
         peer.connection.addStream(stream.mediaStream);
         L.Logger.debug('Added stream to peer connection.');
       }
       peer.pendingStreams=[];
-      for(var i=0;i<peer.pendingUnpublishStreams.length;i++){
-        if(!peer.pendingUnpublishStreams[i].mediaStream)
+      for(var j=0;j<peer.pendingUnpublishStreams.length;j++){
+        if(!peer.pendingUnpublishStreams[j].mediaStream){
           continue;
-        peer.connection.removeStream(peer.pendingUnpublishStreams[i].mediaStream);
+        }
+        peer.connection.removeStream(peer.pendingUnpublishStreams[j].mediaStream);
         L.Logger.debug('Remove stream.');
       }
       peer.pendingUnpublishStreams=[];
@@ -876,8 +904,9 @@ p2p.addEventListener('chat-invited',function(e){
 
   var bindStreamAndPeer=function(stream,peer){
     var streamId=stream.id();
-    if(!streamPeers[streamId])
+    if(!streamPeers[streamId]){
       streamPeers[streamId]=[];
+    }
     streamPeers[streamId].push(peer.id);
   };
 
@@ -891,8 +920,9 @@ p2p.addEventListener('chat-invited',function(e){
       desc.sdp = replaceSdp(desc.sdp);
       peer.connection.setLocalDescription(desc,function(){
         L.Logger.debug("Set local description successfully.");
-        if(gab)
+        if(gab){
           gab.sendSignalMessage(peer.id, desc);
+        }
         L.Logger.debug('Sent answer.');
       },function(errorMessage){
         L.Logger.error("Error occurred while setting local description. Error message:" + errorMessage);
@@ -910,16 +940,20 @@ p2p.addEventListener('chat-invited',function(e){
    * @param {array} streams A Woogeen.Stream or an array of Woogeen.Stream.
    * @param {string} roomId Room ID.
    */
-  var addStreamToRoom=function(streams, roomId){
-    if(!streams||!roomId)
+  var addStreamToRoom=function(streams, roomId){ /*jshint ignore:line*/ //addStreamToRoom is defined but never used.
+    if(!streams||!roomId){
       return;
-    if(!roomStreams[roomId])
+    }
+    if(!roomStreams[roomId]){
       roomStreams[roomId]=[];
+    }
     var streamsInRoom=roomStreams[roomId];
-    if(isArray(streams))
+    if(isArray(streams)){
       streamsInRoom=streamsInRoom.concat(streams);
-    else
+    }
+    else{
       streamsInRoom.push(streams);
+    }
   };
 
   /**
@@ -930,11 +964,13 @@ p2p.addEventListener('chat-invited',function(e){
    * @param {Woogeen.Stream} stream An instance of Woogeen.Stream
    * @param {string} roomId Room ID
    */
-  var deleteStreamFromRoom=function(stream,roomId){
-    if(!stream||!roomId)
+  var deleteStreamFromRoom=function(stream,roomId){ /*jshint ignore:line*/ //deleteStreamFromRoom is defined but never used.
+    if(!stream||!roomId){
       return;
-    if(!roomStreams[roomId])
+    }
+    if(!roomStreams[roomId]){
       return;
+    }
     var savedStreams=roomStreams[roomId];
     for(var i=0;i<savedStreams.length;i++){
       if(stream.getID()===savedStreams[i].getID()){
@@ -946,12 +982,12 @@ p2p.addEventListener('chat-invited',function(e){
 
   var contains = function (arr,obj){
     for(var i=0;i<arr.length;i++){
-        if(arr[i] == obj){
+        if(arr[i] === obj){
         return i;
         }
     }
     return -1;
-  }
+  };
 /**
    * @function publish
    * @instance
@@ -971,8 +1007,9 @@ p2p.publish(localStream,'user1');
 */
   var publish=function(stream, targetId, successCallback, failureCallback){
     if(!(stream instanceof Woogeen.LocalStream && stream.mediaStream)||!targetId){
-      if(failureCallback)
+      if(failureCallback){
         failureCallback(Woogeen.Error.P2P_CLIENT_ILLEGAL_ARGUMENT);
+      }
       return;
     }
     doPublish(stream,targetId, successCallback, failureCallback);
@@ -991,15 +1028,18 @@ p2p.publish(localStream,'user1');
 
     var peerId=getPeerId(targetId);
     if(!peerId){
-      if(room&&successCallback)
+      if(room&&successCallback){
         successCallback();
-      else if(!room&&failureCallback)
+      }
+      else if(!room&&failureCallback){
         failureCallback(Woogeen.Error.P2P_CLIENT_ILLEGAL_ARGUMENT);
+      }
       return;
     }
 
-    if(!peers[peerId])
+    if(!peers[peerId]){
       createPeer(peerId);
+    }
     var peer=peers[peerId];
     // Check peer state
     switch (peer.state){
@@ -1010,21 +1050,24 @@ p2p.publish(localStream,'user1');
         break;
       default:
         L.Logger.warning('Cannot publish stream in this state: '+peer.state);
-        if(failureCallback)
+        if(failureCallback){
           failureCallback(Woogeen.Error.P2P_CLIENT_INVALID_STATE);
+        }
         return;
     }
     // Publish stream or streams
     if(contains(peer.publishedStreams,streams)>-1){
-      if(failureCallback)
+      if(failureCallback){
         failureCallback("The stream has been published.");
+      }
       return;
     }
     else{
       peer.publishedStreams.push(streams);
     }
-    if(isArray(streams))
+    if(isArray(streams)){
       peer.pendingStreams=peer.pendingStreams.concat(streams);
+    }
     else if(streams){
       peer.pendingStreams.push(streams);
     }
@@ -1037,12 +1080,14 @@ p2p.publish(localStream,'user1');
         break;
       default:
         L.Logger.debug('Unexpected peer state: '+peer.state);
-        if(failureCallback)
+        if(failureCallback){
           failureCallback(Woogeen.Error.P2P_CLIENT_INVALID_STATE);
+        }
         return;
     }
-    if(successCallback)
+    if(successCallback){
       successCallback();
+    }
   };
 
 /**
@@ -1067,8 +1112,9 @@ p2p.unpublish(localStream,'user1');
     L.Logger.debug('Unpublish stream.');
     if(!(stream instanceof Woogeen.LocalStream)){
       L.Logger.warning('Invalid argument stream');
-      if(failureCallback)
+      if(failureCallback){
         failureCallback(Woogeen.Error.P2P_CLIENT_ILLEGAL_ARGUMENT);
+      }
       return;
     }
 
@@ -1085,16 +1131,18 @@ p2p.unpublish(localStream,'user1');
     }
 
     if(!peers[peerId] || contains(peers[peerId].publishedStreams,stream)<0){
-      if(failureCallback)
+      if(failureCallback){
         failureCallback(Woogeen.Error.P2P_CLIENT_ILLEGAL_ARGUMENT);
+      }
       return;
     }
     var peer=peers[peerId];
     var i=contains(peer.publishedStreams,stream);
     peer.publishedStreams.splice(i,1);
     peer.pendingUnpublishStreams.push(stream);
-    if (peer.state === PeerState.CONNECTED)
+    if (peer.state === PeerState.CONNECTED){
       drainPendingStreams(peer);
+    }
     if(successCallback){
       successCallback();
     }
@@ -1125,8 +1173,9 @@ p2p.unpublish(localStream,'user1');
       }else if(stream.hasVideo()) {
         type='video';
       }
-      if(gab)
+      if(gab){
         gab.sendStreamType(peer.id, {streamId:stream.mediaStream.id, type:type});
+      }
     }
   };
 /**
@@ -1174,8 +1223,9 @@ p2p.stop();
 */
   var stop=function(peerId, successCallback, failureCallback){
     if(!gab){
-      if(failureCallback)
+      if(failureCallback){
         failureCallback(Woogeen.Error.P2P_CONN_CLIENT_NOT_INITIALIZED);
+      }
       return;
     }
     if(peerId){  // Stop chat with peerId
@@ -1192,31 +1242,34 @@ p2p.stop();
       delete peers[peerId];
     }else{  // Stop all chats
       for(var peerIndex in peers){
-        var peer=peers[peerIndex];
-        gab.sendChatStopped(peer.id);
-        stopChatLocally(peer, myId);
-        delete peers[peer.id];
+        var peer_all=peers[peerIndex];
+        gab.sendChatStopped(peer_all.id);
+        stopChatLocally(peer_all, myId);
+        delete peers[peer_all.id];
       }
     }
-    if(successCallback)
+    if(successCallback){
       successCallback();
+    }
   };
 
-  var stopChat=function(chatId, successCallback, failureCallback){
+  var stopChat=function(chatId, successCallback, failureCallback){ /*jshint ignore:line*/ //stopChat is defined but never used.
     var chat=chats[chatId];
     if(chat){
       var peer=chat.peer;
       stop(peer.id);
       if(!gab){
-        if(failureCallback)
+        if(failureCallback){
           failureCallback(Woogeen.Error.P2P_CONN_CLIENT_NOT_INITIALIZED);
+        }
         return;
       }
       gab.sendLeaveRoom(chatId);
       delete chats[chatId];
     }
-    if(successCallback)
+    if(successCallback){
       successCallback();
+    }
   };
 
 /**
@@ -1241,11 +1294,11 @@ p2p.getConnectionStats($('#target-uid').val(), successcallback, failurecallback)
   var getConnectionStats=function(targetId, successCallback, failureCallback){
     var peerId=getPeerId(targetId);
     var peer=peers[peerId];
-    if(!peer||(!peer.connection)||(peer.state!=PeerState.CONNECTED)){
+    if(!peer||(!peer.connection)||(peer.state!==PeerState.CONNECTED)){
       failureCallback("failed to get peerconnection statistics");
     }
     getPeerConnectionStats(peer.connection, successCallback);
-  }
+  };
 
 /**
    * @function getAudioLevels
@@ -1269,11 +1322,11 @@ p2p.getAudioLevels($('#target-uid').val(), successcallback, failurecallback);
   var getAudioLevels=function(targetId, successCallback, failureCallback){
     var peerId=getPeerId(targetId);
     var peer=peers[peerId];
-    if(!peer||(!peer.connection)||(peer.state!=PeerState.CONNECTED)){
+    if(!peer||(!peer.connection)||(peer.state!==PeerState.CONNECTED)){
       failureCallback("Invalid peer connection status.");
     }
     getPeerConnectionAudioLevels(peer.connection, successCallback, failureCallback);
-  }
+  };
 
 /**
    * @function send
@@ -1292,8 +1345,9 @@ p2p.send($('#data').val(), $('#target-uid').val());
   var send=function(message,targetId, successCallback, failureCallback){
     if(message.length>65535){
       L.Logger.warning("Message too long. Max size: 65535.");
-      if(failureCallback)
+      if(failureCallback){
         failureCallback(Woogeen.Error.P2P_CLIENT_ILLEGAL_ARGUMENT);
+      }
       return;
     }
     doSendData(message,getPeerId(targetId), successCallback, failureCallback);
@@ -1302,7 +1356,7 @@ p2p.send($('#data').val(), $('#target-uid').val());
   //Data channel send data
   var doSendData=function(message,peerId, successCallback, failureCallback){
     var peer=peers[peerId];
-    if(!peer||peer.state!=PeerState.CONNECTED){
+    if(!peer||peer.state!==PeerState.CONNECTED){
       if(failureCallback){
         L.Logger.error("Invalid peer state.");
         failureCallback(Woogeen.Error.P2P_CLIENT_INVALID_STATE);
@@ -1317,8 +1371,9 @@ p2p.send($('#data').val(), $('#target-uid').val());
       peer.pendingMessages.push(message);
       createDataChannel(peerId);
     }
-    if(successCallback)
+    if(successCallback){
       successCallback();
+    }
   };
 
   //DataChannel handler.
@@ -1329,13 +1384,13 @@ p2p.send($('#data').val(), $('#target-uid').val());
 
   var onDataChannelOpen=function(peer,event){
      L.Logger.debug("Data Channel is opened");
-     if(event.target.label==DataChannelLabel.MESSAGE){
+     if(event.target.label===DataChannelLabel.MESSAGE){
        L.Logger.debug('Data channel for messages is opened.');
        drainPendingMessages(peer);
      }
   };
 
-  var onDataChannelClose=function(peerId){
+  var onDataChannelClose=function(peerId){ /*jshint ignore:line*/ //peerId is unused.
     L.Logger.debug("Data Channel is closed");
   };
 
@@ -1376,7 +1431,7 @@ p2p.send($('#data').val(), $('#target-uid').val());
       sdp = sdp.replace(mLineElement[0], tempString);
     }
     return sdp;
-  }
+  };
 
   /**
    * @function getPeerConnection
@@ -1385,11 +1440,12 @@ p2p.send($('#data').val(), $('#target-uid').val());
    * @private
    * @param targetId peerId or roomToken.
    */
-  var getPeerConnection = function(targetId){
+  var getPeerConnection = function(targetId){  /*jshint ignore:line*/ //getPeerConnection is defined but never used.
     var peerId=getPeerId(targetId);
     var peer=peers[peerId];
-    if(!peer)
+    if(!peer){
       return null;
+    }
     return peer.connection;
   };
 

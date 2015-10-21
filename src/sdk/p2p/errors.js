@@ -1,4 +1,4 @@
-;var Woogeen = Woogeen || {};
+var Woogeen = Woogeen || {};/*jshint ignore:line*/ //Woogeen is defined.
 
 Woogeen.Error = {
   // 1000-1999 for media stream errors

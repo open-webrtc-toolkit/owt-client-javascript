@@ -1,4 +1,4 @@
-/* global window, document, webkitURL, Erizo */
+/* global window, document, webkitURL, Erizo,Woogeen */
 /*
  * AudioPlayer represents a Licode Audio component that shows either a local or a remote Audio.
  * Ex.: var player = AudioPlayer({id: id, stream: stream, elementID: elementID});

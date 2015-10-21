@@ -1,4 +1,4 @@
-/* global Erizo */
+/* global Erizo,Woogeen */
 
 /*
  * View class represents a HTML component
