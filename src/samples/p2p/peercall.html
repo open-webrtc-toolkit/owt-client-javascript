@@ -65,6 +65,7 @@ div#videocontainer {
 </style>
 </head>
 <body>
+  <script src="js/ieMediaStream.p2p.js" type="text/javascript"></script>
   <script src="js/jquery-1.10.2.min.js" type="text/javascript"></script>
   <script src="js/utils.js" type="text/javascript"></script>
   <script src="js/adapter.p2p.js" type="text/javascript"></script>
@@ -122,7 +123,7 @@ div#videocontainer {
   <div id="infoDiv"></div>
   <script type="text/javascript">
   var isVideo=1;
-  var serverAddress='http://zhaoxiaoyun.sh.intel.com:8095';  // Please change it to signaling server's address.
+  var serverAddress='http://10.239.197.71:8095';  // Please change it to signaling server's address.
   var p2p=new Woogeen.PeerClient({
     iceServers : [ {
       urls : "stun:61.152.239.60"
@@ -257,7 +258,7 @@ div#videocontainer {
     if(e.stream.isScreen()){
       if (navigator.userAgent.indexOf('MSIE') !== -1 || navigator.appVersion.indexOf('Trident/') > 0) {  // If IE
         $('#screen canvas').show();
-        attachMediaStream($('#screen canvas').get(0), e.stream.mediaStream);  // Show remote screen stream.
+        attachRemoteMediaStream($('#screen canvas').get(0), e.stream.mediaStream, e.stream.mediaStream.attachedPCID);  // Show remote screen stream.
       }else{
         $('#screen video').show();
         attachMediaStream($('#screen video').get(0), e.stream.mediaStream);  // Show remote screen stream.
@@ -265,7 +266,7 @@ div#videocontainer {
     } else if(e.stream.hasVideo()) {
       if (navigator.userAgent.indexOf('MSIE') !== -1 || navigator.appVersion.indexOf('Trident/') > 0) {  // If IE
         $('#remote canvas').show();
-        attachMediaStream($('#remote canvas').get(0), e.stream.mediaStream);  // Show remote video stream.
+        attachRemoteMediaStream($('#remote canvas').get(0), e.stream.mediaStream, e.stream.mediaStream.attachedPCID);  // Show remote video stream.
       }else{
         $('#remote video').show();
         attachMediaStream($('#remote video').get(0), e.stream.mediaStream);  // Show remote video stream.

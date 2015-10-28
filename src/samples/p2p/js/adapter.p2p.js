@@ -1,4 +1,3 @@
-/* global console,mozRTCPeerConnection,createIceServer*/
 /**
  * Copyright (c) 2014 The WebRTC project authors. All Rights Reserved.
  *
@@ -15,6 +14,7 @@
 var RTCPeerConnection = null;
 var getUserMedia = null;
 var attachMediaStream = null;
+var attachRemoteMediaStream = null;
 var reattachMediaStream = null;
 var webrtcDetectedBrowser = null;
 var webrtcDetectedVersion = null;
@@ -363,21 +363,14 @@ if (navigator.mozGetUserMedia) {
 } else {
   console.log("This seems to be IE");
 
-  var plugin = document.createElement("OBJECT");
-  plugin.setAttribute("ID", "WebRTC.ActiveX");
-  plugin.setAttribute("height", "0");
-  plugin.setAttribute("width", "0");
-  //plugin.setAttribute("CLASSID", "CLSID:0E8D29CE-D2D0-459A-8009-3B34EFBC43F0");
-  plugin.setAttribute("CLASSID", "CLSID:1D117433-FD6F-48D2-BF76-26E2DC5390FC");
-  document.getElementsByTagName("body")[0].appendChild(plugin);
-
   RTCPeerConnection = ieRTCPeerConnection;
-
-  navigator.getUserMedia = function(config, success, failure) {
-    document.getElementById("WebRTC.ActiveX").getUserMedia(JSON.stringify(config), function(label) {
-      var stream = new ieMediaStream(label);
-      success(stream);
-    }, failure);
+  navigator.getUserMedia = function(config, success, failure){
+    globalLocalStream.constraints = JSON.stringify(config);
+    globalLocalStream.onsuccess = success;
+    globalLocalStream.onfailure = failure;
+    globalLocalStream.lable = "general_video";
+    globalLocalStream.id = "general_video";
+    success(globalLocalStream);
   };
 
   getPeerConnectionStats = function(pc, callback){
@@ -388,18 +381,24 @@ if (navigator.mozGetUserMedia) {
     pc.getAudioLevels(successcallback);
   };
 
-  // Attach a media stream to an element
+  // Attach a media stream to an element. Currently implented as a fake function
   attachMediaStream = function (element, stream) {
+    globalLocalView = element;
+  }
+
+  //we should assign a dedicated attachStream function to notify corresonding peer connection instaance.
+  attachRemoteMediaStream = function (element, stream, pcid) {
     var ctx = element.getContext("2d");
     var img = new Image();
 
     (function (ctx, element, img) {
-      document.getElementById("WebRTC.ActiveX").attachMediaStream(stream.label, function (data) {
+      document.getElementById("WebRTC.ActiveX"+pcid).attachMediaStream(stream.label, function (data) {
         img.src = data;
         ctx.drawImage(img, 0, 0, element.width, element.height);
       });
     })(ctx, element, img);
   };
+
 
   RTCIceCandidate = function(cand) {
     return cand;
@@ -408,4 +407,21 @@ if (navigator.mozGetUserMedia) {
   RTCSessionDescription = function (desc) {
    return desc;
   };
+
+/*Below is for server SDK, and should be added back.
+  //RTCIceCandidate = function(cand, mid, mlineIndex) {
+   // this.candidate = cand;
+   // this.sdpMid = mid;
+   // this.sdpMLineIndex = mlineIndex;
+  //}
+
+  //ieRTCSessionDescription = function (sd) {
+   // this.type = sd.type;
+   // this.sdp = sd.sdp;
+  //}
+
+ // webkitRTCPeerConnection = ieRTCPeerConnection;
+  //RTCSessionDescription = ieRTCSessionDescription;
+*/
+
 }

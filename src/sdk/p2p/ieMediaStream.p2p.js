@@ -1,10 +1,18 @@
-/* global console*/
-/* exported ieRTCPeerConnection*/
-var ieMediaStream = function(label) {/*jshint ignore:line*/ //Read only.
-  'use strict';
+var pc_id = 0;
+var globalLocalView = null;
+var globalLocalStream = {};
+ieTrack = function(ieStream) {
+  var that = this;
+  this.stream = ieStream;
+  this.stop = function(){
+    that.stream.stop();
+  };
+};
 
+ieMediaStream = function(label) {
   var that = this;
   this.id = label;
+  this.attachedPCID = 0;
   this.label = label;
   this.ended = false;
   this.stopped = false;
@@ -12,13 +20,11 @@ var ieMediaStream = function(label) {/*jshint ignore:line*/ //Read only.
   this.onaddtrack = null;
   this.onended = null;
   this.onremovetrack = null;
-
-  var ieTrack = function() {
-  };
-  this.audioTracks = [new ieTrack()];
-  this.videoTracks = [new ieTrack()];
+  this.audioTracks = [new ieTrack(that)];
+  this.videoTracks = [new ieTrack(that)];
 
   this.getTracks = function() {
+    return that.audioTracks.concat(that.videoTracks);
   };
   this.getAudioTracks = function() {
     return that.audioTracks;
@@ -26,49 +32,48 @@ var ieMediaStream = function(label) {/*jshint ignore:line*/ //Read only.
   this.getVideoTracks = function() {
     return that.videoTracks;
   };
-  this.addTrack = function(track) { /*jshint ignore:line*/ //track is unused.
+  this.addTrack = function(track) {/*jshint ignore:line*/ //track is unused.
   };
-  this.removeTrack = function(track) { /*jshint ignore:line*/ //track is unused.
+  this.removeTrack = function(track) {/*jshint ignore:line*/ //track is unused.
   };
   this.stop = function() {
     if(that.stopped === false){
-      var plugin = document.getElementById("WebRTC.ActiveX");
-      if(plugin !== undefined) {
+      var plugin = document.getElementById("WebRTC.ActiveX"+attachedPCID);
+      if(plugin != undefined) {
         try{
           plugin.stopStream(that);
-        }catch(ex){console.log("An exception is thrown in server");}
+        }catch(ex){console.log("An exception is thrown in server")}
       }
       that.stopped = true;
       that.closed = true;
     }
-  };
+  }
   this.close = function() {
     if(that.closed === false){
-      var plugin = document.getElementById("WebRTC.ActiveX");
-      if(plugin !== undefined) {
+      var plugin = document.getElementById("WebRTC.ActiveX"+attachedPCID);
+      if(plugin != undefined) {
         try{
           plugin.removeStream(that);
-        }catch(ex){console.log("An exception is thrown in server");}
+        }catch(ex){console.log("An exception is thrown in server")}
       }
       that.closed = true;
     }
-  };
-};
+  }
+}
 
-var ieRTCDataChannel = function(label, constraints) {
+var ieRTCDataChannel = function(label, pcid) {
   'use strict';
   var that = this;
-  var pendingMessages = {};
-  this.activeX = document.getElementById("WebRTC.ActiveX");
+  var pendingMessages = [];
+  this.attachedPCID = pcid;
+  this.activeX = document.getElementById("WebRTC.ActiveX"+that.attachedPCID);
   this.label = label;
-  this.constraints = constraints;
 
   this.onmessage = null;
   this.onopen = null;
   this.onerror = null;
   this.onclose = null;
   this.readyState = 'connecting';
-
   this.activeX.onmessage = function(msg) {
     var evt = {};
     evt.data = msg;
@@ -101,29 +106,31 @@ var ieRTCDataChannel = function(label, constraints) {
   };
 
   this.close = function() {
-    that.activeX.closeDataChannel(that.label);
+    if(that.activeX){
+      that.activeX.closeDataChannel(that.label);
+    }
   };
   this.send = function(data) {
-    that.activeX.send(data);
+    if(that.activeX){
+      that.activeX.send(data);
+    }
   };
 };
 
-var ieRTCPeerConnection=function(config, constraints) {/*jshint ignore:line*/ //ieRTCPeerConnection never used.
-  'use strict';
 
+function ieRTCPeerConnection(config, constraints) {
   var that = this;
-  this.activeX = document.getElementById("WebRTC.ActiveX");
-  //If failed to get the plugin, we need to re-create this:
-  if(this.activeX === null){
-    var plugin = document.createElement("OBJECT");
-    plugin.setAttribute("ID", "WebRTC.ActiveX");
-    plugin.setAttribute("height", "0");
-    plugin.setAttribute("width", "0");
-    plugin.setAttribute("CLASSID", "CLSID:1D117433-FD6F-48D2-BF76-26E2DC5390FC");
-    document.body.appendChild(plugin);
-    this.activeX = document.getElementById("WebRTC.ActiveX");
-  }
-  // new ieRTCPeerConnection
+  this.myId = pc_id+1;
+  pc_id = pc_id +1;
+  var plugin = document.createElement("OBJECT");
+  plugin.setAttribute("ID", "WebRTC.ActiveX"+that.myId);
+  plugin.setAttribute("height", "0");
+  plugin.setAttribute("width", "0");
+  plugin.setAttribute("CLASSID", "CLSID:1D117433-FD6F-48D2-BF76-26E2DC5390FC");
+  document.body.appendChild(plugin);
+  that.activeX=document.getElementById("WebRTC.ActiveX"+that.myId);
+
+    // new ieRTCPeerConnection
   if (config != null) {
     config = config["iceServers"];
     this.config = JSON.stringify(config);
@@ -133,30 +140,45 @@ var ieRTCPeerConnection=function(config, constraints) {/*jshint ignore:line*/ //
   }
   this.activeX.initializePeerConnection(this.config, this.constraints);
 
-  // Peer connection methods
-  this.createOffer = function(success, failure, constraints) {
-    that.activeX.createOffer(function (sdp) {
-      success(JSON.parse(sdp));
-    }, failure, JSON.stringify(constraints));
-  };
   this.createAnswer = function(success, failure, constraints) {
     that.activeX.createAnswer(function (sdp) {
       success(JSON.parse(sdp));
     }, failure, JSON.stringify(constraints));
-  };
+  }
   this.setLocalDescription = function(sdp, success, failure) {
     that.activeX.setLocalDescription(sdp, success, failure);
   };
   this.setRemoteDescription = function(sdp, success, failure) {
     that.activeX.setRemoteDescription(sdp, success, failure);
-  };
+  }
   this.addStream = function(stream) {
-    that.activeX.addStream(stream);
-  };
+      that.activeX.getUserMedia(stream.constraints,  function(label) {
+        var ieStream = new ieMediaStream(label);
+        var ctx = globalLocalView.getContext("2d");
+        var img = new Image();
+        that.activeX.attachMediaStream(ieStream.label, function (data) {
+          img.src = data;
+          ctx.drawImage(img, 0, 0, globalLocalView.width, globalLocalView.height);
+        });
+
+        that.activeX.addStream(ieStream);
+        stream.id = ieStream.label;
+        globalLocalStream = stream;
+      }, stream.onfailure);
+  }
+  // Peer connection methods
+  this.createOffer = function(success, failure, constraints) {
+    if(!that.activeX){return;}
+    that.activeX.createOffer(function (sdp) {
+      success(JSON.parse(sdp));
+    }, failure, JSON.stringify(constraints));
+  }
   this.removeStream = function(stream) {
+    if(!that.activeX){return;}
     that.activeX.removeStream(stream);
   };
   this.addIceCandidate = function(candidate, success, failure) {
+    if(!that.activeX){return;}
     that.activeX.addIceCandidate(candidate, success, failure);
   };
   this.getStats = function(callback){
@@ -166,8 +188,12 @@ var ieRTCPeerConnection=function(config, constraints) {/*jshint ignore:line*/ //
     that.activeX.getAudioLevels(callback);
   };
   this.close = function() {
-    that.activeX.close();
-    var plugin = document.getElementById("WebRTC.ActiveX");
+    if(that.activeX){
+      try{
+        that.activeX.close();
+      }catch(ex){console.log("exception when closing the control");}
+    }
+    var plugin = document.getElementById("WebRTC.ActiveX" + that.myId);
     if(plugin){
       that.activeX.closeDataChannel(that.label);
       document.body.removeChild(plugin);
@@ -176,8 +202,10 @@ var ieRTCPeerConnection=function(config, constraints) {/*jshint ignore:line*/ //
   };
 
   this.createDataChannel = function(label, constraints) {
-    that.activeX.createDataChannel(label, constraints);
-    var dc = new ieRTCDataChannel(label, constraints);
+    if(that.activeX){
+      that.activeX.createDataChannel(label, constraints);
+    }
+    var dc = new ieRTCDataChannel(label, that.myId);
     return dc;
   };
 
@@ -200,7 +228,9 @@ var ieRTCPeerConnection=function(config, constraints) {/*jshint ignore:line*/ //
   this.activeX.onaddstream = function(label) {
     var evt = {};
     var stream = new ieMediaStream(label);
+    stream.attachedPCID = that.myId;
     evt.stream = stream;
+    evt.pcid = that.myId;
     if (that.onaddstream) {
       that.onaddstream(evt);
     }
@@ -234,12 +264,13 @@ var ieRTCPeerConnection=function(config, constraints) {/*jshint ignore:line*/ //
   };
   this.activeX.ondatachannel = function(label) {
     var evt = {};
-    var dc = new ieRTCDataChannel(label, null);
+    var dc = new ieRTCDataChannel(label, that.myId);
     evt.channel = dc;
     if (that.ondatachannel) {
       that.ondatachannel(evt);
     }
   };
+
 
   // Peer connection properties
   this.iceConnectionState = "new";

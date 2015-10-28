@@ -4,7 +4,6 @@ var globalLocalStream = {};
 ieTrack = function(ieStream) {
   var that = this;
   this.stream = ieStream;
-  
   this.stop = function(){
     that.stream.stop();
   };
@@ -69,7 +68,6 @@ var ieRTCDataChannel = function(label, pcid) {
   this.attachedPCID = pcid;
   this.activeX = document.getElementById("WebRTC.ActiveX"+that.attachedPCID);
   this.label = label;
-  
 
   this.onmessage = null;
   this.onopen = null;

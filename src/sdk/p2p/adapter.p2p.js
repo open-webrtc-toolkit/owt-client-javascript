@@ -14,13 +14,14 @@
 var RTCPeerConnection = null;
 var getUserMedia = null;
 var attachMediaStream = null;
+var attachRemoteMediaStream = null;
 var reattachMediaStream = null;
 var webrtcDetectedBrowser = null;
 var webrtcDetectedVersion = null;
 
 function trace(text) {
   // This function is used for logging.
-  if (text[text.length - 1] == '\n') {
+  if (text[text.length - 1] === '\n') {
     text = text.substring(0, text.length - 1);
   }
   console.log((performance.now() / 1000).toFixed(3) + ": " + text);
@@ -50,7 +51,7 @@ if (navigator.mozGetUserMedia) {
     // .urls is not supported in FF yet.
     maybeFixConfiguration(pcConfig);
     return new mozRTCPeerConnection(pcConfig, pcConstraints);
-  }
+  };
 
   // The RTCSessionDescription object.
   RTCSessionDescription = mozRTCSessionDescription;
@@ -96,7 +97,7 @@ if (navigator.mozGetUserMedia) {
   createIceServers = function(urls, username, password) {
     var iceServers = [];
     // Use .url for FireFox.
-    for (i = 0; i < urls.length; i++) {
+    for (var i = 0; i < urls.length; i++) {
       var iceServer = createIceServer(urls[i],
                                       username,
                                       password);
@@ -105,7 +106,7 @@ if (navigator.mozGetUserMedia) {
       }
     }
     return iceServers;
-  }
+  };
 
   // Attach a media stream to an element.
   attachMediaStream = function(element, stream) {
@@ -164,7 +165,7 @@ if (navigator.mozGetUserMedia) {
                     'credential': password,
                     'username': username };
     } else {
-      for (i = 0; i < urls.length; i++) {
+      for (var i = 0; i < urls.length; i++) {
         var iceServer = createIceServer(urls[i],
                                         username,
                                         password);
@@ -183,7 +184,7 @@ if (navigator.mozGetUserMedia) {
       maybeFixConfiguration(pcConfig);
     }
     return new webkitRTCPeerConnection(pcConfig, pcConstraints);
-  }
+  };
 
   getPeerConnectionStats = function(pc, callback){
     var index = 0;
@@ -202,11 +203,11 @@ if (navigator.mozGetUserMedia) {
            if(res.stat("googFrameHeightSent")){
          //video send
            var adapt_reason;
-             if(res.stat("googCpuLimitedResolution") == true){
+             if(res.stat("googCpuLimitedResolution") === true){
                adapt_reason = 1;
-             }else if(res.stat("googBandwidthLimitedResolution") == true){
+             }else if(res.stat("googBandwidthLimitedResolution") === true){
                adapt_reason = 2;
-             }else if(res.stat("googViewLimitedResolution") == true){
+             }else if(res.stat("googViewLimitedResolution") === true){
                adapt_reason = 3;
              }else{
                adapt_reason = 99;
@@ -280,7 +281,7 @@ if (navigator.mozGetUserMedia) {
      }
      callback(Stats_Report);
    });
-  }
+  };
 
   getPeerConnectionAudioLevels = function(pc, successcallback, failurecallback){
     var in_level_idx = 0;
@@ -336,7 +337,7 @@ if (navigator.mozGetUserMedia) {
        failurecallback("Failed to get audio levels from current peer connection");
      }
    });
-  }
+  };
 
   // Get UserMedia (only difference is the prefix).
   // Code from Adam Barth.
@@ -362,49 +363,65 @@ if (navigator.mozGetUserMedia) {
 } else {
   console.log("This seems to be IE");
 
-  var plugin = document.createElement("OBJECT");
-  plugin.setAttribute("ID", "WebRTC.ActiveX");
-  plugin.setAttribute("height", "0");
-  plugin.setAttribute("width", "0");
-  //plugin.setAttribute("CLASSID", "CLSID:0E8D29CE-D2D0-459A-8009-3B34EFBC43F0");
-  plugin.setAttribute("CLASSID", "CLSID:1D117433-FD6F-48D2-BF76-26E2DC5390FC");
-  document.getElementsByTagName("body")[0].appendChild(plugin);
-
   RTCPeerConnection = ieRTCPeerConnection;
-
-  navigator.getUserMedia = function(config, success, failure) {
-    document.getElementById("WebRTC.ActiveX").getUserMedia(JSON.stringify(config), function(label) {
-      var stream = new ieMediaStream(label);
-      success(stream);
-    }, failure);
-  }
+  navigator.getUserMedia = function(config, success, failure){
+    globalLocalStream.constraints = JSON.stringify(config);
+    globalLocalStream.onsuccess = success;
+    globalLocalStream.onfailure = failure;
+    globalLocalStream.lable = "general_video";
+    globalLocalStream.id = "general_video";
+    success(globalLocalStream);
+  };
 
   getPeerConnectionStats = function(pc, callback){
     pc.getStats(callback);
-  }
+  };
 
   getPeerConnectionAudioLevels = function(pc, successcallback, failurecallback){
     pc.getAudioLevels(successcallback);
+  };
+
+  // Attach a media stream to an element. Currently implented as a fake function
+  attachMediaStream = function (element, stream) {
+    globalLocalView = element;
   }
 
-  // Attach a media stream to an element
-  attachMediaStream = function (element, stream) {
+  //we should assign a dedicated attachStream function to notify corresonding peer connection instaance.
+  attachRemoteMediaStream = function (element, stream, pcid) {
     var ctx = element.getContext("2d");
     var img = new Image();
 
     (function (ctx, element, img) {
-      document.getElementById("WebRTC.ActiveX").attachMediaStream(stream.label, function (data) {
+      document.getElementById("WebRTC.ActiveX"+pcid).attachMediaStream(stream.label, function (data) {
         img.src = data;
         ctx.drawImage(img, 0, 0, element.width, element.height);
       });
     })(ctx, element, img);
-  }
+  };
+
 
   RTCIceCandidate = function(cand) {
     return cand;
-  }
+  };
 
   RTCSessionDescription = function (desc) {
    return desc;
-  }
+  };
+
+/*Below is for server SDK, and should be added back.
+  //RTCIceCandidate = function(cand, mid, mlineIndex) {
+   // this.candidate = cand;
+   // this.sdpMid = mid;
+   // this.sdpMLineIndex = mlineIndex;
+  //}
+
+  //ieRTCSessionDescription = function (sd) {
+   // this.type = sd.type;
+   // this.sdp = sd.sdp;
+  //}
+
+ // webkitRTCPeerConnection = ieRTCPeerConnection;
+  //RTCSessionDescription = ieRTCSessionDescription;
+*/
+
 }

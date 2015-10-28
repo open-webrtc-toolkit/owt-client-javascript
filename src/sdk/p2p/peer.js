@@ -631,6 +631,7 @@ p2p.connect({host:'http://61.152.239.56:8095/',token:'user1'});
     gab.onAuthenticated=authenticatedHandler;
     gab.onForceDisconnect=forceDisconnectHandler;
     gab.connect(loginInfo,successCallback,failureCallback);
+/* After we merge p2p and conf sdk, this creation should be removed
     if(window.navigator.appVersion.indexOf("Trident") > -1){
       var plugin = document.getElementById("WebRTC.ActiveX");
       if(!plugin){
@@ -642,6 +643,7 @@ p2p.connect({host:'http://61.152.239.56:8095/',token:'user1'});
         document.body.appendChild(plugin);
       }
     }
+*/
   };
 
   /**
@@ -874,10 +876,10 @@ p2p.addEventListener('chat-invited',function(e){
         if(!stream.onClose){
           stream.onClose=function(){onLocalStreamEnded(stream);};/*jshint ignore:line*/ //Function within a loop.
         }
-        sendStreamType(stream,peer);
-        L.Logger.debug('Sent stream type.');
         peer.connection.addStream(stream.mediaStream);
         L.Logger.debug('Added stream to peer connection.');
+        sendStreamType(stream,peer);
+        L.Logger.debug('Sent stream type.');
       }
       peer.pendingStreams=[];
       for(var j=0;j<peer.pendingUnpublishStreams.length;j++){
