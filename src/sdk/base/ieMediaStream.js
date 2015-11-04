@@ -1,7 +1,9 @@
+/*global console,Woogeen*/
+var Woogeen_IEPlugin=Woogeen_IEPlugin || {};
 var pc_id = 0;
 var globalLocalView = null;
 var globalLocalStream = {};
-ieTrack = function(ieStream) {
+var ieTrack = function(ieStream) {
   var that = this;
   this.stream = ieStream;
   this.stop = function(){
@@ -9,7 +11,9 @@ ieTrack = function(ieStream) {
   };
 };
 
-ieMediaStream = function(label) {
+  Woogeen_IEPlugin.ieMediaStream = function(label) {
+  'use strict';
+
   var that = this;
   this.id = label;
   this.attachedPCID = 0;
@@ -38,30 +42,30 @@ ieMediaStream = function(label) {
   };
   this.stop = function() {
     if(that.stopped === false){
-      var plugin = document.getElementById("WebRTC.ActiveX"+attachedPCID);
-      if(plugin != undefined) {
+      var plugin = document.getElementById("WebRTC.ActiveX"+that.attachedPCID);
+      if(plugin !== undefined) {
         try{
           plugin.stopStream(that);
-        }catch(ex){console.log("An exception is thrown in server")}
+        }catch(ex){console.log("An exception is thrown in server");}
       }
       that.stopped = true;
       that.closed = true;
     }
-  }
+  };
   this.close = function() {
     if(that.closed === false){
-      var plugin = document.getElementById("WebRTC.ActiveX"+attachedPCID);
-      if(plugin != undefined) {
+      var plugin = document.getElementById("WebRTC.ActiveX"+that.attachedPCID);
+      if(plugin !== undefined) {
         try{
           plugin.removeStream(that);
-        }catch(ex){console.log("An exception is thrown in server")}
+        }catch(ex){console.log("An exception is thrown in server");}
       }
       that.closed = true;
     }
-  }
-}
+  };
+};
 
-var ieRTCDataChannel = function(label, pcid) {
+Woogeen_IEPlugin.ieRTCDataChannel = function(label, pcid) {
   'use strict';
   var that = this;
   var pendingMessages = [];
@@ -118,7 +122,7 @@ var ieRTCDataChannel = function(label, pcid) {
 };
 
 
-function ieRTCPeerConnection(config, constraints) {
+Woogeen_IEPlugin.ieRTCPeerConnection=function(config, constraints) {
   var that = this;
   this.myId = pc_id+1;
   pc_id = pc_id +1;
@@ -144,16 +148,16 @@ function ieRTCPeerConnection(config, constraints) {
     that.activeX.createAnswer(function (sdp) {
       success(JSON.parse(sdp));
     }, failure, JSON.stringify(constraints));
-  }
+  };
   this.setLocalDescription = function(sdp, success, failure) {
     that.activeX.setLocalDescription(sdp, success, failure);
   };
   this.setRemoteDescription = function(sdp, success, failure) {
     that.activeX.setRemoteDescription(sdp, success, failure);
-  }
+  };
   this.addStream = function(stream) {
       that.activeX.getUserMedia(stream.constraints,  function(label) {
-        var ieStream = new ieMediaStream(label);
+        var ieStream = new Woogeen_IEPlugin.ieMediaStream(label);
         var ctx = globalLocalView.getContext("2d");
         var img = new Image();
         that.activeX.attachMediaStream(ieStream.label, function (data) {
@@ -165,14 +169,14 @@ function ieRTCPeerConnection(config, constraints) {
         stream.id = ieStream.label;
         globalLocalStream = stream;
       }, stream.onfailure);
-  }
+  };
   // Peer connection methods
   this.createOffer = function(success, failure, constraints) {
     if(!that.activeX){return;}
     that.activeX.createOffer(function (sdp) {
       success(JSON.parse(sdp));
     }, failure, JSON.stringify(constraints));
-  }
+  };
   this.removeStream = function(stream) {
     if(!that.activeX){return;}
     that.activeX.removeStream(stream);
@@ -205,7 +209,7 @@ function ieRTCPeerConnection(config, constraints) {
     if(that.activeX){
       that.activeX.createDataChannel(label, constraints);
     }
-    var dc = new ieRTCDataChannel(label, that.myId);
+    var dc = new Woogeen_IEPlugin.ieRTCDataChannel(label, that.myId);
     return dc;
   };
 
@@ -227,7 +231,7 @@ function ieRTCPeerConnection(config, constraints) {
   };
   this.activeX.onaddstream = function(label) {
     var evt = {};
-    var stream = new ieMediaStream(label);
+    var stream = new Woogeen_IEPlugin.ieMediaStream(label);
     stream.attachedPCID = that.myId;
     evt.stream = stream;
     evt.pcid = that.myId;
@@ -237,7 +241,7 @@ function ieRTCPeerConnection(config, constraints) {
   };
   this.activeX.onremovestream = function(label) {
     var evt = {};
-    var stream = new ieMediaStream(label);
+    var stream = new Woogeen_IEPlugin.ieMediaStream(label);
     evt.stream = stream;
     if (that.onremovestream) {
       that.onremovestream(evt);
@@ -264,7 +268,7 @@ function ieRTCPeerConnection(config, constraints) {
   };
   this.activeX.ondatachannel = function(label) {
     var evt = {};
-    var dc = new ieRTCDataChannel(label, that.myId);
+    var dc = new Woogeen_IEPlugin.ieRTCDataChannel(label, that.myId);
     evt.channel = dc;
     if (that.ondatachannel) {
       that.ondatachannel(evt);

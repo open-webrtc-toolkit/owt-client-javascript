@@ -1,4 +1,4 @@
-/* global L,Gab,room,RTCIceCandidate,RTCPeerConnection,RTCSessionDescription,getPeerConnectionStats,getPeerConnectionAudioLevels,remoteIceCandidates*/
+/* global L,Gab,room,RTCIceCandidate,RTCSessionDescription,getPeerConnectionStats,getPeerConnectionAudioLevels,remoteIceCandidates*/
 /* Depend on woogeen.js, gab-websocket.js, WooGeen.Error.js*/
 
 var Woogeen = Woogeen || {}; /*jshint ignore:line*/ //Woogeen is defined.
@@ -497,7 +497,7 @@ Woogeen.PeerClient=function (pcConfig) {
       return true;
     }
     try {
-      peer.connection = new RTCPeerConnection(config, pcConstraints);
+      peer.connection = new RTCPeerConnection(config, pcConstraints);/*jshint ignore:line*/
       peer.connection.onicecandidate = function(event){onLocalIceCandidate(peer,event);};
       peer.connection.onaddstream=function(event){onRemoteStreamAdded(peer,event);};
       peer.connection.onremovestream=function(event){onRemoteStreamRemoved(peer,event);};
@@ -1299,7 +1299,7 @@ p2p.getConnectionStats($('#target-uid').val(), successcallback, failurecallback)
     if(!peer||(!peer.connection)||(peer.state!==PeerState.CONNECTED)){
       failureCallback("failed to get peerconnection statistics");
     }
-    getPeerConnectionStats(peer.connection, successCallback);
+    getPeerConnectionStats(peer.connection, successCallback);/*jshint ignore:line*/
   };
 
 /**
@@ -1327,7 +1327,7 @@ p2p.getAudioLevels($('#target-uid').val(), successcallback, failurecallback);
     if(!peer||(!peer.connection)||(peer.state!==PeerState.CONNECTED)){
       failureCallback("Invalid peer connection status.");
     }
-    getPeerConnectionAudioLevels(peer.connection, successCallback, failureCallback);
+    getPeerConnectionAudioLevels(peer.connection, successCallback, failureCallback);/*jshint ignore:line*/
   };
 
 /**

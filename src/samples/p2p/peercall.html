@@ -65,15 +65,24 @@ div#videocontainer {
 </style>
 </head>
 <body>
-  <script src="js/ieMediaStream.p2p.js" type="text/javascript"></script>
   <script src="js/jquery-1.10.2.min.js" type="text/javascript"></script>
   <script src="js/utils.js" type="text/javascript"></script>
-  <script src="js/adapter.p2p.js" type="text/javascript"></script>
-  <script src="js/socket.io.js" type="text/javascript"></script>
   <script src="js/sc.websocket.js" type="text/javascript"></script>
   <!-- SDK -->
   <!-- Please do NOT remove "SDK" and "SDK Stops". They're used by packing scripts. -->
- <script src="../../../scripts/dist/woogeen.sdk-2.8.0.min.js" type="text/javascript"></script>
+  <script src="../../sdk/base/adapter.js" type="text/javascript"></script>
+  <script src="../../sdk/base/socket.io.js" type="text/javascript"></script>
+
+  <script src="../../sdk/conference/property.js" type="text/javascript"></script>
+  <script src="../../sdk/base/events.js" type="text/javascript"></script>
+  <script src="../../sdk/base/L.Base64.js" type="text/javascript"></script>
+  <script src="../../sdk/base/L.Logger.js" type="text/javascript"></script>
+  <script src="../../sdk/base/stream.js" type="text/javascript"></script>
+  <script src="../../sdk/base/ieMediaStream.js" type="text/javascript"></script>
+  <script src="../../sdk/p2p/errors.js" type="text/javascript"></script>
+  <script src="../../sdk/p2p/gab.proxy.js" type="text/javascript"></script>
+  <script src="../../sdk/p2p/peer.js" type="text/javascript"></script>
+
   <!-- SDK Stops -->
   <h1>Intel<sup>&reg;</sup> Collaboration Suite for WebRTC</h1>
   <h2>P2P Direct Call Sample</h2>
@@ -123,7 +132,7 @@ div#videocontainer {
   <div id="infoDiv"></div>
   <script type="text/javascript">
   var isVideo=1;
-  var serverAddress='http://10.239.197.71:8095';  // Please change it to signaling server's address.
+  var serverAddress='http://10.239.197.71:8095';  // Please  change 61.152.239.56 to signaling server's address.
   var p2p=new Woogeen.PeerClient({
     iceServers : [ {
       urls : "stun:61.152.239.60"

@@ -39,7 +39,7 @@ app.use(function (req, res, next) {
 //disable layout
 //app.set("view options", {layout: false});
 
-N.API.init('_auto_generated_ID_', '_auto_generated_KEY_', 'http://localhost:3000/');
+N.API.init('5608ebe0425ffc63568fe388', 'r0gpL5n/h/z+wHmXLFdLz60NE0JYmbH4MABzpKAA6gMzWK/ezAKXvteynGrnrGysAQJbdzULec4mMB9opJ5aYmGYoMTFEED5IUE/HuGbbhYNir5KbgooQ3O4vhY+aTB4fAOLQHa4Jr2tw/3okedTx4dOs/1vMuiCF5fwzPGEtjE=', 'http://localhost:3000/');
 
 var myRoom;
 var p2pRoom;
@@ -184,8 +184,8 @@ app.delete('/room/:room', function (req, res) {
 })
 
 app.listen(3001);
-
-var cipher = require('../../common/cipher');
+/*
+var cipher = require('cipher');
 cipher.unlock(cipher.k, '../../cert/.woogeen.keystore', function cb (err, obj) {
     if (!err) {
         try {
@@ -201,4 +201,4 @@ cipher.unlock(cipher.k, '../../cert/.woogeen.keystore', function cb (err, obj) {
         console.error('Failed to setup secured server:', err);
         return process.exit();
     }
-});
+});*/

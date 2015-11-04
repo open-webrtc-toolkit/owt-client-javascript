@@ -5,7 +5,7 @@
   "version": "2.8.0",
   "homepage": "http://webrtc.intel.com",
   "author": "Markus Chou <yue.y.zhou@intel.com>",
-  "contributors": ["Xiaoyun Zhao <xiaoyun.zhao@intel.com>"],
+  "contributors": [],
   "keywords": [
     "webrtc",
     "library",
@@ -14,14 +14,11 @@
     "mcu"
   ],
   "devDependencies": {
-    "grunt": "~0.4.0",
-    "grunt-cli": "~0.1.6",
-    "grunt-contrib-concat": "~0.1.3",
-    "grunt-contrib-uglify": "~0.9.2",
-    "grunt-contrib-jshint": "~0.11.3",
-    "grunt-contrib-copy": "~0.8.2",
-    "grunt-contrib-compress": "~0.14.0",
-    "grunt-string-replace":"~1.2.0"
+    "body-parser":"~1.14.1",
+    "express":"",
+    "errorhandler":"",
+    "morgan":"",
+    "socket.io":""
   },
   "engines": {
     "node": ">=0.10"

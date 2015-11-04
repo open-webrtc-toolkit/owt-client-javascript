@@ -7,17 +7,14 @@ module.exports = function(grunt) {
     '../src/sdk/base/events.js',
     '../src/sdk/base/L.Base64.js',
     '../src/sdk/base/L.Logger.js',
+    '../src/sdk/base/ieMediaStream.js',
     '../src/sdk/base/stream.js',
-   // '../src/sdk/conference/adapter.js',
     '../src/sdk/conference/conference.js',
-    '../src/sdk/conference/ieMediaStream.js',
     '../src/sdk/conference/webrtc-stacks/ChromeStableStack.js',
     '../src/sdk/conference/webrtc-stacks/FirefoxStack.js',
     '../src/sdk/conference/webrtc-stacks/IEStableStack.js',
-   // '../src/sdk/p2p/adapter.p2p.js',
     '../src/sdk/p2p/errors.js',
     '../src/sdk/p2p/gab.proxy.js',
-    '../src/sdk/p2p/ieMediaStream.p2p.js',
     '../src/sdk/p2p/peer.js'
   ];
 
@@ -45,13 +42,14 @@ module.exports = function(grunt) {
       footer: '\
 \n\n\nwindow.Erizo = Erizo;\n\
 window.Woogeen = Woogeen;\n\
+window.Woogeen_IEPlugin = Woogeen_IEPlugin;\n\
 window.L = L;\n\
 }(window));\n\n\n'
     },
     concat: {
       dist: {
         src: srcFiles,
-        dest: 'dist/<%= pkg.name %>-<%= pkg.version %>.js',
+        dest: '../dist/sdk/<%= pkg.name %>.js',
         options: {
           banner: '<%= meta.banner %>' + '<%= meta.header %>',
           separator: '\n\n\n',
@@ -62,7 +60,7 @@ window.L = L;\n\
       },
       devel: {
         src: uiSrcFiles,
-        dest: 'dist/<%= pkg.name %>.ui-<%= pkg.version %>.js',
+        dest: '../dist/sdk/<%= pkg.name %>.ui.js',
         options: {
           banner: '<%= meta.banner %>' + '<%= meta.header %>',
           separator: '\n\n\n',
@@ -72,14 +70,14 @@ window.L = L;\n\
         nonull: true
       },
       merge: {
-        src: 'dist/<%= pkg.name %>-<%= pkg.version %>.js',
-        dest: 'dist/<%= pkg.name %>-<%= pkg.version %>.js',
+        src: '../dist/sdk/<%= pkg.name %>.js',
+        dest: '../dist/sdk/<%= pkg.name %>.js',
         nonull: true
       }
     },
     jshint: {
-      dist: 'dist/<%= pkg.name %>-<%= pkg.version %>.js',
-      devel: 'dist/<%= pkg.name %>-ui.js',
+      dist: '../dist/sdk/<%= pkg.name %>.js',
+      devel: '../dist/sdk/<%= pkg.name %>.ui.js',
       options: {
         browser: true,
         curly: true,
@@ -102,13 +100,80 @@ window.L = L;\n\
     uglify: {
       dist: {
         files: {
-          'dist/<%= pkg.name %>-<%= pkg.version %>.min.js': ['dist/<%= pkg.name %>-<%= pkg.version %>.js'],
-          'dist/<%= pkg.name %>.ui-<%= pkg.version %>.min.js': ['dist/<%= pkg.name %>.ui-<%= pkg.version %>.js']
+          '../dist/sdk/<%= pkg.name %>.min.js': ['../dist/sdk/<%= pkg.name %>.js'],
+          '../dist/sdk/<%= pkg.name %>.ui.min.js': ['../dist/sdk/<%= pkg.name %>.ui.js']
         },
         options: {
-          banner: '<%= meta.banner %>',
-	  sourceMap:true
+          banner: '<%= meta.banner %>'
+	        //sourceMap:true
         }
+      }
+    },
+    copy:{
+      dist:{
+        files:[
+          {expand: true,cwd:'../src/samples/',src:['**'],dest:'../dist/samples/',flatten:false},
+          {expand: true,cwd:'../src/sdk/base/',src:['strophe.js','socket.io.js'],dest:'../dist/sdk/dependencies/',flatten:false},
+          {expand: true,cwd:'../src/sdk/base/',src:['adapter.js'],dest:'../dist/sdk/',flatten:false},
+          {expand: true,cwd:'../src/extension/',src:['**'],dest:'../dist/',flatten:false},
+          {expand: true,cwd:'../src/sdk/base/',src:['socket.io.js'],dest:'../dist/samples/conference/public/',flatten:false},
+          {expand: true,cwd:'../dist/sdk/',src:['woogeen.sdk.js'],dest:'../dist/samples/conference/public/',flatten:false},
+          {expand: true,cwd:'../dist/sdk/',src:['woogeen.sdk.ui.js'],dest:'../dist/samples/conference/public/',flatten:false}
+        ]
+      }
+    },
+    'string-replace': {
+      dist_p2p: {
+        files: {
+          '../dist/samples/p2p/peercall.html': '../src/samples/p2p/peercall.html',
+        },
+        options: {
+        replacements: [
+          {
+            pattern: '<script src="../../sdk/base/adapter.js" type="text/javascript"></script>',
+            replacement: '<script src="../../sdk/adapter.js" type="text/javascript"></script>'
+          },
+          {
+            pattern: '<script src="../../sdk/base/socket.io.js" type="text/javascript"></script>',
+            replacement: '<script src="../../sdk/dependencies/socket.io.js" type="text/javascript"></script>'
+          },
+          {
+            pattern: '<script src="../../sdk/conference/property.js" type="text/javascript"></script>\n  <script src="../../sdk/base/events.js" type="text/javascript"></script>\n  <script src="../../sdk/base/L.Base64.js" type="text/javascript"></script>\n  <script src="../../sdk/base/L.Logger.js" type="text/javascript"></script>\n  <script src="../../sdk/base/stream.js" type="text/javascript"></script>\n  <script src="../../sdk/base/ieMediaStream.js" type="text/javascript"></script>\n  <script src="../../sdk/p2p/errors.js" type="text/javascript"></script>\n  <script src="../../sdk/p2p/gab.proxy.js" type="text/javascript"></script>\n  <script src="../../sdk/p2p/peer.js" type="text/javascript"></script>',
+            replacement: '<script src="../../sdk/woogeen.sdk.min.js" type="text/javascript"></script>'
+          }
+         ]
+        }
+      },
+      dist_conference:{
+         files: {
+          '../dist/samples/conference/public/index.html': '../src/samples/conference/public/index.html',
+        },
+        options: {
+        replacements: [
+          {
+            pattern: '<script src="sdk/base/socket.io.js" type="text/javascript"></script>',
+            replacement: '<script src="socket.io.js" type="text/javascript"></script>'
+          },
+          {
+            pattern: '<script src="sdk/conference/property.js" type="text/javascript"></script>\n    <script src="sdk/base/events.js" type="text/javascript"></script>\n    <script src="sdk/base/L.Base64.js" type="text/javascript"></script>\n    <script src="sdk/base/L.Logger.js" type="text/javascript"></script>\n    <script src="sdk/base/stream.js" type="text/javascript"></script>\n    <script src="sdk/base/ieMediaStream.js" type="text/javascript"></script>\n    <script src="sdk/conference/conference.js" type="text/javascript"></script>\n    <script src="sdk/conference/webrtc-stacks/ChromeStableStack.js" type="text/javascript"></script>\n    <script src="sdk/conference/webrtc-stacks/FirefoxStack.js" type="text/javascript"></script>\n    <script src="sdk/conference/webrtc-stacks/IEStableStack.js" type="text/javascript"></script>',
+            replacement:'<script src="woogeen.sdk.js" type="text/javascript"></script>'
+          },
+          {
+            pattern: '<script src="sdk/ui/AudioPlayer.js" type="text/javascript"></script>\n    <script src="sdk/ui/Bar.js" type="text/javascript"></script>\n    <script src="sdk/ui/L.Resizer.js" type="text/javascript"></script>\n    <script src="sdk/ui/View.js" type="text/javascript"></script>\n    <script src="sdk/ui/Speaker.js" type="text/javascript"></script>\n    <script src="sdk/ui/VideoPlayer.js" type="text/javascript"></script>\n    <script src="sdk/ui/ui.js" type="text/javascript"></script>',
+            replacement: '<script src="woogeen.sdk.ui.js" type="text/javascript"></script>'
+          }
+         ]
+        }
+      }
+    },
+    compress:{
+      dist:{
+        options:{
+          archive:'../release-<%= pkg.version %>.zip'
+        },
+        files:[
+          {src:['../dist/**'],dest:'../'}
+        ]
       }
     }
   });
@@ -118,10 +183,11 @@ window.L = L;\n\
   grunt.loadNpmTasks('grunt-contrib-concat');
   grunt.loadNpmTasks('grunt-contrib-uglify');
   grunt.loadNpmTasks('grunt-contrib-jshint');
+  grunt.loadNpmTasks('grunt-contrib-copy');
+  grunt.loadNpmTasks('grunt-string-replace');
+  grunt.loadNpmTasks('grunt-contrib-compress');
 
-
-  grunt.registerTask('build', ['concat:dist', 'concat:devel', 'jshint:dist', 'concat:merge', 'uglify:dist']);
-  // grunt.registerTask('devel', ['concat:devel', 'includereplace:devel', 'jshint:devel', 'concat:post_devel']);
+  grunt.registerTask('build', ['concat:dist', 'concat:devel', 'jshint:dist', 'concat:merge', 'uglify:dist','copy:dist','string-replace','compress:dist']);
 
   // Default task is an alias for 'build'.
   grunt.registerTask('default', ['build']);

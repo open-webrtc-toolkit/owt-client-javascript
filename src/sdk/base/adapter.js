@@ -11,6 +11,9 @@
 // This file is cloned from samples/js/base/adapter.js
 // Modify the original and do new copy instead of doing changes here.
 
+/*global  globalLocalStream,Woogeen,console,performance,createIceServer,RTCIceCandidate,RTCSessionDescription,mozRTCPeerConnection,mozRTCSessionDescription,mozRTCIceCandidate,MediaStream,webkitRTCPeerConnection*/
+/*exported trace,createIceServers*/
+
 var RTCPeerConnection = null;
 var getUserMedia = null;
 var attachMediaStream = null;
@@ -19,14 +22,16 @@ var reattachMediaStream = null;
 var webrtcDetectedBrowser = null;
 var webrtcDetectedVersion = null;
 
-function trace(text) {
+function trace(text) {/*jshint ignore:line*/
   // This function is used for logging.
+  'use strict';
   if (text[text.length - 1] === '\n') {
     text = text.substring(0, text.length - 1);
   }
   console.log((performance.now() / 1000).toFixed(3) + ": " + text);
 }
 function maybeFixConfiguration(pcConfig) {
+  'use strict';
   if (pcConfig == null) {
     return;
   }
@@ -47,17 +52,17 @@ if (navigator.mozGetUserMedia) {
            parseInt(navigator.userAgent.match(/Firefox\/([0-9]+)\./)[1], 10);
 
   // The RTCPeerConnection object.
-  var RTCPeerConnection = function(pcConfig, pcConstraints) {
+  var RTCPeerConnection = function(pcConfig, pcConstraints) {/*jshint ignore:line*/
     // .urls is not supported in FF yet.
     maybeFixConfiguration(pcConfig);
     return new mozRTCPeerConnection(pcConfig, pcConstraints);
   };
 
   // The RTCSessionDescription object.
-  RTCSessionDescription = mozRTCSessionDescription;
+  RTCSessionDescription = mozRTCSessionDescription;/*jshint ignore:line*/
 
   // The RTCIceCandidate object.
-  RTCIceCandidate = mozRTCIceCandidate;
+  RTCIceCandidate = mozRTCIceCandidate;/*jshint ignore:line*/
 
   // Get UserMedia (only difference is the prefix).
   // Code from Adam Barth.
@@ -65,7 +70,7 @@ if (navigator.mozGetUserMedia) {
   navigator.getUserMedia = getUserMedia;
 
   // Creates iceServer from the url for FF.
-  createIceServer = function(url, username, password) {
+  createIceServer = function(url, username, password) {/*jshint ignore:line*/
     var iceServer = null;
     var url_parts = url.split(':');
     if (url_parts[0].indexOf('stun') === 0) {
@@ -94,7 +99,8 @@ if (navigator.mozGetUserMedia) {
     return iceServer;
   };
 
-  createIceServers = function(urls, username, password) {
+  createIceServers = function(urls, username, password) {/*jshint ignore:line*/
+    'use strict';
     var iceServers = [];
     // Use .url for FireFox.
     for (var i = 0; i < urls.length; i++) {
@@ -110,12 +116,14 @@ if (navigator.mozGetUserMedia) {
 
   // Attach a media stream to an element.
   attachMediaStream = function(element, stream) {
+    'use strict';
     console.log("Attaching media stream");
     element.mozSrcObject = stream;
     element.play();
   };
 
   reattachMediaStream = function(to, from) {
+    'use strict';
     console.log("Reattaching media stream");
     to.mozSrcObject = from.mozSrcObject;
     to.play();
@@ -141,7 +149,8 @@ if (navigator.mozGetUserMedia) {
          parseInt(navigator.userAgent.match(/Chrom(e|ium)\/([0-9]+)\./)[2], 10);
 
   // Creates iceServer from the url for Chrome M33 and earlier.
-  createIceServer = function(url, username, password) {
+  createIceServer = function(url, username, password) {/*jshint ignore:line*/
+    'use strict';
     var iceServer = null;
     var url_parts = url.split(':');
     if (url_parts[0].indexOf('stun') === 0) {
@@ -157,7 +166,8 @@ if (navigator.mozGetUserMedia) {
   };
 
   // Creates iceServers from the urls for Chrome M34 and above.
-  createIceServers = function(urls, username, password) {
+  createIceServers = function(urls, username, password) {/*jshint ignore:line*/
+    'use strict';
     var iceServers = [];
     if (webrtcDetectedVersion >= 34) {
       // .urls is supported since Chrome M34.
@@ -178,15 +188,17 @@ if (navigator.mozGetUserMedia) {
   };
 
   // The RTCPeerConnection object.
-  var RTCPeerConnection = function(pcConfig, pcConstraints) {
+  var RTCPeerConnection = function(pcConfig, pcConstraints) {/*jshint ignore:line*/
     // .urls is supported since Chrome M34.
+     'use strict';
     if (webrtcDetectedVersion < 34) {
       maybeFixConfiguration(pcConfig);
     }
     return new webkitRTCPeerConnection(pcConfig, pcConstraints);
   };
 
-  getPeerConnectionStats = function(pc, callback){
+  getPeerConnectionStats = function(pc, callback){/*jshint ignore:line*/
+    'use strict';
     var index = 0;
     var Stats_Report = [];
     pc.getStats(function(stats){
@@ -283,7 +295,8 @@ if (navigator.mozGetUserMedia) {
    });
   };
 
-  getPeerConnectionAudioLevels = function(pc, successcallback, failurecallback){
+  getPeerConnectionAudioLevels = function(pc, successcallback, failurecallback){/*jshint ignore:line*/
+    'use strict';
     var in_level_idx = 0;
     var out_level_idx = 0;
     var Stats_Report = {};
@@ -316,7 +329,7 @@ if (navigator.mozGetUserMedia) {
            }else{
            //audio receive
              match = true;
-             var curObj = {};
+             var curObj = {};/*jshint ignore:line*/
              curObj.ssrc=res.id;
              curObj.level=res.stat("audioOutputLevel");
              curOutputLevels[out_level_idx]=curObj;
@@ -346,6 +359,7 @@ if (navigator.mozGetUserMedia) {
 
   // Attach a media stream to an element.
   attachMediaStream = function(element, stream) {
+    'use strict';
     if (typeof element.srcObject !== 'undefined') {
       element.srcObject = stream;
     } else if (typeof element.mozSrcObject !== 'undefined') {
@@ -363,8 +377,10 @@ if (navigator.mozGetUserMedia) {
 } else {
   console.log("This seems to be IE");
 
-  RTCPeerConnection = ieRTCPeerConnection;
+//RTCPeerConnection = ieRTCPeerConnection;
+  RTCPeerConnection = Woogeen.iePlugin.ieRTCPeerConnection;
   navigator.getUserMedia = function(config, success, failure){
+    'use strict';
     globalLocalStream.constraints = JSON.stringify(config);
     globalLocalStream.onsuccess = success;
     globalLocalStream.onfailure = failure;
@@ -373,21 +389,22 @@ if (navigator.mozGetUserMedia) {
     success(globalLocalStream);
   };
 
-  getPeerConnectionStats = function(pc, callback){
+  getPeerConnectionStats = function(pc, callback){/*jshint ignore:line*/
     pc.getStats(callback);
   };
 
-  getPeerConnectionAudioLevels = function(pc, successcallback, failurecallback){
+  getPeerConnectionAudioLevels = function(pc, successcallback, failurecallback){/*jshint ignore:line*/ //failurecallback is unuesd.
     pc.getAudioLevels(successcallback);
   };
 
   // Attach a media stream to an element. Currently implented as a fake function
-  attachMediaStream = function (element, stream) {
-    globalLocalView = element;
-  }
+  attachMediaStream = function (element, stream) {/*jshint ignore:line*/  //stream is unused.
+    globalLocalView = element;/*jshint ignore:line*/
+  };
 
   //we should assign a dedicated attachStream function to notify corresonding peer connection instaance.
   attachRemoteMediaStream = function (element, stream, pcid) {
+    'use strict';
     var ctx = element.getContext("2d");
     var img = new Image();
 
@@ -400,11 +417,11 @@ if (navigator.mozGetUserMedia) {
   };
 
 
-  RTCIceCandidate = function(cand) {
+  RTCIceCandidate = function(cand) {/*jshint ignore:line*/
     return cand;
   };
 
-  RTCSessionDescription = function (desc) {
+  RTCSessionDescription = function (desc) {/*jshint ignore:line*/
    return desc;
   };
 
