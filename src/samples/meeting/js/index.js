@@ -1,10 +1,10 @@
 //var serverAddress = 'http://180.153.223.233:3001/';
 //var serverAddress = 'http://10.239.33.28:3001/';
-var securedServerAddress = 'https://10.239.44.157:3004/';
-var unsecuredServerAddress = 'http://10.239.44.157:3001/';
+var securedServerAddress = 'https://webrtc.sh.intel.com:3004/';
+var unsecuredServerAddress = 'http://webrtc.sh.intel.com:3001/';
 var serverAddress = unsecuredServerAddress;
 var isSecuredConnection = false;
-var nodeAddress = 'http://10.239.44.157:1235';
+var nodeAddress = 'http://webrtc.sh.intel.com:1235';
 var localStream = null;
 var localScreen = null;
 var room = null;
@@ -41,6 +41,9 @@ var streamObj = {};
 var streamIndices = {};
 var hasMixed = false;
 var isSmall = false;
+var singleMute=true;
+var isPauseAudio=true;
+var isPauseVideo=false;
 
 function login() {
     setTimeout(function() {
@@ -75,16 +78,20 @@ function loginEnableVideo() {
 function exit() {
     if (confirm('Are you sure to exit?')) {
         // window.open('', '_self').close();
+        userExit();
+    }
+}
+
+function userExit(){
         room.leave();
         $("#video-panel div[id^=client-]").remove();
         $("#localScreen").remove();
         $("#screen").remove();
         $("#container").hide();
         $("#login-panel").removeClass("pulse").show();
-        $("#text-content").html("");
+        $("#text-panel").html("");
         localStream.close();
         localStream = undefined;
-    }
 }
 
 function stopAllStream() {
@@ -241,11 +248,12 @@ function initWoogeen() {
         $("#galaxy-btn").removeClass("disabled");
     }
 
-    users.push({
-        name: name,
-        id: localId
-    });
-    $('#profile').text(name);
+    // users.push({
+    //     name: name,
+    //     id: localId
+    // });
+   // $('#profile').text(name);
+    $('#userNameDisplay').text("Logged in as: "+name);
     hasMixed = !(subscribeType === SUBSCRIBETYPES.MIX);
 
     var bandWidth = 100,
@@ -272,7 +280,7 @@ function initWoogeen() {
         if (hasMixed) {
             Woogeen.LocalStream.create({
                 video: setStream,
-                audio: true,
+                audio: true,  //set default muted
                 data: true,
                 attributes: {
                     id: localId,
@@ -293,6 +301,7 @@ function initWoogeen() {
                     console.log("localStream subscribed");
                     addVideo(localStream, true);
                     streamObj[localStream.id()] = localStream;
+                    room.pauseAudio(localStream,"","");
                 }, function(err) {
                     L.Logger.error('publish failed:', err);
                 });
@@ -341,9 +350,20 @@ function initWoogeen() {
 
         room.join(response, function(resp) {
             var streams = resp.streams;
+            var getLoginUsers = resp.users;
+            //for(var i in users){console.log("join a user:"+users[i].name);}
+            console.log(resp);
+            getLoginUsers.map(function(user) {
+                 users.push({
+                        id: user.id,
+                        name: user.name
+                    });
+            });
+            loadUserList();
             streams.map(function(stream) {
                 L.Logger.info('stream in conference:', stream.id());
                 streamObj[stream.id()] = stream;
+
                 if (!stream.isMixed() && !stream.isScreen()) {
                     var attr = stream.attributes();
                     users.push({
@@ -372,6 +392,32 @@ function initWoogeen() {
             L.Logger.error('server connection failed:', err);
         });
     });
+}
+
+function loadUserList(){
+        for(var u in users){
+           // addUserListItem(users[u],isMute(users[u].id));
+           addUserListItem(users[u],true);
+        }
+}
+
+function addUserListItem(user,muted){
+    var muteBtn='<img src="img/mute_white.png" class="muteShow" isMuted="true"/>';
+    var unmuteBtn='<img src="img/unmute_white.png" class="muteShow" isMuted="false"/>';
+    var muteStatus= muted ? muteBtn:unmuteBtn;
+    $('#user-list').append('<li><div class="userID">'+user.id+'</div><img src="img/avatar.png" class="picture"/><div class="name">'+user.name+'</div>'+muteStatus+'</li>');
+}
+
+function chgMutePic(id,muted){
+    var line=$('li:contains('+id+')').children('.muteShow');
+    if(muted){
+        line.attr('src',"img/mute_white.png");
+        line.attr('isMuted',true);
+    }
+    else{
+        line.attr('src',"img/unmute_white.png");
+        line.attr('isMuted',false);
+    }
 }
 
 function generateId() {
@@ -511,6 +557,7 @@ function addRoomEventListener() {
                 name: e.user.name
             });
             sendIm(e.user.name + ' has joined the room.', 'System');
+            addUserListItem(e.user,true);
         }
     });
 
@@ -519,14 +566,24 @@ function addRoomEventListener() {
         if (user !== null && user.name !== undefined) {
             sendIm(user['name'] + ' has left the room.', 'System');
             deleteUser(e.user.id);
+             $('li').remove( ":contains("+user['id']+")");
         } else {
             sendIm('Anonymous has left the room.', 'System');
         }
     });
 
-    room.onMessage(function(event) {
+     room.onMessage(function(event) {
+        //console.log(event.msg.data.muted+"hhh");
         var user = getUserFromId(event.msg.from);
         if (!user) return;
+        if(event.msg.data.toID==localStream.id()){
+            $("#msgText").text(event.msg.data.fromName+" invites you to mute.");
+            $(".msgBox").show();
+            $(".msgBox").fadeOut(6000);
+        }
+        if(event.msg.data.muted!=undefined){
+        chgMutePic(event.msg.from,event.msg.data.muted);
+        }
         var time = new Date();
         var hour = time.getHours();
         hour = hour > 9 ? hour.toString() : '0' + hour.toString();
@@ -691,11 +748,12 @@ function addVideo(stream, isLocal) {
         var resize = size === 'large' ? 'shrink' : 'enlarge';
         var attr = stream.attributes() || [];
         var name = attr['name'] ? attr['name'] : 'Anonymous';
-        var muteBtn = '<a href="#" class="ctrl-btn unmute"></a>';
+        var muteBtn ="";
 
         if (stream.isMixed && stream.isMixed()) {
             name = "MIX Stream";
             $("#client-" + id).attr("isMix", "true");
+            muteBtn = '<a href="#" class="ctrl-btn unmute"></a>';
         }
         streamIndices['client-' + id] = stream.id();
 
@@ -1194,6 +1252,46 @@ function playpause() {
     }
 }
 
+function pauseVideo(){
+    if(!isPauseVideo){
+        room.pauseVideo(localStream, function() {
+        console.log("Pause video Successfully");
+        $('#pauseVideo').text("Play video");
+        isPauseVideo=!isPauseVideo;},
+        function() {console.log("Fail to pasuse video.");}
+        );
+    }else{
+        room.playVideo(localStream, function() {
+        console.log("Play video Successfully");
+        $('#pauseVideo').text("Pause video");
+        isPauseVideo=!isPauseVideo;},
+        function() {console.log("Fail to play video.");}
+        );
+    }
+}
+
+function pauseAudio(){
+    var msg={muted:true};
+     if(!isPauseAudio){
+        room.pauseAudio(localStream, function() {
+        console.log("Pause Audio Successfully");
+        $('#pauseAudio').text("Unmute Me");
+        room.send(msg,'all');
+        isPauseAudio=!isPauseAudio;},
+        function() {console.log("Fail to pasuse audio.");}
+        );
+    }else{
+        room.playAudio(localStream, function() {
+        console.log("Play Audio Successfully");
+        $('#pauseAudio').text("Mute Me");
+        msg={muted:false};
+        room.send(msg,'all');
+        isPauseAudio=!isPauseAudio;},
+        function() {console.log("Fail to play audio.");}
+        );
+    }
+}
+
 $(document).ready(function() {
     $('.buttonset>.button').click(function() {
         $(this).siblings('.button').removeClass('selected');
@@ -1214,6 +1312,14 @@ $(document).ready(function() {
         serverAddress = unsecuredServerAddress;
         $('#screen-btn').addClass('disabled');
     }
+
+     $(document).on('click', '#pauseVideo', function() {
+        pauseVideo();
+    });
+
+     $(document).on('click', '#pauseAudio', function() {
+       pauseAudio();
+    });
 
     $(document).on('click', '.shrink', function() {
         exitFullScreen($(this).parent());
@@ -1249,6 +1355,28 @@ $(document).ready(function() {
         var id = parseInt($(this).parent().parent().attr('id').slice(7));
         toggleMute(id, true);
         $(this).addClass('mute').removeClass('unmute');
+    });
+
+    $(document).on('click', '.muteShow', function() {
+        // mute others
+        //console.log($(this).attr('isMuted')+"????");
+        var mutedID=$(this).siblings('.userID').text();
+        var isMuted=singleMute;
+        var msg={
+            fromName:streamObj[localStream.id()].attributes()["name"],
+            toID:mutedID,
+            mute:isMuted
+        };
+        if(localStream.id()!= mutedID){
+        room.send(msg, 'all', function(mutedID) {
+            L.Logger.info("local send mute "+mutedID+" message");
+       }, function() {
+            L.Logger.error("fail to mute others");
+        });
+        $("#msgText").text("Send mute invitation.");
+        $(".msgBox").show();
+        $(".msgBox").fadeOut(6000);
+    }
     });
 
     $(document).on('click', '.fullscreen', function() {

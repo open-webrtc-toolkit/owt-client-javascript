@@ -22,6 +22,7 @@
 @text-padding: 20px;
 @video-large-r: 120px;
 @video-small-r: 90px;
+@msgBox-r:20px;
 @ctrl-height: 28px;
 @ctrl-img-h: 20px;
 
@@ -123,6 +124,29 @@ a {
     color: @clr-back;
 }
 
+::-webkit-scrollbar {
+  width: 14px;
+  height: 14px;
+}
+
+::-webkit-scrollbar-track,::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  border: 5px solid transparent;
+}
+
+::-webkit-scrollbar-track {
+  box-shadow: 1px 1px 5px rgba(0,0,0,.2) inset;
+}
+
+::-webkit-scrollbar-thumb {
+  min-height: 20px;
+  background-clip: content-box;
+  box-shadow: 0 0 0 5px rgba(0,0,0,.2) inset;
+}
+::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
 .full-screen, #content-panel .galaxy .client.large.full-screen, #content-panel .galaxy .client.small.full-screen {
     position: fixed !important;
     z-index: 100;
@@ -190,6 +214,21 @@ a {
         border: 1px solid #ccc;
         margin: 10px 0;
         outline: none;
+    }
+
+    .small-input {
+        width: 50px;
+        height: 20px;
+        padding: 5px;
+        border-radius: 5px;
+        border: 1px solid #ccc;
+        margin: 10px 0;
+        outline: none;
+    }
+    .udpSize{
+        padding: 5px;
+        display: inline-block;
+        margin: -10px 10px;
     }
 
     .button {
@@ -268,11 +307,11 @@ a {
 
     #setting-login {
         display: none;
-        height: 160px;
+        height: 250px;
     }
 
     #default-login {
-        height: 160px;
+        height: 250px;
     }
 }
 
@@ -297,7 +336,12 @@ a {
         color: #999;
     }
 
-    #exitBtn, #playpause {                                                                                                                                                                                                                                                            
+    #userNameDisplay{
+        float: right;
+        padding: 6px 15px;
+    }
+
+    #exitBtn {
         float: right;
         font-size: 16px;
         padding: 6px 15px;
@@ -308,9 +352,7 @@ a {
         cursor: pointer;
     }
 
-    #playpause {
-        margin-right: 10px;
-    }
+
 }
 
 #progress-panel {
@@ -346,6 +388,44 @@ a {
             bottom: @text-height;
             padding: @text-padding;
             box-sizing: border-box;
+        }
+        #user-list{
+            width: @text-width;
+            height: 100%;
+            overflow-y: auto;
+            overflow-x: hidden;
+            position: absolute;
+
+
+            li{
+                width: @text-width;
+                list-style-type: none;
+                .picture{
+                    width: @text-width/9;
+                    height: @text-width/9-4px;
+                    margin-top: 2px;
+                }
+
+                .name{
+                    color: @clr-lightest-gray;
+                    font-size: 20px;
+                    left: 10px;
+                    width: @text-width/2;
+                    display: inline-block;
+                }
+
+                .userID{
+                    display: none;
+                    top:0;
+                }
+
+                .muteShow{
+                    display: inline-block;
+                    top:0;
+                    margin-left: 30px;
+                    width: 25px;
+                }
+            }
         }
 
         p {
@@ -384,6 +464,26 @@ a {
 
         .largest-mask {
             display: none;
+        }
+
+        .msgBox {
+            display: none;
+            position:absolute;
+            bottom:0;
+            right:0;
+            margin-bottom: 10px;
+            margin-right: 10px;
+            width:140px;
+            height: 60px;
+            background-color: @clr-lightest-gray;
+            z-index:99;
+            border-radius: @msgBox-r;
+
+            #msgText{
+                font-size: 15px;
+                color: @clr-dark-gray;
+                margin:10px;
+            }
         }
 
         .client:hover .self-arrow {
@@ -519,19 +619,6 @@ a {
                 .fullscreen {
                     display: none;
                 }
-            }
-
-            .noCamera {
-                position: absolute;
-                width: 100%;
-                height: 100%;
-                top: 0px;
-                left: 0px;
-                display: none;
-                background-image: url(../img/ban_camera.jpg);
-                background-size: 100% 100%;
-                background-position: center center;
-                background-repeat: no-repeat;
             }
         }
 
@@ -786,6 +873,28 @@ a {
         position: absolute;
         right: @screen-padding-v;
         bottom: 15px;
+
+        #pauseAudio{
+            float: right;
+            padding: 6px 15px;
+            font-size: 16px;
+            border-radius: 5px;
+            background-color: #636363;
+            color: #fff;
+            text-decoration: none;
+            cursor: pointer;
+        }
+         #pauseVideo{
+            float: right;
+            margin-right: 10px;
+            padding: 6px 15px;
+            font-size: 16px;
+            border-radius: 5px;
+            background-color: #636363;
+            color: #fff;
+            text-decoration: none;
+            cursor: pointer;
+        }
     }
 }
 
@@ -821,7 +930,7 @@ a {
         padding: 20px;
         height: 415px;
         overflow: hidden;
-        
+
         .vc-selectable {
             >* {
                 width: 160px;
@@ -853,7 +962,7 @@ a {
             margin: 20px 0;
             cursor: pointer;
         }
-        
+
         .dialog--section {
             margin-top: 0px;
         }

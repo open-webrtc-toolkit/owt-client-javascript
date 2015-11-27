@@ -6,8 +6,8 @@
         <link rel="stylesheet/less" type="text/css" href="css/styles.less" />
         <script type="text/javascript" src="js/jquery-1.11.0.min.js"></script>
         <script type="text/javascript" src="js/less-1.7.0.min.js"></script>
-        <script src="js/woogeen.sdk.js" type="text/javascript"></script>
-        <script src="js/woogeen.sdk.ui.js" type="text/javascript"></script>
+        <script src="js/woogeen.sdk.min.js" type="text/javascript"></script>
+        <script src="js/woogeen.sdk.ui.min.js" type="text/javascript"></script>
         <script type="text/javascript" src="js/index.js"></script>
     </head>
     <body>
@@ -52,26 +52,25 @@
                 <div id="titleText"></div>
                 <div id="titleTime"></div>
                 <a id="exitBtn" href="#" onclick="exit()">Leave Room</a>
-                <a id="playpause" href="#" onclick="playpause()" >Pause Video</a>
+                <div id="userNameDisplay"></div>
+                <!-- <a id="playpause" href="#" onclick="playpause()" >Pause Video</a> -->
             </div>
             <div id="progress-panel">
                 <div id="progress" class="back-clt-0"></div>
             </div>
-            
             <div id="content-panel">
                 <div id="text-panel">
-                    <div id="text-content">
-                    </div>
-                    
-                    <textarea id="text-send" placeholder="Send Message"></textarea>
-                    <a href="#" id="send-btn" onclick="sendIm()"><img src="img/return.png" /></a>
+                   <!--  <div id="text-content">
+                    </div> -->
+                   <!--  <textarea id="text-send" placeholder="Send Message"></textarea>
+                    <a href="#" id="send-btn" onclick="sendIm()"><img src="img/return.png" /></a> -->
+                    <div id="user-list"></div>
                 </div>
-                
                 <div id="video-panel" class="galaxy">
                     <div class="largest-mask"></div>
+                    <div class="msgBox"><div id="msgText"></div></div>
                 </div>
             </div>
-            
             <div id="menu-panel" class="back-clt-0">
                 <div id="menu">
                     <a href="#" class="button selected" onclick="changeMode('galaxy')" id="galaxy-btn" title="Galaxy Layout"></a>
@@ -83,10 +82,13 @@
                     <div class="button-split"></div>
                     <!-- <a href="#" class="button" onclick="startVc()" id="vc-btn" title="Use Virtual Camera"></a> -->
                 </div>
-                <div id="profile"></div>
+                <div id="profile">
+                    <div id="pauseAudio">Unmute Me</div>
+                    <div id="pauseVideo">Pause Video</div>
+                </div>
             </div>
         </div>
-        
+
         <div class="dialog" id="vc-dialog">
             <div class="dialog--title">
                 <span>3D camera settings</span>
@@ -103,7 +105,7 @@
 
                 <h3 class="dialog--section">Select Position</h3>
                 <div id="vc-position-panel"></div>
-                
+
                 <div class="dialog--section">
                     <input type="checkbox" id="vc-enable" checked />Enable camera input
                     <input type="checkbox" id="vc-mode" />Enable background segmentation
