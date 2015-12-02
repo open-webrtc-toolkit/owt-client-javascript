@@ -1,4 +1,4 @@
-/* global window, document, webkitURL, Erizo, L,Woogeen*/
+/* global window, document, webkitURL, Erizo, L */
 /*
  * VideoPlayer represents a Licode video component that shows either a local or a remote video.
  * Ex.: var player = VideoPlayer({id: id, stream: stream, elementID: elementID});
@@ -122,8 +122,8 @@ Erizo.VideoPlayer = function (spec) {
         }
       }
       return function (tag) {
-        if (window.innerWidth === screen.width) {_exitFullScreen();}
-        else {_enterFullScreen(tag);}
+        if (window.innerWidth == screen.width) _exitFullScreen();
+        else _enterFullScreen(tag);
       };
     }());
 

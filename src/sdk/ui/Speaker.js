@@ -1,4 +1,4 @@
-/* global document, Erizo,Woogeen*/
+/* global document, Erizo*/
 /*
  * Speaker represents the volume icon that will be shown in the mediaPlayer, for example.
  * It manages the volume level of the media tag given in the constructor.

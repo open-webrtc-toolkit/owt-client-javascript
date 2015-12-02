@@ -1,4 +1,4 @@
-/* global webkitURL, chrome,Woogeen */
+/* global webkitURL, chrome */
 (function () {
   'use strict';
 /**
@@ -309,6 +309,17 @@ stream.enableVideo();
     return false;
   };
 
+  WoogeenStream.prototype.updateConfiguration = function (config, callback) {
+    if (config === undefined) {
+      return;
+    }
+    if (this.channel) {
+      this.channel.updateSpec(config, callback);
+    } else {
+      return ("This stream has not been published, ignoring");
+    }
+  };
+
   function WoogeenLocalStream (spec) {
     WoogeenStream.call(this, spec);
   }
@@ -479,6 +490,10 @@ if (stream.isMixed()) {
   function isLegacyIE () {
     return window.navigator.appVersion.indexOf('Trident') > -1 &&
       window.navigator.appVersion.indexOf('rv') > -1;
+  }
+
+  function isFirefox () {
+    return window.navigator.userAgent.match("Firefox") !== null;
   }
 
   function getReso(w, h) {
@@ -661,6 +676,15 @@ if (stream.isMixed()) {
     };
 
     if (option.video && option.video.device === 'screen') {
+      if (isFirefox()) {
+        if (mediaOption.video !== undefined) {
+          mediaOption.video.mediaSource = 'window' || 'screen';
+        } else {
+          mediaOption.video = { mediaSource: 'window' || 'screen' };
+        }
+        getMedia.apply(navigator, [mediaOption, onSuccess, onFailure]);
+        return;
+      }
       var extensionId = option.video.extensionId || 'pndohhifhheefbpeljcmnhnkphepimhe';
       mediaOption.audio = false;
       try {
