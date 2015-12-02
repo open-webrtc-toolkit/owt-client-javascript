@@ -1,7 +1,7 @@
 //var serverAddress = 'http://180.153.223.233:3001/';
 //var serverAddress = 'http://10.239.33.28:3001/';
 var securedServerAddress = 'https://webrtc.sh.intel.com:3004/';
-var unsecuredServerAddress = 'http://webrtc.sh.intel.com:3001/';
+var unsecuredServerAddress = 'http://zhaoxiaoyun.sh.intel.com:3001/';
 var serverAddress = unsecuredServerAddress;
 var isSecuredConnection = false;
 var nodeAddress = 'http://webrtc.sh.intel.com:1235';
@@ -84,12 +84,13 @@ function exit() {
 
 function userExit(){
         room.leave();
+        users=[];
         $("#video-panel div[id^=client-]").remove();
         $("#localScreen").remove();
         $("#screen").remove();
         $("#container").hide();
         $("#login-panel").removeClass("pulse").show();
-        $("#text-panel").html("");
+        $("#user-list").html('');
         localStream.close();
         localStream = undefined;
 }
@@ -558,6 +559,7 @@ function addRoomEventListener() {
             });
             sendIm(e.user.name + ' has joined the room.', 'System');
             addUserListItem(e.user,true);
+            room.send({muteInitID:e.user.id},'all');
         }
     });
 
@@ -573,16 +575,27 @@ function addRoomEventListener() {
     });
 
      room.onMessage(function(event) {
-        //console.log(event.msg.data.muted+"hhh");
+        console.log(event.msg.data.myMuted+"ggg");
         var user = getUserFromId(event.msg.from);
         if (!user) return;
-        if(event.msg.data.toID==localStream.id()){
-            $("#msgText").text(event.msg.data.fromName+" invites you to mute.");
-            $(".msgBox").show();
-            $(".msgBox").fadeOut(6000);
+
+        if(event.msg.data.muteInitID!=undefined){
+            console.log("init status "+event.msg.data.muteInitID);
+            room.send({myMuted:isPauseAudio},event.msg.data.muteInitID);
+        //chgMutePic(event.msg.from,event.msg.data.muteInit);
+        }
+        if(event.msg.data.myMuted!=undefined){
+            console.log("get status "+event.msg.data.myMuted);
+            chgMutePic(event.msg.from,event.msg.data.myMuted);
         }
         if(event.msg.data.muted!=undefined){
-        chgMutePic(event.msg.from,event.msg.data.muted);
+            chgMutePic(event.msg.from,event.msg.data.muted);
+        }
+        if(localStream!=null && localStream.id()!=null && event.msg.data.toID==localStream.id()){
+            pauseAudio();
+            isPauseAudio ? $("#msgText").text(event.msg.data.fromName+" mutes you."):$("#msgText").text(event.msg.data.fromName+" unmutes you.");
+            // $(".msgBox").show();
+            // $(".msgBox").fadeOut(6000);
         }
         var time = new Date();
         var hour = time.getHours();
@@ -1373,9 +1386,9 @@ $(document).ready(function() {
        }, function() {
             L.Logger.error("fail to mute others");
         });
-        $("#msgText").text("Send mute invitation.");
-        $(".msgBox").show();
-        $(".msgBox").fadeOut(6000);
+        isPauseAudio?$("#msgText").text("You have unmuted "+streamObj[mutedID].attributes()["name"]):$("#msgText").text("You have muted "+streamObj[mutedID].attributes()["name"]);
+        // $(".msgBox").show();
+        // $(".msgBox").fadeOut(6000);
     }
     });
 
