@@ -1,4 +1,4 @@
-/* global io,L,Woogeen,Erizo*/
+/* global io */
 
 /**
  * @class Woogeen.ConferenceClient
@@ -18,24 +18,60 @@ Woogeen.ConferenceClient = (function () {
 
   Woogeen.sessionId = 103;
 
+  var getBrowser = function () {
+    var browser = "none";
+
+    if (window.navigator.userAgent.match("Firefox") !== null) {
+      // Firefox
+      browser = "mozilla";
+    } else if (window.navigator.appVersion.indexOf('Trident') > -1) {
+      browser = 'internet-explorer';
+    } else if (window.navigator.userAgent.match("Bowser") !==null){
+      browser = "bowser";    
+    } else if (window.navigator.userAgent.match("Chrome") !==null) {
+      if (window.navigator.appVersion.match(/Chrome\/([\w\W]*?)\./)[1] >= 26) {
+        browser = "chrome-stable";
+      }
+    } else if (window.navigator.userAgent.match("Safari") !== null) {
+      browser = "bowser";
+    } else if (window.navigator.userAgent.match("WebKit") !== null) {
+      browser = "bowser";
+    }
+
+    return browser;
+  };
+
   function createChannel (spec) {
     spec.session_id = (Woogeen.sessionId += 1);
-    var that;
-    if (window.navigator.userAgent.match('Firefox') !== null) {
-      // Firefox
+    var that = {};
+
+    that.browser = getBrowser();
+
+    if (that.browser === 'mozilla') {
+      L.Logger.debug("Firefox Stack");
       that = Erizo.FirefoxStack(spec);
-      that.browser = 'mozilla';
-    } else if (window.navigator.appVersion.indexOf('Trident') > -1) {
-      that = Erizo.IEStableStack(spec);
-      that.browser = 'internet-explorer';
-    } else if (window.navigator.appVersion.match(/Chrome\/([\w\W]*?)\./)[1] >= 26) {
-      // Google Chrome Stable.
+    } else if (that.browser === 'internet-explorer'){
+      L.Logger.debug("IE Stack");
+      that = Erizo.IEStableStack(spec); 
+    } else if (that.browser === 'bowser'){
+      L.Logger.debug("Bowser Stack");
+      that = Erizo.BowserStack(spec); 
+    } else if (that.browser === 'chrome-stable') {
+      L.Logger.debug("Stable!");
       that = Erizo.ChromeStableStack(spec);
-      that.browser = 'chrome-stable';
     } else {
-      // None.
-      throw 'WebRTC stack not available';
+      L.Logger.debug("None!");
+      throw "WebRTC stack not available";
     }
+    if (!that.updateSpec){
+      that.updateSpec = function(newSpec, callback){
+        L.Logger.error("Update Configuration not implemented in this browser");
+        if (callback) {
+            callback ("unimplemented");
+        }
+      };
+    }
+
     return that;
   }
 
@@ -65,8 +101,8 @@ Woogeen.ConferenceClient = (function () {
 <br><b>Remarks:</b><br>
 This method accepts string, object, or array (multiple ones) type of ice server item as argument. Typical description of each valid value should be as below:<br>
 <ul>
-<li>For turn: {url: "url", username: "username", credential: "password"}.</li>
-<li>For stun: {url: "url"}, or simply "url" string.</li>
+<li>For turn: {urls: "url", username: "username", credential: "password"}.</li>
+<li>For stun: {urls: "url"}, or simply "url" string.</li>
 </ul>
 Each time this method is called, previous saved value would be discarded. Specifically, if parameter servers is not provided, the result would be an empty array, meaning any predefined servers are discarded.
    * @instance
@@ -77,11 +113,11 @@ Each time this method is called, previous saved value would be discarded. Specif
 <script type="text/JavaScript">
 var conference = Woogeen.ConferenceClient.create();
 conference.setIceServers([{
-    url: "turn:61.152.239.60:4478?transport=udp",
+    urls: "turn:61.152.239.60:4478?transport=udp",
     username: "woogeen",
     credential: "master"
   }, {
-    url: "turn:61.152.239.60:443?transport=tcp",
+    urls: "turn:61.152.239.60:443?transport=tcp",
     username: "woogeen",
     credential: "master"
   }]);
@@ -92,16 +128,28 @@ conference.setIceServers([{
       Array.prototype.slice.call(arguments, 0).map(function (arg) {
         if (arg instanceof Array) {
           arg.map(function (server) {
-            if (typeof server === 'object' && server !== null && typeof server.url === 'string' && server.url !== '') {
-              that.userSetIceServers.push(server);
+            if (typeof server === 'object' && server !== null) {
+              if (typeof server.urls === 'string' && server.urls !== '' || server.urls instanceof Array) {
+                that.userSetIceServers.push(server);
+              } else if (typeof server.url === 'string' && server.url !== '') {
+                server.urls = server.url;
+                delete server.url;
+                that.userSetIceServers.push(server);
+              }
             } else if (typeof server === 'string' && server !== '') {
-              that.userSetIceServers.push({url: server});
+              that.userSetIceServers.push({urls: server});
             }
           });
-        } else if (typeof arg === 'object' && arg !== null && typeof arg.url === 'string' && arg.url !== '') {
-          that.userSetIceServers.push(arg);
+        } else if (typeof arg === 'object' && arg !== null) {
+          if (typeof arg.urls === 'string' && arg.urls !== '' || arg.urls instanceof Array) {
+            that.userSetIceServers.push(arg);
+          } else if (typeof arg.url === 'string' && arg.url !== '') {
+            arg.urls = arg.url;
+            delete arg.url;
+            that.userSetIceServers.push(arg);
+          }
         } else if (typeof arg === 'string' && arg !== '') {
-          that.userSetIceServers.push({url: arg});
+          that.userSetIceServers.push({urls: arg});
         }
       });
       return that.userSetIceServers;
@@ -243,27 +291,47 @@ conference.join(token, function(response) {...}, function(error) {...});
           }
         });
 
-        self.socket.on('onSubscribeP2P', function (spec) { // p2p conference call
+        self.socket.on('signaling_message_erizo', function (arg) {
+            var stream;
+            if (arg.peerId) {
+                stream = self.remoteStreams[arg.peerId];
+            } else {
+                stream = self.localStreams[arg.streamId];
+            }
+             
+            if (stream) {
+                stream.channel.processSignalingMessage(arg.mess);
+            }
+        });
+
+        self.socket.on('signaling_message_peer', function (arg) {
+
+            var stream = self.localStreams[arg.streamId];
+
+            if (stream) {
+                stream.channel[arg.peerSocket].processSignalingMessage(arg.msg);
+            } else {
+                stream = self.remoteStreams[arg.streamId];
+
+                if (!stream.pc) {
+                    create_remote_pc(stream, arg.peerSocket);
+                }   
+                stream.channel.processSignalingMessage(arg.msg);
+            }
+        });
+
+        self.socket.on('publish_me', function (spec) {
           var myStream = self.localStreams[spec.streamId];
           if (myStream.channel === undefined) {
             myStream.channel = {};
           }
 
-          myStream.channel[spec.subsSocket] = createChannel({
-            callback: function (offer) {
-              sendSdp(self.socket, 'publish', {
-                state: 'p2pSignaling',
+          myStream.channel[spec.peerSocket] = createChannel({
+            callback: function (msg) {
+              sendSdp(self.socket, 'signaling_message', {
                 streamId: spec.streamId,
-                subsSocket: spec.subsSocket
-              }, offer, function (answer) {
-                if (answer === 'error' || answer === 'timeout') {
-                  L.Logger.warning('invalid answer');
-                  return;
-                }
-                myStream.channel[spec.subsSocket].onsignalingmessage = function () {
-                  myStream.channel[spec.subsSocket].onsignalingmessage = function () {};
-                };
-                myStream.channel[spec.subsSocket].processSignalingMessage(answer);
+                peerSocket: spec.peerSocket,
+                msg: msg
               });
             },
             audio: myStream.hasAudio(),
@@ -272,38 +340,38 @@ conference.join(token, function(response) {...}, function(error) {...});
             turnServer: self.connSettings.turn
           });
 
-          myStream.channel[spec.subsSocket].addStream(myStream.mediaStream);
-          myStream.channel[spec.subsSocket].oniceconnectionstatechange = function (state) {
+          myStream.channel[spec.peerSocket].oniceconnectionstatechange = function (state) {
             if (state === 'disconnected') {
-              myStream.channel[spec.subsSocket].close();
-              delete myStream.channel[spec.subsSocket];
+              myStream.channel[spec.peerSocket].close();
+              delete myStream.channel[spec.peerSocket];
             }
           };
+
+          myStream.channel[spec.peerSocket].addStream(myStream.mediaStream);
+          myStream.channel[spec.peerSocket].createOffer();
         });
 
-        self.socket.on('onPublishP2P', function (spec, callback) {
-          var myStream = self.remoteStreams[spec.streamId];
+        var create_remote_pc = function (stream, peerSocket) {
 
-          myStream.channel = createChannel({
-            callback: function () {},
+          stream.channel = createChannel({
+            callback: function (msg) {
+              sendSdp(self.socket, 'signaling_message', {streamId: stream.id(), peerSocket: peerSocket, msg: msg});
+            },
             stunServerUrl: self.connSettings.stun,
             turnServer: self.connSettings.turn,
             maxAudioBW: self.connSettings.maxAudioBW,
-            maxVideoBW: self.connSettings.maxVideoBW
+            maxVideoBW: self.connSettings.maxVideoBW,
+            limitMaxAudioBW: self.connSettings.maxAudioBW,
+            limitMaxVideoBW: self.connSettings.maxVideoBW
           });
 
-          myStream.channel.onsignalingmessage = function (answer) {
-            myStream.channel.onsignalingmessage = function () {};
-            safeCall(callback, answer);
+          stream.channel.onaddstream = function (evt) {
+            // Draw on html
+            L.Logger.info('Stream subscribed');
+            stream.mediaStream = evt.stream;
+            internalDispatcher.dispatchEvent(new Woogeen.StreamEvent({type: 'p2p-stream-subscribed', stream: stream}));
           };
-
-          myStream.channel.processSignalingMessage(spec.sdp);
-
-          myStream.channel.onaddstream = function (evt) {
-            myStream.mediaStream = evt.stream;
-            internalDispatcher.dispatchEvent(new Woogeen.StreamEvent({type: 'p2p-stream-subscribed', stream: myStream}));
-          };
-        });
+        };
 
         // We receive an event of remote video stream paused
         self.socket.on('onVideoHold', function (spec) {
@@ -400,6 +468,15 @@ conference.join(token, function(response) {...}, function(error) {...});
         self.socket.on('error', function (err) {
           safeCall(onFailure, err || 'connection_error');
         });
+
+        self.socket.on('connection_failed', function() {
+          L.Logger.info("ICE Connection Failed");
+          if (that.state !== DISCONNECTED) {
+            var disconnectEvt = new Woogeen.StreamEvent({type: 'stream-failed'});
+            self.dispatchEvent(disconnectEvt);
+          }
+        });
+
       }
 
       try {
@@ -415,10 +492,13 @@ conference.join(token, function(response) {...}, function(error) {...});
             self.conferenceId = resp.id;
             self.p2p = resp.p2p;
             that.state = CONNECTED;
-            var streams = resp.streams.map(function (st) {
-              self.remoteStreams[st.id] = createRemoteStream(st);
-              return self.remoteStreams[st.id];
-            });
+            var streams = [];
+            if (resp.streams) {
+              streams = resp.streams.map(function (st) {
+                self.remoteStreams[st.id] = createRemoteStream(st);
+                return self.remoteStreams[st.id];
+              });
+            }
             return safeCall(onSuccess, {streams: streams, users: resp.users});
           }
           return safeCall(onFailure, resp||'response error');
@@ -613,9 +693,9 @@ conference.publish(localStream, {maxVideoBW: 300}, function (st) {
         self.connSettings.maxVideoBW = options.maxVideoBW;
         self.connSettings.maxAudioBW = options.maxAudioBW;
         opt.state = 'p2p';
-        sendSdp(self.socket, 'publish', opt, null, function (answer, id) {
-            if (answer === 'error') {
-              return safeCall(onFailure, answer);
+        sendSdp(self.socket, 'publish', opt, null, function (id) {
+            if (id === 'error') {
+              return safeCall(onFailure, id);
             }
             stream.id = function () {
               return id;
@@ -632,78 +712,85 @@ conference.publish(localStream, {maxVideoBW: 300}, function (st) {
       if (options.maxVideoBW > self.connSettings.maxVideoBW) {
         options.maxVideoBW = self.connSettings.maxVideoBW;
       }
-      stream.channel = createChannel({
-        callback: function (offer) {
-          opt.state = 'offer';
-          sendSdp(self.socket, 'publish', opt, offer, function (answer, id) {
-            if (answer === 'error') {
-              return safeCall(onFailure, id);
-            }
-            if (answer === 'timeout') {
-              return safeCall(onFailure, answer);
-            }
-            stream.channel.onsignalingmessage = function () {};
-            var onChannelReady = function () {
-              stream.id = function () {
-                return id;
-              };
-              self.localStreams[id] = stream;
-              stream.signalOnPlayAudio = function (onSuccess, onFailure) {
-                sendCtrlPayload(self.socket, 'audio-out-on', id, onSuccess, onFailure);
-              };
-              stream.signalOnPauseAudio = function (onSuccess, onFailure) {
-                sendCtrlPayload(self.socket, 'audio-out-off', id, onSuccess, onFailure);
-              };
-              stream.signalOnPlayVideo = function (onSuccess, onFailure) {
-                sendCtrlPayload(self.socket, 'video-out-on', id, onSuccess, onFailure);
-              };
-              stream.signalOnPauseVideo = function (onSuccess, onFailure) {
-                sendCtrlPayload(self.socket, 'video-out-off', id, onSuccess, onFailure);
-              };
-              stream.unpublish = function (onSuccess, onFailure) {
-                self.unpublish(stream, onSuccess, onFailure);
-              };
-              safeCall(onSuccess, stream);
-              onChannelReady = function () {};
-              onChannelFailed = function () {};
-            };
-            var onChannelFailed = function () {
-              sendMsg(self.socket, 'unpublish', id, function () {}, function () {}); // FIXME: still need this?
-              stream.channel.close();
-              stream.channel = undefined;
-              safeCall(onFailure, 'peer connection failed');
-              onChannelReady = function () {};
-              onChannelFailed = function () {};
-            };
-            stream.channel.oniceconnectionstatechange = function (state) {
-              switch (state) {
-              case 'completed': // chrome
-              case 'connected': // firefox
-                onChannelReady();
-                break;
-              case 'checking':
-              case 'closed':
-                break;
-              case 'failed':
-                onChannelFailed();
-                break;
-              default:
-                L.Logger.warning('unknown ice connection state:', state);
-              }
-            };
-            stream.channel.processSignalingMessage(answer);
-          });
-        },
-        video: stream.hasVideo(),
-        audio: stream.hasAudio(),
-        iceServers: self.getIceServers(),
-        stunServerUrl: self.connSettings.stun,
-        turnServer: self.connSettings.turn,
-        maxAudioBW: options.maxAudioBW,
-        maxVideoBW: options.maxVideoBW,
-        videoCodec: options.videoCodec
+
+      opt.state = 'erizo';
+      sendSdp(self.socket, 'publish', opt, undefined, function (answer, id) {
+        if (answer === 'error') {
+          return safeCall(onFailure, id);
+        }
+        if (answer === 'timeout') {
+          return safeCall(onFailure, answer);
+        }
+        stream.id = function () {
+          return id;
+        };
+        self.localStreams[id] = stream;
+
+        stream.channel = createChannel({
+          callback: function (message) {
+            console.log("Sending message", message);
+            sendSdp(self.socket, 'signaling_message', {streamId: id, msg: message}, undefined, function () {});
+          },
+          video: stream.hasVideo(),
+          audio: stream.hasAudio(),
+          iceServers: self.getIceServers(),
+          stunServerUrl: self.connSettings.stun,
+          turnServer: self.connSettings.turn,
+          maxAudioBW: options.maxAudioBW,
+          maxVideoBW: options.maxVideoBW,
+          limitMaxAudioBW: self.connSettings.maxAudioBW,
+          limitMaxVideoBW: self.connSettings.maxVideoBW,
+          videoCodec: options.videoCodec
+        });
+
+        var onChannelReady = function () {
+          stream.signalOnPlayAudio = function (onSuccess, onFailure) {
+            sendCtrlPayload(self.socket, 'audio-out-on', id, onSuccess, onFailure);
+          };
+          stream.signalOnPauseAudio = function (onSuccess, onFailure) {
+            sendCtrlPayload(self.socket, 'audio-out-off', id, onSuccess, onFailure);
+          };
+          stream.signalOnPlayVideo = function (onSuccess, onFailure) {
+            sendCtrlPayload(self.socket, 'video-out-on', id, onSuccess, onFailure);
+          };
+          stream.signalOnPauseVideo = function (onSuccess, onFailure) {
+            sendCtrlPayload(self.socket, 'video-out-off', id, onSuccess, onFailure);
+          };
+          stream.unpublish = function (onSuccess, onFailure) {
+            self.unpublish(stream, onSuccess, onFailure);
+          };
+          safeCall(onSuccess, stream);
+          onChannelReady = function () {};
+          onChannelFailed = function () {};
+        };
+        var onChannelFailed = function () {
+          sendMsg(self.socket, 'unpublish', id, function () {}, function () {}); // FIXME: still need this?
+          stream.channel.close();
+          stream.channel = undefined;
+          safeCall(onFailure, 'peer connection failed');
+          onChannelReady = function () {};
+          onChannelFailed = function () {};
+        };
+        stream.channel.oniceconnectionstatechange = function (state) {
+          switch (state) {
+          case 'completed': // chrome
+          case 'connected': // firefox
+            onChannelReady();
+            break;
+          case 'checking':
+          case 'closed':
+            break;
+          case 'failed':
+            onChannelFailed();
+            break;
+          default:
+            L.Logger.warning('unknown ice connection state:', state);
+          }
+        };
+
+        stream.channel.addStream(stream.mediaStream);
+        stream.channel.createOffer();
       });
-      stream.channel.addStream(stream.mediaStream);
     } else {
       return safeCall(onFailure, 'already published');
     }
@@ -866,87 +953,93 @@ conference.subscribe(remoteStream, function (st) {
       return safeCall(onFailure, 'no audio or video to subscribe.');
     }
 
-    stream.channel = createChannel({
-      callback: function (offer) {
-        if (JSON.parse(offer).messageType !== 'OFFER') {return;} // filter out 'sendOK'
-        sendSdp(self.socket, 'subscribe', {
-          streamId: stream.id(),
-          audio: stream.hasAudio() && (options.audio !== false),
-          video: stream.hasVideo() && options.video
-        }, offer, function (answer, errText) {
-          if (answer === 'error' || answer === 'timeout') {
-            return safeCall(onFailure, errText || answer);
-          }
-          stream.channel.processSignalingMessage(answer);
-        });
-      },
+    sendSdp(self.socket, 'subscribe', {
+      streamId: stream.id(),
       audio: stream.hasAudio() && (options.audio !== false),
-      video: stream.hasVideo() && (options.video !== false),
-      iceServers: self.getIceServers(),
-      stunServerUrl: self.connSettings.stun,
-      turnServer: self.connSettings.turn,
-      videoCodec: options.videoCodec
-    });
+      video: stream.hasVideo() && options.video,
+      browser: getBrowser()
+    }, undefined, function (answer, errText) {
+      if (answer === 'error' || answer === 'timeout') {
+        return safeCall(onFailure, errText || answer);
+      }
 
-    stream.channel.onaddstream = function (evt) {
-      stream.mediaStream = evt.stream;
-      if (navigator.appVersion.indexOf('Trident') > -1) {
-        stream.pcid = evt.pcid;
-      }
-      if (mediaStreamIsReady) {
-         safeCall(onSuccess, stream);
-      } else {
-         mediaStreamIsReady = true;
-      }
-    };
-    var onChannelReady = function () {
-      stream.signalOnPlayAudio = function (onSuccess, onFailure) {
-        sendCtrlPayload(self.socket, 'audio-in-on', stream.id(), onSuccess, onFailure);
+      stream.channel = createChannel({
+        callback: function (message) {
+          sendSdp(self.socket, 'signaling_message', {
+            streamId: stream.id(),
+            msg: message,
+            browser: stream.channel.browser
+          }, undefined, function () {});
+        },
+        audio: stream.hasAudio() && (options.audio !== false),
+        video: stream.hasVideo() && (options.video !== false),
+        iceServers: self.getIceServers(),
+        stunServerUrl: self.connSettings.stun,
+        turnServer: self.connSettings.turn,
+        videoCodec: options.videoCodec
+      });
+
+      stream.channel.onaddstream = function (evt) {
+        stream.mediaStream = evt.stream;
+        if (navigator.appVersion.indexOf('Trident') > -1) {
+          stream.pcid = evt.pcid;
+        }
+        if (mediaStreamIsReady) {
+          safeCall(onSuccess, stream);
+        } else {
+          mediaStreamIsReady = true;
+        }
       };
-      stream.signalOnPauseAudio = function (onSuccess, onFailure) {
-        sendCtrlPayload(self.socket, 'audio-in-off', stream.id(), onSuccess, onFailure);
+      var onChannelReady = function () {
+        stream.signalOnPlayAudio = function (onSuccess, onFailure) {
+          sendCtrlPayload(self.socket, 'audio-in-on', stream.id(), onSuccess, onFailure);
+        };
+        stream.signalOnPauseAudio = function (onSuccess, onFailure) {
+          sendCtrlPayload(self.socket, 'audio-in-off', stream.id(), onSuccess, onFailure);
+        };
+        stream.signalOnPlayVideo = function (onSuccess, onFailure) {
+          sendCtrlPayload(self.socket, 'video-in-on', stream.id(), onSuccess, onFailure);
+        };
+        stream.signalOnPauseVideo = function (onSuccess, onFailure) {
+          sendCtrlPayload(self.socket, 'video-in-off', stream.id(), onSuccess, onFailure);
+        };
+        if (mediaStreamIsReady) {
+          safeCall(onSuccess, stream);
+        } else {
+          mediaStreamIsReady = true;
+        }
+        onChannelReady = function () {};
+        onChannelFailed = function () {};
       };
-      stream.signalOnPlayVideo = function (onSuccess, onFailure) {
-        sendCtrlPayload(self.socket, 'video-in-on', stream.id(), onSuccess, onFailure);
+      var onChannelFailed = function () {
+        sendMsg(self.socket, 'unsubscribe', stream.id(), function () {}, function () {});
+        stream.close();
+        stream.signalOnPlayAudio = undefined;
+        stream.signalOnPauseAudio = undefined;
+        stream.signalOnPlayVideo = undefined;
+        stream.signalOnPauseVideo = undefined;
+        safeCall(onFailure, 'peer connection failed');
+        onChannelReady = function () {};
+        onChannelFailed = function () {};
       };
-      stream.signalOnPauseVideo = function (onSuccess, onFailure) {
-        sendCtrlPayload(self.socket, 'video-in-off', stream.id(), onSuccess, onFailure);
+      stream.channel.oniceconnectionstatechange = function (state) {
+        switch (state) {
+        case 'completed': // chrome
+        case 'connected': // firefox
+          onChannelReady();
+          break;
+        case 'checking':
+        case 'closed':
+          break;
+        case 'failed':
+          onChannelFailed();
+          break;
+        default:
+          L.Logger.warning('unknown ice connection state:', state);
+        }
       };
-      if (mediaStreamIsReady) {
-         safeCall(onSuccess, stream);
-      } else {
-         mediaStreamIsReady = true;
-      }
-      onChannelReady = function () {};
-      onChannelFailed = function () {};
-    };
-    var onChannelFailed = function () {
-      sendMsg(self.socket, 'unsubscribe', stream.id(), function () {}, function () {});
-      stream.close();
-      stream.signalOnPlayAudio = undefined;
-      stream.signalOnPauseAudio = undefined;
-      stream.signalOnPlayVideo = undefined;
-      stream.signalOnPauseVideo = undefined;
-      safeCall(onFailure, 'peer connection failed');
-      onChannelReady = function () {};
-      onChannelFailed = function () {};
-    };
-    stream.channel.oniceconnectionstatechange = function (state) {
-      switch (state) {
-      case 'completed': // chrome
-      case 'connected': // firefox
-        onChannelReady();
-        break;
-      case 'checking':
-      case 'closed':
-        break;
-      case 'failed':
-        onChannelFailed();
-        break;
-      default:
-        L.Logger.warning('unknown ice connection state:', state);
-      }
-    };
+      stream.channel.createOffer(true);
+    });
   };
 
 /**
