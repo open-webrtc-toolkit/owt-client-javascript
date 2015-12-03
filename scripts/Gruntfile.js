@@ -117,8 +117,8 @@ window.L = L;\n\
           {expand: true,cwd:'../src/sdk/base/',src:['adapter.js'],dest:'../dist/sdk/',flatten:false},
           {expand: true,cwd:'../src/extension/',src:['**'],dest:'../dist/',flatten:false},
           {expand: true,cwd:'../src/sdk/base/',src:['socket.io.js'],dest:'../dist/samples/conference/public/',flatten:false},
-          {expand: true,cwd:'../dist/sdk/',src:['woogeen.sdk.js'],dest:'../dist/samples/conference/public/',flatten:false},
-          {expand: true,cwd:'../dist/sdk/',src:['woogeen.sdk.ui.js'],dest:'../dist/samples/conference/public/',flatten:false}
+          {expand: true,cwd:'../dist/sdk/',src:['woogeen.sdk.min.js'],dest:'../dist/samples/conference/public/',flatten:false},
+          {expand: true,cwd:'../dist/sdk/',src:['woogeen.sdk.ui.min.js'],dest:'../dist/samples/conference/public/',flatten:false}
         ]
       }
     },
@@ -156,15 +156,21 @@ window.L = L;\n\
           },
           {
             pattern: '<script src="sdk/conference/property.js" type="text/javascript"></script>\n    <script src="sdk/base/events.js" type="text/javascript"></script>\n    <script src="sdk/base/L.Base64.js" type="text/javascript"></script>\n    <script src="sdk/base/L.Logger.js" type="text/javascript"></script>\n    <script src="sdk/base/stream.js" type="text/javascript"></script>\n    <script src="sdk/base/ieMediaStream.js" type="text/javascript"></script>\n    <script src="sdk/conference/conference.js" type="text/javascript"></script>\n    <script src="sdk/conference/webrtc-stacks/ChromeStableStack.js" type="text/javascript"></script>\n    <script src="sdk/conference/webrtc-stacks/FirefoxStack.js" type="text/javascript"></script>\n    <script src="sdk/conference/webrtc-stacks/IEStableStack.js" type="text/javascript"></script>',
-            replacement:'<script src="woogeen.sdk.js" type="text/javascript"></script>'
+            replacement:'<script src="woogeen.sdk.min.js" type="text/javascript"></script>'
           },
           {
             pattern: '<script src="sdk/ui/AudioPlayer.js" type="text/javascript"></script>\n    <script src="sdk/ui/Bar.js" type="text/javascript"></script>\n    <script src="sdk/ui/L.Resizer.js" type="text/javascript"></script>\n    <script src="sdk/ui/View.js" type="text/javascript"></script>\n    <script src="sdk/ui/Speaker.js" type="text/javascript"></script>\n    <script src="sdk/ui/VideoPlayer.js" type="text/javascript"></script>\n    <script src="sdk/ui/ui.js" type="text/javascript"></script>',
-            replacement: '<script src="woogeen.sdk.ui.js" type="text/javascript"></script>'
+            replacement: '<script src="woogeen.sdk.ui.min.js" type="text/javascript"></script>'
           }
          ]
         }
       }
+    },
+    clean: {
+     build: {
+       options: {force: true},
+       src: ['../dist/sdk/<%= pkg.name %>.js','../dist/sdk/<%= pkg.name %>.ui.js']
+     }
     },
     compress:{
       dist:{
@@ -185,9 +191,10 @@ window.L = L;\n\
   grunt.loadNpmTasks('grunt-contrib-jshint');
   grunt.loadNpmTasks('grunt-contrib-copy');
   grunt.loadNpmTasks('grunt-string-replace');
+  grunt.loadNpmTasks('grunt-contrib-clean');
   grunt.loadNpmTasks('grunt-contrib-compress');
 
-  grunt.registerTask('build', ['concat:dist', 'concat:devel', 'jshint:dist', 'concat:merge', 'uglify:dist','copy:dist','string-replace','compress:dist']);
+  grunt.registerTask('build', ['concat:dist', 'concat:devel', 'jshint:dist', 'concat:merge', 'uglify:dist','copy:dist','string-replace','clean:build','compress:dist']);
 
   // Default task is an alias for 'build'.
   grunt.registerTask('default', ['build']);
