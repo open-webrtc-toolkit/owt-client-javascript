@@ -7,6 +7,7 @@
 
 
 // base path, that will be used to resolve files and exclude
+var fs = require("fs");
 module.exports = function (config){
   config.set({
     basePath : '../',
@@ -22,7 +23,7 @@ module.exports = function (config){
     'errorHandler.js',
     './js/test_functions.js',
     './js/video_detector.js',
-    './js/test.js',
+    './js/test.n.js',
     './js/qq.js',
     './js/MediaStreamTest.js',
     'test-peer.js'
@@ -80,12 +81,12 @@ module.exports = function (config){
     // CLI --capture-timeout 5000
     captureTimeout : 10000,
 
-//    protocol: 'https',
-/*
+    protocol: 'https',
+
     httpsServerOptions: {
-        key: fs.readFileSync('/home/webrtctest3/workspace/Test/webrtc-webrtc-qa/dailyTestScript/NightlyTest/script/sdk/deps/cert/key.pem', 'utf8'),
-        cert: fs.readFileSync('/home/webrtctest3/workspace/Test/webrtc-webrtc-qa/dailyTestScript/NightlyTest/script/sdk/deps/cert/cert.pem', 'utf8')
-    },*/
+        key: fs.readFileSync('/home/webrtctest3/workspace/Test/webrtc-webrtc-qa/dailyTestScript/NightlyTest/script/sdk/test_space/server/dist/server/cert/key.pem', 'utf8'),
+        cert: fs.readFileSync('/home/webrtctest3/workspace/Test/webrtc-webrtc-qa/dailyTestScript/NightlyTest/script/sdk/test_space/server/dist/server/cert/cert.pem', 'utf8')
+    },
     // Auto run tests on start (when browsers are captured) and exit
     // CLI --single-run --no-single-run
     singleRun : true,
