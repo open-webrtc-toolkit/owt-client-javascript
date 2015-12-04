@@ -1,4 +1,4 @@
-/* global SignalingChannel,L*/
+/* global SignalingChannel*/
 /* exported Gab*/
 /**
  * @class Gab

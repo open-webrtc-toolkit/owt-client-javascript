@@ -1,4 +1,4 @@
-/* global L,Gab,room,RTCIceCandidate,RTCSessionDescription,getPeerConnectionStats,getPeerConnectionAudioLevels,remoteIceCandidates*/
+/* global Gab,room,RTCIceCandidate,RTCSessionDescription,getPeerConnectionStats,getPeerConnectionAudioLevels,remoteIceCandidates*/
 /* Depend on woogeen.js, gab-websocket.js, WooGeen.Error.js*/
 
 var Woogeen = Woogeen || {}; /*jshint ignore:line*/ //Woogeen is defined.

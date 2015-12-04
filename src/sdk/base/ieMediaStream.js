@@ -1,4 +1,4 @@
-/*global console,Woogeen*/
+/*global console*/
 var Woogeen_IEPlugin=Woogeen_IEPlugin || {};
 var pc_id = 0;
 var globalLocalView = null;
