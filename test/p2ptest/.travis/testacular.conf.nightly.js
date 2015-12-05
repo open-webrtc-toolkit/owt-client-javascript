@@ -36,11 +36,12 @@ module.exports = function (config){
     // possible values: 'dots', 'progress', 'junit'
     // CLI --reporters progress
     //reporters : ['dots','junit','coverage'],
-    reporters : ['progress','junit'],
+    reporters : ['progress','jenkins'],
 
-    junitReporter : {
+    jenkinsReporter : {
       useBrowserName:false,
-      outputFile:'./test-results.xml'
+      outputFile:'./test-results.xml',
+      suite:''
     },
 
     // web server port
@@ -102,7 +103,8 @@ module.exports = function (config){
 
     plugins:[
       'karma-*',
-      'karma-junit-reporter'
+      'karma-junit-reporter',
+      'karma-jenkins-reporter'
     ]
   });
 };

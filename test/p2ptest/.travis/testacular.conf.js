@@ -46,12 +46,14 @@ module.exports = function (config){
     // possible values: 'dots', 'progress', 'junit'
     // CLI --reporters progress
     //reporters : ['dots','junit','coverage'],
-    reporters : ['progress','junit', 'coverage'],
+    reporters : ['progress','jenkins', 'coverage'],
 
-    junitReporter : {
+    jenkinsReporter : {
       useBrowserName:false,
       outputFile:'./test/p2ptest/full-test-results.xml'
+      suite:''
     },
+
     coverageReporter : {
       type : 'html',
       dir : 'test/coverage/'
@@ -123,6 +125,7 @@ module.exports = function (config){
     plugins:[
       'karma-*',
       'karma-junit-reporter',
+      'karma-jenkins-reporter',
       'requirejs'
     ]
   });
