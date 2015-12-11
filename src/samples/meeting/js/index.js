@@ -93,6 +93,8 @@ function userExit(){
         $("#user-list").html('');
         localStream.close();
         localStream = undefined;
+        isPauseAudio=true;
+        singleMute=true;
 }
 
 function stopAllStream() {
@@ -593,9 +595,10 @@ function addRoomEventListener() {
         }
         if(localStream!=null && localStream.id()!=null && event.msg.data.toID==localStream.id()){
             pauseAudio();
-            isPauseAudio ? $("#msgText").text(event.msg.data.fromName+" mutes you."):$("#msgText").text(event.msg.data.fromName+" unmutes you.");
-            // $(".msgBox").show();
-            // $(".msgBox").fadeOut(6000);
+            //isPauseAudio ? $("#msgText").text(event.msg.data.fromName+" mutes you."):$("#msgText").text(event.msg.data.fromName+" unmutes you.");
+            !isPauseAudio ? $("#msgText").text("You are muted."):$("#msgText").text("You are unmuted.");
+            $(".msgBox").show();
+            $(".msgBox").fadeOut(6000);
         }
         var time = new Date();
         var hour = time.getHours();
@@ -1386,7 +1389,8 @@ $(document).ready(function() {
        }, function() {
             L.Logger.error("fail to mute others");
         });
-        isPauseAudio?$("#msgText").text("You have unmuted "+streamObj[mutedID].attributes()["name"]):$("#msgText").text("You have muted "+streamObj[mutedID].attributes()["name"]);
+        if($(this).attr('isMuted')){$("#msgText").text("You have unmuted "+streamObj[mutedID].attributes()["name"]);}
+        else{ $("#msgText").text("You have muted "+streamObj[mutedID].attributes()["name"]);}
         // $(".msgBox").show();
         // $(".msgBox").fadeOut(6000);
     }
@@ -1487,6 +1491,10 @@ $(document).ready(function() {
     });
 
     checkMobile();
+});
+
+$( window ).unload(function() {
+    userExit();
 });
 
 function checkMobile() {

@@ -27,7 +27,7 @@ Woogeen.ConferenceClient = (function () {
     } else if (window.navigator.appVersion.indexOf('Trident') > -1) {
       browser = 'internet-explorer';
     } else if (window.navigator.userAgent.match("Bowser") !==null){
-      browser = "bowser";    
+      browser = "bowser";
     } else if (window.navigator.userAgent.match("Chrome") !==null) {
       if (window.navigator.appVersion.match(/Chrome\/([\w\W]*?)\./)[1] >= 26) {
         browser = "chrome-stable";
@@ -52,10 +52,10 @@ Woogeen.ConferenceClient = (function () {
       that = Erizo.FirefoxStack(spec);
     } else if (that.browser === 'internet-explorer'){
       L.Logger.debug("IE Stack");
-      that = Erizo.IEStableStack(spec); 
+      that = Erizo.IEStableStack(spec);
     } else if (that.browser === 'bowser'){
       L.Logger.debug("Bowser Stack");
-      that = Erizo.BowserStack(spec); 
+      that = Erizo.BowserStack(spec);
     } else if (that.browser === 'chrome-stable') {
       L.Logger.debug("Stable!");
       that = Erizo.ChromeStableStack(spec);
@@ -298,7 +298,6 @@ conference.join(token, function(response) {...}, function(error) {...});
             } else {
                 stream = self.localStreams[arg.streamId];
             }
-             
             if (stream) {
                 stream.channel.processSignalingMessage(arg.mess);
             }
@@ -315,7 +314,7 @@ conference.join(token, function(response) {...}, function(error) {...});
 
                 if (!stream.pc) {
                     create_remote_pc(stream, arg.peerSocket);
-                }   
+                }
                 stream.channel.processSignalingMessage(arg.msg);
             }
         });
@@ -435,7 +434,8 @@ conference.join(token, function(response) {...}, function(error) {...});
           // Handle: 'VideoEnabled', 'VideoDisabled', 'AudioEnabled', 'AudioDisabled', 'VideoLayoutChanged', [etc]
           var stream = self.remoteStreams[spec.id];
           if (stream) {
-            stream.emit(spec.event, spec.data);
+            //stream.emit is not a function.
+            //stream.emit(spec.event, spec.data);
           }
         });
 

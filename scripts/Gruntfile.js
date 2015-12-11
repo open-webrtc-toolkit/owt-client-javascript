@@ -28,6 +28,14 @@ module.exports = function(grunt) {
     '../src/sdk/ui/ui.js'
   ];
 
+  var nuveFiles = [
+    '../src/sdk/nuve/xmlhttprequest.js',
+    '../src/sdk/nuve/hmac-sha256.js',
+    '../src/sdk/nuve/N.js',
+    '../src/sdk/nuve/N.Base64.js',
+    '../src/sdk/nuve/N.API.js'
+  ];
+
   // Project configuration.
   grunt.initConfig({
     pkg: grunt.file.readJSON('package.json'),
@@ -69,6 +77,15 @@ window.L = L;\n\
         },
         nonull: true
       },
+      nuve: {
+        src: nuveFiles,
+        dest: '../dist/sdk/nuve.js',
+        options:{
+           footer:'module.exports = N;',
+           process: true
+        },
+        nonull: true
+      },
       merge: {
         src: '../dist/sdk/<%= pkg.name %>.js',
         dest: '../dist/sdk/<%= pkg.name %>.js',
@@ -101,7 +118,8 @@ window.L = L;\n\
       dist: {
         files: {
           '../dist/sdk/<%= pkg.name %>.min.js': ['../dist/sdk/<%= pkg.name %>.js'],
-          '../dist/sdk/<%= pkg.name %>.ui.min.js': ['../dist/sdk/<%= pkg.name %>.ui.js']
+          '../dist/sdk/<%= pkg.name %>.ui.min.js': ['../dist/sdk/<%= pkg.name %>.ui.js'],
+          '../dist/sdk/nuve.js': ['../dist/sdk/nuve.js']
         },
         options: {
           banner: '<%= meta.banner %>'
@@ -118,7 +136,9 @@ window.L = L;\n\
           {expand: true,cwd:'../src/extension/',src:['**'],dest:'../dist/',flatten:false},
           {expand: true,cwd:'../src/sdk/base/',src:['socket.io.js'],dest:'../dist/samples/conference/public/',flatten:false},
           {expand: true,cwd:'../dist/sdk/',src:['woogeen.sdk.min.js'],dest:'../dist/samples/conference/public/',flatten:false},
-          {expand: true,cwd:'../dist/sdk/',src:['woogeen.sdk.ui.min.js'],dest:'../dist/samples/conference/public/',flatten:false}
+          {expand: true,cwd:'../dist/sdk/',src:['woogeen.sdk.ui.min.js'],dest:'../dist/samples/conference/public/',flatten:false},
+          {expand: true,cwd:'../dist/sdk/',src:['nuve.js'],dest:'../dist/samples/conference/',flatten:false},
+          {expand: true,cwd:'../dist/sdk/',src:['nuve.js'],dest:'../src/samples/conference/',flatten:false}
         ]
       }
     },
@@ -194,7 +214,7 @@ window.L = L;\n\
   grunt.loadNpmTasks('grunt-contrib-clean');
   grunt.loadNpmTasks('grunt-contrib-compress');
 
-  grunt.registerTask('build', ['concat:dist', 'concat:devel', 'jshint:dist', 'concat:merge', 'uglify:dist','copy:dist','string-replace','clean:build','compress:dist']);
+  grunt.registerTask('build', ['concat:dist', 'concat:devel', 'concat:nuve','jshint:dist', 'concat:merge', 'uglify:dist','copy:dist','string-replace','clean:build','compress:dist']);
 
   // Default task is an alias for 'build'.
   grunt.registerTask('default', ['build']);

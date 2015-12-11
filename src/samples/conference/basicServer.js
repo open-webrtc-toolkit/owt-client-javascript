@@ -184,13 +184,13 @@ app.delete('/room/:room', function (req, res) {
 })
 
 app.listen(3001);
-/*
-var cipher = require('cipher');
-cipher.unlock(cipher.k, '../../cert/.woogeen.keystore', function cb (err, obj) {
+
+var cipher = require('./cipher');
+cipher.unlock(cipher.k, 'cert/.woogeen.keystore', function cb (err, obj) {
     if (!err) {
         try {
             https.createServer({
-                pfx: fs.readFileSync('../../cert/certificate.pfx'),
+                pfx: fs.readFileSync('cert/certificate.pfx'),
                 passphrase: obj.sample
             }, app).listen(3004);
         } catch (e) {
@@ -201,4 +201,4 @@ cipher.unlock(cipher.k, '../../cert/.woogeen.keystore', function cb (err, obj) {
         console.error('Failed to setup secured server:', err);
         return process.exit();
     }
-});*/
+});
