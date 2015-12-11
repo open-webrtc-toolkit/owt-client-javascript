@@ -131,6 +131,7 @@ window.L = L;\n\
       dist:{
         files:[
           {expand: true,cwd:'../src/samples/',src:['**'],dest:'../dist/samples/',flatten:false},
+          {expand: true,cwd:'../src/samples/conference/',src:['initcert.js'],dest:'../dist/samples/',flatten:false,mode:true},
           {expand: true,cwd:'../src/sdk/base/',src:['strophe.js','socket.io.js'],dest:'../dist/sdk/dependencies/',flatten:false},
           {expand: true,cwd:'../src/sdk/base/',src:['adapter.js'],dest:'../dist/sdk/',flatten:false},
           {expand: true,cwd:'../src/extension/',src:['**'],dest:'../dist/',flatten:false},
