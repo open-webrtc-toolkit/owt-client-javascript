@@ -50,7 +50,7 @@ module.exports = function (config){
 
     jenkinsReporter : {
       useBrowserName:false,
-      outputFile:'./test/p2ptest/full-test-results.xml'
+      outputFile:'./test/p2ptest/full-test-results.xml',
       suite:''
     },
 
