@@ -24,22 +24,6 @@
     req.send(JSON.stringify(body));
   }
 
-  // var recording;
-  // var recordingId;
-  // function startRecording () {
-  //   if (room !== undefined){
-  //     if (!recording){
-  //       room.startRecording(localStream, function(id) {
-  //         recording = true;
-  //         recordingId = id;
-  //       });
-  //     } else {
-  //       room.stopRecording(recordingId);
-  //       recording = false;
-  //     }
-  //   }
-  // }
-
   var conference = Woogeen.ConferenceClient.create({});
 
   function displayStream (stream, resolution) {
@@ -161,8 +145,19 @@
     L.Logger.info('user left:', event.user);
   });
 
-  window.onload = function () {
+  conference.on('recorder-added', function (event) {
+    L.Logger.info('media recorder added:', event.recorderId);
+  });
 
+  conference.on('recorder-continued', function (event) {
+    L.Logger.info('media recorder continued:', event.recorderId);
+  });
+
+  conference.on('recorder-removed', function (event) {
+    L.Logger.info('media recorder removed:', event.recorderId);
+  });
+
+  window.onload = function () {
     L.Logger.setLogLevel(L.Logger.INFO);
     var myResolution = getParameterByName('resolution') || 'vga';
     var shareScreen = getParameterByName('screen') || false;
