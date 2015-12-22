@@ -474,12 +474,53 @@ if (stream.isMixed()) {
     };
   }
 
+  function WoogeenExternalStream (spec) {
+    this.url = function () {
+      if(typeof spec.url === 'string' && spec.url !== '') {
+        return spec.url;
+      }
+      return undefined;
+    };
+  /* @function id
+   * @desc This function returns stream Id assigned by server.
+<br><b>Remarks:</b><br>
+For unpublished external stream, it returns null if the stream has not been published; once published, stream Id should be updated by server.
+   * @memberOf Woogeen.ExternalStream
+   * @instance
+   * @return {string} Stream Id assigned by server.
+   * @example
+<script type="text/JavaScript">
+L.Logger.info('stream added:', stream.id());
+</script>
+   */
+    this.id = function () {
+      return spec.id || null;
+    };
+    // Actually, we don't know whether this external stream has audio/video, but publish function will not publish audio/video if hasAudio/hasVideo returns false.
+    this.hasVideo = function () {
+      return true;
+    };
+    this.hasAudio = function () {
+      return true;
+    };
+    this.toJson = function () {
+      return {
+        id: this.id(),
+        audio: true,
+        video: true,
+        url: this.url()
+      };
+    };
+  }
+
   WoogeenLocalStream.prototype = Object.create(WoogeenStream.prototype);
   WoogeenRemoteStream.prototype = Object.create(WoogeenStream.prototype);
   WoogeenRemoteMixedStream.prototype = Object.create(WoogeenRemoteStream.prototype);
+  WoogeenExternalStream.prototype = Object.create({});
   WoogeenLocalStream.prototype.constructor = WoogeenLocalStream;
   WoogeenRemoteStream.prototype.constructor = WoogeenRemoteStream;
   WoogeenRemoteMixedStream.prototype.constructor = WoogeenRemoteMixedStream;
+  WoogeenExternalStream.prototype.constructor = WoogeenExternalStream;
 
 
   function isLegacyChrome () {
@@ -533,6 +574,12 @@ if (stream.isMixed()) {
   */
   function createLocalStream (option, callback) {
     if (typeof option === 'object' && option !== null && option.url !== undefined) {
+      var warnMessage = 'URL for LocalStream is deprecated, please use ExternalStream instead.';
+      if(typeof console.warn === 'function'){
+        console.warn(warnMessage);
+      } else {
+        L.Logger.warning(warnMessage);
+      }
       var localStream = new Woogeen.LocalStream(option);
       if (typeof callback === 'function') {
         callback(null, localStream);
@@ -787,6 +834,62 @@ Woogeen.LocalStream.create({
     createLocalStream.apply(this, arguments);
   };
 
+  /*
+  createExternalStream({
+    url:'http://www.example.com/'
+  }, function () {});
+  */
+  function createExternalStream (option, callback) {
+    if (typeof option !== 'object' || !option.url) {
+      if (typeof callback === 'function') {
+        callback({
+          code: 1107,
+          msg: 'External stream must have url property'
+        });
+      }
+      return;
+    }
+    var externalStream = new Woogeen.ExternalStream(option);
+    if (typeof callback === 'function') {
+      callback(null, externalStream);
+    }
+    return;
+  }
+
+/**
+   * @function create
+   * @desc This factory returns a Woogeen.ExternalStream instance with user defined options.<br>
+<br><b>options:</b>
+<ul>
+    <li>url: RTSP stream URL</li>
+</ul>
+<br><b>callback:</b>
+<br>Upon success, err is null, and externalStream is an instance of Woogeen.ExternalStream; upon failure externalStream is undefined and err is one of the following:<br>
+<ul>
+  <li><b>{code: 1107, msg: 'USER_INPUT_INVALID'}</b> – user input media option is invalid.</li>
+</ul>
+   * @memberOf Woogeen.ExternalStream
+   * @static
+   * @param {json} options Stream creation options.
+   * @param {function} callback callback(err, externalStream) will be invoked when ExternalStream creation is done.
+   * @example
+<script type="text/javascript">
+// ExternalStream
+var externalStream;
+Woogeen.ExternalStream.create({
+  url: 'http://www.example.com/camera'
+}, function (err, stream) {
+  if (err) {
+    return console.log('create ExternalStream failed:', err);
+  }
+  externalStream = stream;
+});
+</script>
+   */
+  WoogeenExternalStream.create = function() {
+    createExternalStream.apply(this, arguments);
+  };
+
   Woogeen.Stream = WoogeenStream;
 
 /**
@@ -816,5 +919,11 @@ console.log('stream added:', stream.id());
  * @classDesc A RemoteStream whose video track is mixed by server.
  */
   Woogeen.RemoteMixedStream = WoogeenRemoteMixedStream;
+
+/**
+ * @class Woogeen.ExternalStream
+ * @classDesc Stream from external input(e.g. rtsp). Use create(options, callback) factory to create an instance.
+ */
+  Woogeen.ExternalStream = WoogeenExternalStream;
 
 }());

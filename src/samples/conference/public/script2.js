@@ -185,9 +185,7 @@
 
       conference.join(token, function (resp) {
         if (typeof mediaUrl === 'string' && mediaUrl !== '') {
-            Woogeen.LocalStream.create({
-            video: true,
-            audio: true,
+            Woogeen.ExternalStream.create({
             url: mediaUrl
           }, function (err, stream) {
             if (err) {

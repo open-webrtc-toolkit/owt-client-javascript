@@ -603,7 +603,7 @@ conference.publish(localStream, {maxVideoBW: 300}, function (st) {
     } else if (typeof options !== 'object' || options === null) {
       options = stream.bitRate;
     }
-    if (!(stream instanceof Woogeen.LocalStream) ||
+    if (!(stream instanceof Woogeen.LocalStream || stream instanceof Woogeen.ExternalStream) ||
           ((typeof stream.mediaStream !== 'object' || stream.mediaStream === null) &&
              stream.url() === undefined)) {
       return safeCall(onFailure, 'invalid stream');
