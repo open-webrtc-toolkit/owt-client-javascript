@@ -1,9 +1,8 @@
 /*global console*/
-//var Woogeen=Woogeen || {};
-Woogeen.pluginIE={};
+var Woogeen_IEPlugin=Woogeen_IEPlugin || {};
 var pc_id = 0;
-Woogeen.globalLocalView = null;
-Woogeen.globalLocalStream = {};
+Woogeen_IEPlugin.globalLocalView = null;
+Woogeen_IEPlugin.globalLocalStream = {};
 var ieTrack = function(ieStream) {
   var that = this;
   this.stream = ieStream;
@@ -12,7 +11,7 @@ var ieTrack = function(ieStream) {
   };
 };
 
-  Woogeen.pluginIE.ieMediaStream =function (label) {
+  Woogeen_IEPlugin.ieMediaStream = function(label) {
   'use strict';
 
   var that = this;
@@ -66,7 +65,7 @@ var ieTrack = function(ieStream) {
   };
 };
 
-  Woogeen.pluginIE.ieRTCDataChannel=function(label, pcid) {
+Woogeen_IEPlugin.ieRTCDataChannel = function(label, pcid) {
   'use strict';
   var that = this;
   var pendingMessages = [];
@@ -123,7 +122,7 @@ var ieTrack = function(ieStream) {
 };
 
 
-  Woogeen.pluginIE.ieRTCPeerConnection= function (config, constraints) {
+Woogeen_IEPlugin.ieRTCPeerConnection=function(config, constraints) {
   var that = this;
   this.myId = pc_id+1;
   pc_id = pc_id +1;
@@ -158,18 +157,18 @@ var ieTrack = function(ieStream) {
   };
   this.addStream = function(stream) {
       that.activeX.getUserMedia(stream.constraints,  function(label) {
-        var ieStream = new Woogeen.pluginIE.ieMediaStream(label);
-        var ctx = Woogeen.globalLocalView.getContext("2d");
+        var ieStream = new Woogeen_IEPlugin.ieMediaStream(label);
+        var ctx = Woogeen_IEPlugin.globalLocalView.getContext("2d");
         var img = new Image();
         that.activeX.attachMediaStream(ieStream.label, function (data) {
          try{ img.src = data;
-          ctx.drawImage(img, 0, 0, Woogeen.globalLocalView.width, Woogeen.globalLocalView.height);
+          ctx.drawImage(img, 0, 0, Woogeen_IEPlugin.globalLocalView.width, Woogeen_IEPlugin.globalLocalView.height);
         }catch(ex){console.log("err:"+ex);}
         });
 
         that.activeX.addStream(ieStream);
         stream.id = ieStream.label;
-        Woogeen.globalLocalStream = stream;
+        Woogeen_IEPlugin.globalLocalStream = stream;
       }, stream.onfailure);
   };
   // Peer connection methods
@@ -211,7 +210,7 @@ var ieTrack = function(ieStream) {
     if(that.activeX){
       that.activeX.createDataChannel(label, constraints);
     }
-    var dc = new Woogeen.pluginIE.ieRTCDataChannel(label, that.myId);
+    var dc = new Woogeen_IEPlugin.ieRTCDataChannel(label, that.myId);
     return dc;
   };
 
@@ -233,7 +232,7 @@ var ieTrack = function(ieStream) {
   };
   this.activeX.onaddstream = function(label) {
     var evt = {};
-    var stream = new Woogeen.pluginIE.ieMediaStream(label);
+    var stream = new Woogeen_IEPlugin.ieMediaStream(label);
     stream.attachedPCID = that.myId;
     evt.stream = stream;
     evt.pcid = that.myId;
@@ -243,7 +242,7 @@ var ieTrack = function(ieStream) {
   };
   this.activeX.onremovestream = function(label) {
     var evt = {};
-    var stream = new Woogeen.pluginIE.ieMediaStream(label);
+    var stream = new Woogeen_IEPlugin.ieMediaStream(label);
     evt.stream = stream;
     if (that.onremovestream) {
       that.onremovestream(evt);
@@ -270,7 +269,7 @@ var ieTrack = function(ieStream) {
   };
   this.activeX.ondatachannel = function(label) {
     var evt = {};
-    var dc = new Woogeen.pluginIE.ieRTCDataChannel(label, that.myId);
+    var dc = new Woogeen_IEPlugin.ieRTCDataChannel(label, that.myId);
     evt.channel = dc;
     if (that.ondatachannel) {
       that.ondatachannel(evt);

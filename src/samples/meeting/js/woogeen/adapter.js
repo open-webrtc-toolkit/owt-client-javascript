@@ -11,7 +11,7 @@
 // This file is cloned from samples/js/base/adapter.js
 // Modify the original and do new copy instead of doing changes here.
 
-/*global  Woogeen.pluginIE.globalLocalStream,Woogeen,console,performance,createIceServer,RTCIceCandidate,RTCSessionDescription,mozRTCPeerConnection,mozRTCSessionDescription,mozRTCIceCandidate,MediaStream,webkitRTCPeerConnection*/
+/*global  Woogeen_IEPlugin.globalLocalStream,Woogeen,console,performance,createIceServer,RTCIceCandidate,RTCSessionDescription,mozRTCPeerConnection,mozRTCSessionDescription,mozRTCIceCandidate,MediaStream,webkitRTCPeerConnection*/
 /*exported trace,createIceServers*/
 
 var RTCPeerConnection = null;
@@ -21,7 +21,7 @@ var attachRemoteMediaStream = null;
 var reattachMediaStream = null;
 var webrtcDetectedBrowser = null;
 var webrtcDetectedVersion = null;
-//var Woogeen=Woogeen|| {};
+var Woogeen_IEPlugin=Woogeen_IEPlugin || {};
 
 function trace(text) {/*jshint ignore:line*/
   // This function is used for logging.
@@ -53,7 +53,7 @@ if (navigator.mozGetUserMedia) {
            parseInt(navigator.userAgent.match(/Firefox\/([0-9]+)\./)[1], 10);
 
   // The RTCPeerConnection object.
-  RTCPeerConnection = function(pcConfig, pcConstraints) {/*jshint ignore:line*/
+  var RTCPeerConnection = function(pcConfig, pcConstraints) {/*jshint ignore:line*/
     // .urls is not supported in FF yet.
     maybeFixConfiguration(pcConfig);
     return new mozRTCPeerConnection(pcConfig, pcConstraints);
@@ -189,7 +189,7 @@ if (navigator.mozGetUserMedia) {
   };
 
   // The RTCPeerConnection object.
-  RTCPeerConnection = function(pcConfig, pcConstraints) {/*jshint ignore:line*/
+  var RTCPeerConnection = function(pcConfig, pcConstraints) {/*jshint ignore:line*/
     // .urls is supported since Chrome M34.
      'use strict';
     if (webrtcDetectedVersion < 34) {
@@ -378,7 +378,7 @@ if (navigator.mozGetUserMedia) {
 } else {
   console.log("This seems to be IE");
 
-  RTCPeerConnection = Woogeen.pluginIE.ieRTCPeerConnection;
+  RTCPeerConnection = Woogeen_IEPlugin.ieRTCPeerConnection;
 
   var ieLocalTrack = function() {
       this.stop = function(){
@@ -386,17 +386,17 @@ if (navigator.mozGetUserMedia) {
     };
   navigator.getUserMedia = function(config, success, failure){
     'use strict';
-    Woogeen.globalLocalStream.constraints = JSON.stringify(config);
-    Woogeen.globalLocalStream.onsuccess = success;
-    Woogeen.globalLocalStream.onfailure = failure;
-    Woogeen.globalLocalStream.lable = "general_video";
-    Woogeen.globalLocalStream.getTracks =function(){
+    Woogeen_IEPlugin.globalLocalStream.constraints = JSON.stringify(config);
+    Woogeen_IEPlugin.globalLocalStream.onsuccess = success;
+    Woogeen_IEPlugin.globalLocalStream.onfailure = failure;
+    Woogeen_IEPlugin.globalLocalStream.lable = "general_video";
+    Woogeen_IEPlugin.globalLocalStream.getTracks =function(){
       var tracks=[new ieLocalTrack()];
       return tracks;
     }
 
-    Woogeen.globalLocalStream.id = "general_video";
-    success(Woogeen.globalLocalStream);
+    Woogeen_IEPlugin.globalLocalStream.id = "general_video";
+    success(Woogeen_IEPlugin.globalLocalStream);
   };
 
   getPeerConnectionStats = function(pc, callback){/*jshint ignore:line*/
@@ -409,7 +409,7 @@ if (navigator.mozGetUserMedia) {
 
   // Attach a media stream to an element. Currently implented as a fake function
   attachMediaStream = function (element, stream) {/*jshint ignore:line*/  //stream is unused.
-    Woogeen.globalLocalView = element;/*jshint ignore:line*/
+    Woogeen_IEPlugin.globalLocalView = element;/*jshint ignore:line*/
   };
 
   //we should assign a dedicated attachStream function to notify corresonding peer connection instaance.

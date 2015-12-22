@@ -50,7 +50,7 @@
       canvas.height = resolution.height;
       canvas.setAttribute('autoplay', 'autoplay::autoplay');
       div.appendChild(canvas);
-      var ieStream = new ieMediaStream(stream.mediaStream.label);
+      var ieStream = new Woogeen.pluginIE.ieMediaStream(stream.mediaStream.label);
       attachRemoteMediaStream(canvas, ieStream, stream.pcid);
     }
   }

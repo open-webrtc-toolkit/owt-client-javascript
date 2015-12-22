@@ -69,7 +69,6 @@ div#videocontainer {
   <script src="js/utils.js" type="text/javascript"></script>
   <script src="js/sc.websocket.js" type="text/javascript"></script>
   <!-- SDK -->
-  <script src="../../sdk/base/adapter.js" type="text/javascript"></script>
   <script src="../../sdk/base/socket.io.js" type="text/javascript"></script>
 
   <script src="../../sdk/conference/property.js" type="text/javascript"></script>
@@ -81,6 +80,8 @@ div#videocontainer {
   <script src="../../sdk/p2p/errors.js" type="text/javascript"></script>
   <script src="../../sdk/p2p/gab.proxy.js" type="text/javascript"></script>
   <script src="../../sdk/p2p/peer.js" type="text/javascript"></script>
+
+  <script src="../../sdk/base/adapter.js" type="text/javascript"></script>
 
   <!-- SDK Stops -->
   <h1>Intel<sup>&reg;</sup> Collaboration Suite for WebRTC</h1>
@@ -131,7 +132,7 @@ div#videocontainer {
   <div id="infoDiv"></div>
   <script type="text/javascript">
   var isVideo=1;
-  var serverAddress='http://10.239.197.71:8095';  // Please  change 61.152.239.56 to signaling server's address.
+  var serverAddress='http://61.152.239.56:8095';  // Please  change 61.152.239.56 to signaling server's address.
   var p2p=new Woogeen.PeerClient({
     iceServers : [ {
       urls : "stun:61.152.239.60"

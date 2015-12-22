@@ -1,20 +1,7 @@
 /*global window, console, RTCSessionDescription, RTCIceCandidate, webkitRTCPeerConnection*/
-Erizo.IEStableStack = function (spec) {
+
+Erizo.ChromeStableStack = function (spec) {
     "use strict";
-
-    var RTCIceCandidate = function(cand, mid, mlineIndex) { /*jshint ignore:line*/
-      this.candidate = cand;
-      this.sdpMid = mid;
-      this.sdpMLineIndex = mlineIndex;
-     };
-
-    var ieRTCSessionDescription = function (sd) { /*jshint ignore:line*/
-       this.type = sd.type;
-       this.sdp = sd.sdp;
-    };
-
-  var webkitRTCPeerConnection = Woogeen.pluginIE.ieRTCPeerConnection;
-  var RTCSessionDescription = ieRTCSessionDescription;
 
     var that = {},
         WebkitRTCPeerConnection = webkitRTCPeerConnection;
@@ -22,6 +9,9 @@ Erizo.IEStableStack = function (spec) {
     that.pc_config = {
         "iceServers": []
     };
+
+
+    that.con = {'optional': [{'DtlsSrtpKeyAgreement': true}]};
 
     if (spec.iceServers instanceof Array) {
         that.pc_config.iceServers = spec.iceServers;
@@ -78,7 +68,7 @@ Erizo.IEStableStack = function (spec) {
         console.log("Error in Stack ", message);
     };
 
-    that.peerConnection = new WebkitRTCPeerConnection(that.pc_config);
+    that.peerConnection = new WebkitRTCPeerConnection(that.pc_config, that.con);
 
     var setMaxBW = function (sdp) {
         var a, r;
@@ -159,7 +149,7 @@ Erizo.IEStableStack = function (spec) {
 
     that.peerConnection.oniceconnectionstatechange = function (e) {
         if (that.oniceconnectionstatechange) {
-            that.oniceconnectionstatechange(e);
+            that.oniceconnectionstatechange(e.currentTarget.iceConnectionState);
         }
     };
 

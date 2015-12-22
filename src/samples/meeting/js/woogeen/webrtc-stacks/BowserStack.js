@@ -34,7 +34,7 @@ Erizo.BowserStack = function (spec) {
     };
 
     that.peerConnection = new WebkitRTCPeerConnection(that.pc_config, that.con);
-
+    
     spec.remoteDescriptionSet = false;
 
     var setMaxBW = function (sdp) {
@@ -82,7 +82,7 @@ Erizo.BowserStack = function (spec) {
                 event.candidate.candidate ="a="+event.candidate.candidate;
             }
 
-
+            
             if (spec.remoteDescriptionSet) {
                 spec.callback({type:'candidate', candidate: event.candidate});
             } else {
@@ -91,7 +91,7 @@ Erizo.BowserStack = function (spec) {
             }
 
         } else {
-
+            
           //  spec.callback(that.peerConnection.localDescription);
             console.log("End of candidates." , that.peerConnection.localDescription);
         }
@@ -108,7 +108,7 @@ Erizo.BowserStack = function (spec) {
             that.onremovestream(stream);
         }
     };
-
+    
     that.peerConnection.oniceconnectionstatechange = function (e) {
         if (that.oniceconnectionstatechange) {
             that.oniceconnectionstatechange(e.currentTarget.iceConnectionState);
@@ -164,7 +164,7 @@ Erizo.BowserStack = function (spec) {
             that.peerConnection.setRemoteDescription(new RTCSessionDescription(msg));
             that.peerConnection.createAnswer(setLocalDescp2p, null, that.mediaConstraints);
             spec.remoteDescriptionSet = true;
-
+        
         } else if (msg.type === 'answer') {
 
             console.log("Set remote description", msg.sdp);
@@ -178,7 +178,7 @@ Erizo.BowserStack = function (spec) {
               while (spec.remoteCandidates.length > 0) {
                 console.log("Candidate :",spec.remoteCandidates[spec.remoteCandidates.length-1]);
                 that.peerConnection.addIceCandidate(spec.remoteCandidates.shift(), nullFunc, errorCallback);
-
+               
               }
 //              console.log("Local candidates to send:" , spec.localCandidates.length);
               while(spec.localCandidates.length > 0) {
@@ -189,7 +189,7 @@ Erizo.BowserStack = function (spec) {
 
         } else if (msg.type === 'candidate') {
           console.log("Message with candidate");
-            try {
+            try {              
                 var obj;
                 if (typeof(msg.candidate) === 'object') {
                     obj = msg.candidate;

@@ -1,7 +1,7 @@
 //var serverAddress = 'http://180.153.223.233:3001/';
 //var serverAddress = 'http://10.239.33.28:3001/';
 var securedServerAddress = 'https://webrtc.sh.intel.com:3004/';
-var unsecuredServerAddress = 'http://zhaoxiaoyun.sh.intel.com:3001/';
+var unsecuredServerAddress = 'http://webrtc.sh.intel.com:3001/';
 var serverAddress = unsecuredServerAddress;
 var isSecuredConnection = false;
 var nodeAddress = 'http://webrtc.sh.intel.com:1235';
@@ -60,6 +60,10 @@ function login() {
     if (isMobile && typeof document.body.webkitRequestFullScreen === 'function') {
         document.body.webkitRequestFullScreen();
     }
+}
+
+function setLoginHeight(height){
+    $('#login-panel').height(height);
 }
 
 function toggleLoginSetting() {

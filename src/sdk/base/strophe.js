@@ -405,7 +405,7 @@ if (!Function.prototype.bind) {
         var _slice = Array.prototype.slice;
         var _concat = Array.prototype.concat;
         var _args = _slice.call(arguments, 1);
-        
+
         return function () {
             return func.apply(obj ? obj : this,
                               _concat.call(_args,
@@ -1962,7 +1962,7 @@ Strophe.Connection.prototype = {
 
         // parse jid for domain and resource
         this.domain = Strophe.getDomainFromJid(this.jid);
-        
+
         //trace("domain:"+this.domain);
         // build the body tag
         var body = this._buildBody().attrs({
@@ -1975,7 +1975,7 @@ Strophe.Connection.prototype = {
             "xmpp:version": "1.0",
             "xmlns:xmpp": Strophe.NS.BOSH
         });
-        
+
         this._changeConnectStatus(Strophe.Status.CONNECTING, null);
 
         this._requests.push(

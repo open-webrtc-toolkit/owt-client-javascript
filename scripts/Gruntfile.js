@@ -50,7 +50,6 @@ module.exports = function(grunt) {
       footer: '\
 \n\n\nwindow.Erizo = Erizo;\n\
 window.Woogeen = Woogeen;\n\
-window.Woogeen_IEPlugin = Woogeen_IEPlugin;\n\
 window.L = L;\n\
 }(window));\n\n\n'
     },
@@ -131,13 +130,16 @@ window.L = L;\n\
       dist:{
         files:[
           {expand: true,cwd:'../src/samples/',src:['**'],dest:'../dist/samples/',flatten:false},
-          {expand: true,cwd:'../src/samples/conference/',src:['initcert.js'],dest:'../dist/samples/',flatten:false,mode:true},
+          {expand: true,cwd:'../src/samples/conference/',src:['initcert.js'],dest:'../dist/samples/conference/',flatten:false,mode:true},
           {expand: true,cwd:'../src/sdk/base/',src:['strophe.js','socket.io.js'],dest:'../dist/sdk/dependencies/',flatten:false},
           {expand: true,cwd:'../src/sdk/base/',src:['adapter.js'],dest:'../dist/sdk/',flatten:false},
+          {expand: true,cwd:'../src/sdk/base/',src:['adapter.js'],dest:'../dist/samples/conference/public/',flatten:false},
           {expand: true,cwd:'../src/extension/',src:['**'],dest:'../dist/',flatten:false},
           {expand: true,cwd:'../src/sdk/base/',src:['socket.io.js'],dest:'../dist/samples/conference/public/',flatten:false},
           {expand: true,cwd:'../dist/sdk/',src:['woogeen.sdk.min.js'],dest:'../dist/samples/conference/public/',flatten:false},
           {expand: true,cwd:'../dist/sdk/',src:['woogeen.sdk.ui.min.js'],dest:'../dist/samples/conference/public/',flatten:false},
+          {expand: true,cwd:'../dist/sdk/',src:['woogeen.sdk.min.js'],dest:'../dist/samples/meeting/js/',flatten:false},
+          {expand: true,cwd:'../dist/sdk/',src:['woogeen.sdk.ui.min.js'],dest:'../dist/samples/meeting/js/',flatten:false},
           {expand: true,cwd:'../dist/sdk/',src:['nuve.js'],dest:'../dist/samples/conference/',flatten:false},
           {expand: true,cwd:'../dist/sdk/',src:['nuve.js'],dest:'../src/samples/conference/',flatten:false}
         ]
@@ -176,12 +178,29 @@ window.L = L;\n\
             replacement: '<script src="socket.io.js" type="text/javascript"></script>'
           },
           {
-            pattern: '<script src="sdk/conference/property.js" type="text/javascript"></script>\n    <script src="sdk/base/events.js" type="text/javascript"></script>\n    <script src="sdk/base/L.Base64.js" type="text/javascript"></script>\n    <script src="sdk/base/L.Logger.js" type="text/javascript"></script>\n    <script src="sdk/base/stream.js" type="text/javascript"></script>\n    <script src="sdk/base/ieMediaStream.js" type="text/javascript"></script>\n    <script src="sdk/conference/conference.js" type="text/javascript"></script>\n    <script src="sdk/conference/webrtc-stacks/ChromeStableStack.js" type="text/javascript"></script>\n    <script src="sdk/conference/webrtc-stacks/FirefoxStack.js" type="text/javascript"></script>\n    <script src="sdk/conference/webrtc-stacks/IEStableStack.js" type="text/javascript"></script>',
-            replacement:'<script src="woogeen.sdk.min.js" type="text/javascript"></script>'
+            pattern: '<script src="sdk/conference/property.js" type="text/javascript"></script>\n    <script src="sdk/base/events.js" type="text/javascript"></script>\n    <script src="sdk/base/L.Base64.js" type="text/javascript"></script>\n    <script src="sdk/base/L.Logger.js" type="text/javascript"></script>\n    <script src="sdk/base/stream.js" type="text/javascript"></script>\n    <script src="sdk/base/ieMediaStream.js" type="text/javascript"></script>\n    <script src="sdk/base/adapter.js" type="text/javascript"></script>\n    <script src="sdk/conference/conference.js" type="text/javascript"></script>\n    <script src="sdk/conference/webrtc-stacks/ChromeStableStack.js" type="text/javascript"></script>\n    <script src="sdk/conference/webrtc-stacks/FirefoxStack.js" type="text/javascript"></script>\n    <script src="sdk/conference/webrtc-stacks/IEStableStack.js" type="text/javascript"></script>',
+            replacement:'<script src="woogeen.sdk.min.js" type="text/javascript"></script>\n    <script src="adapter.js" type="text/javascript"></script>'
           },
           {
             pattern: '<script src="sdk/ui/AudioPlayer.js" type="text/javascript"></script>\n    <script src="sdk/ui/Bar.js" type="text/javascript"></script>\n    <script src="sdk/ui/L.Resizer.js" type="text/javascript"></script>\n    <script src="sdk/ui/View.js" type="text/javascript"></script>\n    <script src="sdk/ui/Speaker.js" type="text/javascript"></script>\n    <script src="sdk/ui/VideoPlayer.js" type="text/javascript"></script>\n    <script src="sdk/ui/ui.js" type="text/javascript"></script>',
             replacement: '<script src="woogeen.sdk.ui.min.js" type="text/javascript"></script>'
+          }
+         ]
+        }
+      },
+      dist_meeting:{
+         files: {
+          '../dist/samples/meeting/index.html': '../src/samples/meeting/index.html',
+        },
+        options: {
+        replacements: [
+          {
+            pattern: '<script src="js/woogeen/socket.io.js" type="text/javascript"></script>\n        <script src="js/woogeen/property.js" type="text/javascript"></script>\n        <script src="js/woogeen/events.js" type="text/javascript"></script>\n        <script src="js/woogeen/L.Base64.js" type="text/javascript"></script>\n        <script src="js/woogeen/L.Logger.js" type="text/javascript"></script>\n        <script src="js/woogeen/stream.js" type="text/javascript"></script>\n        <script src="js/woogeen/ieMediaStream.js" type="text/javascript"></script>\n        <script src="js/woogeen/adapter.js" type="text/javascript"></script>\n        <script src="js/woogeen/conference.js" type="text/javascript"></script>\n        <script src="js/woogeen/webrtc-stacks/ChromeStableStack.js" type="text/javascript"></script>\n        <script src="js/woogeen/webrtc-stacks/FirefoxStack.js" type="text/javascript"></script>\n        <script src="js/woogeen/webrtc-stacks/IEStableStack.js" type="text/javascript"></script>',
+            replacement:'<script src="js/socket.io.js" type="text/javascript"></script>\n        <script src="js/adapter.js" type="text/javascript"></script>\n        <script src="js/woogeen.sdk.min.js" type="text/javascript"></script>'
+          },
+          {
+            pattern: '<script src="js/woogeen/ui/AudioPlayer.js" type="text/javascript"></script>\n        <script src="js/woogeen/ui/Bar.js" type="text/javascript"></script>\n        <script src="js/woogeen/ui/L.Resizer.js" type="text/javascript"></script>\n        <script src="js/woogeen/ui/View.js" type="text/javascript"></script>\n        <script src="js/woogeen/ui/Speaker.js" type="text/javascript"></script>\n        <script src="js/woogeen/ui/VideoPlayer.js" type="text/javascript"></script>\n        <script src="js/woogeen/ui/ui.js" type="text/javascript"></script>',
+            replacement: '<script src="js/woogeen.sdk.ui.min.js" type="text/javascript"></script>'
           }
          ]
         }
@@ -190,7 +209,7 @@ window.L = L;\n\
     clean: {
      build: {
        options: {force: true},
-       src: ['../dist/sdk/<%= pkg.name %>.js','../dist/sdk/<%= pkg.name %>.ui.js']
+       src: ['../dist/sdk/<%= pkg.name %>.js','../dist/sdk/<%= pkg.name %>.ui.js','../dist/samples/meeting/js/woogeen/']
      }
     },
     compress:{
