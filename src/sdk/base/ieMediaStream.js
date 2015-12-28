@@ -1,6 +1,6 @@
 /*global console*/
 //var Woogeen=Woogeen || {};
-Woogeen.pluginIE={};
+Woogeen.ieplugin={};
 var pc_id = 0;
 Woogeen.globalLocalView = null;
 Woogeen.globalLocalStream = {};
@@ -12,7 +12,7 @@ var ieTrack = function(ieStream) {
   };
 };
 
-  Woogeen.pluginIE.ieMediaStream =function (label) {
+  Woogeen.ieplugin.ieMediaStream =function (label) {
   'use strict';
 
   var that = this;
@@ -66,7 +66,7 @@ var ieTrack = function(ieStream) {
   };
 };
 
-  Woogeen.pluginIE.ieRTCDataChannel=function(label, pcid) {
+  Woogeen.ieplugin.ieRTCDataChannel=function(label, pcid) {
   'use strict';
   var that = this;
   var pendingMessages = [];
@@ -123,7 +123,7 @@ var ieTrack = function(ieStream) {
 };
 
 
-  Woogeen.pluginIE.ieRTCPeerConnection= function (config, constraints) {
+  Woogeen.ieplugin.ieRTCPeerConnection= function (config, constraints) {
   var that = this;
   this.myId = pc_id+1;
   pc_id = pc_id +1;
@@ -158,7 +158,7 @@ var ieTrack = function(ieStream) {
   };
   this.addStream = function(stream) {
       that.activeX.getUserMedia(stream.constraints,  function(label) {
-        var ieStream = new Woogeen.pluginIE.ieMediaStream(label);
+        var ieStream = new Woogeen.ieplugin.ieMediaStream(label);
         var ctx = Woogeen.globalLocalView.getContext("2d");
         var img = new Image();
         that.activeX.attachMediaStream(ieStream.label, function (data) {
@@ -211,7 +211,7 @@ var ieTrack = function(ieStream) {
     if(that.activeX){
       that.activeX.createDataChannel(label, constraints);
     }
-    var dc = new Woogeen.pluginIE.ieRTCDataChannel(label, that.myId);
+    var dc = new Woogeen.ieplugin.ieRTCDataChannel(label, that.myId);
     return dc;
   };
 
@@ -233,7 +233,7 @@ var ieTrack = function(ieStream) {
   };
   this.activeX.onaddstream = function(label) {
     var evt = {};
-    var stream = new Woogeen.pluginIE.ieMediaStream(label);
+    var stream = new Woogeen.ieplugin.ieMediaStream(label);
     stream.attachedPCID = that.myId;
     evt.stream = stream;
     evt.pcid = that.myId;
@@ -243,7 +243,7 @@ var ieTrack = function(ieStream) {
   };
   this.activeX.onremovestream = function(label) {
     var evt = {};
-    var stream = new Woogeen.pluginIE.ieMediaStream(label);
+    var stream = new Woogeen.ieplugin.ieMediaStream(label);
     evt.stream = stream;
     if (that.onremovestream) {
       that.onremovestream(evt);
@@ -268,7 +268,7 @@ var ieTrack = function(ieStream) {
   };
   this.activeX.ondatachannel = function(label) {
     var evt = {};
-    var dc = new Woogeen.pluginIE.ieRTCDataChannel(label, that.myId);
+    var dc = new Woogeen.ieplugin.ieRTCDataChannel(label, that.myId);
     evt.channel = dc;
     if (that.ondatachannel) {
       that.ondatachannel(evt);

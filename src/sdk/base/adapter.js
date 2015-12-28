@@ -11,7 +11,7 @@
 // This file is cloned from samples/js/base/adapter.js
 // Modify the original and do new copy instead of doing changes here.
 
-/*global  Woogeen.pluginIE.globalLocalStream,Woogeen,console,performance,createIceServer,RTCIceCandidate,RTCSessionDescription,mozRTCPeerConnection,mozRTCSessionDescription,mozRTCIceCandidate,MediaStream,webkitRTCPeerConnection*/
+/*global  Woogeen.ieplugin.globalLocalStream,Woogeen,console,performance,createIceServer,RTCIceCandidate,RTCSessionDescription,mozRTCPeerConnection,mozRTCSessionDescription,mozRTCIceCandidate,MediaStream,webkitRTCPeerConnection*/
 /*exported trace,createIceServers*/
 
 var RTCPeerConnection = null;
@@ -378,7 +378,7 @@ if (navigator.mozGetUserMedia) {
 } else {
   console.log("This seems to be IE");
 
-  RTCPeerConnection = Woogeen.pluginIE.ieRTCPeerConnection;
+  RTCPeerConnection = Woogeen.ieplugin.ieRTCPeerConnection;
 
   var ieLocalTrack = function() {
       this.stop = function(){

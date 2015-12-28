@@ -13,7 +13,7 @@ Erizo.IEStableStack = function (spec) {
        this.sdp = sd.sdp;
     };
 
-  var webkitRTCPeerConnection = Woogeen.pluginIE.ieRTCPeerConnection;
+  var webkitRTCPeerConnection = Woogeen.ieplugin.ieRTCPeerConnection;
   var RTCSessionDescription = ieRTCSessionDescription;
 
     var that = {},

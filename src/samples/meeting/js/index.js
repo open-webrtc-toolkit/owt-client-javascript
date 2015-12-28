@@ -581,7 +581,7 @@ function addRoomEventListener() {
     });
 
      room.onMessage(function(event) {
-        console.log(event.msg.data.myMuted+"ggg");
+        //console.log(event.msg.data.myMuted+"ggg");
         var user = getUserFromId(event.msg.from);
         if (!user) return;
 
@@ -1377,7 +1377,7 @@ $(document).ready(function() {
         $(this).addClass('mute').removeClass('unmute');
     });
 
-    $(document).on('click', '.muteShow', function() {
+    $(document).on('dblclick', '.muteShow', function() {
         // mute others
         //console.log($(this).attr('isMuted')+"????");
         var mutedID=$(this).siblings('.userID').text();
