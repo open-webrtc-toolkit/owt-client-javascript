@@ -34,7 +34,7 @@ conference.leave();
 
 /**
    * @function on
-  * @desc This function equals to {@link Woogeen.ConferenceClient#addEventListener addEventListener}.See <a href="index.html#section8">eventType</a> description.
+   * @desc This function equals to {@link Woogeen.ConferenceClient#addEventListener addEventListener}.See <a href="index.html#section8">eventType</a> description.
    * @memberOf Woogeen.ConferenceClient
    * @instance
    * @param {string} eventType Event string.
