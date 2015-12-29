@@ -3,7 +3,7 @@
   'use strict';
 /**
     *@namespace Woogeen
-    *@desc TODO:Description of namespace Woogeen.
+    *@classDesc Namespace for client API.
     */
 /**
  * @class Woogeen.Stream
@@ -26,7 +26,7 @@
    * @desc This function returns true when stream has video track otherwise false.
    * @memberOf Woogeen.Stream
    * @instance
-   * @return true The stream has video.<br>false The stream does not have video.
+   * @return {boolean} true The stream has video.<br>false The stream does not have video.
    * @example
 <script type="text/JavaScript">
 L.Logger.info('stream hasVideo:', stream.hasVideo());
@@ -40,7 +40,7 @@ L.Logger.info('stream hasVideo:', stream.hasVideo());
    * @desc This function returns true when stream has audio track otherwise false.
    * @memberOf Woogeen.Stream
    * @instance
-   * @return true The stream has audio.<br>false The stream does not have audio.
+   * @return {boolean} true The stream has audio.<br>false The stream does not have audio.
    * @example
 <script type="text/JavaScript">
 L.Logger.info('stream hasAudio:', stream.hasAudio());
@@ -54,7 +54,7 @@ L.Logger.info('stream hasAudio:', stream.hasAudio());
    * @desc This function returns all user-defined attributes in stream.
    * @memberOf Woogeen.Stream
    * @instance
-   * @return All the user-defined attributes.
+   * @return {string} All the user-defined attributes.
    * @example
 <script type="text/JavaScript">
 L.Logger.info('stream attibutes:', stream.attributes());
@@ -70,7 +70,7 @@ L.Logger.info('stream attibutes:', stream.attributes());
    * @instance
    * @param {string} key attribute key.
    * @param {string} value attribute value.
-   * @return Existing attribute value if it's not specified in parameter
+   * @return {string} Existing attribute value if it's not specified in parameter
    * @example
 <script type="text/JavaScript">
 stream.attr("custom_key", "custom_value");
@@ -352,7 +352,8 @@ L.Logger.info('stream isMixed:', stream.isMixed());
    * @desc This function registers a listener for a specified event, which would be called when the event occurred.
 <br><b>Remarks:</b><br>
 Reserved events from MCU:<br>
-<table class="params table table-striped">
+@htmlonly
+<table class="doxtable">
 <thead>
   <tr><th align="center">Event Name</th><th align="center">Description</th><th align="center">Status</th></tr>
 </thead>
@@ -364,7 +365,8 @@ Reserved events from MCU:<br>
   <tr><td align="center"><code>AudioDisabled</code></td><td align="center">Audio track of a remote stream disabled</td><td align="center">reserved</td></tr>
 </tbody>
 </table>
-User-defined events and listeners are also supported, See {@link Woogeen.RemoteStream#emit|stream.emit(event, data)} method.
+@endhtmlonly
+User-defined events and listeners are also supported, See {@link Woogeen.RemoteStream#emit stream.emit(event, data)} method.
    * @memberOf Woogeen.RemoteStream
    * @param {string} event Event name.
    * @param {function} listener(data) Callback function.

@@ -7,7 +7,8 @@ var Woogeen = Woogeen || {}; /*jshint ignore:line*/ //Woogeen is defined.
  * @classDesc Sets up one-to-one video chat for two clients. It provides methods to initialize or stop a video call or to join a P2P chat room. This object can start a chat when another client joins the same chat room.
     <br><b>Remarks:</b><br>
 The following list briefly describes the URIs:<br>
-<table class="params table table-striped">
+@htmlonly
+<table class="doxtable">
     <tr>
         <th>bandWidth</th>
         <td>(Optional) Defines the bandwidth in kbps for any video streams sent by this peer client. Currently only maxVideoBW option is supported, to limit maximum bandwidth of any outgoing video stream.</td>
@@ -31,6 +32,12 @@ The following list briefly describes the URIs:<br>
     </tr>
 </tbody>
 </table>
+@endhtmlonly
+*/
+/**
+ * @function PeerClient
+ * @desc Constructor of PeerClient
+ * @memberOf Woogeen.PeerClient
  * @param {json} config (Optional)Specifies the configurations for the peer client object. This parameter is the property of config: iceServers.
  * @return {Woogeen.PeerClient} An instance of Woogeen.PeerClient.
  * @example
@@ -1277,7 +1284,7 @@ p2p.stop();
 /**
    * @function getConnectionStats
    * @instance
-   * @desc This function returns connection statistics to a remote client. More details about <a href="format.html">connection status</a>.
+   * @desc This function returns connection statistics to a remote client. More details about [connection status](@ref status).
    * @memberOf Woogeen.PeerClient
    * @param {string} targetId Remote user's ID.
    * @param {function} successCallback callback function to be invoked when statistics is available
@@ -1305,7 +1312,7 @@ p2p.getConnectionStats($('#target-uid').val(), successcallback, failurecallback)
 /**
    * @function getAudioLevels
    * @instance
-   * @desc This function returns audio output levels associated with current peer client. More details about <a href="format.html">audio levels</a>.
+   * @desc This function returns audio output levels associated with current peer client. More details about [audio levels](@ref audiolevel).
    * @memberOf Woogeen.PeerClient
    * @param {string} targetId Remote user's ID.
    * @param {function} successCallback callback function to be invoked when audio level information is available.

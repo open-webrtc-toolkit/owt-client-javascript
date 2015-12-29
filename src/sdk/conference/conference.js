@@ -852,7 +852,7 @@ audio: true/false,<br>
 videoCodec: 'h264'/'vp8' // not for p2p room<br>
 }
 <br><b>Remarks:</b><br>
-Video resolution choice is only valid for subscribing {@link Woogeen.RemoteMixedStream|Woogeen.RemoteMixedStream} when multistreaming output is enabled.　See {@link N.API.createRoom|N.API.createRoom()} for detailed description of multistreaming.<br>
+Video resolution choice is only valid for subscribing {@link Woogeen.RemoteMixedStream Woogeen.RemoteMixedStream} when multistreaming output is enabled.　See {@link N.API.createRoom N.API.createRoom()} for detailed description of multistreaming.<br>
    * @memberOf Woogeen.ConferenceClient
    * @param {stream} stream Stream to subscribe.
    * @param {json} options (optional) Subscribe options.
@@ -1053,7 +1053,7 @@ conference.unsubscribe(remoteStream, function (st) {
    * @memberOf Woogeen.ConferenceClient
    * @param {string} options (optional) Share screen options, similar to video option that used to create a LocalStream.
    * @param {function} onSuccess(stream) (optional) Success callback.
-   * @param {function} onFailure(err) (optional) Failure callback. See details about error definition in {@link Woogeen.LocalStream.create|LocalStream.create}.
+   * @param {function} onFailure(err) (optional) Failure callback. See details about error definition in {@link Woogeen.LocalStream#create LocalStream.create}.
    * @example
 <script type="text/JavaScript">
 var conference = Woogeen.ConferenceClient.create();

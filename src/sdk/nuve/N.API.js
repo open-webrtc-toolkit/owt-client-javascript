@@ -2,7 +2,7 @@
 var N = N || {};
 
 /**@namespace N
- * @classDesc
+ * @classDesc Namespace for Nuve.
  */
 /**
  * @class N.API
@@ -84,7 +84,7 @@ N.API.init('5188b9af6e53c84ffd600413', '21989', 'http://61.129.90.140:3000/')
             <li>layout describes video layout in mix stream</li>
                 <ul>
                     <li>"base" is the base template (choose from "void", "fluid", "lecture")</li>
-                    <li>"custom" is user-defined customized video layout. Here we give out an example to show you the details of a valid customized video layout.A valid customized video layout should be a JSON string which represents an array of video layout definition. More details see <a href="layout.html">customized video layout</a></li>
+                    <li>"custom" is user-defined customized video layout. Here we give out an example to show you the details of a valid customized video layout.A valid customized video layout should be a JSON string which represents an array of video layout definition. More details see [customized video layout](@ref layout) . </li>
                     <li>MCU would try to combine the two entries for mixing video if user sets both.</li>
                 </ul>
             <li>avCoordinated (0 or 1) is for disabling/enabling VAD(Voice activity detection). When VAD is applied, main pane(layout id=1) will be filled with the user stream which is the most active in voice currently.</li>
@@ -93,7 +93,8 @@ N.API.init('5188b9af6e53c84ffd600413', '21989', 'http://61.129.90.140:3000/')
 </ul>
 Omitted entries are set with default values.
 All supported resolutions are list in the following table.
-<table class="params table table-striped">
+@htmlonly
+<table class="doxtable">
 <caption><b>Table : Resolution Mapping for Multistreaming</b></caption>
     <tbody>
     <thead>
@@ -132,6 +133,7 @@ All supported resolutions are list in the following table.
         </tr>
     </tbody>
 </table>
+@endhtmlonly
    * @memberOf N.API
    * @param {string} name Room name.
    * @param {function} callback(room) Callback function on success.
@@ -230,8 +232,8 @@ N.API.deleteRoom(room, function(result) {
    * @function updateRoom
    * @desc This function updates a room.
    * @memberOf N.API
-   * @param {string} roomId DESCRIPTION
-   * @param {json} options Room configuration. See details about options in {@link N.API.createRoom|createRoom(name, callback, callbackError, options)}.
+   * @param {string} roomId room ID.
+   * @param {json} options Room configuration. See details about options in {@link N.API#createRoom createRoom(name, callback, callbackError, options)}.
    * @param {function} callback(room) Callback function on success
    * @param {function} callbackError(err) Callback function on error
    * @example
