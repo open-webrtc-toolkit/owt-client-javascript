@@ -389,12 +389,17 @@ if (navigator.mozGetUserMedia) {
     Woogeen.globalLocalStream.constraints = JSON.stringify(config);
     Woogeen.globalLocalStream.onsuccess = success;
     Woogeen.globalLocalStream.onfailure = failure;
-    Woogeen.globalLocalStream.lable = "general_video";
+    Woogeen.globalLocalStream.label = "general_video";
+    Woogeen.globalLocalStream.ieStream = null;
     Woogeen.globalLocalStream.getTracks =function(){
       var tracks=[new ieLocalTrack()];
       return tracks;
     }
-
+    Woogeen.globalLocalStream.close = function(){
+      if(Woogeen.globalLocalStream.ieStream !== null){
+        Woogeen.globalLocalStream.ieStream.close();
+      }
+    }
     Woogeen.globalLocalStream.id = "general_video";
     success(Woogeen.globalLocalStream);
   };

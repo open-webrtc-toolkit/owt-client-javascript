@@ -169,7 +169,7 @@ var ieTrack = function(ieStream) {
 
         that.activeX.addStream(ieStream);
         stream.id = ieStream.label;
-        Woogeen.globalLocalStream = stream;
+        Woogeen.globalLocalStream.ieStream = ieStream;
       }, stream.onfailure);
   };
   // Peer connection methods
@@ -255,10 +255,8 @@ var ieTrack = function(ieStream) {
       that.oniceconnectionstatechange(state);
     }
   };
-  this.activeX.onsignalingstatechange = function() {
-    if(that.activeX != null){
-      that.signalingState = that.activeX.signalingState;
-    }
+  this.activeX.onsignalingstatechange = function(state) {
+    that.signalingState = state;
     if (that.onsignalingstatechange) {
       that.onsignalingstatechange();
     }

@@ -177,7 +177,7 @@ div#videocontainer {
       $('#target-video-unpublish').prop('disabled',true);
       p2p.unpublish(localStream,$('#target-uid').val());  // Publish local stream to remote client
       if(window.navigator.appVersion.indexOf("Trident") > -1){
-        localStream.mediaStream.close();
+        localStream.close();
       } else {
         localStream.close();
         localStream = undefined;
