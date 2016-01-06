@@ -368,6 +368,9 @@ function initWoogeen() {
             });
             loadUserList();
             streams.map(function(stream) {
+                if (stream.isMixed && stream.isMixed()) {
+                    console.log("Mix stream id: "+stream.id());
+                }
                 L.Logger.info('stream in conference:', stream.id());
                 streamObj[stream.id()] = stream;
 
@@ -455,7 +458,16 @@ function createToken(userName, role, room, callback) {
 function addRoomEventListener() {
     room.on('stream-added', function(streamEvent) {
         var stream = streamEvent.stream;
+        console.log("stream added:", stream.id());
         streamObj = room.remoteStreams;
+        if(stream.id() == localStream.id()) {
+            room.startRecorder({videoStreamId:stream.id()}, function(info) {
+                console.log("Record my stream succeed with info:", info);
+            }, function(err) {
+                condole.log("Record my stream fail with err:", err);
+            });
+        }
+
         if (subscribeType === SUBSCRIBETYPES.FORWARD && (stream.isMixed && stream.isMixed())) {
             return;
         } else if (subscribeType === SUBSCRIBETYPES.MIX && (!(stream.isMixed && stream.isMixed()) && !(stream.isScreen && stream.isScreen()))) {
@@ -631,6 +643,7 @@ function shareScreen() {
         resolution: "hd1080p",
         frameRate: [10, 10]
     }, function(stream) {
+        console.log("share screen Stream id: "+stream.id());
         // stream.show('local-screen');
         localScreen = stream;
         changeMode(MODES.LECTURE, $('#local-screen'));

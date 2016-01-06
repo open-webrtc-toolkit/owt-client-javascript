@@ -116,8 +116,8 @@ window.L = L;\n\
     uglify: {
       dist: {
         files: {
-          '../dist/sdk/<%= pkg.name %>.min.js': ['../dist/sdk/<%= pkg.name %>.js'],
-          '../dist/sdk/<%= pkg.name %>.ui.min.js': ['../dist/sdk/<%= pkg.name %>.ui.js'],
+          '../dist/sdk/<%= pkg.name %>.js': ['../dist/sdk/<%= pkg.name %>.js'],
+          '../dist/sdk/<%= pkg.name %>.ui.js': ['../dist/sdk/<%= pkg.name %>.ui.js'],
           '../dist/sdk/nuve.js': ['../dist/sdk/nuve.js']
         },
         options: {
@@ -136,12 +136,12 @@ window.L = L;\n\
           {expand: true,cwd:'../src/sdk/base/',src:['adapter.js'],dest:'../dist/samples/conference/public/',flatten:false},
           {expand: true,cwd:'../src/extension/',src:['**'],dest:'../dist/',flatten:false},
           {expand: true,cwd:'../src/sdk/base/',src:['socket.io.js'],dest:'../dist/samples/conference/public/',flatten:false},
-          {expand: true,cwd:'../dist/sdk/',src:['woogeen.sdk.min.js'],dest:'../dist/samples/conference/public/',flatten:false},
-          {expand: true,cwd:'../dist/sdk/',src:['woogeen.sdk.ui.min.js'],dest:'../dist/samples/conference/public/',flatten:false},
+          {expand: true,cwd:'../dist/sdk/',src:['woogeen.sdk.js'],dest:'../dist/samples/conference/public/',flatten:false},
+          {expand: true,cwd:'../dist/sdk/',src:['woogeen.sdk.ui.js'],dest:'../dist/samples/conference/public/',flatten:false},
           {expand: true,cwd:'../src/sdk/base/',src:['adapter.js'],dest:'../dist/samples/meeting/js/',flatten:false},
           {expand: true,cwd:'../src/sdk/base/',src:['socket.io.js'],dest:'../dist/samples/meeting/js/',flatten:false},
-          {expand: true,cwd:'../dist/sdk/',src:['woogeen.sdk.min.js'],dest:'../dist/samples/meeting/js/',flatten:false},
-          {expand: true,cwd:'../dist/sdk/',src:['woogeen.sdk.ui.min.js'],dest:'../dist/samples/meeting/js/',flatten:false},
+          {expand: true,cwd:'../dist/sdk/',src:['woogeen.sdk.js'],dest:'../dist/samples/meeting/js/',flatten:false},
+          {expand: true,cwd:'../dist/sdk/',src:['woogeen.sdk.ui.js'],dest:'../dist/samples/meeting/js/',flatten:false},
           {expand: true,cwd:'../dist/sdk/',src:['nuve.js'],dest:'../dist/samples/conference/',flatten:false},
           {expand: true,cwd:'../dist/sdk/',src:['nuve.js'],dest:'../src/samples/conference/',flatten:false}
         ]
@@ -164,7 +164,7 @@ window.L = L;\n\
           },
           {
             pattern: '<script src="../../sdk/conference/property.js" type="text/javascript"></script>\n  <script src="../../sdk/base/events.js" type="text/javascript"></script>\n  <script src="../../sdk/base/L.Base64.js" type="text/javascript"></script>\n  <script src="../../sdk/base/L.Logger.js" type="text/javascript"></script>\n  <script src="../../sdk/base/stream.js" type="text/javascript"></script>\n  <script src="../../sdk/base/ieMediaStream.js" type="text/javascript"></script>\n  <script src="../../sdk/p2p/errors.js" type="text/javascript"></script>\n  <script src="../../sdk/p2p/gab.proxy.js" type="text/javascript"></script>\n  <script src="../../sdk/p2p/peer.js" type="text/javascript"></script>',
-            replacement: '<script src="../../sdk/woogeen.sdk.min.js" type="text/javascript"></script>'
+            replacement: '<script src="../../sdk/woogeen.sdk.js" type="text/javascript"></script>'
           }
          ]
         }
@@ -181,11 +181,11 @@ window.L = L;\n\
           },
           {
             pattern: '<script src="sdk/conference/property.js" type="text/javascript"></script>\n    <script src="sdk/base/events.js" type="text/javascript"></script>\n    <script src="sdk/base/L.Base64.js" type="text/javascript"></script>\n    <script src="sdk/base/L.Logger.js" type="text/javascript"></script>\n    <script src="sdk/base/stream.js" type="text/javascript"></script>\n    <script src="sdk/base/ieMediaStream.js" type="text/javascript"></script>\n    <script src="sdk/base/adapter.js" type="text/javascript"></script>\n    <script src="sdk/conference/conference.js" type="text/javascript"></script>\n    <script src="sdk/conference/webrtc-stacks/ChromeStableStack.js" type="text/javascript"></script>\n    <script src="sdk/conference/webrtc-stacks/FirefoxStack.js" type="text/javascript"></script>\n    <script src="sdk/conference/webrtc-stacks/IEStableStack.js" type="text/javascript"></script>',
-            replacement:'<script src="woogeen.sdk.min.js" type="text/javascript"></script>\n    <script src="adapter.js" type="text/javascript"></script>'
+            replacement:'<script src="woogeen.sdk.js" type="text/javascript"></script>\n    <script src="adapter.js" type="text/javascript"></script>'
           },
           {
             pattern: '<script src="sdk/ui/AudioPlayer.js" type="text/javascript"></script>\n    <script src="sdk/ui/Bar.js" type="text/javascript"></script>\n    <script src="sdk/ui/L.Resizer.js" type="text/javascript"></script>\n    <script src="sdk/ui/View.js" type="text/javascript"></script>\n    <script src="sdk/ui/Speaker.js" type="text/javascript"></script>\n    <script src="sdk/ui/VideoPlayer.js" type="text/javascript"></script>\n    <script src="sdk/ui/ui.js" type="text/javascript"></script>',
-            replacement: '<script src="woogeen.sdk.ui.min.js" type="text/javascript"></script>'
+            replacement: '<script src="woogeen.sdk.ui.js" type="text/javascript"></script>'
           }
          ]
         }
@@ -198,11 +198,11 @@ window.L = L;\n\
         replacements: [
           {
             pattern: '<script src="../../sdk/base/socket.io.js" type="text/javascript"></script>\n        <script src="../../sdk/conference/property.js" type="text/javascript"></script>\n        <script src="../../sdk/base/events.js" type="text/javascript"></script>\n        <script src="../../sdk/base/L.Base64.js" type="text/javascript"></script>\n        <script src="../../sdk/base/L.Logger.js" type="text/javascript"></script>\n        <script src="../../sdk/base/stream.js" type="text/javascript"></script>\n        <script src="../../sdk/base/ieMediaStream.js" type="text/javascript"></script>\n        <script src="../../sdk/base/adapter.js" type="text/javascript"></script>\n        <script src="../../sdk/conference/conference.js" type="text/javascript"></script>\n        <script src="../../sdk/conference/webrtc-stacks/ChromeStableStack.js" type="text/javascript"></script>\n        <script src="../../sdk/conference/webrtc-stacks/FirefoxStack.js" type="text/javascript"></script>\n        <script src="../../sdk/conference/webrtc-stacks/IEStableStack.js" type="text/javascript"></script>',
-            replacement:'<script src="js/socket.io.js" type="text/javascript"></script>\n        <script src="js/adapter.js" type="text/javascript"></script>\n        <script src="js/woogeen.sdk.min.js" type="text/javascript"></script>'
+            replacement:'<script src="js/socket.io.js" type="text/javascript"></script>\n        <script src="js/adapter.js" type="text/javascript"></script>\n        <script src="js/woogeen.sdk.js" type="text/javascript"></script>'
           },
           {
             pattern: '<script src="../../sdk/ui/AudioPlayer.js" type="text/javascript"></script>\n        <script src="../../sdk/ui/Bar.js" type="text/javascript"></script>\n        <script src="../../sdk/ui/L.Resizer.js" type="text/javascript"></script>\n        <script src="../../sdk/ui/View.js" type="text/javascript"></script>\n        <script src="../../sdk/ui/Speaker.js" type="text/javascript"></script>\n        <script src="../../sdk/ui/VideoPlayer.js" type="text/javascript"></script>\n        <script src="../../sdk/ui/ui.js" type="text/javascript"></script>',
-            replacement: '<script src="js/woogeen.sdk.ui.min.js" type="text/javascript"></script>'
+            replacement: '<script src="js/woogeen.sdk.ui.js" type="text/javascript"></script>'
           }
          ]
         }
@@ -211,7 +211,7 @@ window.L = L;\n\
     clean: {
      build: {
        options: {force: true},
-       src: ['../dist/sdk/<%= pkg.name %>.js','../dist/sdk/<%= pkg.name %>.ui.js','../dist/samples/meeting/js/woogeen/']
+       src: ['../dist/samples/meeting/js/woogeen.sdk.min.js','../dist/samples/meeting/js/woogeen.sdk.ui.min.js']
      }
     },
     compress:{
