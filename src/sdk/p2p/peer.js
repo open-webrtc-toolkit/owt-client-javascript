@@ -615,7 +615,7 @@ Woogeen.PeerClient=function (pcConfig) {
    * @instance
    * @desc This function establishes a connection to the signaling server.
    * @memberOf Woogeen.PeerClient
-   * @param {string} loginInfo  An objects contains login information. For peer server, this object has two properties: host and token.
+   * @param {string} loginInfo  An objects contains login information. For peer server, this object has two properties: host and token. Please make sure the host is correct.
    * @example
 <script type="text/JavaScript">
 var p2p=new Woogeen.PeerClient();
@@ -1204,7 +1204,7 @@ p2p.deny('user2');
 */
   var deny=function(peerId, successCallback, failureCallback){
     if(peers[peerId]&&peers[peerId].state===PeerState.PENDING){
-      if(!gab){
+      if(!gab&&failureCallback){
         failureCallback(Woogeen.Error.P2P_CONN_CLIENT_NOT_INITIALIZED);
         return;
       }
@@ -1214,6 +1214,10 @@ p2p.deny('user2');
         }
       });
       delete peers[peerId];
+    }else{
+      if(failureCallback){
+        failureCallback(Woogeen.Error.P2P_CLIENT_INVALID_STATE);
+      }
     }
   };
 
