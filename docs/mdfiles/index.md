@@ -20,22 +20,22 @@ The following table lists the basic JavaScript objects provided in the JavaScrip
         </tr>
     </thead>
         <tr>
-            <td>sc.websocket.js</td>
-            <td>Provides socket.io signaling method for P2P chat.</td>
+            <td>adapter.js</td>
+            <td>An adapter to interop between different browsers.</td>
         </tr>
          <tr>
             <td>woogeen.sdk.js</td>
-            <td>Defines basic objects used throughout the SDK code.</td>
-        </tr>
-         <tr>
-            <td>woogeen.p2p.js</td>
-            <td>Provides functionality for P2P chat.</td>
+            <td>Intel CS for WebRTC cliet SDK for JavaScript.</td>
         </tr>
     </tbody>
 </table>
 @endhtmlonly
 
 Refer to the SDK release notes for the latest information on the SDK release package, including features, supported browsers, bug fixes, and known issues.
+
+Please include adaper.js before woogeen.sdk.js in HTML files.
+
+If you want to use conference SDK, please also include socket.io.js before woogeen.sdk.js.
 
 # 2 Browser requirement {#section2}
 The Intel CS for WebRTC Client SDK for JavaScript has been tested on the following browsers and operating systems:
@@ -93,10 +93,6 @@ Internet Explorer (IE) does not support WebRTC natively.  End user needs to inst
 
 # 3 Plugin for Internet Explorer (IE) {#section3}
 If you are developing a WebRTC web app which is intended to support IE browser, your end users must install the WebRTC IE plugin package provided in the CS_WebRTC_Client_SDK_JavaScript.&lt;ver&gt;.zip file to enable WebRTC capability.
-Follow these steps for web application that require IE browser compatibility:
-
- 1.  ieMediaStream.p2p.js and adapter.p2p.js must be included in the HTML pages which are visited by IE P2P users.
- 2. ieMediaStream.js and adapter.js must be included in the HTML pages which are visited by IE conference users.
 
 > **Note:** Canvas is used to render the WebRTC streams since IE's video tag cannot render them; and performance may not be as comparable to what you get with Chrome and FireFox.  Also, you must close the local stream and stop all conversations when the tab is closed. The following code is for reference.
 
@@ -119,15 +115,16 @@ We provide source code of a Chrome screen sharing extension sample. Developers s
 To enable P2P chat, copy and paste the following code into the head section of your HTML document:
 ~~~~~~{.js}
 <script type="text/JavaScript" src="sc.websocket.js"></script>
-<script type="text/JavaScript" src="woogeen.p2p.js"></script>
+<script type="text/JavaScript" src="woogeen.sdk.js"></script>
 ~~~~~~
-The SDK supports Web sockets signaling channel in P2P mode; You need to include sc.websocket.js and socket.io.js in your HTML files. Please include socket.io.js after woogeen.p2p.js.
+The SDK supports Web sockets signaling channel in P2P mode; You need to include sc.websocket.js and socket.io.js in your HTML files.
 
 ## 5.1 P2P direct call chat {#section5_1}
 
 Direct call chat refers to the discovery of another client by chatting with that user's ID. This is a synchronous call and requires that the two clients be online on the signaling server.
 ~~~~~~{.js}
-<script type="text/javascript">var isVideo=1;
+<script type="text/javascript">
+var isVideo=1;
 var serverAddress='http://61.152.239.56:8095/';  // Please change it to signaling server's address.
 var p2p=new Woogeen.PeerClient({
   iceServers : [ {
@@ -157,7 +154,9 @@ $(document).ready(function(){
   $('#target-screen').click(function(){
     Woogeen.LocalStream.create({
       video:{
-        device:"screen"
+        device:"screen",
+        resolution:"hd1080p",
+        frameRate: [10,10]
       }
     }, function(err, stream){
       if (err) {
@@ -299,6 +298,7 @@ Woogeen.API.createRoom (room.name, function (resp) {
 ## 6.2 Join a conference from the client side {#section6_2}
 To initialize your HTML code, copy and paste the following code into the head section of your HTML document:
 ~~~~~~{.js}
+<script type="text/javascript" src="socket.io.js"></script>
 <script type="text/javascript" src="woogeen.sdk.js"></script>
 <script type="text/javascript" src="woogeen.sdk.ui.js"></script>
 ~~~~~~
@@ -464,15 +464,6 @@ The JavaScript objects (described earlier in this section) throw events using Ev
             <th><b>Description</b></th>
         </tr>
     </thead>
-        <tr valign="top">
-            <td rowspan="10">PeerClient</td>
-            <td>server-connected</td>
-            <td>Sets up one-to-one video chat for two clients. This event provides methods to initialize or stop a video call or to join a chat room. It can start a chat when another client joins the same chat room.</p></td>
-        </tr>
-        <tr valign="top">
-           <td>server-connectfailed</td>
-            <td>The client is failed to connect to signaling server.</td>
-        </tr>
         <tr valign="top">
            <td>server-disconnected</td>
             <td>The client is disconnected from the peer server.</td>
