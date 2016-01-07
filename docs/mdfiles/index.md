@@ -106,6 +106,9 @@ window.onbeforeunload = function(){
     p2p.stop($('#target-uid').val());
   }
 ~~~~~~
+
+For IE Plugin, the way to attach local media stream and remote media stream to canvas is different.  For local stream, call attachMediaStream() with the first parameter set to your canvas, and second parameter to the localStream's "mediaStream" member; for remote stream, instead you have to call attachRemoteMediaStream with the first parameter set to canvas, second parameter set to remote stream's "mediaStream" member, and third parameter set to remote stream's "mediaStream.attachedPCID" member. Refer to the p2p sample html page for more details.
+
 # 4 Screen sharing extension {#section4}
 We provide source code of a Chrome screen sharing extension sample. Developers should edit manifest.json and publish it to Chrome App Store to make it work for their products. After your extension is published, you will get an extension ID. This ID will be used when create screen sharing stream.
 
