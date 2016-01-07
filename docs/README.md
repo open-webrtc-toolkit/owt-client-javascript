@@ -16,7 +16,13 @@ Useful:
     + **Tips**: You can add additional markdown pages to be include in the document and put the resources into 'resource' package.
 2. 'gendoc.sh':
     + **Content**: the script to generate the document and output a package named 'docout'.
-    + **Usage**:　example usage: ./gendoc.sh /home/bean/workspace/webrtc-woogeensdk/webrtc/src/sdk/peer.js
-    +**Tips**: by default, 5 files in this repo is included: 'conference.js', 'events.js', 'stream.js', 'N.API.js' and 'ui.js'. If you want to include other javascript files, just add the its path as argument.
+    + **Usage**:　example usage: ./gendoc.sh /home/bean/workspace/webrtc-javascript-sdk/docs/mdfiles/sipcomment.js
+    +**Tips**: by default, 6 files in this repo is included: 'peer.js', 'conference.js', 'events.js', 'stream.js', 'N.API.js' and 'ui.js'. If you want to include other javascript files, just add the its path as argument.
+
+Note: before running this script, you should install doxygen first.
+See instruction at https://www.stack.nl/~dimitri/doxygen/manual/install.html
+For Ubuntu, you can directly run the following commands to install doxygen under version 1.8.6.
+    sudo apt-get update
+    sudo apt-get install doxygen
 3. 'docformat.md': the comment format to enable document auto generation.
 4. 'JSDoc2DoxygenFormat.txt': descript how the js2doxy tool works.(Maybe useful when you want to expand the comment syntax).

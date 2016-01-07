@@ -1034,7 +1034,7 @@ conference.unsubscribe(remoteStream, function (st) {
    * @example
 <script type="text/JavaScript">
   var conference = Woogeen.ConferenceClient.create();
-// ……
+  // ……
   conference.onMessage(function (event) {
     L.Logger.info('Message Received:', event.msg);
   });

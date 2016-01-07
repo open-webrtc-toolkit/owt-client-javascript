@@ -424,7 +424,7 @@ The following table describes the objects provided in the JavaScript SDK.
   });
 </script>
 ~~~~~~
-## 7.3Example: Get ConferenceClient {#section7_3}
+## 7.3 Example: Get ConferenceClient {#section7_3}
 
 ~~~~~~{.js}
 <script type="text/JavaScript">
@@ -458,7 +458,7 @@ The following table describes the objects provided in the JavaScript SDK.
 </script>
 ~~~~~~
 
-# 8 Events {#section8}
+# 8 Events {#Events}
 
 The JavaScript objects (described earlier in this section) throw events using EventDispatchers. The following table describes all events which can be handled by registering event handlers with the `addEventListener()` function.
 @htmlonly

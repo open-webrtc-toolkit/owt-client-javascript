@@ -906,14 +906,16 @@ Woogeen.ExternalStream.create({
  * @extends Woogeen.Stream
  * @classDesc Stream from server retrieved by 'stream-added' event. RemoteStreams are automatically constructed upon the occurrence of the event.
 <br><b>Example:</b>
-```
+
+~~~~~~~{.js}
 <script type="text/javascript">
 conference.on('stream-added', function (event) {
   var remoteStream = event.stream;
-console.log('stream added:', stream.id());
+  console.log('stream added:', stream.id());
 });
 </script>
-```
+~~~~~~~
+
  */
   Woogeen.RemoteStream = WoogeenRemoteStream;
 /**

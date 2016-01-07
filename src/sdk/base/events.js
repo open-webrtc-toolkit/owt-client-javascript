@@ -13,7 +13,7 @@ Woogeen.EventDispatcher = function (spec) {
 
 /**
    * @function addEventListener
-   * @desc This function registers a callback function as a handler for the corresponding event. See <a href="index.html#Events">eventType</a> description.
+   * @desc This function registers a callback function as a handler for the corresponding event. See [eventType](@ref Events) description.
    * @memberOf Woogeen.ConferenceClient
    * @instance
    * @param {string} eventType Event string.
@@ -34,7 +34,7 @@ conference.leave();
 
 /**
    * @function on
-   * @desc This function equals to {@link Woogeen.ConferenceClient#addEventListener addEventListener}.See <a href="index.html#section8">eventType</a> description.
+   * @desc This function equals to {@link Woogeen.ConferenceClient#addEventListener addEventListener}.See [eventType](@ref Events) description.
    * @memberOf Woogeen.ConferenceClient
    * @instance
    * @param {string} eventType Event string.
