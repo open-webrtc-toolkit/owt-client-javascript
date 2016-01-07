@@ -2,7 +2,7 @@ Intel CS for WebRTC Client SDK for JavaScript
 ------------------
 
 # 1 Introduction {#section1}
-The Intel CS for WebRTC Client SDK for JavaScript provides tools to help you develop Web applications. The SDK is distributed in the CS_WebRTC_Client_SDK_JavaScript.&lt;ver&gt;.zip  release package. The SDK consists of client-side and server-side APIs, as well as sample Web applications:
+The Intel CS for WebRTC Client SDK for JavaScript provides tools to help you develop Web applications. The SDK is distributed in the `CS_WebRTC_Client_SDK_JavaScript.&lt;ver&gt;.zip`  release package. The SDK consists of client-side and server-side APIs, as well as sample Web applications:
 
  - Client-side APIs:  Manage how to act with the peer client, room, and stream.
  - Server-side APIs:  Manage how to create a token, room, and service.
@@ -92,7 +92,11 @@ The Intel CS for WebRTC Client SDK for JavaScript has been tested on the followi
 Internet Explorer (IE) does not support WebRTC natively.  End user needs to install the IE plugin provided in the Intel CS for WebRTC package in order to enable WebRTC capability.
 
 # 3 Plugin for Internet Explorer (IE) {#section3}
-If you are developing a WebRTC web app which is intended to support IE browser, your end users must install the WebRTC IE plugin package provided in the CS_WebRTC_Client_SDK_JavaScript.&lt;ver&gt;.zip file to enable WebRTC capability.
+If you are developing a WebRTC web app which is intended to support IE browser, your end users must install the WebRTC IE plugin package provided in the `CS_WebRTC_Client_SDK_JavaScript.&lt;ver&gt;.zip` file to enable WebRTC capability.
+Follow these steps for web application that require IE browser compatibility:
+
+ 1.  `ieMediaStream.p2p.js` and `adapter.p2p.js` must be included in the HTML pages which are visited by IE P2P users.
+ 2. `ieMediaStream.js` and `adapter.js` must be included in the HTML pages which are visited by IE conference users.
 
 > **Note:** Canvas is used to render the WebRTC streams since IE's video tag cannot render them; and performance may not be as comparable to what you get with Chrome and FireFox.  Also, you must close the local stream and stop all conversations when the tab is closed. The following code is for reference.
 
@@ -107,7 +111,7 @@ window.onbeforeunload = function(){
   }
 ~~~~~~
 
-For IE Plugin, the way to attach local media stream and remote media stream to canvas is different.  For local stream, call attachMediaStream() with the first parameter set to your canvas, and second parameter to the localStream's "mediaStream" member; for remote stream, instead you have to call attachRemoteMediaStream with the first parameter set to canvas, second parameter set to remote stream's "mediaStream" member, and third parameter set to remote stream's "mediaStream.attachedPCID" member. Refer to the p2p sample html page for more details.
+For IE Plugin, the way to attach local media stream and remote media stream to canvas is different.  For local stream, call `attachMediaStream()` with the first parameter set to your canvas, and second parameter to the localStream's `mediaStream` member; for remote stream, instead you have to call `attachRemoteMediaStream` with the first parameter set to canvas, second parameter set to remote stream's `mediaStream` member, and third parameter set to remote stream's `mediaStream.attachedPCID` member. Refer to the p2p sample html page for more details.
 
 # 4 Screen sharing extension {#section4}
 We provide source code of a Chrome screen sharing extension sample. Developers should edit manifest.json and publish it to Chrome App Store to make it work for their products. After your extension is published, you will get an extension ID. This ID will be used when create screen sharing stream.
@@ -120,7 +124,7 @@ To enable P2P chat, copy and paste the following code into the head section of y
 <script type="text/JavaScript" src="sc.websocket.js"></script>
 <script type="text/JavaScript" src="woogeen.sdk.js"></script>
 ~~~~~~
-The SDK supports Web sockets signaling channel in P2P mode; You need to include sc.websocket.js and socket.io.js in your HTML files.
+The SDK supports Web sockets signaling channel in P2P mode; You need to include `sc.websocket.js` and `socket.io.js` in your HTML files. Please include `socket.io.js` after `woogeen.p2p.js`.
 
 ## 5.1 P2P direct call chat {#section5_1}
 
@@ -376,7 +380,7 @@ createToken(roomId, 'user', 'presenter', function (response) {
 </script>
 ~~~~~~
 # 7 JavaScript API reference guide {#section7}
-This discussion describes the APIs provided in the Intel CS for WebRTC Client SDK for JavaScript. Unless mentioned elsewhere, all APIs are under namespace 'Woogeen'.
+This discussion describes the APIs provided in the Intel CS for WebRTC Client SDK for JavaScript. Unless mentioned elsewhere, all APIs are under namespace `Woogeen`.
 
 ## 7.1 Objects {#section7_1}
 The following table describes the objects provided in the JavaScript SDK.
@@ -428,7 +432,7 @@ The following table describes the objects provided in the JavaScript SDK.
 </script>
 ~~~~~~
 
-## 7.4 Example: Create LocalStream and receive RemoteStream {section7_4}
+## 7.4 Example: Create LocalStream and receive RemoteStream {#section7_4}
 
 ~~~~~~{.js}
 <script type="text/javascript">
@@ -456,7 +460,7 @@ The following table describes the objects provided in the JavaScript SDK.
 
 # 8 Events {#section8}
 
-The JavaScript objects (described earlier in this section) throw events using EventDispatchers. The following table describes all events which can be handled by registering event handlers with the addEventListener() function.
+The JavaScript objects (described earlier in this section) throw events using EventDispatchers. The following table describes all events which can be handled by registering event handlers with the `addEventListener()` function.
 @htmlonly
 <table class="doxtable">
     <caption>Table 4: Events that can be handled by registering event handlers</caption>
