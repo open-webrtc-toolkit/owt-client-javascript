@@ -794,7 +794,8 @@ When the video/audio parameters are not supported by the browser, a fallback par
                 </ul>
             <li>frameRate should be an array as [min_frame_rate, max_frame_rate], in which each element should be a proper number, e.g., [20, 30].</li>
             <li>extensionId is id of Chrome Extension for screen sharing. If not provided, the id of <a href="https://chrome.google.com/webstore/detail/webrtc-desktop-sharing-ex/pndohhifhheefbpeljcmnhnkphepimhe">WebRTC Desktop Sharing Extension</a> would be used.</li>
-            <li><b>Note</b>: Firefox currently does not fully support resolution or frameRate setting.</li>
+            <li><b>Note</b>: Firefox currently does not support runtime resolution or frameRate 
+setting till version 43. Please config them statically through media.navigator.video.* parameters in about:config.</li>
         </ul>
     <li>url: RTSP stream URL</li>
 </ul>
