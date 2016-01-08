@@ -1,0 +1,35 @@
+{
+  "name": "lynckia",
+  "version": "0.1.0",
+  "description": "Open Source Communication Provider",
+  "devDependencies": {
+    "vows": "0.6.x",
+    "coffee-script": "1.4.x",
+    "testacular": "0.4.x"
+  },
+  "dependencies": {
+    "amqp": "*",
+    "express": "3.x",
+    "mongodb": "*",
+    "mongojs": "*",
+    "socket.io": "1.1",
+    "socket.io-client": "1.1",
+    "aws-lib": "*",
+    "request": "*",
+    "node-stat": "*"
+  },
+  "contributors": [
+    {
+      "name": "Alvaro Alonso",
+      "email": "aalonsog@dit.upm.es"
+    },
+    {
+      "name": "Pedro Rodriguez",
+      "email": "prodriguez@dit.upm.es"
+    },
+    {
+      "name": "Javier Cerviño",
+      "email": "jcervino@dit.upm.es"
+    }
+  ]
+}
