@@ -18,7 +18,7 @@ module.exports = function (config){
     '../dist/samples/p2p/js/utils.js',
     '../dist/samples/p2p/js/sc.websocket.js',
     '../dist/sdk/adapter.js',
-    '../dist/sdk/woogeen.sdk.min.js',
+    '../dist/sdk/woogeen.sdk.js',
     '../dist/sdk/dependencies/socket.io.js',
     'errorHandler.js',
     './js/test_functions.js',
