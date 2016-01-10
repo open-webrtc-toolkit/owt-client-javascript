@@ -1099,7 +1099,7 @@ conference.shareScreen({resolution: 'hd720p'}, function (st) {
    * @function playAudio
    * @desc This function tells server to continue sending/receiving audio data of the RemoteStream/LocalStream.
 <br><b>Remarks:</b><br>
-The audio track of the stream should be enabled to be played correctly. For RemoteStream, it should be subscribed; for LocalStream, it should be published.
+The audio track of the stream should be enabled to be played correctly. For RemoteStream, it should be subscribed; for LocalStream, it should be published. playAudio with video only stream will succeed without any action.
    * @memberOf Woogeen.ConferenceClient
    * @param {WoogeenStream} stream instance.
    * @param {function} onSuccess() (optional) Success callback.
@@ -1119,7 +1119,7 @@ The audio track of the stream should be enabled to be played correctly. For Remo
    * @function pauseAudio
    * @desc This function tells server to stop sending/receiving audio data of the subscribed RemoteStream/LocalStream.
 <br><b>Remarks:</b><br>
-Upon success, the audio of the stream would be hold, and you can call disableAudio() method to disable the audio track locally to stop playing. For RemoteStream, it should be subscribed; for LocalStream, it should be published.
+Upon success, the audio of the stream would be hold, and you can call disableAudio() method to disable the audio track locally to stop playing. For RemoteStream, it should be subscribed; for LocalStream, it should be published. puaseAudio with video only stream will succeed without any action.
    * @memberOf Woogeen.ConferenceClient
    * @param {WoogeenStream} stream instance.
    * @param {function} onSuccess() (optional) Success callback.
@@ -1139,7 +1139,7 @@ Upon success, the audio of the stream would be hold, and you can call disableAud
    * @function playVideo
    * @desc This function tells server to continue sending/receiving video data of the subscribed RemoteStream/LocalStream.
 <br><b>Remarks:</b><br>
-The video track of the stream should be enabled to be played correctly. For RemoteStream, it should be subscribed; for LocalStream, it should be published.
+The video track of the stream should be enabled to be played correctly. For RemoteStream, it should be subscribed; for LocalStream, it should be published. playVideo with audio only stream will succeed without any action.
    * @memberOf Woogeen.ConferenceClient
    * @param {WoogeenStream} stream instance.
    * @param {function} onSuccess() (optional) Success callback.
@@ -1159,7 +1159,7 @@ The video track of the stream should be enabled to be played correctly. For Remo
    * @function pauseVideo
    * @desc This function tells server to stop sending/receiving video data of the subscribed RemoteStream/LocalStream.
 <br><b>Remarks:</b><br>
-Upon success, the video of the stream would be hold, and you can call disableVideo() method to disable the video track locally to stop playing. For RemoteStream, it should be subscribed; for LocalStream, it should be published.
+Upon success, the video of the stream would be hold, and you can call disableVideo() method to disable the video track locally to stop playing. For RemoteStream, it should be subscribed; for LocalStream, it should be published. pauseVideo with audio only stream will succeed without any action.
    * @memberOf Woogeen.ConferenceClient
    * @param {WoogeenStream} stream instance.
    * @param {function} onSuccess() (optional) Success callback.
@@ -1354,6 +1354,8 @@ conference.setRegion({id: 'participantId', region: 'regionId'}, function () {
    * @function setVideoBitrate
    * @instance
    * @desc This function sets the video bitrate (kbps) for the given participant. Currently it works only if the participant's video stream is being mixed in the conference.
+<br><b>Remarks:</b><br>
+This method also depends on whether client side support dynamically video stream bitrate change, now only Chrome browser is verified to be workable.
    <br><b>options:</b><br>
 {<br>
   id: 'the participant id'<br>
