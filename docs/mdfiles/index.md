@@ -472,6 +472,7 @@ The JavaScript objects (described earlier in this section) throw events using Ev
         </tr>
     </thead>
         <tr valign="top">
+        <td rowspan="8" width="115">PeerClient</td>
            <td>server-disconnected</td>
             <td>The client is disconnected from the peer server.</td>
         </tr>
