@@ -1012,7 +1012,7 @@
                 timeout = tiout;
             }
             var debugFunction = function(msg, result) {
-                console.log('++++ Error message from waitsForAndRuns:' , msg, "actual is ", result);           
+                console.log('++++ Error message from waitsForAndRuns:' , msg, "actual is ", result);
             };
             var selfTimeOut = setTimeout(function doWaitsFor() {
                     clearInterval(interval);

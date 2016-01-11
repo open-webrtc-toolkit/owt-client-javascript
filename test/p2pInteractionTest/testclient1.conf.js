@@ -91,8 +91,8 @@ module.exports = function (config){
     // - PhantomJS
     // - IE (only Windows)
     // CLI --browsers Chrome,Firefox,Safari
-    //browsers : ["IE"],
-   browsers : [".travis/chrome-start1.bat"],
+    browsers : ["IE"],
+   // browsers : [".travis/chrome-start1.bat"],
     browserDisconnectTimeout : 60000,
     browserNoActivityTimeout : 60000,
 

@@ -322,7 +322,7 @@ TestClient.prototype = {
   },
   showInPage: function(stream) {
     console.log('showInPage!')
-  	var that = this;
+    var that = this;
     var isIE= that.isIE();
     if(isIE==true){
       console.log('IE detected!')
@@ -336,10 +336,18 @@ TestClient.prototype = {
               canvas.setAttribute('autoplay', 'autoplay::autoplay');
               canvas.setAttribute("id", "stream" + stream.id());
               canvas.setAttribute("class", "video");
-              document.body.appendChild(canvas);
+              // canvas.style.position = "absolute";
+              // canvas.style.left = 100;
+              // canvas.style.top = 200;
+               document.body.appendChild(canvas);
              // document.getElementById('myVideo').appendChild(canvas);
-              attachMediaStream(canvas, stream.mediaStream);
-              console.log('stream added..');
+              if(stream instanceof Woogeen.LocalStream){
+                attachMediaStream(canvas, stream.mediaStream);
+              }else{
+                attachRemoteMediaStream(canvas, stream.mediaStream, stream.mediaStream.attachedPCID);
+              }
+              // attachMediaStream(canvas, stream.mediaStream);
+              console.log('stream added..'+stream.mediaStream);
               return;
             }
     }
@@ -350,7 +358,12 @@ TestClient.prototype = {
     video.setAttribute("height", "240px");
     video.setAttribute("class", "video");
     video.setAttribute("autoplay", "autoplay");
+    // video.style.position = "absolute";
+    // video.style.left = 100;
+    // video.style.top = 200;
+    console.log('added video:'+stream.mediaStream);
     document.body.appendChild(video);
+
     attachMediaStream(video, stream.mediaStream);
     this.request[videoId] = startDetection(videoId, "320", "240");
   },
