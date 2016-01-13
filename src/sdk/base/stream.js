@@ -797,7 +797,6 @@ When the video/audio parameters are not supported by the browser, a fallback par
             <li><b>Note</b>: Firefox currently does not support runtime resolution or frameRate 
 setting till version 43. Please config them statically through media.navigator.video.* parameters in about:config.</li>
         </ul>
-    <li>url: RTSP stream URL</li>
 </ul>
 <br><b>callback:</b>
 <br>Upon success, err is null, and localStream is an instance of Woogeen.LocalStream; upon failure localStream is undefined and err is one of the following:<br>
