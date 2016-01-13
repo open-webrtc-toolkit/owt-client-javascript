@@ -509,7 +509,7 @@ L.Logger.info('stream added:', stream.id());
       return {
         id: this.id(),
         audio: true,
-        video: true,
+        video: {device: 'camera'},
         url: this.url()
       };
     };
