@@ -189,7 +189,7 @@
             url: mediaUrl
           }, function (err, stream) {
             if (err) {
-              return L.Logger.error('create LocalStream failed:', err);
+              return L.Logger.error('create ExternalStream failed:', err);
             }
             localStream = stream;
             conference.publish(localStream, {}, function (st) {
