@@ -605,10 +605,6 @@ L.Logger.info('stream added:', stream.id());
 
     if (typeof option === 'object' && option !== null) {
       if (option.video) {
-        if (option.video.device === undefined) {
-          option.video.device="camera";
-        }
-
         if (option.video.device === 'screen') {
           if (window.navigator.appVersion.match(/Chrome\/([\w\W]*?)\./)[1] < 34) {
             if (typeof callback === 'function') {
