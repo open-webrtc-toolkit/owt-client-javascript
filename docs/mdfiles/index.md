@@ -114,7 +114,10 @@ We provide source code of a Chrome screen sharing extension sample. Developers s
 
 > **Note:** End users need to install your extension and visit your site with https if they want to use screen sharing.
 
-# 5 Peer-to-peer (P2P) mode{#section5}
+# 5 NAT and Firewall traversal {#section5}
+Intel CS for WebRTC Client SDK for Javascript fully supports NAT and firewall traversal with STUN / TURN / ICE. The rfc5766-turn-server version 3.2.3.6 from https://code.google.com/p/rfc5766-turn-server/ has been verified.
+
+# 6 Peer-to-peer (P2P) mode{#section6}
 To enable P2P chat, copy and paste the following code into the head section of your HTML document:
 ~~~~~~{.js}
 <script type="text/JavaScript" src="sc.websocket.js"></script>
@@ -122,7 +125,7 @@ To enable P2P chat, copy and paste the following code into the head section of y
 ~~~~~~
 The SDK supports Web sockets signaling channel in P2P mode; You need to include `sc.websocket.js` and `socket.io.js` in your HTML files. Please include `socket.io.js` after `woogeen.p2p.js`.
 
-## 5.1 P2P direct call chat {#section5_1}
+## 6.1 P2P direct call chat {#section6_1}
 
 Direct call chat refers to the discovery of another client by chatting with that user's ID. This is a synchronous call and requires that the two clients be online on the signaling server.
 ~~~~~~{.js}
@@ -265,16 +268,16 @@ p2p.on('data-received',function(e){  // Received data from datachannel.
 </script>
 ~~~~~~
 
-## 5.2Customize Signaling Channel {#section5_2}
+## 6.2Customize Signaling Channel {#section6_2}
 
 Signaling channel is an implementation to transmit signaling data for creating a WebRTC session. Signaling channel for P2P sessions can be customized by writing your own `sc.*.js`. The default Socket.IO signaling channel has been provided in the release package with name `sc.websocket.js`.
 
 In the customized signaling channel, you need to implement `connect`, `disconnect` and `sendMessage`, invoke `onMessage` when a new message arrives, and invoke `onServerDisconnected` when the connection is lost. Then include your customized `sc.*.js` into the HTML page.
 
-# 6 Conference mode {#section6}
+# 7 Conference mode {#section7}
 Conference mode is designed for applications with multiple participants. The JavaScript SDK includes a demo application for this.
 
-## 6.1 Create a room from the server side {#section6_1}
+## 7.1 Create a room from the server side {#section7_1}
 
 Server-side APIs are run on Node.js, and act as a Node.js module:
 ~~~~~~{.js}
@@ -298,7 +301,7 @@ Woogeen.API.createRoom (room.name, function (resp) {
 }, room);
 ~~~~~~
 
-## 6.2 Join a conference from the client side {#section6_2}
+## 7.2 Join a conference from the client side {#section7_2}
 To initialize your HTML code, copy and paste the following code into the head section of your HTML document:
 ~~~~~~{.js}
 <script type="text/javascript" src="socket.io.js"></script>
@@ -375,11 +378,11 @@ createToken(roomId, 'user', 'presenter', function (response) {
 });
 </script>
 ~~~~~~
-# 7 JavaScript API reference guide {#section7}
-This discussion describes the APIs provided in the Intel CS for WebRTC Client SDK for JavaScript. Unless mentioned elsewhere, all APIs are under namespace `Woogeen`.
+# 8 JavaScript API quick start {#section8}
+This discussion describes how to quickly grasp the API usages of Intel CS for WebRTC Client SDK for JavaScript. Unless mentioned elsewhere, all APIs are under namespace `Woogeen`.
 
-## 7.1 Objects {#section7_1}
-The following table describes the objects provided in the JavaScript SDK.
+## 8.1 Objects {#section8_1}
+The following table describes the key objects provided in the JavaScript SDK.
 @htmlonly
 <table class="doxtable">
 <caption><b>Table 3 : JavaScript objects </b></caption>
@@ -405,7 +408,7 @@ The following table describes the objects provided in the JavaScript SDK.
     </tbody>
 </table>
 @endhtmlonly
-## 7.2 Example: Get PeerClient {#section7_2}
+## 8.2 Example: Get PeerClient {#section8_2}
 ~~~~~~{.js}
 <script type="text/JavaScript">
   var peer = new Woogeen.PeerClient({
@@ -420,7 +423,7 @@ The following table describes the objects provided in the JavaScript SDK.
   });
 </script>
 ~~~~~~
-## 7.3 Example: Get ConferenceClient {#section7_3}
+## 8.3 Example: Get ConferenceClient {#section8_3}
 
 ~~~~~~{.js}
 <script type="text/JavaScript">
@@ -428,7 +431,7 @@ The following table describes the objects provided in the JavaScript SDK.
 </script>
 ~~~~~~
 
-## 7.4 Example: Create LocalStream and receive RemoteStream {#section7_4}
+## 8.4 Example: Create LocalStream and receive RemoteStream {#section8_4}
 
 ~~~~~~{.js}
 <script type="text/javascript">
@@ -454,7 +457,7 @@ The following table describes the objects provided in the JavaScript SDK.
 </script>
 ~~~~~~
 
-# 8 Events {#Events}
+# 9 Events {#Events}
 
 The JavaScript objects (described earlier in this section) throw events using EventDispatchers. The following table describes all events which can be handled by registering event handlers with the `addEventListener()` function.
 @htmlonly
@@ -530,7 +533,7 @@ The JavaScript objects (described earlier in this section) throw events using Ev
 @endhtmlonly
 <p>&nbsp;</p>
 
-## 8.1 Example for conference:{#section8_1}
+## 9.1 Example for conference:{#section9_1}
 
 ~~~~~~{.js}
 <script type="text/JavaScript">
@@ -558,7 +561,7 @@ conference.subscribe(stream, function () {
 </script>
 ~~~~~~
 
-## 8.2 Example for p2p:{#section8_2}
+## 9.2 Example for p2p:{#section9_2}
 
 ~~~~~~{.js}
 <script type="text/JavaScript">
@@ -575,7 +578,7 @@ conference.subscribe(stream, function () {
 </script>
 ~~~~~~
 
-# 9 Constructors {#section9}
+# 10 Constructors {#section9}
 {@link Woogeen.PeerClient#PeerClient Woogeen.PeerClient.PeerClient(config)}
 
 Factories
