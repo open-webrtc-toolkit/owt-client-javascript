@@ -131,6 +131,7 @@ window.L = L;\n\
         files:[
           {expand: true,cwd:'../src/samples/',src:['**'],dest:'../dist/samples/',flatten:false},
           {expand: true,cwd:'../src/samples/conference/',src:['initcert.js'],dest:'../dist/samples/conference/',flatten:false,mode:true},
+          {expand: true,cwd:'../src/samples/conference/cert/',src:['.woogeen.keystore'],dest:'../dist/samples/conference/cert/',flatten:false,mode:true},
           {expand: true,cwd:'../src/sdk/base/',src:['strophe.js','socket.io.js'],dest:'../dist/sdk/dependencies/',flatten:false},
           {expand: true,cwd:'../src/sdk/base/',src:['adapter.js'],dest:'../dist/sdk/',flatten:false},
           {expand: true,cwd:'../src/sdk/base/',src:['adapter.js'],dest:'../dist/samples/conference/public/',flatten:false},
@@ -144,6 +145,7 @@ window.L = L;\n\
           {expand: true,cwd:'../dist/sdk/',src:['woogeen.sdk.ui.js'],dest:'../dist/samples/meeting/js/',flatten:false},
           {expand: true,cwd:'../dist/sdk/',src:['nuve.js'],dest:'../dist/samples/conference/',flatten:false},
           {expand: true,cwd:'../dist/sdk/',src:['nuve.js'],dest:'../src/samples/conference/',flatten:false}
+
         ]
       }
     },
