@@ -603,12 +603,12 @@ L.Logger.info('stream added:', stream.id());
     }
     var mediaOption = {};
 
-    if (typeof option === 'object' && option !== null) {
+    if (option !== null && typeof option === 'object') {
       if (option.video) {
-        if (option.video === 'object' && option.video !== null ) {
+        if (typeof option.video === 'object') {
           option.video.device="camera";
         }
-        else if(option.video instanceof boolean){
+        else if(option.video instanceof Boolean){
           option.video  =  {
             device:"camera"
           };
