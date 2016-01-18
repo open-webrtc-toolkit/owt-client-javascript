@@ -76,6 +76,28 @@ window.L = L;\n\
         },
         nonull: true
       },
+      dist_debug: {
+        src: srcFiles,
+        dest: '../dist/sdk/<%= pkg.name %>.debug.js',
+        options: {
+          banner: '<%= meta.banner %>' + '<%= meta.header %>',
+          separator: '\n\n\n',
+          footer: '<%= meta.footer %>',
+          process: true
+        },
+        nonull: true
+      },
+      devel_debug: {
+        src: uiSrcFiles,
+        dest: '../dist/sdk/<%= pkg.name %>.ui.debug.js',
+        options: {
+          banner: '<%= meta.banner %>' + '<%= meta.header %>',
+          separator: '\n\n\n',
+          footer: '<%= meta.footer %>',
+          process: true
+        },
+        nonull: true
+      },
       nuve: {
         src: nuveFiles,
         dest: '../dist/sdk/nuve.js',
@@ -129,7 +151,8 @@ window.L = L;\n\
     copy:{
       dist:{
         files:[
-          {expand: true,cwd:'../src/samples/',src:['**'],dest:'../dist/samples/',flatten:false},
+          {expand: true,cwd:'../src/samples/p2p/',src:['**'],dest:'../dist/samples/p2p/',flatten:false},
+          {expand: true,cwd:'../src/samples/conference/',src:['**'],dest:'../dist/samples/conference/',flatten:false},
           {expand: true,cwd:'../src/samples/conference/',src:['initcert.js'],dest:'../dist/samples/conference/',flatten:false,mode:true},
           {expand: true,cwd:'../src/samples/conference/cert/',src:['.woogeen.keystore'],dest:'../dist/samples/conference/cert/',flatten:false,mode:true},
           {expand: true,cwd:'../src/sdk/base/',src:['strophe.js','socket.io.js'],dest:'../dist/sdk/dependencies/',flatten:false},
@@ -139,10 +162,6 @@ window.L = L;\n\
           {expand: true,cwd:'../src/sdk/base/',src:['socket.io.js'],dest:'../dist/samples/conference/public/',flatten:false},
           {expand: true,cwd:'../dist/sdk/',src:['woogeen.sdk.js'],dest:'../dist/samples/conference/public/',flatten:false},
           {expand: true,cwd:'../dist/sdk/',src:['woogeen.sdk.ui.js'],dest:'../dist/samples/conference/public/',flatten:false},
-          {expand: true,cwd:'../src/sdk/base/',src:['adapter.js'],dest:'../dist/samples/meeting/js/',flatten:false},
-          {expand: true,cwd:'../src/sdk/base/',src:['socket.io.js'],dest:'../dist/samples/meeting/js/',flatten:false},
-          {expand: true,cwd:'../dist/sdk/',src:['woogeen.sdk.js'],dest:'../dist/samples/meeting/js/',flatten:false},
-          {expand: true,cwd:'../dist/sdk/',src:['woogeen.sdk.ui.js'],dest:'../dist/samples/meeting/js/',flatten:false},
           {expand: true,cwd:'../dist/sdk/',src:['nuve.js'],dest:'../dist/samples/conference/',flatten:false},
           {expand: true,cwd:'../dist/sdk/',src:['nuve.js'],dest:'../src/samples/conference/',flatten:false}
 
@@ -191,30 +210,7 @@ window.L = L;\n\
           }
          ]
         }
-      },
-      dist_meeting:{
-         files: {
-          '../dist/samples/meeting/index.html': '../src/samples/meeting/index.html',
-        },
-        options: {
-        replacements: [
-          {
-            pattern: '<script src="../../sdk/base/socket.io.js" type="text/javascript"></script>\n        <script src="../../sdk/conference/property.js" type="text/javascript"></script>\n        <script src="../../sdk/base/events.js" type="text/javascript"></script>\n        <script src="../../sdk/base/L.Base64.js" type="text/javascript"></script>\n        <script src="../../sdk/base/L.Logger.js" type="text/javascript"></script>\n        <script src="../../sdk/base/stream.js" type="text/javascript"></script>\n        <script src="../../sdk/base/ieMediaStream.js" type="text/javascript"></script>\n        <script src="../../sdk/base/adapter.js" type="text/javascript"></script>\n        <script src="../../sdk/conference/conference.js" type="text/javascript"></script>\n        <script src="../../sdk/conference/webrtc-stacks/ChromeStableStack.js" type="text/javascript"></script>\n        <script src="../../sdk/conference/webrtc-stacks/FirefoxStack.js" type="text/javascript"></script>\n        <script src="../../sdk/conference/webrtc-stacks/IEStableStack.js" type="text/javascript"></script>',
-            replacement:'<script src="js/socket.io.js" type="text/javascript"></script>\n        <script src="js/adapter.js" type="text/javascript"></script>\n        <script src="js/woogeen.sdk.js" type="text/javascript"></script>'
-          },
-          {
-            pattern: '<script src="../../sdk/ui/AudioPlayer.js" type="text/javascript"></script>\n        <script src="../../sdk/ui/Bar.js" type="text/javascript"></script>\n        <script src="../../sdk/ui/L.Resizer.js" type="text/javascript"></script>\n        <script src="../../sdk/ui/View.js" type="text/javascript"></script>\n        <script src="../../sdk/ui/Speaker.js" type="text/javascript"></script>\n        <script src="../../sdk/ui/VideoPlayer.js" type="text/javascript"></script>\n        <script src="../../sdk/ui/ui.js" type="text/javascript"></script>',
-            replacement: '<script src="js/woogeen.sdk.ui.js" type="text/javascript"></script>'
-          }
-         ]
-        }
       }
-    },
-    clean: {
-     build: {
-       options: {force: true},
-       src: ['../dist/samples/meeting/js/woogeen.sdk.min.js','../dist/samples/meeting/js/woogeen.sdk.ui.min.js']
-     }
     },
     compress:{
       dist:{
@@ -235,12 +231,13 @@ window.L = L;\n\
   grunt.loadNpmTasks('grunt-contrib-jshint');
   grunt.loadNpmTasks('grunt-contrib-copy');
   grunt.loadNpmTasks('grunt-string-replace');
-  grunt.loadNpmTasks('grunt-contrib-clean');
   grunt.loadNpmTasks('grunt-contrib-compress');
 
-  grunt.registerTask('build', ['concat:dist', 'concat:devel', 'concat:nuve','jshint:dist', 'concat:merge', 'uglify:dist','copy:dist','string-replace','clean:build','compress:dist']);
+  grunt.registerTask('build', ['concat:dist', 'concat:devel', 'concat:nuve','jshint:dist', 'concat:merge', 'uglify:dist','copy:dist','string-replace','compress:dist']);
 
   // Default task is an alias for 'build'.
   grunt.registerTask('default', ['build']);
+
+  grunt.registerTask('debug', ['concat:dist_debug', 'concat:devel_debug']);
 
 };
