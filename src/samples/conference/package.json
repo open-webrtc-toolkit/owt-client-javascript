@@ -13,7 +13,7 @@
     "gateway",
     "mcu"
   ],
-  "devDependencies": {
+  "dependencies": {
     "body-parser":"~1.14.1",
     "express":"",
     "errorhandler":"",
