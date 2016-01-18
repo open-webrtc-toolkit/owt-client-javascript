@@ -904,7 +904,7 @@ Woogeen.ExternalStream.create({
 /**
  * @class Woogeen.LocalStream
  * @extends Woogeen.Stream
- * @classDesc Stream from browser constructed from camera, screen, external input(e.g. rtsp)... Use create(options, callback) factory to create an instance.
+ * @classDesc Stream from browser constructed from camera, screen... Use create(options, callback) factory to create an instance.
  */
   Woogeen.LocalStream = WoogeenLocalStream;
 /**
@@ -933,7 +933,7 @@ conference.on('stream-added', function (event) {
 
 /**
  * @class Woogeen.ExternalStream
- * @classDesc Stream from external input(e.g. rtsp). Use create(options, callback) factory to create an instance.
+ * @classDesc Stream from external input(like rtsp). Use create(options, callback) factory to create an instance.
  */
   Woogeen.ExternalStream = WoogeenExternalStream;
 
