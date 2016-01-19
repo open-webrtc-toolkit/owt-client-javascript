@@ -606,7 +606,7 @@ L.Logger.info('stream added:', stream.id());
     if (option !== null && typeof option === 'object') {
       if (option.video) {
         if (typeof option.video === undefined || (typeof option.video !== 'object' && !!option.video)) {
-          option.video = Object.create();
+          option.video = Object.create({});
         }
         if (typeof option.video.device !== 'string') {
           option.video.device = 'camera';
