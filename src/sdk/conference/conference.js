@@ -572,7 +572,7 @@ conference.send(message, receiver, function (obj) {
    {<br>
 maxVideoBW: xxx,<br>
 unmix: false/true, // if true, this stream would not be included in mix stream<br>
-videoCodec: 'h264'/'vp8' // not applicable for p2p room<br>
+videoCodec: 'h264'/'vp8' <br>
 transport: 'udp'/'tcp' // rtsp connection transport type, default 'udp'; only for rtsp input<br>
 bufferSize: integer number in bytes // udp receiving buffer size, default 2 MB; only for rtsp input (udp transport)<br>
 }
@@ -849,7 +849,7 @@ conference.unpublish(localStream, function (st) {
 {<br>
 video: true/false, {resolution: {width:xxx, height:xxx}},<br>
 audio: true/false,<br>
-videoCodec: 'h264'/'vp8' // not for p2p room<br>
+videoCodec: 'h264'/'vp8'<br>
 }
 <br><b>Remarks:</b><br>
 Video resolution choice is only valid for subscribing {@link Woogeen.RemoteMixedStream Woogeen.RemoteMixedStream} when multistreaming output is enabled.　See {@link N.API.createRoom N.API.createRoom()} for detailed description of multistreaming.<br>

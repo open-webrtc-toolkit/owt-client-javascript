@@ -58,7 +58,7 @@ N.API.init('5188b9af6e53c84ffd600413', '21989', 'http://61.129.90.140:3000/')
 <b>options:</b>
 <br>
 <ul>
-    <li><b>mode:</b>"hybrid" for room with mixing and forward streams; "p2p" for p2p room.</li>
+    <li><b>mode:</b>"hybrid" for room with mixing and forward streams.</li>
     <li><b>publishLimit:</b>limiting number of publishers in the room. Value should be equal to or greater than -1. -1 for unlimited.</li>
     <li><b>userLimit:</b>limiting number of users in the room. Value should be equal to or greater than -1. -1 for unlimited.</li>
     <li><b>enableMixing:</b>control whether to enable media mixing in the room, with value choices 0 or 1.</li>
