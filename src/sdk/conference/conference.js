@@ -1282,10 +1282,10 @@ conference.stopRecorder({recorderId: recorderIdToStop}, function (file) {
 /**
    * @function getRegion
    * @instance
-   * @desc This function gets the region ID of the given participant in the mixed stream.
+   * @desc This function gets the region ID of the given stream in the mixed stream.
    <br><b>options:</b><br>
 {<br>
-  id: 'the participant id'<br>
+  id: 'the stream id'<br>
 }
    * @memberOf Woogeen.ConferenceClient
    * @param {json} options getRegion options.
@@ -1295,8 +1295,8 @@ conference.stopRecorder({recorderId: recorderIdToStop}, function (file) {
 <script type="text/JavaScript">
 var conference = Woogeen.ConferenceClient.create();
 // ......
-conference.getRegion({id: 'participantId'}, function (resp) {
-    L.Logger.info('Region for participantId: ', resp.region);
+conference.getRegion({id: 'streamId'}, function (resp) {
+    L.Logger.info('Region for streamId: ', resp.region);
   }, function (err) {
     L.Logger.error('getRegion failed:', err);
   }
@@ -1319,10 +1319,10 @@ conference.getRegion({id: 'participantId'}, function (resp) {
 /**
    * @function setRegion
    * @instance
-   * @desc This function sets the region for the given participant in the mixed stream with the given region id.
+   * @desc This function sets the region for the given stream in the mixed stream with the given region id.
    <br><b>options:</b><br>
 {<br>
-  id: 'the participant id'<br>
+  id: 'the stream id'<br>
   region: 'the region id'<br>
 }
    * @memberOf Woogeen.ConferenceClient
@@ -1333,7 +1333,7 @@ conference.getRegion({id: 'participantId'}, function (resp) {
 <script type="text/JavaScript">
 var conference = Woogeen.ConferenceClient.create();
 // ......
-conference.setRegion({id: 'participantId', region: 'regionId'}, function () {
+conference.setRegion({id: 'streamId', region: 'regionId'}, function () {
     L.Logger.info('setRegion succeeded');
   }, function (err) {
     L.Logger.error('setRegion failed:', err);
