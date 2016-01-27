@@ -38,10 +38,9 @@ app.use(function (req, res, next) {
 //disable layout
 //app.set("view options", {layout: false});
 
-N.API.init('5608ebe0425ffc63568fe388', 'r0gpL5n/h/z+wHmXLFdLz60NE0JYmbH4MABzpKAA6gMzWK/ezAKXvteynGrnrGysAQJbdzULec4mMB9opJ5aYmGYoMTFEED5IUE/HuGbbhYNir5KbgooQ3O4vhY+aTB4fAOLQHa4Jr2tw/3okedTx4dOs/1vMuiCF5fwzPGEtjE=', 'http://localhost:3000/');
+N.API.init('_auto_generated_ID_', '_auto_generated_KEY_', 'http://localhost:3000/');
 
 var myRoom;
-var p2pRoom;
 
 N.API.getRooms(function(roomlist) {
     var rooms = JSON.parse(roomlist);
@@ -51,11 +50,7 @@ N.API.getRooms(function(roomlist) {
             myRoom = rooms[i]._id;
             console.log('MyRoom Id:', myRoom);
         }
-        if (p2pRoom === undefined && rooms[i].mode === 'p2p') {
-            p2pRoom = rooms[i]._id;
-            console.log('P2PRoom Id:', p2pRoom);
-        }
-        if (myRoom !== undefined && p2pRoom !== undefined) {
+        if (myRoom !== undefined) {
             break;
         }
     }
@@ -79,13 +74,6 @@ N.API.getRooms(function(roomlist) {
             console.log('myRoom Id:', myRoom);
         });
     }
-    if (!p2pRoom) {
-        room = {name:'P2P Room', mode:'p2p'};
-        tryCreate(room, function (Id) {
-            p2pRoom = Id;
-            console.log('P2PRoom Id:', p2pRoom);
-        });
-    }
 });
 
 
@@ -102,9 +90,6 @@ app.post('/createToken/', function(req, res) {
     var room = req.body.room || myRoom,
         username = req.body.username,
         role = req.body.role;
-    if (room === 'p2p') {
-        room = p2pRoom;
-    }
     N.API.createToken(room, username, role, function(token) {
         res.send(token);
     },function (err){
