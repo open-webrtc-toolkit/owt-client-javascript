@@ -538,6 +538,12 @@ L.Logger.info('stream added:', stream.id());
     return window.navigator.userAgent.match("Firefox") !== null;
   }
 
+  function canShareScreen () {
+    return isFirefox() ||
+      (window.navigator.appVersion.match(/Chrome\/([\w\W]*?)\./) !== null &&
+      window.navigator.appVersion.match(/Chrome\/([\w\W]*?)\./)[1] >= 34);
+  }
+
   function getReso(w, h) {
     return {
       mandatory: {
@@ -613,7 +619,7 @@ L.Logger.info('stream added:', stream.id());
         }
 
         if (option.video.device === 'screen') {
-          if (window.navigator.appVersion.match(/Chrome\/([\w\W]*?)\./)[1] < 34) {
+          if (!canShareScreen()) {
             if (typeof callback === 'function') {
               callback({
                 code: 1103,
