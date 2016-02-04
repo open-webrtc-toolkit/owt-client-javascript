@@ -78,7 +78,7 @@ window.L = L;\n\
       },
       dist_debug: {
         src: srcFiles,
-        dest: '../dist/sdk/<%= pkg.name %>.debug.js',
+        dest: '../dist/sdk-debug/<%= pkg.name %>.debug.js',
         options: {
           banner: '<%= meta.banner %>' + '<%= meta.header %>',
           separator: '\n\n\n',
@@ -89,7 +89,7 @@ window.L = L;\n\
       },
       devel_debug: {
         src: uiSrcFiles,
-        dest: '../dist/sdk/<%= pkg.name %>.ui.debug.js',
+        dest: '../dist/sdk-debug/<%= pkg.name %>.ui.debug.js',
         options: {
           banner: '<%= meta.banner %>' + '<%= meta.header %>',
           separator: '\n\n\n',
@@ -101,6 +101,15 @@ window.L = L;\n\
       nuve: {
         src: nuveFiles,
         dest: '../dist/sdk/nuve.js',
+        options:{
+           footer:'module.exports = N;',
+           process: true
+        },
+        nonull: true
+      },
+      nuve_debug: {
+        src: nuveFiles,
+        dest: '../dist/sdk-debug/nuve.debug.js',
         options:{
            footer:'module.exports = N;',
            process: true
@@ -238,6 +247,6 @@ window.L = L;\n\
   // Default task is an alias for 'build'.
   grunt.registerTask('default', ['build']);
 
-  grunt.registerTask('debug', ['concat:dist_debug', 'concat:devel_debug']);
+  grunt.registerTask('debug', ['concat:dist_debug', 'concat:devel_debug', 'concat:nuve_debug']);
 
 };
