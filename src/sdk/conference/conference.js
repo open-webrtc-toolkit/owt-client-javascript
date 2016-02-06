@@ -821,7 +821,7 @@ conference.unpublish(localStream, function (st) {
    */
   WoogeenConference.prototype.unpublish = function (stream, onSuccess, onFailure) {
     var self = this;
-    if (!(stream instanceof Woogeen.LocalStream)) {
+    if (!(stream instanceof Woogeen.LocalStream || stream instanceof Woogeen.ExternalStream)) {
       return safeCall(onFailure, 'invalid stream');
     }
     sendMsg(self.socket, 'unpublish', stream.id(), function (err) {
