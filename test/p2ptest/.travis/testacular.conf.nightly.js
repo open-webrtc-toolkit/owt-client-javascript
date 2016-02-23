@@ -85,8 +85,8 @@ module.exports = function (config){
     protocol: 'https',
 
     httpsServerOptions: {
-        key: fs.readFileSync('/home/webrtctest3/workspace/Test/webrtc-webrtc-qa/dailyTestScript/NightlyTest/script/sdk/test_space/server/dist/server/cert/key.pem', 'utf8'),
-        cert: fs.readFileSync('/home/webrtctest3/workspace/Test/webrtc-webrtc-qa/dailyTestScript/NightlyTest/script/sdk/test_space/server/dist/server/cert/cert.pem', 'utf8')
+        key: fs.readFileSync('../server/dist/server/cert/key.pem', 'utf8'),
+        cert: fs.readFileSync('../server/dist/server/cert/cert.pem', 'utf8')
     },
     // Auto run tests on start (when browsers are captured) and exit
     // CLI --single-run --no-single-run

@@ -17,7 +17,7 @@ fi
 # Prepare profile to use webrtc
 #rm -rf $USER_DIR
 #mkdir -p $USER_DIR"/Default/"
-cp /home/webrtctest3/workspace/Test/NightlyTest/script/sdk/deps/karmar/Preferences $USER_DIR"/Default/"
+cp /home/webrtc-003/workspace/Test/NightlyTest/script/sdk/deps/karmar/Preferences $USER_DIR"/Default/"
 
 # Execute the command
 export DISPLAY=:0
