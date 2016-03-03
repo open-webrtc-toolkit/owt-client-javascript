@@ -408,7 +408,7 @@ The following table describes the key objects provided in the JavaScript SDK.
     </tbody>
 </table>
 @endhtmlonly
-## Example: Get PeerClient {#section8_2}
+## 8.2 Example: Get PeerClient {#section8_2}
 ~~~~~~{.js}
 <script type="text/JavaScript">
   var peer = new Woogeen.PeerClient({
@@ -423,7 +423,7 @@ The following table describes the key objects provided in the JavaScript SDK.
   });
 </script>
 ~~~~~~
-## Example: Get ConferenceClient {#section8_3}
+## 8.3 Example: Get ConferenceClient {#section8_3}
 
 ~~~~~~{.js}
 <script type="text/JavaScript">
