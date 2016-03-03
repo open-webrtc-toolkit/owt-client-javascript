@@ -15,44 +15,51 @@ describe('TestDevice2', function() {
         actorUserName = "User2",
         targetUserName = "User1",
         serverIP = 'http://10.239.44.33:8095/',
-        waitInterval = 10000;
+        waitInterval = 20000;
 
     beforeEach(function(done) {
-        actorUser = new TestClient(actorUserName, serverIP);
-        //bind callback listners
-        actorUser.bindListener("server-disconnected", function(e) {
-            actorUser.request["server-disconnected_success"]++;
-        });
-        actorUser.bindListener("chat-invited", function(e) {
-            actorUser.request["chat-invited_success"]++;
-        });
-        actorUser.bindListener("chat-denied", function(e) {
-            actorUser.request["chat-denied_success"]++;
-        });
-        actorUser.bindListener("chat-started", function(e) {
-            actorUser.request["chat-started_success"]++;
-        });
-        actorUser.bindListener("chat-stopped", function(e) {
-            actorUser.request["chat-stopped_success"]++;
-            sender = e.senderId;
-            actorUserPeer = e.peerId;
-        });
-        actorUser.bindListener("stream-added", function(e) {
-            actorUser.showInPage(e.stream);
-            actorUser.request["stream-added_success"]++;
-        });
-        actorUser.bindListener("stream-removed", function(e) {
-            console.log('stream-removed is called!');
-            actorUser.removeVideo(e.stream);
-            console.log('after remove!');
-            actorUser.request["stream-removed_success"]++;
-        });
-        actorUser.bindListener("data-received", function(e) {
-            actorUser.request["data-received_success"]++;
-            actorUser_datasender = e.senderId;
-            actorUser_data = e.data;
-        });
-        done();
+        thisQ
+            .runs(function() {
+                actorUser = new TestClient(actorUserName, serverIP);
+                //bind callback listners
+                actorUser.bindListener("server-disconnected", function(e) {
+                    actorUser.request["server-disconnected_success"]++;
+                });
+                actorUser.bindListener("chat-invited", function(e) {
+                    actorUser.request["chat-invited_success"]++;
+                });
+                actorUser.bindListener("chat-denied", function(e) {
+                    actorUser.request["chat-denied_success"]++;
+                });
+                actorUser.bindListener("chat-started", function(e) {
+                    actorUser.request["chat-started_success"]++;
+                });
+                actorUser.bindListener("chat-stopped", function(e) {
+                    actorUser.request["chat-stopped_success"]++;
+                    sender = e.senderId;
+                    actorUserPeer = e.peerId;
+                });
+                actorUser.bindListener("stream-added", function(e) {
+                    actorUser.showInPage(e.stream);
+                    actorUser.request["stream-added_success"]++;
+                });
+                actorUser.bindListener("stream-removed", function(e) {
+                    actorUser.removeVideo(e.stream);
+                    actorUser.request["stream-removed_success"]++;
+                });
+                actorUser.bindListener("data-received", function(e) {
+                    actorUser.request["data-received_success"]++;
+                    actorUser_datasender = e.senderId;
+                    actorUser_data = e.data;
+                });
+            })
+            .waitsFor(function() {
+                return waitLock('STARTTEST');
+            },actorUserName + " wait start message", waitInterval)
+            .runs(function() {
+                console.log(actorUserName + ' start test!');
+                done();
+            });
     });
     /**
      * Test a normal interaction process between two users.
@@ -80,13 +87,14 @@ describe('TestDevice2', function() {
         thisQ
             .runs(function() {
                 // start test
-                debug(actorUserName+"test start!");
+                debug(actorUserName + "test start!");
             })
             // 1. User1Connect
             // 2. User2Connect
             .waitsFor(function() {
-                debug("wait User1Connect")
-                    // wait lock
+                //This sentence will cause a bug in testFrameworkTest.
+                // debug("wait User1Connect")
+                // wait lock
                 return waitLock('User1Connect');
             }, actorUserName + "wait lock: User1Connect", waitInterval)
             .runs(function() {
@@ -254,13 +262,11 @@ describe('TestDevice2', function() {
                 notifyLock('User2Disconnect');
             })
             .waits('wait lock send out', 1000)
-            .runs(function () {
+            .runs(function() {
                 // end test
+                console.log('test end');
                 done();
             })
             // 17. User1Disconnect
-    });
-    it('hello client 2', function() {
-        debug('hello client2');
     });
 });

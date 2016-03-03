@@ -21,7 +21,7 @@ How to Run the Case
 -------------------
 (If you run this test for the first time, please run 'npm install' to download necessary libs)
 1. Start lock server: import java project under 'netty' package and run Test.java.
-    This will start a socket.io server under port 9092.
+    This will start a socket.io server under port 9092. Additionally, there's a 'LockServerHtmlClient' provided under path 'netty/src'. You can open Client.html to watch the lock signals(Lock server will resend the latest lock it has received).
 2. Start a p2p server and change the 'serverIP' field  in test case files(test-peerwn-user*.js).
 3. Run 'karma start <testclient*.conf.js>' to start the karma(every time you change your source code or files, this command should be runned). e.g.
     ~~~~~~~~~~~~~~~~~~~{cmd}
@@ -33,6 +33,7 @@ How to Run the Case
     karma run testclient1.conf.js -- --grep=testTwoUserInteraction
     karma run testclient2.conf.js -- --grep=testTwoUserInteraction
     ~~~~~~~~~~~~~~~~~~~
+5. Press 'StartTest' button to start the test.
 
 Case Logic: testTwoUserInteraction
 -----------------------
@@ -62,3 +63,6 @@ Tips
 1. the time interval to excute the above 'karma run' command should not be very long in that I define a short time of waiting.
 2. for the browsers that start by our script instead of the embeded launchers in karma, you have to manually close them.
 3. the simple server only broadcast all the lock messages to all the clients and resend last lock message every 500 seconds. The client take charge of the logic of testing.
+4. remember to close the proxy before testing.
+5. if you want to change the test platform(e.g. Firefox) or change the test source code, please change the configuration in karma file.
+6. after you change the test code, you should rerun the 'karma start' to refresh or it won't take effect.

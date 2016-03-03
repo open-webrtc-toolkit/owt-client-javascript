@@ -35,7 +35,9 @@ var TestClient = function(user, serverURL, config) {
   };
   this.peerClient = new Woogeen.PeerClient(config);
   this.serverURL = serverURL || "http://10.239.44.33:8095/";
+  console.log('serverURL:'+this.serverURL);
   this.user = user || "user" + new Date().getTime();
+  console.log('user:'+this.user);
   this.request = {};
 }
 
@@ -104,6 +106,7 @@ TestClient.prototype = {
     var that = this;
     this.request["connect_success"] = this.request["connect_success"] || 0;
     this.request["connect_failed"] = this.request["connect_failed"] || 0;
+    console.log('urll:'+this.serverURL);
     this.peerClient.connect({
       host: this.serverURL,
       token: this.user
