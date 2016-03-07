@@ -3,9 +3,11 @@
   "version": "0.1.0",
   "description": "Open Source Communication Provider",
   "devDependencies": {
-    "vows": "0.6.x",
     "coffee-script": "1.4.x",
-    "testacular": "0.4.x"
+    "karma-jenkins-reporter": "0.0.2",
+    "requirejs": "^2.1.22",
+    "testacular": "0.4.x",
+    "vows": "0.6.x"
   },
   "dependencies": {
     "amqp": "*",

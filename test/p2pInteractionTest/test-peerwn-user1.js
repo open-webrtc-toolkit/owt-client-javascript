@@ -18,39 +18,48 @@ describe('TestDevice1', function() {
         waitInterval = 20000;
 
     beforeEach(function(done) {
-        actorUser = new TestClient(actorUserName, serverIP);
-        //bind callback listners
-        actorUser.bindListener("server-disconnected", function(e) {
-            actorUser.request["server-disconnected_success"]++;
-        });
-        actorUser.bindListener("chat-invited", function(e) {
-            actorUser.request["chat-invited_success"]++;
-        });
-        actorUser.bindListener("chat-denied", function(e) {
-            actorUser.request["chat-denied_success"]++;
-        });
-        actorUser.bindListener("chat-started", function(e) {
-            actorUser.request["chat-started_success"]++;
-        });
-        actorUser.bindListener("chat-stopped", function(e) {
-            actorUser.request["chat-stopped_success"]++;
-            sender = e.senderId;
-            actorUserPeer = e.peerId;
-        });
-        actorUser.bindListener("stream-added", function(e) {
-            actorUser.showInPage(e.stream);
-            actorUser.request["stream-added_success"]++;
-        });
-        actorUser.bindListener("stream-removed", function(e) {
-            actorUser.removeVideo(e.stream);
-            actorUser.request["stream-removed_success"]++;
-        });
-        actorUser.bindListener("data-received", function(e) {
-            actorUser.request["data-received_success"]++;
-            actorUser_datasender = e.senderId;
-            actorUser_data = e.data;
-        });
-        done();
+        thisQ
+            .runs(function() {
+                actorUser = new TestClient(actorUserName, serverIP);
+                //bind callback listners
+                actorUser.bindListener("server-disconnected", function(e) {
+                    actorUser.request["server-disconnected_success"]++;
+                });
+                actorUser.bindListener("chat-invited", function(e) {
+                    actorUser.request["chat-invited_success"]++;
+                });
+                actorUser.bindListener("chat-denied", function(e) {
+                    actorUser.request["chat-denied_success"]++;
+                });
+                actorUser.bindListener("chat-started", function(e) {
+                    actorUser.request["chat-started_success"]++;
+                });
+                actorUser.bindListener("chat-stopped", function(e) {
+                    actorUser.request["chat-stopped_success"]++;
+                    sender = e.senderId;
+                    actorUserPeer = e.peerId;
+                });
+                actorUser.bindListener("stream-added", function(e) {
+                    actorUser.showInPage(e.stream);
+                    actorUser.request["stream-added_success"]++;
+                });
+                actorUser.bindListener("stream-removed", function(e) {
+                    actorUser.removeVideo(e.stream);
+                    actorUser.request["stream-removed_success"]++;
+                });
+                actorUser.bindListener("data-received", function(e) {
+                    actorUser.request["data-received_success"]++;
+                    actorUser_datasender = e.senderId;
+                    actorUser_data = e.data;
+                });
+            })
+            .waitsFor(function () {
+                return waitLock('STARTTEST');
+            },actorUserName + " wait start message", waitInterval)
+            .runs(function () {
+                console.log(actorUserName+' start test!');
+                done();
+            });
     });
     /**
      * Test a normal interaction process between two users.
@@ -80,7 +89,7 @@ describe('TestDevice1', function() {
                 // start test
                 debug(actorUserName + "test start!");
             })
-            .waits('wait for user2 init', 2000)
+            // .waits('wait for user2 init', 10000)
             // // 1. User1Connect
             .runs(function() {
                 // action
@@ -168,7 +177,7 @@ describe('TestDevice1', function() {
             .runs(function() {
                 // action
                 actorUser.send(targetUserName, "english ~!#$%^&*()");
-                //actorUser.send(targetUserName, "中文 ～！@＃¥％……&＊（）");
+                // actorUser.send(targetUserName, "中文 ～！@＃¥％……&＊（）");
             })
             .waitsFor(function() {
                 //check action
@@ -262,16 +271,8 @@ describe('TestDevice1', function() {
             }, actorUserName + "check action: disconnect ", waitInterval)
             .runs(function() {
                 // ends the case
+                console.log('test end');
                 done();
             })
-    });
-    it('hello client 2', function() {
-        debug('hello client2');
-    });
-    it('testCreateLocalStream', function(done) {
-        actorUser.createLocalStream();
-        setTimeout(function(done) {
-            done();
-        }, 10000);
     });
 });
