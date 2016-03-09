@@ -65,7 +65,7 @@ N.API.init('5188b9af6e53c84ffd600413', '21989', 'http://61.129.90.140:3000/')
     <li><b>mediaMixing:</b>media setting for mixed stream in the room if mixing is enabled. Value should be a JSON object contains two entries: "video" and "audio". Audio entry is currently not used and should be null.</li>
     <ul>
         <li>audio: null</li>
-        <li>video: maxInput, resolution, multistreaming, bitrate , bkColor, layout, avCoordinate</li>
+        <li>video: maxInput, resolution, multistreaming, bitrate , bkColor, layout, avCoordinate, crop</li>
         <ul>
             <li>maxInput is for maximum number of slots in the mix stream</li>
             <li>resolution denotes the resolution of the video size of mix stream.Valid resolution list:</li>
@@ -87,6 +87,7 @@ N.API.init('5188b9af6e53c84ffd600413', '21989', 'http://61.129.90.140:3000/')
                     <li>MCU would try to combine the two entries for mixing video if user sets both.</li>
                 </ul>
             <li>avCoordinated (0 or 1) is for disabling/enabling VAD(Voice activity detection). When VAD is applied, main pane(layout id=1) will be filled with the user stream which is the most active in voice currently.</li>
+            <li>crop (0 or 1) is for disabling/enabling video cropping to fit in the region assigned to it in the mixed video.</li>
         </ul>
     </ul>
 </ul>
@@ -154,7 +155,8 @@ N.API.createRoom('myRoom',
       layout: {
         base: 'fluid',
       },
-      avCoordinated: 1
+      avCoordinated: 1,
+      crop: 1
     },
     audio: null
   },
@@ -246,7 +248,8 @@ N.API.updateRoom(XXXXXXXXXX, {
       layout: {
         base: 'lecture',
       },
-      avCoordinated: 1
+      avCoordinated: 1,
+      crop: 1
     },
     audio: null
   },
