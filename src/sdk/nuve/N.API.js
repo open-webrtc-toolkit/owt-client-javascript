@@ -76,6 +76,8 @@ N.API.init('5188b9af6e53c84ffd600413', '21989', 'http://61.129.90.140:3000/')
                     <li>'xga'</li>
                     <li>'hd720p'</li>
                     <li>'hd1080p'</li>
+                    <li>'uhd_4k'</li>
+                    <li>'r720x720'</li>
                 </ul>
             <li>multistreaming(0 or 1) indicates whether the MCU mix stream outputs multiple resolutions for different devices. The additional stream's resolutions are determined by MCU according to the base resolution user specified, no customizations is allowed yet. Please see the following table for detailed mapping.</li>
             <li>bitrate indicates video bitrate of the mix stream, in Kbit unit. Default value 0, meaning that MCU could use its own calculated default value.</li>
@@ -126,6 +128,14 @@ All supported resolutions are list in the following table.
         <tr>
             <td>hd1080p</td>
             <td>{width: 1920, height: 1080}, {width: 1280, height: 720}, {width: 800, height: 600}, {width: 640, height: 480}, {width: 640, height: 360}</td>
+        </tr>
+        <tr>
+            <td>uhd_4k</td>
+            <td>{width: 3840, height: 2160}, {width: 1920, height: 1080}, {width: 1280, height: 720}, {width: 800, height: 600}, {width: 640, height: 480}, {width: 640, height: 360}</td>
+        </tr>
+        <tr>
+            <td>r720x720</td>
+            <td>{width: 720, height: 720}</td>
         </tr>
     </tbody>
 </table>
