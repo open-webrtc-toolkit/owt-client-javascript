@@ -17,8 +17,8 @@ fi
 # Prepare profile to use webrtc
 #rm -rf $USER_DIR
 #mkdir -p $USER_DIR"/Default/"
-cp /home/webrtc-003/workspace/Test/NightlyTest/script/sdk/deps/karmar/Preferences $USER_DIR"/Default/"
+cp .travis/Preferences $USER_DIR"/Default/"
 
 # Execute the command
 export DISPLAY=:0
-exec "$CMD" --user-data-dir="$USER_DIR" --use-fake-ui-for-media-stream --disable-user-media-security --no-default-browser-check --no-first-run --disable-default-apps --use-fake-device-for-media-stream "$@"
+exec "$CMD" --user-data-dir="$USER_DIR"  --no-proxy-server --use-fake-ui-for-media-stream --disable-user-media-security --no-default-browser-check --no-first-run --disable-default-apps --use-fake-device-for-media-stream "$@"
