@@ -1,5 +1,3 @@
-//var serverAddress = 'http://180.153.223.233:3001/';
-//var serverAddress = 'http://10.239.33.28:3001/';
 var securedServerAddress = 'https://webrtc.sh.intel.com:3004/';
 var unsecuredServerAddress = 'http://webrtc.sh.intel.com:3001/';
 var serverAddress = unsecuredServerAddress;
@@ -44,6 +42,7 @@ var isSmall = false;
 var singleMute=true;
 var isPauseAudio=true;
 var isPauseVideo=false;
+var isOriginal=true;
 
 function login() {
     setTimeout(function() {
@@ -60,10 +59,6 @@ function login() {
     if (isMobile && typeof document.body.webkitRequestFullScreen === 'function') {
         document.body.webkitRequestFullScreen();
     }
-}
-
-function setLoginHeight(height){
-    $('#login-panel').height(height);
 }
 
 function toggleLoginSetting() {
@@ -269,7 +264,7 @@ function initWoogeen() {
         bandWidth = 500;
         videoSize = "vga";
     } else if ($('#login-720').hasClass('selected')) {
-        bandWidth = 1000;
+        bandWidth = 1500;
         videoSize = "hd720p";
     }
 
@@ -300,7 +295,6 @@ function initWoogeen() {
                 localStream = stream;
                 sendIm('Connected to the room.', 'System');
                 $('#text-send,#send-btn').show();
-
                 room.publish(localStream, {
                     maxVideoBW: bandWidth
                 }, function(st) {
@@ -368,7 +362,7 @@ function initWoogeen() {
             });
             loadUserList();
             streams.map(function(stream) {
-                if (stream.isMixed && stream.isMixed()) {
+            if (stream.isMixed && stream.isMixed()) {
                     console.log("Mix stream id: "+stream.id());
                 }
                 L.Logger.info('stream in conference:', stream.id());
@@ -458,16 +452,8 @@ function createToken(userName, role, room, callback) {
 function addRoomEventListener() {
     room.on('stream-added', function(streamEvent) {
         var stream = streamEvent.stream;
-        console.log("stream added:", stream.id());
+        console.log("stream added:",stream.id());
         streamObj = room.remoteStreams;
-        if(stream.id() == localStream.id()) {
-            room.startRecorder({videoStreamId:stream.id()}, function(info) {
-                console.log("Record my stream succeed with info:", info);
-            }, function(err) {
-                condole.log("Record my stream fail with err:", err);
-            });
-        }
-
         if (subscribeType === SUBSCRIBETYPES.FORWARD && (stream.isMixed && stream.isMixed())) {
             return;
         } else if (subscribeType === SUBSCRIBETYPES.MIX && (!(stream.isMixed && stream.isMixed()) && !(stream.isScreen && stream.isScreen()))) {
@@ -575,7 +561,7 @@ function addRoomEventListener() {
                 id: e.user.id,
                 name: e.user.name
             });
-            sendIm(e.user.name + ' has joined the room.', 'System');
+            console.log("join user:"+e.user.name);
             addUserListItem(e.user,true);
             room.send({muteInitID:e.user.id},'all');
         }
@@ -625,8 +611,11 @@ function addRoomEventListener() {
         sec = sec > 9 ? sec.toString() : '0' + sec.toString();
         var timeStr = hour + ':' + mini + ':' + sec;
         var color = getColor(user.name);
-        $('<p class="' + color + '">').html(timeStr + ' ' + user.name + '<br />')
+        if(typeof event.msg.data !=='object'){
+            $('<p class="' + color + '">').html(timeStr + ' ' + user.name + '<br />')
             .append(document.createTextNode(event.msg.data)).appendTo('#text-content');
+            $('#text-content').scrollTop($('#text-content').prop('scrollHeight'));
+        }
     });
 }
 
@@ -639,12 +628,14 @@ function shareScreen() {
     $('#video-panel').append('<div id="local-screen" class="client clt-0 largest"' +
         '>Screen Sharing</div>').addClass('screen');
     changeMode(MODES.LECTURE, $('#local-screen'));
+    var width = screen.width, height = screen.height;
+
     room.shareScreen({
-        resolution: "hd1080p",
+        resolution: {width:width,height:height},
         frameRate: [10, 10]
     }, function(stream) {
-        console.log("share screen Stream id: "+stream.id());
-        // stream.show('local-screen');
+        console.log("share stream id:",stream.id());
+        console.log("share stream resolution:",stream.resolution);
         localScreen = stream;
         changeMode(MODES.LECTURE, $('#local-screen'));
         localScreen.mediaStream.addEventListener('ended', function(e) {
@@ -731,7 +722,7 @@ function addVideo(stream, isLocal) {
             .children().children('div').remove();
         $('#video-panel .largest').removeClass("largest");
         $('#screen').addClass("largest");
-        $('#screen').append('<div class="ctrl"><a href="#" class="ctrl-btn enlarge"></a><a href="#" class="ctrl-btn ' + 'fullscreen"></a></div>').append('<div class="ctrl-name">' + 'Screen Sharing from ' + streamObj[stream.from].attributes()['name'] + '</div>');
+        $('#screen').append('<div class="ctrl" id="original"><a href="#" class="ctrl-btn original"></a><a href="#" class="ctrl-btn enlarge"></a><a href="#" class="ctrl-btn ' + 'fullscreen"></a></div>').append('<div class="ctrl-name">' + 'Screen Sharing from ' + streamObj[stream.from].attributes()['name'] + '</div>');
         $('#local-screen').remove();
         changeMode(MODES.LECTURE, !isLocalScreenSharing);
         streamObj["screen"] = stream;
@@ -936,10 +927,12 @@ function sendIm(msg, sender) {
     var color = getColor(sender);
     var user = getUserFromId(sender);
     var name = user ? user['name'] : 'System';
+    if(name!=='System'){
     $('<p class="' + color + '">').html(timeStr + ' ' + name + '<br />')
         .append(document.createTextNode(msg)).appendTo('#text-content');
     // scroll to bottom of text content
     $('#text-content').scrollTop($('#text-content').prop('scrollHeight'));
+    }
 }
 
 function updateProgress() {
@@ -1158,6 +1151,14 @@ function resizeStream(newMode) {
             element = $("#" + stream.elementId),
             width = element.width(),
             height = element.height();
+    if (stream.isScreen()){
+      element.find("video").css({
+            width: hasLeft ? "calc(100% + " + (4 / 3 * height - width) + "px)" : ""+stream.width,
+            height: ""+stream.height,
+            top: "0px",
+            left: hasLeft ? -(4 / 3 * height / 2 - width / 2) + "px" : "0px"
+          });
+    }else{
         element.find("video").css({
             width: hasLeft ? "calc(100% + " + (4 / 3 * height - width) + "px)" : "100%",
             height: "100%",
@@ -1165,6 +1166,7 @@ function resizeStream(newMode) {
             left: hasLeft ? -(4 / 3 * height / 2 - width / 2) + "px" : "0px"
         });
     }
+ }
 }
 
 function updateMonitor() {
@@ -1353,6 +1355,19 @@ $(document).ready(function() {
      $(document).on('click', '#pauseAudio', function() {
        pauseAudio();
     });
+
+     $(document).on('click', '.original', function() {
+        if(isOriginal){
+          $(this).parent().siblings().children('video').css('width','100%');
+          $(this).parent().siblings().children('video').css('height','100%');
+          $(this).parent().siblings().css('overflow','auto');
+          //$(this).parent().siblings().children('video').parent().css('z-index','100');
+          isOriginal=!isOriginal;
+    }else{
+          $(this).parent().siblings().children('video').css('width','');
+          $(this).parent().siblings().children('video').css('height','');
+          isOriginal=!isOriginal;
+    }});
 
     $(document).on('click', '.shrink', function() {
         exitFullScreen($(this).parent());

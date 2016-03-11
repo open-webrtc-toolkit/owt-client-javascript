@@ -630,8 +630,13 @@ L.Logger.info('stream added:', stream.id());
           }
         }
 
-        mediaOption.video = JSON.parse(JSON.stringify(supportedVideoList[option.video.resolution] || supportedVideoList.unspecified));
-        if(!isLegacyIE()){
+        if(typeof option.video.resolution === 'object' && option.video.resolution.width !== undefined && option.video.resolution.height !== undefined){
+          mediaOption.video = JSON.parse(JSON.stringify(getReso(option.video.resolution.width,option.video.resolution.height)));
+        }else{
+          mediaOption.video = JSON.parse(JSON.stringify(supportedVideoList[option.video.resolution] || supportedVideoList.unspecified));
+        }
+
+       if(!isLegacyIE()){
           if (!isLegacyChrome() && option.video.frameRate instanceof Array && option.video.frameRate.length >= 2) {
             mediaOption.video.mandatory.minFrameRate = option.video.frameRate[0];
             mediaOption.video.mandatory.maxFrameRate = option.video.frameRate[1];
