@@ -203,14 +203,6 @@ conference.setIceServers([{
     return this.spec.userSetIceServers;
   };
 
-  Object.defineProperties(this, {
-    state: {
-      get: function () {
-        return this.spec.state;
-      }
-    }
-  });
-
 /**
    * @function join
    * @instance
@@ -243,12 +235,12 @@ conference.join(token, function(response) {...}, function(error) {...});
       host = isSecured ? ('https://' + host) : ('http://' + host);
     }
     // check connection>host< state
-    if (this.state !== DISCONNECTED) {
+    if (self.state !== DISCONNECTED) {
       return safeCall(onFailure, 'connection state invalid');
     }
 
     self.on('server-disconnected', function () { // onConnectionClose handler
-      this.state = DISCONNECTED;
+      self.state = DISCONNECTED;
       self.myId = null;
       var i, stream;
       // remove all remote streams
@@ -279,7 +271,7 @@ conference.join(token, function(response) {...}, function(error) {...});
       } catch (err) {}
     });
 
-    this.state = CONNECTING;
+    self.state = CONNECTING;
 
     if (self.socket !== undefined) { // whether reconnect
       self.socket.connect();
@@ -422,7 +414,7 @@ conference.join(token, function(response) {...}, function(error) {...});
       });
 
       self.socket.on('disconnect', function () {
-        if (this.state !== DISCONNECTED) {
+        if (self.state !== DISCONNECTED) {
           var evt = new Woogeen.ClientEvent({type: 'server-disconnected'});
           self.dispatchEvent(evt);
         }
@@ -453,7 +445,7 @@ conference.join(token, function(response) {...}, function(error) {...});
 
       self.socket.on('connection_failed', function() {
         L.Logger.info("ICE Connection Failed");
-        if (this.state !== DISCONNECTED) {
+        if (self.state !== DISCONNECTED) {
           var disconnectEvt = new Woogeen.StreamEvent({type: 'stream-failed'});
           self.dispatchEvent(disconnectEvt);
         }
@@ -481,7 +473,7 @@ conference.join(token, function(response) {...}, function(error) {...});
           self.myId = resp.clientId;
           self.conferenceId = resp.id;
           self.p2p = resp.p2p;
-          this.state = CONNECTED;
+          self.state = CONNECTED;
           var streams = [];
           self.conferenceId = resp.id;
           self.p2p = resp.p2p;
