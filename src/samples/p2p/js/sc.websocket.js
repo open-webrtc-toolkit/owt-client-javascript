@@ -8,15 +8,15 @@ function SignalingChannel(){
   this.onServerDisconnected=null;
 
   var clientType='Web';
-  var clientVersion='3.0';
+  var clientVersion='3.1';
 
   var wsServer=null;
 
   var self=this;
 
-  /* TODO: Do remember to trigger onMessageReceived when new message is received.
-     if(this.onMessageReceived)
-       this.onMessageReceived(from, message);
+  /* TODO: Do remember to trigger onMessage when new message is received.
+     if(this.onMessage)
+       this.onMessage(from, message);
    */
 
   // message should a string.
