@@ -1071,14 +1071,29 @@ conference.leave();
      * @instance
      * @desc This function creates a LocalStream from screen and publishes it to the　server.
      * @memberOf Woogeen.ConferenceClient
-     * @param {string} options (optional) Share screen options, similar to video option that used to create a LocalStream.
+     * @param {string} options (optional) : extensionId, resolution, frameRate, maxVideoBW, videoCodec<br/>
+        <ul>
+          <li>extensionId is id of Chrome Extension for screen sharing.</li>
+          <li>Valid resolution list:</li>
+              <ul>
+                  <li>'sif'</li>
+                  <li>'vga'</li>
+                  <li>'hd720p'</li>
+                  <li>'hd1080p'</li>
+                  <li>If not provided, the resolution is decided by the screen size.</li>
+              </ul>
+          <li>frameRate should be an array as [min_frame_rate, max_frame_rate], in which each element should be a proper number, e.g., [20, 30].</li>
+          <li>maxVideoBW: xxx</li>
+          <li>videoCodec: 'h264'/'vp8'</li>
+        </ul>
+        <br/>
      * @param {function} onSuccess(stream) (optional) Success callback.
      * @param {function} onFailure(err) (optional) Failure callback. See details about error definition in {@link Woogeen.LocalStream#create LocalStream.create}.
      * @example
   <script type="text/JavaScript">
   var conference = Woogeen.ConferenceClient.create();
   // ……
-  conference.shareScreen({resolution: 'hd720p'}, function (st) {
+  conference.shareScreen({ extensionId:'pndohhifhheefbpeljcmnhnkphepimhe', resolution: 'hd1080p', frameRate:[10,10], maxVideoBW:2000, videoCodec:'vp8'}, function (st) {
       L.Logger.info('screen shared:', st.id());
     }, function (err) {
       L.Logger.error('sharing failed:', err);
@@ -1098,7 +1113,7 @@ conference.leave();
         video: {
           device: 'screen',
           extensionId: option.extensionId,
-          resolution: option.resolution,
+          resolution: option.resolution ? option.resolution : {width:screen.width,height:screen.height},
           frameRate: option.frameRate
         },
         audio: false
@@ -1106,7 +1121,8 @@ conference.leave();
         if (err) {
           return safeCall(onFailure, err);
         }
-        self.publish(stream, function (st) {
+        self.publish(stream,{maxVideoBW:option.maxVideoBW, videoCodec:option.videoCodec},
+          function (st) {
           safeCall(onSuccess, st);
         }, function (err) {
           safeCall(onFailure, err);
