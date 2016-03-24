@@ -1378,7 +1378,7 @@ p2p.send($('#data').val(), $('#target-uid').val());
     }
     // If data channel is ready, send it. Otherwise, cache it in message queue.
     var dc=peer.dataChannels[DataChannelLabel.MESSAGE];
-    if(dc&&dc.readyState!=='closed'){
+    if(dc&&dc.readyState==='open'){
       dc.send(message);
     }else{
       peer.pendingMessages.push(message);
