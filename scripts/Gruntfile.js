@@ -65,7 +65,7 @@ window.L = L;\n\
         },
         nonull: true
       },
-      devel: {
+      ui_dist: {
         src: uiSrcFiles,
         dest: '../dist/sdk/<%= pkg.name %>.ui.js',
         options: {
@@ -87,7 +87,7 @@ window.L = L;\n\
         },
         nonull: true
       },
-      devel_debug: {
+      ui_dist_debug: {
         src: uiSrcFiles,
         dest: '../dist/sdk-debug/<%= pkg.name %>.ui.debug.js',
         options: {
@@ -124,7 +124,7 @@ window.L = L;\n\
     },
     jshint: {
       dist: '../dist/sdk/<%= pkg.name %>.js',
-      devel: '../dist/sdk/<%= pkg.name %>.ui.js',
+      ui_dist: '../dist/sdk/<%= pkg.name %>.ui.js',
       options: {
         browser: true,
         curly: true,
@@ -153,7 +153,7 @@ window.L = L;\n\
         },
         options: {
           banner: '<%= meta.banner %>'
-	        //sourceMap:true
+          //sourceMap:true
         }
       }
     },
@@ -247,11 +247,11 @@ window.L = L;\n\
   grunt.loadNpmTasks('grunt-string-replace');
   grunt.loadNpmTasks('grunt-contrib-compress');
 
-  grunt.registerTask('build', ['concat:dist', 'concat:devel', 'concat:nuve','jshint:dist', 'concat:merge', 'uglify:dist','copy:dist','string-replace','compress:dist']);
+  grunt.registerTask('build', ['concat:dist', 'concat:ui_dist', 'concat:nuve','jshint:dist', 'concat:merge', 'uglify:dist','copy:dist','string-replace','compress:dist']);
 
   // Default task is an alias for 'build'.
   grunt.registerTask('default', ['build']);
 
-  grunt.registerTask('debug', ['concat:dist_debug', 'concat:devel_debug', 'concat:nuve_debug']);
+  grunt.registerTask('debug', ['concat:dist_debug', 'concat:ui_dist_debug', 'concat:nuve_debug']);
 
 };
