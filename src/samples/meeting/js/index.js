@@ -631,8 +631,10 @@ function shareScreen() {
     var width = screen.width, height = screen.height;
 
     room.shareScreen({
-        resolution: {width:width,height:height},
-        frameRate: [10, 10]
+        extensionId:'pndohhifhheefbpeljcmnhnkphepimhe',
+        resolution: 'hd1080p',
+        frameRate: [10, 10],
+        maxVideoBW: 2000
     }, function(stream) {
         console.log("share stream id:",stream.id());
         console.log("share stream resolution:",stream.resolution);
