@@ -195,7 +195,7 @@
           <div class="col-lg-4"></div>
         </div>
         <div class="col-md-12 column" id="gVideo">
-          <div class="col-md-1 column vivid sample-video-elem sample-video-elem-local" style="display:none" id='localContainer'><div id="localVideo"></div></div>
+          <div class="col-md-1 column vivid sample-video-elem sample-video-elem-local" style="display:none" id='localVideo'></div>
         </div>
       </div>
     </div>
@@ -255,7 +255,6 @@
         $('div#gVideo').width(gWidth);
         $('div#gVideo').height(gWidth/4*3);
         Connect(info);
-        $('#call-form').show();
       });
       $('#publish').click(function (evt) {
         evt.preventDefault();

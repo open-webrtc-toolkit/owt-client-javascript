@@ -51,6 +51,43 @@ function setWidth() {
   root.find('video').height(width/4*3);
 }
 
+function resetLoginForm() {
+  $('#call-form').hide();
+  $('#chat-control').hide();
+  $('#hangupCall').hide();
+  $('div#login-form').show();
+  $('div#media-option').show();
+}
+
+function openLocalStream() {
+  Woogeen.LocalStream.create({
+    video: {
+      device: 'camera',
+      resolution: resolution
+    },
+    audio: true
+  },
+  function (err, stream) {
+    if (err) {
+      return L.Logger.error('create LocalStream failed:', err);
+    }
+    localStream = stream;
+    setWidth();
+    $('#localVideo').show();
+    if (window.navigator.appVersion.indexOf('Trident') < 0){
+      localStream.show('localVideo');
+    }
+    if (window.navigator.appVersion.indexOf('Trident') > -1){
+      var canvas = document.createElement('canvas');
+      canvas.width = 320;
+      canvas.height = 240;
+      canvas.setAttribute('autoplay', 'autoplay::autoplay');
+      document.getElementById('localVideo').appendChild(canvas);
+      attachMediaStream(canvas, localStream.mediaStream);
+    }
+  });
+}
+
 function Connect (accinfo) {
   var video_ = $('#enable-video').prop('checked');
   if (video_) {
@@ -62,10 +99,7 @@ function Connect (accinfo) {
       resolution = resolution.toLowerCase();
     }
   }
-
   $('input#calleeURI').val("");
-  resetCallForm();
-  $('div#gVideo #localVideo').empty();
   client.join(accinfo,
     function(ok) {
       $('#call-make').removeAttr('disabled');
@@ -76,6 +110,9 @@ function Connect (accinfo) {
           type: 'success',
           delay: 5000
         });
+       // open camera after user register OK
+       openLocalStream();
+       resetCallForm();
       });
     },
     function(err) {
@@ -87,6 +124,7 @@ function Connect (accinfo) {
         delay: 5000
       });
     });
+    resetLoginForm();
   });
 }
 
@@ -113,19 +151,13 @@ function init () {
         delay: 5000
       });
     });
-    unsubscribe();
     unpublish();
-    localStream.close();
-    $('div#gVideo #localVideo').parent().hide();
-    $('#call-form').hide();
-    $('#chat-control').hide();
-    $('#hangupCall').hide();
-    $('div#login-form').show();
-    $('div#media-option').show();
-  });
+    $('div#gVideo').hide();
+    resetLoginForm();
+    });
 
   client.onMessage(function (evt) {
-    var msg = evt.attr;
+    var msg = evt.msg;
     if (typeof msg === 'object' && msg !== null && msg.type === 'callAbort') {
       resetCallForm();
       $(function(){
@@ -157,10 +189,15 @@ function init () {
       });
     });
 
-    unpublish = function () {
-      client.unpublish(localStream, function(ok){}, function (err) {
-        L.Logger.error(err);
-      });
+    unpublish = function (callback) {
+      client.unpublish(localStream,
+        function(ok){
+          if(typeof callback === 'function') callback();
+        },
+        function (err) {
+          if(typeof callback === 'function') callback();
+          L.Logger.error(err);
+        });
       unpublish = function () {};
     };
   });
@@ -192,60 +229,8 @@ function init () {
     };
   });
 
-  client.on('video-paused', function (evt) {
-    var stream = evt.stream;
-    stream.pauseVideo();
-    $(function(){
-      new PNotify({
-        title: 'Video paused',
-        text: 'Stream Id: '+stream.Id(),
-        type: 'info',
-        delay: 5000
-      });
-    });
-  });
-
-  client.on('video-play', function (evt) {
-    var stream = evt.stream;
-    $(function(){
-      new PNotify({
-        title: 'Video playing',
-        text: 'Stream Id: '+stream.id(),
-        type: 'info',
-        delay: 5000
-      });
-    });
-    stream.playVideo();
-  });
-
-  client.on('audio-paused', function (evt) {
-    var stream = evt.stream;
-    stream.pauseAudio();
-    $(function(){
-      new PNotify({
-        title: 'Audio paused',
-        text: 'Stream Id: '+stream.id(),
-        type: 'info',
-        delay: 5000
-      });
-    });
-  });
-
-  client.on('audio-play', function (evt) {
-    var stream = evt.stream;
-    $(function(){
-      new PNotify({
-        title: 'Audio playing',
-        text: 'Stream Id: '+stream.id(),
-        type: 'info',
-        delay: 5000
-      });
-    });
-    stream.playAudio();
-  });
-
   client.on('stream-added', function (evt) {
-    publishLocalStream();
+    publish();
     var stream = evt.stream;
     remoteStream = evt.stream;
     subscribe = function () {
@@ -276,13 +261,12 @@ function init () {
         delay: 5000
       });
     });
-    delete allStreams[stream.id()];
-    localStream.close();
-    $('#remoteVideo'+stream.id()).parent().remove();
     unpublish();
-    unsubscribe();
+    // the server alreay remove the subscriber
+    // unsubscribe();
+    delete allStreams[stream.id()];
+    $('#remoteVideo'+stream.id()).parent().remove();
     setWidth();
-    $('#localContainer').hide();
     resetCallForm();
   });
 
@@ -299,36 +283,6 @@ function init () {
     $('#call-reject').removeAttr('disabled');
     $('#call-make').attr('disabled', 'disabled');
   });
-
-  publishLocalStream = function() {
-    Woogeen.LocalStream.create({
-        video: {
-          device: 'camera',
-          resolution: resolution
-        },
-        audio: true
-      },
-      function (err, stream) {
-        if (err) {
-          return L.Logger.error('create LocalStream failed:', err);
-        }
-        localStream = stream;
-        setWidth();
-        $('#localContainer').show();
-        if (window.navigator.appVersion.indexOf('Trident') < 0){
-          localStream.show('localVideo');
-        }
-        if (window.navigator.appVersion.indexOf('Trident') > -1){
-          var canvas = document.createElement('canvas');
-          canvas.width = 320;
-          canvas.height = 240;
-          canvas.setAttribute('autoplay', 'autoplay::autoplay');
-          document.getElementById('localVideo').appendChild(canvas);
-          attachMediaStream(canvas, localStream.mediaStream);
-        }
-        publish();
-    });
-  }
 
   publish = function () {
     L.Logger.info("Publishing....");
