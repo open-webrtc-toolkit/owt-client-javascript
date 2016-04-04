@@ -13,16 +13,16 @@ Woogeen.EventDispatcher = function (spec) {
 
 /**
    * @function addEventListener
-   * @desc This function registers a callback function as a handler for the corresponding event. See [eventType](@ref Events) description.
-   * @memberOf Woogeen.ConferenceClient
+   * @desc This function registers a callback function as a handler for the corresponding event. its shortened form is on(eventType, listener). See [eventType](@ref Events) description.
+   * @memberOf WoogeenConferenceBase
    * @instance
    * @param {string} eventType Event string.
    * @param {function} listener Callback function.
    * @example
 <script type="text/JavaScript">
-var conference = Woogeen.ConferenceClient.create();
-conference.addEventListener("server-disconnected", function (evt) {...});
-conference.leave();
+...
+//client.on("server-disconnected", function (evt) {...});
+client.addEventListener("server-disconnected", function (evt) {...});
 </script>
    */
   that.addEventListener = function (eventType, listener) {
@@ -45,7 +45,7 @@ conference.leave();
 /**
    * @function removeEventListener
    * @desc This function removes a registered event listener.
-   * @memberOf Woogeen.ConferenceClient
+   * @memberOf WoogeenConferenceBase
    * @instance
    * @param {string} eventType Event string.
    * @param {function} listener Callback function.
@@ -61,7 +61,7 @@ conference.leave();
 /**
    * @function clearEventListener
    * @desc This function removes all event listeners for one type.
-   * @memberOf Woogeen.ConferenceClient
+   * @memberOf WoogeenConferenceBase
    * @instance
    * @param {string} eventType Event string.
    */

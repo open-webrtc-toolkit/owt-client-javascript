@@ -148,13 +148,13 @@ This method accepts string, object, or array (multiple ones) type of ice server 
 </ul>
 Each time this method is called, previous saved value would be discarded. Specifically, if parameter servers is not provided, the result would be an empty array, meaning any predefined servers are discarded.
    * @instance
-   * @memberOf Woogeen.ConferenceClient
+   * @memberOf WoogeenConferenceBase
    * @param {string/object/array} servers turn or stun server configuration.
    * @return {array} Result of the user-set of ice servers.
    * @example
 <script type="text/JavaScript">
-var conference = Woogeen.ConferenceClient.create();
-conference.setIceServers([{
+...
+client.setIceServers([{
     urls: "turn:61.152.239.60:4478?transport=udp",
     username: "woogeen",
     credential: "master"
@@ -203,26 +203,6 @@ conference.setIceServers([{
     return this.spec.userSetIceServers;
   };
 
-/**
-   * @function join
-   * @instance
-   * @desc This function establishes a connection to server and joins a certain　conference.
-<br><b>Remarks:</b><br>
-On success, successCallback is called (if provided); otherwise, failureCallback is called (if provided).
-<br><b>resp:</b><br>
-{<br>
- streams:, an array of remote streams that have been published in the conference.<br>
- users:, an array of users that have joined in the conference.<br>
-}
-   * @memberOf Woogeen.ConferenceClient
-   * @param {string} token Token used to join conference room.
-   * @param {function} onSuccess(resp) (optional) Success callback function.
-   * @param {function} onFailure(err) (optional) Failure callback function.
-   * @example
-<script type="text/JavaScript">
-conference.join(token, function(response) {...}, function(error) {...});
-</script>
-   */
 
   WoogeenConferenceBase.prototype.join = function (token, onSuccess, onFailure) {
     var self = this;
@@ -504,16 +484,16 @@ conference.join(token, function(response) {...}, function(error) {...});
   transport: 'udp'/'tcp' // rtsp connection transport type, default 'udp'; only for rtsp input<br>
   bufferSize: integer number in bytes // udp receiving buffer size, default 2 MB; only for rtsp input (udp transport)<br>
   }
-     * @memberOf Woogeen.ConferenceClient
+     * @memberOf WoogeenConferenceBase
      * @param {stream} stream Stream to publish.
      * @param {json} options Publish options.
      * @param {function} onSuccess(stream) (optional) Success callback.
      * @param {function} onFailure(err) (optional) Failure callback.
      * @example
   <script type="text/JavaScript">
-  var conference = Woogeen.ConferenceClient.create();
+  ...
   // ……
-  conference.publish(localStream, {maxVideoBW: 300}, function (st) {
+  client.publish(localStream, {maxVideoBW: 300}, function (st) {
       L.Logger.info('stream published:', st.id());
     }, function (err) {
       L.Logger.error('publish failed:', err);
@@ -672,15 +652,15 @@ conference.join(token, function(response) {...}, function(error) {...});
      * @function unpublish
      * @instance
      * @desc This function unpublishes the local stream. 'stream-removed' event would be triggered when the stream is removed from server.
-     * @memberOf Woogeen.ConferenceClient
+     * @memberOf WoogeenConferenceBase
      * @param {stream} stream Stream to un-publish.
      * @param {function} onSuccess() (optional) Success callback.
      * @param {function} onFailure(err) (optional) Failure callback.
      * @example
   <script type="text/JavaScript">
-  var conference = Woogeen.ConferenceClient.create();
+  ...
   // ……
-  conference.unpublish(localStream, function (st) {
+  client.unpublish(localStream, function (st) {
       L.Logger.info('stream unpublished:', st.id());
     }, function (err) {
       L.Logger.error('unpublish failed:', err);
@@ -723,16 +703,16 @@ conference.join(token, function(response) {...}, function(error) {...});
   }
   <br><b>Remarks:</b><br>
   Video resolution choice is only valid for subscribing {@link Woogeen.RemoteMixedStream Woogeen.RemoteMixedStream} when multistreaming output is enabled.　See {@link N.API.createRoom N.API.createRoom()} for detailed description of multistreaming.<br>
-     * @memberOf Woogeen.ConferenceClient
+     * @memberOf WoogeenConferenceBase
      * @param {stream} stream Stream to subscribe.
      * @param {json} options (optional) Subscribe options.
      * @param {function} onSuccess(stream) (optional) Success callback.
      * @param {function} onFailure(err) (optional) Failure callback.
      * @example
   <script type="text/JavaScript">
-  var conference = Woogeen.ConferenceClient.create();
+  ...
   // ……
-  conference.subscribe(remoteStream, function (st) {
+  client.subscribe(remoteStream, function (st) {
       L.Logger.info('stream subscribed:', st.id());
     }, function (err) {
       L.Logger.error('subscribe failed:', err);
@@ -863,15 +843,15 @@ conference.join(token, function(response) {...}, function(error) {...});
      * @function unsubscribe
      * @instance
      * @desc This function unsubscribes the remote stream.
-     * @memberOf Woogeen.ConferenceClient
+     * @memberOf WoogeenConferenceBase
      * @param {stream} stream Stream to unsubscribe.
      * @param {function} onSuccess() (optional) Success callback.
      * @param {function} onFailure(err) (optional) Failure callback.
      * @example
   <script type="text/JavaScript">
-  var conference = Woogeen.ConferenceClient.create();
+  ...
   // ……
-  conference.unsubscribe(remoteStream, function (st) {
+  client.unsubscribe(remoteStream, function (st) {
       L.Logger.info('stream unsubscribed:', st.id());
     }, function (err) {
       L.Logger.error('unsubscribe failed:', err);
@@ -901,13 +881,13 @@ conference.join(token, function(response) {...}, function(error) {...});
      * @instance
      * @desc This function is the shortcut of on('message-received', callback).
   <br><b>Remarks:</b><br>Once the message is received, the callback is invoked.
-     * @memberOf Woogeen.ConferenceClient
+     * @memberOf WoogeenConferenceBase
      * @param {function} callback callback function to the message.
      * @example
   <script type="text/JavaScript">
-    var conference = Woogeen.ConferenceClient.create();
+    ...
     // ……
-    conference.onMessage(function (event) {
+    client.onMessage(function (event) {
       L.Logger.info('Message Received:', event.msg);
     });
   </script>
@@ -928,6 +908,27 @@ Woogeen.ConferenceClient = (function () {
   'use strict';
   var WoogeenConference = function WoogeenConference (spec) {
     WoogeenConferenceBase.call(this, spec);
+
+/**
+   * @function join
+   * @instance
+   * @desc This function establishes a connection to server and joins a certain　conference.
+<br><b>Remarks:</b><br>
+On success, successCallback is called (if provided); otherwise, failureCallback is called (if provided).
+<br><b>resp:</b><br>
+{<br>
+ streams:, an array of remote streams that have been published in the conference.<br>
+ users:, an array of users that have joined in the conference.<br>
+}
+   * @memberOf Woogeen.ConferenceClient
+   * @param {string} token Token used to join conference room.
+   * @param {function} onSuccess(resp) (optional) Success callback function.
+   * @param {function} onFailure(err) (optional) Failure callback function.
+   * @example
+<script type="text/JavaScript">
+conference.join(token, function(response) {...}, function(error) {...});
+</script>
+   */
 
     this.join = function (token, onSuccess, onFailure) {
       try {
@@ -1455,14 +1456,42 @@ var conference = Woogeen.ConferenceClient.create();
   return WoogeenConference;
 }());
 
+
+/**
+ * @class Woogeen.SipClient
+ * @classDesc Provides to initiate, accept, reject and hangup a sip audio or video call.
+ */
+
 Woogeen.SipClient = (function () {
 
   var WoogeenSipGateway = function WoogeenSipGateway (spec) {
     WoogeenConferenceBase.call(this, spec);
     this.sip = true;
 
+/**
+   * @function join
+   * @instance
+   * @desc This function establishes a connection to sip server and joins a certain conference.
+<br><b>Remarks:</b><br>
+On success, onSuccess is called (if provided); otherwise, onFailure is called (if provided).
+<br><b>resp:</b><br>
+   * @memberOf Woogeen.SipClient
+   * @param {array} userInfo The sip user information with the structure {display_name:, sip_name:, sip_password:, sip_server:}.
+   * @param {function} onSuccess(resp) (optional) Success callback function.
+   * @param {function} onFailure(err) (optional) Failure callback function.
+   * @example
+<script type="text/JavaScript">
+ var userInfo = {
+          display_name: $('input#display_name').val(),
+          sip_name:      $('input#sip_name').val(),
+          sip_password: $('input#sip_password').val(),
+          sip_server:   $('input#sip_server').val()
+ };
+ sipClient.join(userInfo, function(msg){}, function(error){});
+</script>
+   */
+
     this.join = function (token, onSuccess, onFailure) {
-      // yaojie add the server;
       token.host = this.spec.host;
       token.secure = this.spec.secure;
       WoogeenConferenceBase.prototype.join.call(this, token, onSuccess, onFailure);
@@ -1483,6 +1512,18 @@ Woogeen.SipClient = (function () {
       };
       WoogeenConferenceBase.prototype.subscribe.call(this, stream, options, subscribeSuccess, onFailure);
     };
+    /**
+     * @function acceptCall
+     * @instance
+     * @desc Accept the sip call to respond to a incoming call.
+     * @memberOf Woogeen.SipClient
+     * @param {function} onSuccess(resp) (optional) Success callback.
+     * @param {function} onFailure(error) (optional) Failure callback.
+     * @example
+<script type="text/JavaScript">
+sipClient.acceptCall(function(msg){});
+</script>
+   */
     this.acceptCall = function (onSuccess, onFailure) {
       var self = this;
       var payload = {
@@ -1496,6 +1537,18 @@ Woogeen.SipClient = (function () {
       });
     };
 
+    /**
+     * @function rejectCall
+     * @instance
+     * @desc Reject the sip call to respond to a incoming call.
+     * @memberOf Woogeen.SipClient
+     * @param {function} onSuccess(resp) (optional) Success callback.
+     * @param {function} onFailure(error) (optional) Failure callback.
+     * @example
+<script type="text/JavaScript">
+sipClient.rejectCall(function(msg){});
+</script>
+*/
     this.rejectCall = function (onSuccess, onFailure) {
       var self = this;
       var payload = {
@@ -1508,7 +1561,18 @@ Woogeen.SipClient = (function () {
       safeCall(onSuccess, resp);
       });
     };
-
+    /**
+     * @function hangupCall
+     * @instance
+     * @desc Hangup the sip call after the sip call established.
+     * @memberOf Woogeen.SipClient
+     * @param {function} onSuccess(resp) (optional) Success callback.
+     * @param {function} onFailure(error) (optional) Failure callback.
+     * @example
+     <script type="text/JavaScript">
+     sipClient.hangupCall(function(msg){});
+     </script>
+     */
     this.hangupCall = function (onSuccess, onFailure) {
       var self = this;
       var payload = {
@@ -1521,7 +1585,24 @@ Woogeen.SipClient = (function () {
       safeCall(onSuccess, resp);
       });
     };
-
+    /**
+     * @function makeCall
+     * @instance
+     * @desc Initiate a sip call.
+     * @memberOf Woogeen.SipClient
+     * @param {array} callee The option of the callee with the structure {calleeURI:, audio:, video:}.
+     * @param {function} onSuccess(resp) (optional) Success callback.
+     * @param {function} onFailure(error) (optional) Failure callback.
+     * @example
+  <script type="text/JavaScript">
+        var option = {
+            calleeURI: $('input#calleeURI').val(),
+            audio: true,
+            video: true
+        };
+        sipclient.makeCall(option, function(msg));
+  </script>
+   */
     this.makeCall = function (callee, onSuccess, onFailure) {
       var self = this;
       var payload = {
@@ -1538,7 +1619,27 @@ Woogeen.SipClient = (function () {
   };
   WoogeenSipGateway.prototype = Object.create(WoogeenConferenceBase.prototype); // make WoogeenConference a eventDispatcher
   WoogeenSipGateway.prototype.constructor = WoogeenSipGateway;
-
+   /**
+   * @function create
+   * @desc This factory returns a Woogeen.SipClient instance.
+   * @memberOf Woogeen.SipClient
+   * @static
+   * @return Woogeen.SipClient An instance of Woogeen.SipClient.
+   * @example
+<script type="text/JavaScript">
+var gateway_host = location.hostname;
+var isSecured = window.location.protocol === 'https:';
+if (isSecured) {
+  gateway_host += ':8443';
+} else {
+  gateway_host += ':8080';
+}
+sipClient = Woogeen.SipClient.create({
+    host: gateway_host,
+    secure: isSecured,
+  });
+</script>
+   */
   WoogeenSipGateway.create = function factory (spec) { // factory, not in prototype
     return new WoogeenSipGateway(spec);
   };

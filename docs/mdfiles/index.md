@@ -402,6 +402,10 @@ The following table describes the key objects provided in the JavaScript SDK.
             <td>Provides connection, local stream publication, and remote stream subscription for a video conference. The conference client is created by the server side API. The conference client is retrieved by the client API with the access token for the connection.</td>
         </tr>
          <tr>
+            <td>SipClient</td>
+            <td>Provides to initiate, accept, reject, hangup a SIP call. And also local stream publication, and remote stream subscription for a video or audio call.</td>
+        </tr>
+         <tr>
             <td>Stream</td>
             <td>Handles the WebRTC (audio, video) stream, identifies the stream, and identifies the location where the stream should be displayed. There are two stream classes: LocalStream and RemoteStream.</td>
         </tr>
@@ -528,6 +532,36 @@ The JavaScript objects (described earlier in this section) throw events using Ev
         <tr valign="top">
             <td>stream-removed </td>
             <td>Indicates one existed stream has been removed. </td>
+        </tr>
+        <tr valign="top">
+            <td rowspan="7" width="115">SipClient
+            </td>
+            <td>server-disconnected</td>
+            <td>Indicates the client has been disconnected to the server.</td>
+        </tr>
+        <tr valign="top">
+            <td>user-joined </td>
+            <td>Indicates a incoming sip call. </td>
+        </tr>
+        <tr valign="top">
+            <td>stream-published </td>
+            <td>Indicates the local stream has been publisded.</td>
+        </tr>
+        <tr valign="top">
+            <td>stream-subscribed </td>
+            <td>Indicates the remote stream has been subscribed. </td>
+        </tr>
+        <tr valign="top">
+            <td>stream-added </td>
+            <td>Indicates the sip call has been established. </td>
+        </tr>
+        <tr valign="top">
+            <td>stream-removed </td>
+            <td>Indicates the sip call has been hangup. </td>
+        </tr>
+        <tr valign="top">
+            <td>message-received</td>
+            <td>Indicates there is a new message delivered by server</td>
         </tr>
 </table>
 @endhtmlonly
