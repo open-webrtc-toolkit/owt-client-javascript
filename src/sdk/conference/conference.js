@@ -1214,7 +1214,7 @@ conference.leave();
   /**
      * @function startRecorder
      * @instance
-     * @desc This function starts the recording of a video stream and an audio stream in the conference room and saves it to a .mkv file, according to the configurable "config.erizoController.recording_path".<br>
+     * @desc This function starts the recording of a video stream and an audio stream in the conference room and saves it to a .mkv file, according to the configurable "recording.path" in agent.toml file.<br>
   Three events are defined for media recording: 'recorder-added' for the creation of media recorder; 'recorder-removed' for the removal of media recorder; 'recorder-continued' for the continuous recording.
      <br><b>options:</b><br>
      {<br>
@@ -1227,8 +1227,8 @@ conference.leave();
      * @memberOf Woogeen.ConferenceClient
      * @param {string} options (optional)Media recorder options. If unspecified, the mixed stream will be recorded as default.<br>
       <ul>
-     <li>videoStreamId: video stream id to be recorded. If unspecified and audioStreamId is valid, audioStreamId will be used by default.</li>
-     <li>audioStreamId: audio stream id to be recorded. If unspecified and videoStreamId is valid, videoStreamId will be used by default.</li>
+     <li>videoStreamId: video stream id to be recorded. If unspecified and audioStreamId is valid, audio stream will be recorded without video.</li>
+     <li>audioStreamId: audio stream id to be recorded. If unspecified and videoStreamId is valid, video stream will be recorded without audio.</li>
      <li>videoCodec: preferred video codec to be recorded. If unspecified, 'vp8' will be used by default. Currently, there is no video transcoding for forward stream with the consideration of system load.</li>
      <li>audioCodec: preferred audio codec to be recorded. If unspecified, 'pcmu' will be used by default.</li>
      <li>recorderId: recorder id to be reused.</li>
@@ -1274,7 +1274,7 @@ conference.leave();
   /**
      * @function stopRecorder
      * @instance
-     * @desc This function stops the recording of a video stream and an audio stream in the conference room and saves it to a .mkv file, according to the configurable "config.erizoController.recording_path".
+     * @desc This function stops the recording of a video stream and an audio stream in the conference room and saves it to a .mkv file, according to the configurable "recording.path" in agent.toml file.
      <br><b>options:</b><br>
   {<br>
     recorderId: xxxxxx<br>
