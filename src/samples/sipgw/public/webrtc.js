@@ -9,6 +9,19 @@ var initLocalStream = function() {};
 
 function makeCall (option) {
   client.makeCall(option, function(msg) {
+  }, function(err) {
+    resetCallForm();
+    $(function() {
+      var notice = new PNotify({
+        title: 'makeCall',
+        text: err,
+        type: 'error',
+        hide: false
+      });
+      notice.get().click(function() {
+        notice.remove();
+      });
+    });
   });
 }
 
