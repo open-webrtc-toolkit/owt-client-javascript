@@ -72,14 +72,13 @@ function resetLoginForm() {
   $('div#media-option').show();
 }
 
-function openLocalStream() {
-  Woogeen.LocalStream.create({
-    video: {
-      device: 'camera',
-      resolution: resolution
-    },
-    audio: true
-  },
+function openLocalStream(video, audio) {
+  var opts = {audio: audio};
+  if (video === true)
+    opts['video'] = {device: 'camera',
+                     resolution: resolution
+                    };
+  Woogeen.LocalStream.create(opts,
   function (err, stream) {
     if (err) {
       return L.Logger.error('create LocalStream failed:', err);
@@ -124,7 +123,7 @@ function Connect (accinfo) {
           delay: 5000
         });
        // open camera after user register OK
-       openLocalStream();
+       openLocalStream(video_, true);
        resetCallForm();
       });
     },
