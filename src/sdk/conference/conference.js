@@ -1236,6 +1236,7 @@ conference.leave();
      </ul>
      Important Note: In the case of continuous media recording among different streams, the recorderId is the key to make sure each switched stream go to the same recording url. Do not stop the recorder when you want the continuous media recording functionality, unless all the required media content has been recorded successfully.<br>
   The recommendation is to invoke another startRecorder with new videoStreamId and audioStreamId (default to mixed stream) right after the previous call of startRecorder, but the same recorderId should be kept.
+  Another important thing is that the storage availability of the recording path needs to be guaranteed when using media recording.
      * @param {function} onSuccess(resp) (optional) Success callback. The following information will be
    returned as well:<br>
       <ul>
