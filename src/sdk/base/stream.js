@@ -358,11 +358,11 @@ Reserved events from MCU:<br>
   <tr><th align="center">Event Name</th><th align="center">Description</th><th align="center">Status</th></tr>
 </thead>
 <tbody>
-  <tr><td align="center"><code>VideoLayoutChanged</code></td><td align="center">Video layout of a mix (remote) stream changed</td><td align="center">stable</td></tr>
-  <tr><td align="center"><code>VideoEnabled</code></td><td align="center">Video track of a remote stream enabled</td><td align="center">reserved</td></tr>
-  <tr><td align="center"><code>VideoDisabled</code></td><td align="center">Video track of a remote stream disabled</td><td align="center">reserved</td></tr>
-  <tr><td align="center"><code>AudioEnabled</code></td><td align="center">Audio track of a remote stream enabled</td><td align="center">reserved</td></tr>
-  <tr><td align="center"><code>AudioDisabled</code></td><td align="center">Audio track of a remote stream disabled</td><td align="center">reserved</td></tr>
+  <tr><td align="center"><code>VideoLayoutChanged</code></td><td align="center">Video layout of the mix (remote) stream changed</td><td align="center">stable</td></tr>
+  <tr><td align="center"><code>VideoEnabled</code></td><td align="center">Video track of the remote stream enabled</td><td align="center">stable</td></tr>
+  <tr><td align="center"><code>VideoDisabled</code></td><td align="center">Video track of the remote stream disabled</td><td align="center">stable</td></tr>
+  <tr><td align="center"><code>AudioEnabled</code></td><td align="center">Audio track of the remote stream enabled</td><td align="center">stable</td></tr>
+  <tr><td align="center"><code>AudioDisabled</code></td><td align="center">Audio track of the remote stream disabled</td><td align="center">stable</td></tr>
 </tbody>
 </table>
 @endhtmlonly
