@@ -71,17 +71,20 @@ public class datalist {
         }
         //process function group
         for(jsfunction func:functions){
-            String clsname=func.classname;
-            if(!classes.containsKey(clsname)){
-                throw new Exception(clsname + " not found for function "+func.name);
-            }else{
-                if(functionGroup.containsKey(clsname)){
-                    HashSet<jsfunction> set=functionGroup.get(clsname);
-                    set.add(func);
+            String[] clsnames=func.classname.split("&");
+            //System.out.println("clsnames.size:"+clsnames.length);
+            for(String clsname:clsnames){
+                if(!classes.containsKey(clsname)){
+                    throw new Exception(clsname + " not found for function "+func.name);
                 }else{
-                    HashSet<jsfunction> set=new HashSet<jsfunction>();
-                    set.add(func);
-                    functionGroup.put(clsname, set);
+                    if(functionGroup.containsKey(clsname)){
+                        HashSet<jsfunction> set=functionGroup.get(clsname);
+                        set.add(func);
+                    }else{
+                        HashSet<jsfunction> set=new HashSet<jsfunction>();
+                        set.add(func);
+                        functionGroup.put(clsname, set);
+                    }
                 }
             }
         }

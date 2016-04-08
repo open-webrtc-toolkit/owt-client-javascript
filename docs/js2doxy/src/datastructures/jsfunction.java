@@ -74,7 +74,7 @@ public class jsfunction implements transBlock {
             argulist += ", " + paramitem[0] + " " + paramitem[1].replaceAll("\\([^\\)]*\\)","");
         }
         if (returnResolve != null) {
-            ret += " * @return " + returnResolve[0] + returnResolve[1] + "\n";
+            ret += " * @return " + returnResolve[1] + "\n";
         }
         if (example != null) {
             ret += " <br><br>\n* @code\n" +
