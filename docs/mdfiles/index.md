@@ -1,7 +1,7 @@
 Intel CS for WebRTC Client SDK for JavaScript
 ------------------
 
-# Introduction {#section1}
+# 1 Introduction {#section1}
 The Intel CS for WebRTC Client SDK for JavaScript provides tools to help you develop Web applications. The SDK is distributed in the `CS_WebRTC_Client_SDK_JavaScript.&lt;ver&gt;.zip`  release package. The SDK consists of client-side and server-side APIs, as well as sample Web applications:
 
  - Client-side APIs:  Manage how to act with the peer client, room, and stream.
@@ -37,7 +37,7 @@ Please include adaper.js before woogeen.sdk.js in HTML files.
 
 If you want to use conference SDK, please also include socket.io.js before woogeen.sdk.js.
 
-# Browser requirement {#section2}
+# 2 Browser requirement {#section2}
 The Intel CS for WebRTC Client SDK for JavaScript has been tested on the following browsers and operating systems:
 
 @htmlonly
@@ -91,7 +91,7 @@ The Intel CS for WebRTC Client SDK for JavaScript has been tested on the followi
 
 Internet Explorer (IE) does not support WebRTC natively.  End user needs to install the IE plugin provided in the Intel CS for WebRTC package in order to enable WebRTC capability.
 
-# Plugin for Internet Explorer (IE) {#section3}
+# 3 Plugin for Internet Explorer (IE) {#section3}
 If you are developing a WebRTC web app which is intended to support IE browser, your end users must install the WebRTC IE plugin package provided in the `CS_WebRTC_Client_SDK_JavaScript.&lt;ver&gt;.zip` file to enable WebRTC capability.
 
 > **Note:** Canvas is used to render the WebRTC streams since IE's video tag cannot render them; and performance may not be as comparable to what you get with Chrome and FireFox.  Also, you must close the local stream and stop all conversations when the tab is closed. The following code is for reference.
@@ -109,15 +109,15 @@ window.onbeforeunload = function(){
 
 For IE Plugin, the way to attach local media stream and remote media stream to canvas is different.  For local stream, call `attachMediaStream()` with the first parameter set to your canvas, and second parameter to the localStream's `mediaStream` member; for remote stream, instead you have to call `attachRemoteMediaStream` with the first parameter set to canvas, second parameter set to remote stream's `mediaStream` member, and third parameter set to remote stream's `mediaStream.attachedPCID` member. Refer to the p2p sample html page for more details.
 
-# Screen sharing extension {#section4}
+# 4 Screen sharing extension {#section4}
 We provide source code of a Chrome screen sharing extension sample. Developers should edit manifest.json and publish it to Chrome App Store to make it work for their products. After your extension is published, you will get an extension ID. This ID will be used when create screen sharing stream.
 
 > **Note:** End users need to install your extension and visit your site with https if they want to use screen sharing.
 
-# NAT and firewall traversal {#section5}
+# 5 NAT and firewall traversal {#section5}
 Intel CS for WebRTC Client SDK for Javascript fully supports NAT and firewall traversal with STUN / TURN / ICE. The rfc5766-turn-server version 3.2.3.6 from https://code.google.com/p/rfc5766-turn-server/ has been verified.
 
-# Peer-to-peer (P2P) mode{#section6}
+# 6 Peer-to-peer (P2P) mode{#section6}
 To enable P2P chat, copy and paste the following code into the head section of your HTML document:
 ~~~~~~{.js}
 <script type="text/JavaScript" src="sc.websocket.js"></script>
@@ -125,7 +125,7 @@ To enable P2P chat, copy and paste the following code into the head section of y
 ~~~~~~
 The SDK supports Web sockets signaling channel in P2P mode; You need to include `sc.websocket.js` and `socket.io.js` in your HTML files. Please include `socket.io.js` after `woogeen.p2p.js`.
 
-## P2P direct call chat {#section6_1}
+## 6.1 P2P direct call chat {#section6_1}
 
 Direct call chat refers to the discovery of another client by chatting with that user's ID. This is a synchronous call and requires that the two clients be online on the signaling server.
 ~~~~~~{.js}
@@ -268,16 +268,16 @@ p2p.on('data-received',function(e){  // Received data from datachannel.
 </script>
 ~~~~~~
 
-## Customize signaling channel {#section6_2}
+## 6.2 Customize signaling channel {#section6_2}
 
 Signaling channel is an implementation to transmit signaling data for creating a WebRTC session. Signaling channel for P2P sessions can be customized by writing your own `sc.*.js`. The default Socket.IO signaling channel has been provided in the release package with name `sc.websocket.js`.
 
 In the customized signaling channel, you need to implement `connect`, `disconnect` and `sendMessage`, invoke `onMessage` when a new message arrives, and invoke `onServerDisconnected` when the connection is lost. Then include your customized `sc.*.js` into the HTML page.
 
-# Conference mode {#section7}
+# 7 Conference mode {#section7}
 Conference mode is designed for applications with multiple participants. The JavaScript SDK includes a demo application for this.
 
-## Create a room from the server side {#section7_1}
+## 7.1 Create a room from the server side {#section7_1}
 
 Server-side APIs are run on Node.js, and act as a Node.js module:
 ~~~~~~{.js}
@@ -301,7 +301,7 @@ Woogeen.API.createRoom (room.name, function (resp) {
 }, room);
 ~~~~~~
 
-## Join a conference from the client side {#section7_2}
+## 7.2 Join a conference from the client side {#section7_2}
 To initialize your HTML code, copy and paste the following code into the head section of your HTML document:
 ~~~~~~{.js}
 <script type="text/javascript" src="socket.io.js"></script>
@@ -378,7 +378,7 @@ createToken(roomId, 'user', 'presenter', function (response) {
 });
 </script>
 ~~~~~~
-# JavaScript API quick start {#section8}
+# 8 JavaScript API quick start {#section8}
 This discussion describes how to quickly grasp the API usages of Intel CS for WebRTC Client SDK for JavaScript. Unless mentioned elsewhere, all APIs are under namespace `Woogeen`.
 
 ## 8.1 Objects {#section8_1}
@@ -461,7 +461,7 @@ The following table describes the key objects provided in the JavaScript SDK.
 </script>
 ~~~~~~
 
-# Events {#Events}
+# 9 Events {#Events}
 
 The JavaScript objects (described earlier in this section) throw events using EventDispatchers. The following table describes all events which can be handled by registering event handlers with the `addEventListener()` function.
 @htmlonly
@@ -579,7 +579,7 @@ The JavaScript objects (described earlier in this section) throw events using Ev
 @endhtmlonly
 <p>&nbsp;</p>
 
-## Example for conference:{#section9_1}
+## 9.1 Example for conference:{#section9_1}
 
 ~~~~~~{.js}
 <script type="text/JavaScript">
@@ -607,7 +607,7 @@ conference.subscribe(stream, function () {
 </script>
 ~~~~~~
 
-## Example for p2p:{#section9_2}
+## 9.2 Example for p2p:{#section9_2}
 
 ~~~~~~{.js}
 <script type="text/JavaScript">
@@ -624,7 +624,7 @@ conference.subscribe(stream, function () {
 </script>
 ~~~~~~
 
-# Constructors {#section9}
+# 10 Constructors {#section9}
 {@link Woogeen.PeerClient#PeerClient Woogeen.PeerClient.PeerClient(config)}
 
 Factories
