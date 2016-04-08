@@ -84,6 +84,7 @@ function openLocalStream(video, audio) {
       return L.Logger.error('create LocalStream failed:', err);
     }
     localStream = stream;
+    allStreams['local'] = localStream;
     setWidth();
     $('#localVideo').show();
     if (window.navigator.appVersion.indexOf('Trident') < 0){
