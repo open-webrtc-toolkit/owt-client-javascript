@@ -512,14 +512,5 @@ conference.subscribe(stream, function () {
 </script>
 ~~~~~~
 
-# 10 Constructors {#section9}
-{@link Woogeen.PeerClient#PeerClient Woogeen.PeerClient.PeerClient(config)}
-
-Factories
--------------
-{@link Woogeen.ConferenceClient#create Woogeen.ConferenceClient.create}
-
-{@link Woogeen.LocalStream#create Woogeen.LocalStream.create(options, callback)}
-
 > **Note**: \* Other names and brands may be claimed as the property of others.
 
