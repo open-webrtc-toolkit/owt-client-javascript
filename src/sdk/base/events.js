@@ -14,7 +14,7 @@ Woogeen.EventDispatcher = function (spec) {
 /**
    * @function addEventListener
    * @desc This function registers a callback function as a handler for the corresponding event. its shortened form is on(eventType, listener). See [eventType](@ref Events) description.
-   * @memberOf WoogeenConferenceBase
+   * @memberOf Woogeen.ConferenceClient&Woogeen.SipClient
    * @instance
    * @param {string} eventType Event string.
    * @param {function} listener Callback function.
@@ -45,7 +45,7 @@ client.addEventListener("server-disconnected", function (evt) {...});
 /**
    * @function removeEventListener
    * @desc This function removes a registered event listener.
-   * @memberOf WoogeenConferenceBase
+   * @memberOf Woogeen.ConferenceClient&Woogeen.SipClient
    * @instance
    * @param {string} eventType Event string.
    * @param {function} listener Callback function.
@@ -61,7 +61,7 @@ client.addEventListener("server-disconnected", function (evt) {...});
 /**
    * @function clearEventListener
    * @desc This function removes all event listeners for one type.
-   * @memberOf WoogeenConferenceBase
+   * @memberOf Woogeen.ConferenceClient&Woogeen.SipClient
    * @instance
    * @param {string} eventType Event string.
    */

@@ -148,7 +148,7 @@ This method accepts string, object, or array (multiple ones) type of ice server 
 </ul>
 Each time this method is called, previous saved value would be discarded. Specifically, if parameter servers is not provided, the result would be an empty array, meaning any predefined servers are discarded.
    * @instance
-   * @memberOf WoogeenConferenceBase
+   * @memberOf Woogeen.ConferenceClient&Woogeen.SipClient
    * @param {string/object/array} servers turn or stun server configuration.
    * @return {array} Result of the user-set of ice servers.
    * @example
@@ -484,7 +484,7 @@ client.setIceServers([{
   transport: 'udp'/'tcp' // rtsp connection transport type, default 'udp'; only for rtsp input<br>
   bufferSize: integer number in bytes // udp receiving buffer size, default 2 MB; only for rtsp input (udp transport)<br>
   }
-     * @memberOf WoogeenConferenceBase
+     * @memberOf Woogeen.ConferenceClient&Woogeen.SipClient
      * @param {stream} stream Stream to publish.
      * @param {json} options Publish options.
      * @param {function} onSuccess(stream) (optional) Success callback.
@@ -652,7 +652,7 @@ client.setIceServers([{
      * @function unpublish
      * @instance
      * @desc This function unpublishes the local stream. 'stream-removed' event would be triggered when the stream is removed from server.
-     * @memberOf WoogeenConferenceBase
+     * @memberOf Woogeen.ConferenceClient&Woogeen.SipClient
      * @param {stream} stream Stream to un-publish.
      * @param {function} onSuccess() (optional) Success callback.
      * @param {function} onFailure(err) (optional) Failure callback.
@@ -703,7 +703,7 @@ client.setIceServers([{
   }
   <br><b>Remarks:</b><br>
   Video resolution choice is only valid for subscribing {@link Woogeen.RemoteMixedStream Woogeen.RemoteMixedStream} when multistreaming output is enabled.　See {@link N.API.createRoom N.API.createRoom()} for detailed description of multistreaming.<br>
-     * @memberOf WoogeenConferenceBase
+     * @memberOf Woogeen.ConferenceClient&Woogeen.SipClient
      * @param {stream} stream Stream to subscribe.
      * @param {json} options (optional) Subscribe options.
      * @param {function} onSuccess(stream) (optional) Success callback.
@@ -843,7 +843,7 @@ client.setIceServers([{
      * @function unsubscribe
      * @instance
      * @desc This function unsubscribes the remote stream.
-     * @memberOf WoogeenConferenceBase
+     * @memberOf Woogeen.ConferenceClient&Woogeen.SipClient
      * @param {stream} stream Stream to unsubscribe.
      * @param {function} onSuccess() (optional) Success callback.
      * @param {function} onFailure(err) (optional) Failure callback.
@@ -881,7 +881,7 @@ client.setIceServers([{
      * @instance
      * @desc This function is the shortcut of on('message-received', callback).
   <br><b>Remarks:</b><br>Once the message is received, the callback is invoked.
-     * @memberOf WoogeenConferenceBase
+     * @memberOf Woogeen.ConferenceClient&Woogeen.SipClient
      * @param {function} callback callback function to the message.
      * @example
   <script type="text/JavaScript">
@@ -1625,7 +1625,7 @@ sipClient.rejectCall(function(msg){});
    * @desc This factory returns a Woogeen.SipClient instance.
    * @memberOf Woogeen.SipClient
    * @static
-   * @return Woogeen.SipClient An instance of Woogeen.SipClient.
+   * @return {Woogeen.SipClient} An instance of Woogeen.SipClient.
    * @example
 <script type="text/JavaScript">
 var gateway_host = location.hostname;
