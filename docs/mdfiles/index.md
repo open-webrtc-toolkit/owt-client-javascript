@@ -561,7 +561,19 @@ The JavaScript objects (described earlier in this section) throw events using Ev
         </tr>
         <tr valign="top">
             <td>message-received</td>
-            <td>Indicates there is a new message delivered by server</td>
+            <td>Indicates there is a new message delivered by server.</td>
+        </tr>
+        <tr valign="top">
+            <td>recorder-added</td>
+            <td>Indicates there is a new recorder added by server.</td>
+        </tr>
+        <tr valign="top">
+            <td>recorder-removed</td>
+            <td>Indicates the recorder has been removed.</td>
+        </tr>
+        <tr valign="top">
+            <td>recorder-continued</td>
+            <td>Indicates the recorder has been reused for continuous recording.</td>
         </tr>
 </table>
 @endhtmlonly
