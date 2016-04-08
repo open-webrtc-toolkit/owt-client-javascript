@@ -13,8 +13,162 @@ Woogeen.EventDispatcher = function (spec) {
 
 /**
    * @function addEventListener
-   * @desc This function registers a callback function as a handler for the corresponding event. its shortened form is on(eventType, listener). See [eventType](@ref Events) description.
-   * @memberOf Woogeen.ConferenceClient&Woogeen.SipClient
+   * @desc This function registers a callback function as a handler for the corresponding event. It's shortened form is on(eventType, listener). See the event description in the following table.<br>
+   @htmlonly
+<table class="doxtable">
+    <thead>
+        <tr valign="top">
+            <th><b>Event name</b></th>
+            <th><b>Description</b></th>
+        </tr>
+        <tr valign="top">
+            <td>server-disconnected</td>
+            <td>Indicates the client has been disconnected to the server.</td>
+        </tr>
+        <tr valign="top">
+            <td>user-joined</td>
+            <td>Indicates that there is a new user joined. </td>
+        </tr>
+        <tr valign="top">
+            <td>user-left</td>
+            <td>Indicates that a user has left conference.</td>
+        </tr>
+        <tr valign="top">
+            <td>message-received</td>
+            <td>Indicates there is a new message delivered by server</td>
+        </tr>
+        <tr valign="top">
+            <td>stream-added</td>
+            <td>Indicates there is a new stream available.</td>
+        </tr>
+        <tr valign="top">
+            <td>stream-removed </td>
+            <td>Indicates one existed stream has been removed. </td>
+        </tr>
+        <tr valign="top">
+            <td>recorder-added</td>
+            <td>Indicates there is a new recorder added by server.</td>
+        </tr>
+        <tr valign="top">
+            <td>recorder-removed</td>
+            <td>Indicates the recorder has been removed.</td>
+        </tr>
+        <tr valign="top">
+            <td>recorder-continued</td>
+            <td>Indicates the recorder has been reused for continuous recording.</td>
+        </tr>
+    </thead>
+</table>
+@endhtmlonly
+   * @memberOf Woogeen.ConferenceClient
+   * @instance
+   * @param {string} eventType Event string.
+   * @param {function} listener Callback function.
+   * @example
+<script type="text/JavaScript">
+...
+//client.on("server-disconnected", function (evt) {...});
+client.addEventListener("server-disconnected", function (evt) {...});
+</script>
+   */
+   /**
+   * @function addEventListener
+   * @desc This function registers a callback function as a handler for the corresponding event. It's shortened form is on(eventType, listener). See the event description in the following table.<br>
+   @htmlonly
+<table class="doxtable">
+    <thead>
+        <tr valign="top">
+            <th><b>Event name</b></th>
+            <th><b>Description</b></th>
+        </tr>
+        <tr valign="top">
+            <td>server-disconnected</td>
+            <td>Indicates the client has been disconnected to the server.</td>
+        </tr>
+        <tr valign="top">
+            <td>user-joined </td>
+            <td>Indicates a incoming sip call. </td>
+        </tr>
+        <tr valign="top">
+            <td>stream-published </td>
+            <td>Indicates the local stream has been publisded.</td>
+        </tr>
+        <tr valign="top">
+            <td>stream-subscribed </td>
+            <td>Indicates the remote stream has been subscribed. </td>
+        </tr>
+        <tr valign="top">
+            <td>stream-added </td>
+            <td>Indicates the sip call has been established. </td>
+        </tr>
+        <tr valign="top">
+            <td>stream-removed </td>
+            <td>Indicates the sip call has been hangup. </td>
+        </tr>
+        <tr valign="top">
+            <td>message-received</td>
+            <td>Indicates there is a new message delivered by server</td>
+        </tr>
+    </thead>
+</table>
+@endhtmlonly
+   * @memberOf Woogeen.SipClient
+   * @instance
+   * @param {string} eventType Event string.
+   * @param {function} listener Callback function.
+   * @example
+<script type="text/JavaScript">
+...
+//client.on("server-disconnected", function (evt) {...});
+client.addEventListener("server-disconnected", function (evt) {...});
+</script>
+   */
+   /**
+   * @function addEventListener
+   * @desc This function registers a callback function as a handler for the corresponding event. It's shortened form is on(eventType, listener). See the event description in the following table.<br>
+   @htmlonly
+<table class="doxtable">
+    <thead>
+        <tr valign="top">
+            <th><b>Event name</b></th>
+            <th><b>Description</b></th>
+        </tr>
+    </thead>
+        <tr valign="top">
+           <td>server-disconnected</td>
+            <td>The client is disconnected from the peer server.</td>
+        </tr>
+        <tr valign="top">
+            <td>chat-invited</td>
+            <td>Received an invitation from a remote user. Parameter: senderId for the remote user's ID.</td>
+        </tr>
+        <tr valign="top">
+            <td>chat-denied</td>
+            <td>Remote user denied the invitation. Parameter: senderId for the remote user's ID.</td>
+        </tr>
+        <tr valign="top">
+            <td>chat-started</td>
+            <td>A new chat is started. Parameter: peerId for the remote user's ID.</td>
+        </tr>
+        <tr valign="top">
+            <td>chat-stopped</td>
+            <td>Current chat is stopped. This event is triggered when the chat is stopped by current user. Parameter: peerId for the remote user's ID and senderID for the event sender's ID.</td>
+        </tr>
+        <tr valign="top">
+            <td>stream-added</td>
+            <td>A stream is ready to show. Parameter: stream for remote stream, which is an instance of Woogeen.RemoteStream.</td>
+        </tr>
+        <tr valign="top">
+            <td>stream-removed</td>
+            <td>A stream has been removed. Parameter: stream for remote stream, which is an instance of Woogeen.RemoteStream.</td>
+        </tr>
+        <tr valign="top">
+            <td>data-received</td>
+            <td>Indicates there is new data content arrived which is sent by peer through data channel.</td>
+        </tr>
+</table>
+@endhtmlonly
+   * @memberOf Woogeen.PeerClient
    * @instance
    * @param {string} eventType Event string.
    * @param {function} listener Callback function.
@@ -34,7 +188,7 @@ client.addEventListener("server-disconnected", function (evt) {...});
 
 /**
    * @function on
-   * @desc This function equals to {@link Woogeen.ConferenceClient#addEventListener addEventListener}.See [eventType](@ref Events) description.
+   * @desc This function equals to {@link Woogeen.ConferenceClient#addEventListener addEventListener}.
    * @memberOf Woogeen.ConferenceClient
    * @instance
    * @param {string} eventType Event string.
