@@ -115,7 +115,7 @@ We provide source code of a Chrome screen sharing extension sample. Developers s
 > **Note:** End users need to install your extension and visit your site with https if they want to use screen sharing.
 
 # 5 NAT and firewall traversal {#section5}
-Intel CS for WebRTC Client SDK for Javascript fully supports NAT and firewall traversal with STUN / TURN / ICE. The rfc5766-turn-server version 3.2.3.6 from https://code.google.com/p/rfc5766-turn-server/ has been verified.
+Intel CS for WebRTC Client SDK for JavaScript fully supports NAT and firewall traversal with STUN / TURN / ICE. The rfc5766-turn-server version 3.2.3.6 from https://code.google.com/p/rfc5766-turn-server/ has been verified.
 
 # 6 Peer-to-peer (P2P) mode{#section6}
 To enable P2P chat, copy and paste the following code into the head section of your HTML document:
@@ -378,7 +378,7 @@ createToken(roomId, 'user', 'presenter', function (response) {
 });
 </script>
 ~~~~~~
-# 8 JavaScript API quick start {#section8}
+# 8 JavaScript API quick start guide {#section8}
 This discussion describes how to quickly grasp the API usages of Intel CS for WebRTC Client SDK for JavaScript. Unless mentioned elsewhere, all APIs are under namespace `Woogeen`.
 
 ## 8.1 Objects {#section8_1}
