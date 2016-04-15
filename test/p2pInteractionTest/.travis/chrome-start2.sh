@@ -21,4 +21,4 @@ cp /home/webrtctest3/workspace/Test/NightlyTest/script/sdk/deps/karmar/Preferenc
 
 # Execute the command
 export DISPLAY=:0
-exec "$CMD" --user-data-dir="$USER_DIR" --window-position=30,500 --window-size=950,450  --use-fake-ui-for-media-stream --disable-user-media-security --no-default-browser-check --no-first-run --disable-default-apps --use-fake-device-for-media-stream "$@"
+exec "$CMD" --user-data-dir="$USER_DIR" --no-proxy-server --window-position=30,500 --window-size=950,450  --use-fake-ui-for-media-stream --disable-user-media-security --no-default-browser-check --no-first-run --disable-default-apps --use-fake-device-for-media-stream "$@"
