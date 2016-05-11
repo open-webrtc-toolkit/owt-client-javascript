@@ -1213,6 +1213,102 @@ conference.leave();
     };
 
   /**
+     * @function startRtspOut
+     * @instance
+     * @desc This function starts streaming corresponding media stream in the conference room to specified remote RTSP server.
+     <br><b>options:</b><br>
+     {<br>
+    streamId: xxxxxx,<br>
+    url: 'rtsp://SERVER_ADDRESS:PORT/APPLICATION/'<br>
+    }
+     * @memberOf Woogeen.ConferenceClient
+     * @param {string} options RTSP streaming options.<br>
+      <ul>
+     <li>streamId: stream id to be streamed. (optional, if unspecified, the mixed stream will be streamed by default)</li>
+     <li>url: remote RTSP server url. (required)</li>
+     <li>resolution: video resolution setting only valid for mixed stream, an json object with format {width:xxx,height:xxx} or a string like 'vga'.
+        Retrieve resolution information of a mixed stream: <code>stream.resolutions()</code>.
+       (optional)</li>
+     </ul>
+     * @param {function} onSuccess(resp) (optional) Success callback. The following information will be
+   returned as well:<br>
+      <ul>
+     <li>id: rtsp streaming id.</li>
+     <li>url: full path of rtsp streaming accessable via media player.</li>
+     </ul>
+     * @param {function} onFailure(err) (optional) Failure callback.
+     * @example
+  <script type="text/JavaScript">
+  var conference = Woogeen.ConferenceClient.create();
+  // ……
+  conference.startRtspOut({
+    url: 'rtsp://localhost:1935/live'
+  }, function (resp) {
+    L.Logger.info('start rtsp streaming, id:', resp.id, 'URL:', resp.url);
+  }, function (err) {
+    L.Logger.error('start rtsp streaming failed:', err);
+  });
+  </script>
+     */
+    this.startRtspOut = function (options, onSuccess, onFailure) {
+      var self = this;
+      if (typeof options === 'function') {
+        onFailure = onSuccess;
+        onSuccess = options;
+        options = {};
+      } else if (typeof options !== 'object' || options === null) {
+        options = {};
+      }
+
+      sendMsg(self.socket, 'startRtspOut', options, function (err, resp) {
+        if (err) {return safeCall(onFailure, err);}
+        safeCall(onSuccess, resp);
+      });
+    };
+
+  /**
+     * @function stopRtspOut
+     * @instance
+     * @desc This function stops streaming media stream in the conference room to specified remote RTSP server.
+     <br><b>options:</b><br>
+  {<br>
+    id: xxxxxx<br>
+  }
+     * @memberOf Woogeen.ConferenceClient
+     * @param {string} options (required) RTSP streaming options. id: rtsp streaming id to be stopped.
+     * @param {function} onSuccess(resp) (optional) Success callback. The following information will be returned as well:
+     <ul>
+     <li>id: rtsp streaming id.</li>
+     </ul>
+     * @param {function} onFailure(error) (optional) Failure callback.
+     * @example
+  <script type="text/JavaScript">
+  var conference = Woogeen.ConferenceClient.create();
+  // ……
+  conference.stopRtspOut({id: rtspIdToStop}, function (resp) {
+    L.Logger.info('stop rtsp streaming, id:', resp.id);
+  }, function (err) {
+    L.Logger.error('stop rtsp streaming failed:', err);
+  });
+  </script>
+   */
+    this.stopRtspOut = function (options, onSuccess, onFailure) {
+      var self = this;
+      if (typeof options === 'function') {
+        onFailure = onSuccess;
+        onSuccess = options;
+        options = {};
+      } else if (typeof options !== 'object' || options === null) {
+        options = {};
+      }
+
+      sendMsg(self.socket, 'stopRtspOut', options, function (err, resp) {
+        if (err) {return safeCall(onFailure, err);}
+        safeCall(onSuccess, resp);
+      });
+    };
+
+  /**
      * @function startRecorder
      * @instance
      * @desc This function starts the recording of a video stream and an audio stream in the conference room and saves it to a .mkv file, according to the configurable "recording.path" in agent.toml file.<br>

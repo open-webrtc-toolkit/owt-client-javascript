@@ -5,8 +5,14 @@
   </head>
 
   <body>
-    <div id="buttons" style="width:100%;">
-      <button id="shareScreen" type="button" style="display:none">Share Screen!</button>
+    <div style="width:100%;">
+      <div style="width:100%;">
+        <button id="shareScreen" type="button" style="display:none">Share Screen!</button>
+      </div>
+      <div>
+        <button id="rtspOut" type="button" style="display:inline"></button>
+        <input type="text" id="rtspOutURL" placeholder="rtsp://USER:PASS@localhost:1935/live">
+      </div>
     </div>
     <div style="width:640px" title="local medias">
       <div id="myVideo" style="width:320px; height: 240px;" title="my camera"></div>

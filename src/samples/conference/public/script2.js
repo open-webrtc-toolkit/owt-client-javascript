@@ -180,6 +180,40 @@
       }
     }
 
+    var rtspOutButton = document.getElementById('rtspOut');
+    rtspOutButton.onclick = (function () {
+      var id;
+      var startRtspOut = 'start RTSP streaming';
+      var stopRtspOut = 'stop RTSP streaming';
+      rtspOutButton.innerHTML = startRtspOut;
+      return function () {
+        var url = document.getElementById('rtspOutURL');
+        if (!url || !url.value) {
+          L.Logger.error('invalid url of rtsp server.');
+          return;
+        }
+        if (!id) {
+          conference.startRtspOut({
+            url: url.value
+          }, function (resp) {
+            L.Logger.info('start rtsp streaming, id:', resp.id, 'URL:', resp.url);
+            id = resp.id;
+            rtspOutButton.innerHTML = stopRtspOut;
+          }, function (err) {
+            L.Logger.error('start rtsp streaming failed:', err);
+          });
+        } else {
+          conference.stopRtspOut({id: id}, function (resp) {
+            L.Logger.info('stop rtsp streaming, id:', resp.id);
+            id = undefined;
+            rtspOutButton.innerHTML = startRtspOut;
+          }, function (err) {
+            L.Logger.error('stop rtsp streaming failed:', err);
+          });
+        }
+      };
+    }());
+
     createToken(myRoom, 'user', 'presenter', function (response) {
       var token = response;
 
