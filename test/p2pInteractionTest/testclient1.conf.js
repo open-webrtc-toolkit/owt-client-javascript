@@ -16,6 +16,10 @@ module.exports = function (config){
     files : [
     //  JASMINE,
     //  JASMINE_ADAPTER,
+	'./test/p2pInteractionTest/vendor/jquery-latest.js',
+	'./test/p2pInteractionTest/vendor/bootstrap.min.js',
+	'./test/p2pInteractionTest/vendor/pnotify.custom.min.js',
+	'./test/p2pInteractionTest/vendor/pnotify.custom.min.css',
     './src/samples/p2p/js/jquery-1.10.2.min.js',
     './src/samples/p2p/js/utils.js',
     './src/samples/p2p/js/sc.websocket.js',

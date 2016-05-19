@@ -14,7 +14,7 @@ describe('TestDevice1', function() {
 
         actorUserName = "User1",
         targetUserName = "User2",
-        serverIP = 'http://10.239.44.33:8095/',
+        serverIP = 'http://localhost:8095/',
         waitInterval = 20000;
 
     beforeEach(function(done) {
@@ -22,6 +22,7 @@ describe('TestDevice1', function() {
             .runs(function() {
                 actorUser = new TestClient(actorUserName, serverIP);
                 //bind callback listners
+				actorUser.showLog();// add Pnotify;
                 actorUser.bindListener("server-disconnected", function(e) {
                     actorUser.request["server-disconnected_success"]++;
                 });
@@ -40,7 +41,7 @@ describe('TestDevice1', function() {
                     actorUserPeer = e.peerId;
                 });
                 actorUser.bindListener("stream-added", function(e) {
-                    actorUser.showInPage(e.stream);
+                    actorUser.showInPage(e.stream, "REMOTE STREAM");
                     actorUser.request["stream-added_success"]++;
                 });
                 actorUser.bindListener("stream-removed", function(e) {
@@ -189,6 +190,7 @@ describe('TestDevice1', function() {
             })
             // 10. User2SendTwoMessagesToUser1
             // 11. User1UnpublishToUser2
+			
             .waitsFor(function() {
                 // wait lock
                 return waitLock('User2SendTwoMessagesToUser1')
