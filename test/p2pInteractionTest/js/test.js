@@ -34,7 +34,7 @@ var TestClient = function(user, serverURL, config) {
     }];
   };
   this.peerClient = new Woogeen.PeerClient(config);
-  this.serverURL = serverURL || "http://10.239.44.33:8095/";
+  this.serverURL = serverURL || "http://10.239.44.127:8095/";
   console.log('serverURL:'+this.serverURL);
   this.user = user || "user" + new Date().getTime();
   console.log('user:'+this.user);
@@ -74,10 +74,21 @@ TestClient.prototype = {
       that.debug("create stream", "success");
       that.localStream = stream;
       that.request["createLocal_success"]++;
-      that.showInPage(stream);
+      that.showInPage(stream, "LOCAL STREAM");
     }, function(err) {
       that.request["createLocal_failed"]++;
     });
+			$(function(){
+          var notice = new PNotify({
+            title: 'API: createLocalStream',
+            text: 'CreateLocalStream .......',
+            type: 'error',
+            hide: false
+          });
+          notice.get().click(function() {
+            notice.remove();
+          });
+     });
   },
   bindDefaultListener: function(types) {
     var i = 0,
@@ -113,10 +124,22 @@ TestClient.prototype = {
     }, function() {
       that.debug("connect peer", "success");
       that.request["connect_success"]++;
+
     }, function() {
       that.debug("connect peer", "failed");
       that.request["connect_failed"]++;
     });
+		  $(function(){
+          var notice = new PNotify({
+            title: 'API: Connection',
+            text: "Connect .......",
+            type: 'error',
+            hide: false
+          });
+          notice.get().click(function() {
+            notice.remove();
+          });
+	  });
   },
   disconnect: function() {
     var that = this;
@@ -138,6 +161,7 @@ TestClient.prototype = {
       this.peerClient.accept(tc, function() {
         that.debug("accept:", "accept user: " + tc + " success");
         that.request["accept_success"]++;
+
       }, function() {
         that.debug("accept:", "accept user: " + tc + " failed");
         that.request["accept_failed"]++;
@@ -151,6 +175,18 @@ TestClient.prototype = {
         that.request["accept_failed"]++;
       });
     }
+			$(function(){
+          var notice = new PNotify({
+            title: 'API:Accept',
+            text: "Accept .......",
+            type: 'error',
+            hide: false
+          });
+          notice.get().click(function() {
+            notice.remove();
+          });
+
+     });
   },
   deny: function(tc) {
     var that = this;
@@ -173,6 +209,17 @@ TestClient.prototype = {
         that.request["deny_failed"]++;
       });
     }
+		$(function(){
+          var notice = new PNotify({
+            title: 'deny action',
+            text: 'publish .......',
+            type: 'error',
+            hide: false
+          });
+          notice.get().click(function() {
+            notice.remove();
+          });
+     });
   },
   invited: function(tc) {
     var that = this;
@@ -194,7 +241,19 @@ TestClient.prototype = {
         that.debug("invite:", "invite user: " + tc.user + " failed");
         that.request["invite_failed"]++;
       });
+	  	$(function(){
+          var notice = new PNotify({
+            title: 'API:invite',
+            text: "Invite .......",
+            type: 'error',
+            hide: false
+          });
+          notice.get().click(function() {
+            notice.remove();
+          });
+     });
     }
+
   },
   publish: function(tc) {
     var that = this;
@@ -217,6 +276,17 @@ TestClient.prototype = {
         that.request["publish_failed"]++;
       });
     }
+	$(function(){
+          var notice = new PNotify({
+            title: 'API:publish',
+            text: 'publish .......',
+            type: 'error',
+            hide: false
+          });
+          notice.get().click(function() {
+            notice.remove();
+          });
+     });
   },
   unpublish: function(tc) {
     var that = this;
@@ -239,6 +309,17 @@ TestClient.prototype = {
         that.request["unpublish_failed"]++;
       });
     }
+  $(function(){
+          var notice = new PNotify({
+            title: 'API:unpublish',
+            text: "unpublish .......",
+            type: 'error',
+            hide: false
+          });
+          notice.get().click(function() {
+            notice.remove();
+          });
+     });
   },
   send: function(tc, msg) {
     var that = this;
@@ -286,6 +367,17 @@ TestClient.prototype = {
         that.request["stop_failed"]++;
       });
     }
+			  	$(function(){
+          var notice = new PNotify({
+            title: 'API:stop',
+            text: "stop .......",
+            type: 'error',
+            hide: false
+          });
+          notice.get().click(function() {
+            notice.remove();
+          });
+     });
 
   },
   enableVideo: function(tc) {
@@ -323,10 +415,36 @@ TestClient.prototype = {
     var stream = tc.localStream;
     stream.close();
   },
-  showInPage: function(stream) {
+  showLog: function() {
+	  var cssId = 'myCss';  // you could encode the css path itself to generate id..
+     if (!document.getElementById(cssId))
+        {
+          var head  = document.getElementsByTagName('head')[0];
+           var link  = document.createElement('link');
+           link.id   = cssId;
+           link.rel  = 'stylesheet';
+           link.type = 'text/css';
+           link.href = 'C:\\Users\\yzha176\\Documents\\webrtc-javascript-sdk\\test\\p2pInteractionTest\\vendor\\pnotify.custom.min.css';
+           link.media = 'all';
+            head.appendChild(link);
+          }
+  },
+  showInPage: function(stream, tag) {
     console.log('showInPage!')
+	 	$(function(){
+          var notice = new PNotify({
+            title: 'API:show',
+            text: "show" + tag +" at HTML page:",
+            type: 'error',
+            hide: false
+          });
+          notice.get().click(function() {
+            notice.remove();
+          });
+     });
     var that = this;
     var isIE= that.isIE();
+  
     if(isIE==true){
       console.log('IE detected!')
       var localdiv = document.createElement("div");
@@ -342,7 +460,12 @@ TestClient.prototype = {
               // canvas.style.position = "absolute";
               // canvas.style.left = 100;
               // canvas.style.top = 200;
-               document.body.appendChild(canvas);
+               //document.body.appendChild(canvas);
+			    document.body.appendChild(canvas);
+			     var para = document.createElement("p");
+                var node = document.createTextNode(tag);
+                 para.appendChild(node);
+                 document.body.appendChild(para);
              // document.getElementById('myVideo').appendChild(canvas);
               if(stream instanceof Woogeen.LocalStream){
                 attachMediaStream(canvas, stream.mediaStream);
@@ -366,9 +489,14 @@ TestClient.prototype = {
     // video.style.top = 200;
     console.log('added video:'+stream.mediaStream);
     document.body.appendChild(video);
-
+    var para = document.createElement("p");
+    var node = document.createTextNode(tag);
+    para.appendChild(node);
+    document.body.appendChild(para);
     attachMediaStream(video, stream.mediaStream);
     this.request[videoId] = startDetection(videoId, "320", "240");
+	
+		 
   },
   removeVideo: function(stream) {
     var videos = document.getElementsByClassName("video");
@@ -417,7 +545,7 @@ TestClient.prototype = {
       config = {};
     }
     this.peerClient = new Woogeen.PeerClient(config);
-    this.serverURL = serverURL || "http://10.239.44.33:8095/";
+    this.serverURL = serverURL || "http://10.239.44.127:8095/";
     this.user = user || "user" + new Date().getTime();
     this.request = {};
   }
