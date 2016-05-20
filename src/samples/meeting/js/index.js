@@ -43,6 +43,7 @@ var singleMute=true;
 var isPauseAudio=true;
 var isPauseVideo=false;
 var isOriginal=true;
+var isAudioOnly=false;
 
 function login() {
     setTimeout(function() {
@@ -276,6 +277,7 @@ function initWoogeen() {
     } else {
         setStream = $("#login-audio-video").hasClass("selected")
     }
+    isAudioOnly = !setStream;
     var isIce = $(".checkbox")[0].checked;
 
     function createLocal() {
@@ -380,9 +382,11 @@ function initWoogeen() {
                     return;
                 } else if (subscribeType === SUBSCRIBETYPES.MIX && !stream.isMixed() && !stream.isScreen()) {
                     return;
+                } else if (stream.isScreen() && isLocalScreenSharing) {
+                    return;
                 }
                 L.Logger.info('subscribing:', stream.id());
-                room.subscribe(stream, function() {
+                room.subscribe(stream, {video:!isAudioOnly, audio:true},function() {
                     L.Logger.info('subscribed:', stream.id());
                     addVideo(stream, false);
                     console.log("subscribe");
@@ -458,6 +462,8 @@ function addRoomEventListener() {
             return;
         } else if (subscribeType === SUBSCRIBETYPES.MIX && (!(stream.isMixed && stream.isMixed()) && !(stream.isScreen && stream.isScreen()))) {
             return;
+        } else if (stream.isScreen() && isLocalScreenSharing) {
+            return;
         }
         if (localStream != null && stream.id() == localStream.id()) {
             return;
@@ -491,7 +497,7 @@ function addRoomEventListener() {
                     }
                 }
             });
-            room.subscribe(stream, function() {
+            room.subscribe(stream, {video:!isAudioOnly, audio:true}, function() {
                 L.Logger.info('subscribed:', stream.id());
                 addVideo(stream);
                 streamObj[stream.id()] = stream;
@@ -1291,19 +1297,36 @@ function playpause() {
 
 function pauseVideo(){
     if(!isPauseVideo){
-        room.pauseVideo(localStream, function() {
+      for (var i in room.remoteStreams) {
+        var stream = room.remoteStreams[i];
+        // Usually, we don't want to pause screen sharing
+        if(!stream.isScreen()){
+          room.pauseVideo(stream);
+        }
+      };
+      localStream.disableVideo();
+      room.pauseVideo(localStream, function() {
         console.log("Pause video Successfully");
         $('#pauseVideo').text("Play video");
-        isPauseVideo=!isPauseVideo;},
-        function() {console.log("Fail to pasuse video.");}
-        );
+        isPauseVideo=!isPauseVideo;
+      }, function() {
+        console.log("Fail to pasuse video.");
+      });
     }else{
-        room.playVideo(localStream, function() {
+      for (var i in room.remoteStreams) {
+        var stream = room.remoteStreams[i];
+        if(!stream.isScreen()){
+          room.playVideo(stream);
+        }
+      };
+      localStream.enableVideo();
+      room.playVideo(localStream, function() {
         console.log("Play video Successfully");
         $('#pauseVideo').text("Pause video");
-        isPauseVideo=!isPauseVideo;},
-        function() {console.log("Fail to play video.");}
-        );
+        isPauseVideo=!isPauseVideo;
+      }, function() {
+        console.log("Fail to play video.");
+      });
     }
 }
 
