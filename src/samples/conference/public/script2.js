@@ -255,7 +255,7 @@
               document.getElementById('myVideo').appendChild(canvas);
               attachMediaStream(canvas, localStream.mediaStream);
             }
-            conference.publish(localStream, {maxVideoBW: 300}, function (st) {
+            conference.publish(localStream, {}, function (st) {
               L.Logger.info('stream published:', st.id());
             }, function (err) {
                L.Logger.error('publish failed:', err);

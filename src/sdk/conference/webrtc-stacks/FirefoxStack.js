@@ -14,38 +14,6 @@ Erizo.FirefoxStack = function (spec) {
 
     if (spec.iceServers instanceof Array) {
         that.pc_config.iceServers = spec.iceServers;
-    } else {
-        if (spec.stunServerUrl) {
-            if (spec.stunServerUrl instanceof Array) {
-                spec.stunServerUrl.map(function (url) {
-                    if (typeof url === 'string' && url !== '') {
-                        that.pc_config.iceServers.push({urls: url});
-                    }
-                });
-            } else if (typeof spec.stunServerUrl === 'string' && spec.stunServerUrl !== '') {
-                that.pc_config.iceServers.push({urls: spec.stunServerUrl});
-            }
-        }
-
-        if (spec.turnServer) {
-            if (spec.turnServer instanceof Array) {
-                spec.turnServer.map(function (turn) {
-                    if (typeof turn.url === 'string' && turn.url !== '') {
-                        that.pc_config.iceServers.push({
-                            username: turn.username,
-                            credential: turn.password,
-                            urls: turn.url
-                        });
-                    }
-                });
-            } else if (typeof spec.turnServer.url === 'string' && spec.turnServer.url !== '') {
-                that.pc_config.iceServers.push({
-                    username: spec.turnServer.username,
-                    credential: spec.turnServer.password,
-                    urls: spec.turnServer.url
-                });
-            }
-        }
     }
 
     if (spec.audio === undefined) {

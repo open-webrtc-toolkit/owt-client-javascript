@@ -15,38 +15,6 @@ Erizo.ChromeStableStack = function (spec) {
 
     if (spec.iceServers instanceof Array) {
         that.pc_config.iceServers = spec.iceServers;
-    } else {
-        if (spec.stunServerUrl) {
-            if (spec.stunServerUrl instanceof Array) {
-                spec.stunServerUrl.map(function (url) {
-                    if (typeof url === 'string' && url !== '') {
-                        that.pc_config.iceServers.push({urls: url});
-                    }
-                });
-            } else if (typeof spec.stunServerUrl === 'string' && spec.stunServerUrl !== '') {
-                that.pc_config.iceServers.push({urls: spec.stunServerUrl});
-            }
-        }
-
-        if (spec.turnServer) {
-            if (spec.turnServer instanceof Array) {
-                spec.turnServer.map(function (turn) {
-                    if (typeof turn.url === 'string' && turn.url !== '') {
-                        that.pc_config.iceServers.push({
-                            username: turn.username,
-                            credential: turn.password,
-                            urls: turn.url
-                        });
-                    }
-                });
-            } else if (typeof spec.turnServer.url === 'string' && spec.turnServer.url !== '') {
-                that.pc_config.iceServers.push({
-                    username: spec.turnServer.username,
-                    credential: spec.turnServer.password,
-                    urls: spec.turnServer.url
-                });
-            }
-        }
     }
 
     if (spec.audio === undefined) {
@@ -180,17 +148,11 @@ Erizo.ChromeStableStack = function (spec) {
     that.updateSpec = function (config, callback) {
         if (config.maxVideoBW || config.maxAudioBW) {
             if (config.maxVideoBW) {
-                console.log("Maxvideo Requested", config.maxVideoBW, "limit", spec.limitMaxVideoBW);
-                if (config.maxVideoBW > spec.limitMaxVideoBW) {
-                    config.maxVideoBW = spec.limitMaxVideoBW;
-                }
+                console.log("Maxvideo Requested", config.maxVideoBW);
                 spec.maxVideoBW = config.maxVideoBW;
-                console.log("Result", spec.maxVideoBW);
             }
             if (config.maxAudioBW) {
-                if (config.maxAudioBW > spec.limitMaxAudioBW) {
-                    config.maxAudioBW = spec.limitMaxAudioBW;
-                }
+                console.log("Maxaudio Requested", config.maxAudioBW);
                 spec.maxAudioBW = config.maxAudioBW;
             }
 

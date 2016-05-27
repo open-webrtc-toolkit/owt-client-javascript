@@ -12,12 +12,8 @@ Erizo.BowserStack = function (spec) {
 
     that.con = {'optional': [{'DtlsSrtpKeyAgreement': true}]};
 
-    if (spec.stunServerUrl !== undefined) {
-        that.pc_config.iceServers.push({"urls": spec.stunServerUrl});
-    } 
-
-    if ((spec.turnServer || {}).url) {
-        that.pc_config.iceServers.push({"username": spec.turnServer.username, "credential": spec.turnServer.password, "urls": spec.turnServer.url});
+    if (spec.iceServers instanceof Array) {
+        that.pc_config.iceServers = spec.iceServers;
     }
 
     if (spec.audio === undefined) {

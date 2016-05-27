@@ -141,10 +141,10 @@ WoogeenConferenceBase.prototype = Woogeen.EventDispatcher({}); // make WoogeenCo
    * @function setIceServers
    * @desc This function establishes a connection to server and joins a certain conference.
 <br><b>Remarks:</b><br>
-This method accepts string, object, or array (multiple ones) type of ice server item as argument. Typical description of each valid value should be as below:<br>
+This method accepts array (multiple ones) type of ice server item as argument. Typical description of each valid value should be as below:<br>
 <ul>
-<li>For turn: {urls: "url", username: "username", credential: "password"}.</li>
-<li>For stun: {urls: "url"}, or simply "url" string.</li>
+<li>For turn: {urls: array or single "url", username: "username", credential: "password"}.</li>
+<li>For stun: {urls: array or single "url"}.</li>
 </ul>
 Each time this method is called, previous saved value would be discarded. Specifically, if parameter servers is not provided, the result would be an empty array, meaning any predefined servers are discarded.
    * @instance
@@ -155,13 +155,11 @@ Each time this method is called, previous saved value would be discarded. Specif
 <script type="text/JavaScript">
 ...
 client.setIceServers([{
-    urls: "turn:61.152.239.60:4478?transport=udp",
-    username: "woogeen",
-    credential: "master"
+    urls: "stun:x.x.x.x:3478"
   }, {
-    urls: "turn:61.152.239.60:443?transport=tcp",
-    username: "woogeen",
-    credential: "master"
+    urls: ["turn:x.x.x.x:443?transport=udp", "turn:x.x.x.x:443?transport=tcp"],
+    username: "abc",
+    credential: "xyz"
   }]);
 </script>
    */
@@ -261,12 +259,7 @@ client.setIceServers([{
           callback: function (msg) {
             sendSdp(self.socket, 'signaling_message', {streamId: stream.id(), peerSocket: peerSocket, msg: msg});
           },
-          stunServerUrl: self.connSettings.stun,
-          turnServer: self.connSettings.turn,
-          maxAudioBW: self.connSettings.maxAudioBW,
-          maxVideoBW: self.connSettings.maxVideoBW,
-          limitMaxAudioBW: self.connSettings.maxAudioBW,
-          limitMaxVideoBW: self.connSettings.maxVideoBW
+          iceServers: self.getIceServers()
         });
 
         stream.channel.onaddstream = function (evt) {
@@ -363,8 +356,7 @@ client.setIceServers([{
           },
           audio: myStream.hasAudio(),
           video: myStream.hasVideo(),
-          stunServerUrl: self.connSettings.stun,
-          turnServer: self.connSettings.turn
+          iceServers: self.getIceServers()
         });
 
         myStream.channel[spec.peerSocket].oniceconnectionstatechange = function (state) {
@@ -444,12 +436,6 @@ client.setIceServers([{
     try {
       self.socket.emit('token', token, function (status, resp) {
         if (status === 'success') {
-          self.connSettings = {
-            turn: resp.turnServer,
-            stun: resp.stunServerUrl,
-            defaultVideoBW: resp.defaultVideoBW,
-            maxVideoBW: resp.maxVideoBW
-          };
           self.myId = resp.clientId;
           self.conferenceId = resp.id;
           self.p2p = resp.p2p;
@@ -542,8 +528,6 @@ client.setIceServers([{
         });
         return;
       } else if (self.p2p) {
-        self.connSettings.maxVideoBW = options.maxVideoBW;
-        self.connSettings.maxAudioBW = options.maxAudioBW;
         opt.state = 'p2p';
         sendSdp(self.socket, 'publish', opt, null, function (id) {
             if (id === 'error') {
@@ -559,10 +543,6 @@ client.setIceServers([{
             safeCall(onSuccess, stream);
         });
         return;
-      }
-      options.maxVideoBW = options.maxVideoBW || self.connSettings.defaultVideoBW;
-      if (options.maxVideoBW > self.connSettings.maxVideoBW) {
-        options.maxVideoBW = self.connSettings.maxVideoBW;
       }
 
       opt.state = 'erizo';
@@ -586,12 +566,8 @@ client.setIceServers([{
           video: stream.hasVideo(),
           audio: stream.hasAudio(),
           iceServers: self.getIceServers(),
-          stunServerUrl: self.connSettings.stun,
-          turnServer: self.connSettings.turn,
           maxAudioBW: options.maxAudioBW,
           maxVideoBW: options.maxVideoBW,
-          limitMaxAudioBW: self.connSettings.maxAudioBW,
-          limitMaxVideoBW: self.connSettings.maxVideoBW,
           videoCodec: options.videoCodec
         });
 
@@ -769,8 +745,6 @@ client.setIceServers([{
         audio: stream.hasAudio() && (options.audio !== false),
         video: stream.hasVideo() && (options.video !== false),
         iceServers: self.getIceServers(),
-        stunServerUrl: self.connSettings.stun,
-        turnServer: self.connSettings.turn,
         videoCodec: options.videoCodec
       });
 
