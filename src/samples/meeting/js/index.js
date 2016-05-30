@@ -386,7 +386,8 @@ function initWoogeen() {
                     return;
                 }
                 L.Logger.info('subscribing:', stream.id());
-                room.subscribe(stream, {video:!isAudioOnly, audio:true},function() {
+                var videoOption = stream.isScreen()? true:!isAudioOnly;
+                room.subscribe(stream, {video:videoOption, audio:true},function() {
                     L.Logger.info('subscribed:', stream.id());
                     addVideo(stream, false);
                     console.log("subscribe");
@@ -497,7 +498,8 @@ function addRoomEventListener() {
                     }
                 }
             });
-            room.subscribe(stream, {video:!isAudioOnly, audio:true}, function() {
+            var videoOption = stream.isScreen()? true:!isAudioOnly;
+            room.subscribe(stream, {video:videoOption, audio:true}, function() {
                 L.Logger.info('subscribed:', stream.id());
                 addVideo(stream);
                 streamObj[stream.id()] = stream;
