@@ -122,30 +122,9 @@ Woogeen.PeerClient=function (pcConfig) {
   }
   var config = null;
 
-  // Format for iceServers follows W3C standard, we parse it for different browsers.
-  // TODO: Support Chrome only.
-  var parseIceServers=function(iceServers){
-    var servers=[];
-    for(var i=0;i<iceServers.length;i++){
-      var iceServer=iceServers[i];
-      if(isArray(iceServer.urls)){  // If "urls" is an array.
-        for(var j=0;j<iceServer.urls.length;j++){
-          servers.push({url:iceServer.urls[j],username:iceServer.username,credential:iceServer.credential});
-        }
-      }
-      else{  // If "urls" is a string.
-        servers.push({url:iceServer.urls,username:iceServer.username,credential:iceServer.credential});
-      }
-    }
-    return servers;
-  };
-
   // Set configuration for PeerConnection
   if(pcConfig){
-    config={};
-    if(pcConfig.iceServers){
-      config.iceServers=parseIceServers(pcConfig.iceServers);
-    }
+    config={iceServers: pcConfig.iceServers};
   }
 
   /*
