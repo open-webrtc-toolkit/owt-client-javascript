@@ -1,4 +1,4 @@
-/* global Gab,room,RTCIceCandidate,RTCSessionDescription,getPeerConnectionStats,getPeerConnectionAudioLevels,remoteIceCandidates*/
+/* global Gab,room,RTCIceCandidate,RTCSessionDescription,getPeerConnectionAudioLevels,remoteIceCandidates*/
 /* Depend on woogeen.js, gab-websocket.js, WooGeen.Error.js*/
 
 var Woogeen = Woogeen || {}; /*jshint ignore:line*/ //Woogeen is defined.
@@ -1287,9 +1287,26 @@ p2p.getConnectionStats($('#target-uid').val(), successcallback, failurecallback)
     var peerId=getPeerId(targetId);
     var peer=peers[peerId];
     if(!peer||(!peer.connection)||(peer.state!==PeerState.CONNECTED)){
-      failureCallback("failed to get peerconnection statistics");
+      if(failureCallback){
+        failureCallback("failed to get peerconnection statistics");
+      }
+      return;
     }
-    getPeerConnectionStats(peer.connection, successCallback);/*jshint ignore:line*/
+    if(!successCallback){
+      // If user doesn't provide a success callback, no reason to getStats().
+      return;
+    }
+    peer.connection.getStats(function(stats){
+      if(window.navigator.appVersion.indexOf("Trident") > -1){
+        successCallback(stats);
+      } else {
+        successCallback(Woogeen.Common.parseStats(stats));
+      }
+    }, function(err){
+      if(failureCallback){
+        failureCallback(err);
+      }
+    });
   };
 
 /**

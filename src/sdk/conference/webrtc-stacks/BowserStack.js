@@ -210,5 +210,9 @@ Erizo.BowserStack = function (spec) {
         }
     };
 
+    that.getConnectionStats = function(onSuccess, onFailure){
+        onFailure('getConnectionStats is not supported on Browser.');
+    };
+
     return that;
 };

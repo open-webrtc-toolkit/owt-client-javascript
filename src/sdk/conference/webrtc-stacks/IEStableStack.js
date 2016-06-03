@@ -265,5 +265,11 @@ Erizo.IEStableStack = function (spec) {
         }
     };
 
+    that.getConnectionStats = function(onSuccess, onFailure){
+        /*jshint unused: false*/
+        // IE plugin doesn't provide onFailure callback.
+        that.peerConnection.getStats(onSuccess);
+    };
+
     return that;
 };

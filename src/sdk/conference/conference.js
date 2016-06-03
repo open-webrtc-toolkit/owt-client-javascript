@@ -1505,6 +1505,38 @@ conference.leave();
         safeCall(onSuccess, resp);
       });
     };
+
+  /**
+     * @function getConnectionStats
+     * @instance
+     * @desc This function gets statistic information about the given stream and its associated connection.
+     * @memberOf Woogeen.ConferenceClient
+     * @param {WoogeenStream} stream Stream instance.
+     * @param {function} onSuccess(stats) (optional) Success callback.
+     * @param {function} onFailure(error) (optional) Failure callback.
+     * @example
+  <script type="text/JavaScript">
+  var conference = Woogeen.ConferenceClient.create();
+  // ......
+  conference.getConnectionStats(stream, function (stats) {
+      L.Logger.info('Statistic information: ', stats);
+    }, function (err) {
+      L.Logger.error('Get statistic information failed:', err);
+    }
+  );
+  </script>
+   */
+    this.getConnectionStats = function (stream, onSuccess, onFailure) {
+      if (stream.channel && typeof stream.channel.getConnectionStats === 'function') {
+        stream.channel.getConnectionStats(function(stats){
+          safeCall(onSuccess, stats);
+        }, function(err){
+          safeCall(onFailure, err);
+        });
+      } else {
+        safeCall(onFailure, 'invalid stream.');
+      }
+    };
   };
 
   WoogeenConference.prototype = Object.create(WoogeenConferenceBase.prototype); // make WoogeenConference a WoogeenConferenceBase

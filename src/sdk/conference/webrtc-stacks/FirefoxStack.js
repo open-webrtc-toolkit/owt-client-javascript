@@ -239,5 +239,11 @@ Erizo.FirefoxStack = function (spec) {
             }
         }
     };
+
+    that.getConnectionStats = function(onSuccess, onFailure){
+        // FireFox supports getStats, but SDK cannot parse it.
+        onFailure('getConnectionStats is not supported on FireFox.');
+    };
+
     return that;
 };
