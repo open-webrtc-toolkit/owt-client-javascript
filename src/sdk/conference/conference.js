@@ -254,22 +254,6 @@ client.setIceServers([{
     if (self.socket !== undefined) { // whether reconnect
       self.socket.connect();
     } else {
-      var create_remote_pc = function (stream, peerSocket) {
-        stream.channel = createChannel({
-          callback: function (msg) {
-            sendSdp(self.socket, 'signaling_message', {streamId: stream.id(), peerSocket: peerSocket, msg: msg});
-          },
-          iceServers: self.getIceServers()
-        });
-
-        stream.channel.onaddstream = function (evt) {
-          // Draw on html
-          L.Logger.info('Stream subscribed');
-          stream.mediaStream = evt.stream;
-          this.internalDispatcher.dispatchEvent(new Woogeen.StreamEvent({type: 'p2p-stream-subscribed', stream: stream}));
-        };
-      };
-
       self.socket = io.connect(host, {
         reconnect: false,
         secure: isSecured,
@@ -322,52 +306,6 @@ client.setIceServers([{
           if (stream) {
               stream.channel.processSignalingMessage(arg.mess);
           }
-      });
-
-      self.socket.on('signaling_message_peer', function (arg) {
-
-          var stream = self.localStreams[arg.streamId];
-
-          if (stream) {
-              stream.channel[arg.peerSocket].processSignalingMessage(arg.msg);
-          } else {
-              stream = self.remoteStreams[arg.streamId];
-
-              if (!stream.pc) {
-                  create_remote_pc(stream, arg.peerSocket);
-              }
-              stream.channel.processSignalingMessage(arg.msg);
-          }
-      });
-
-      self.socket.on('publish_me', function (spec) {
-        var myStream = self.localStreams[spec.streamId];
-        if (myStream.channel === undefined) {
-          myStream.channel = {};
-        }
-
-        myStream.channel[spec.peerSocket] = createChannel({
-          callback: function (msg) {
-            sendSdp(self.socket, 'signaling_message', {
-              streamId: spec.streamId,
-              peerSocket: spec.peerSocket,
-              msg: msg
-            });
-          },
-          audio: myStream.hasAudio(),
-          video: myStream.hasVideo(),
-          iceServers: self.getIceServers()
-        });
-
-        myStream.channel[spec.peerSocket].oniceconnectionstatechange = function (state) {
-          if (state === 'disconnected') {
-            myStream.channel[spec.peerSocket].close();
-            delete myStream.channel[spec.peerSocket];
-          }
-        };
-
-        myStream.channel[spec.peerSocket].addStream(myStream.mediaStream);
-        myStream.channel[spec.peerSocket].createOffer();
       });
 
       self.socket.on('add_recorder', function (spec) {
@@ -438,11 +376,9 @@ client.setIceServers([{
         if (status === 'success') {
           self.myId = resp.clientId;
           self.conferenceId = resp.id;
-          self.p2p = resp.p2p;
           self.state = CONNECTED;
           var streams = [];
           self.conferenceId = resp.id;
-          self.p2p = resp.p2p;
           if (resp.streams !== undefined) {
             streams = resp.streams.map(function (st) {
               self.remoteStreams[st.id] = createRemoteStream(st);
@@ -525,22 +461,6 @@ client.setIceServers([{
           };
           self.localStreams[id] = stream;
           safeCall(onSuccess, stream);
-        });
-        return;
-      } else if (self.p2p) {
-        opt.state = 'p2p';
-        sendSdp(self.socket, 'publish', opt, null, function (id) {
-            if (id === 'error') {
-              return safeCall(onFailure, id);
-            }
-            stream.id = function () {
-              return id;
-            };
-            stream.unpublish = function (onSuccess, onFailure) {
-              self.unpublish(stream, onSuccess, onFailure);
-            };
-            self.localStreams[id] = stream;
-            safeCall(onSuccess, stream);
         });
         return;
       }
@@ -710,14 +630,6 @@ client.setIceServers([{
     }
     if (!(stream instanceof Woogeen.RemoteStream)) {
       return safeCall(onFailure, 'invalid stream');
-    }
-    if (self.p2p) {
-      this.internalDispatcher.on('p2p-stream-subscribed', function p2pStreamHandler (evt) {
-        this.internalDispatcher.removeEventListener('p2p-stream-subscribed', p2pStreamHandler);
-        safeCall(onSuccess, evt.stream);
-      });
-      sendSdp(self.socket, 'subscribe', {streamId: stream.id()}, null, function () {});
-      return;
     }
 
     if (options.audio === false && options.video === false) {
