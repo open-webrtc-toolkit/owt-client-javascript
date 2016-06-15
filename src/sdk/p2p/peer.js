@@ -112,14 +112,7 @@ Woogeen.PeerClient=function (pcConfig) {
   //                     'protocol': 'SCTP'
   //                    };
   var dataConstraints=null;
-  var sdpConstraints=null;
-  // Doesn't add constraints for FireFox because it doesn't do renegotiation, so the first offer is expected to contain MediaStream.
-  // If this constraints are added, and the remote stream doesn't have audio, FireFox will create a new stream that only has audio.
-  if(!navigator.mozGetUserMedia){
-    sdpConstraints={'mandatory': {
-      'OfferToReceiveAudio': true,
-      'OfferToReceiveVideo': true }};
-  }
+  var sdpConstraints={'offerToReceiveAudio':true, 'offerToReceiveVideo':true };
   var config = null;
 
   // Set configuration for PeerConnection
@@ -234,7 +227,7 @@ Woogeen.PeerClient=function (pcConfig) {
       peer.state=PeerState.MATCHED;
       createPeerConnection(peer);
       peer.state=PeerState.CONNECTING;
-      createAndSendOffer(peer);
+      createDataChannel(peer.id);  // PeerConnection without streams and data channel is not allowed by FireFox.
       that.dispatchEvent(new Woogeen.ChatEvent({type: 'chat-accepted', senderId: senderId}));
     }
   };
@@ -278,9 +271,12 @@ Woogeen.PeerClient=function (pcConfig) {
 
   var onNegotiationneeded=function(peer){
     L.Logger.debug('On negotiation needed.');
-    if(gab){
-        gab.sendNegotiationNeeded(peer.id);
-        changeNegotiationState(peer,NegotiationState.REQUESTED);
+    if(peer.isCaller&&peer.connection.signalingState==='stable'&&peer.negotiationState===NegotiationState.READY){
+      doRenegotiate(peer);
+    } else if(!peer.isCaller && gab){
+      gab.sendNegotiationNeeded(peer.id);
+    } else {
+      peer.isNegotiationNeeded=true;
     }
   };
 
@@ -359,13 +355,7 @@ Woogeen.PeerClient=function (pcConfig) {
   };
 
   var createRemoteStream=function(mediaStream,peer){
-    var type;
-    if(navigator.mozGetUserMedia){ // MediaStream in FireFox doesn't have label property, so all streams are treated as video.
-      type='video';
-    }
-    else{
-      type=streams[mediaStream.id];
-    }
+    var type=streams[mediaStream.id];
     if(!type){
       return null;
     }else{
@@ -464,13 +454,8 @@ Woogeen.PeerClient=function (pcConfig) {
     }
     else if(peer.connection.signalingState==='stable'){
       changeNegotiationState(peer, NegotiationState.READY);
-      if(peer.isRemoteNegotiationNeeded&&!navigator.mozGetUserMedia&&gab){
-        // Signaling state changed to 'stable' so it's ready to accept renegotiation.
-        // Doesn't accept renegotiation if local is FireFox.
-        L.Logger.debug('Send negotiation accept from '+myId+' because signaling state changed.');
-        gab.sendNegotiationAccepted(peer.id);
-        changeNegotiationState(peer,NegotiationState.ACCEPTED);
-        peer.isRemoteNegotiationNeeded=false;
+      if(peer.isCaller&&peer.isNegotiationNeeded&&gab){
+        doRenegotiate(peer);
       } else {
         drainPendingStreams(peer);
       }
@@ -488,7 +473,7 @@ Woogeen.PeerClient=function (pcConfig) {
       peer.connection.onaddstream=function(event){onRemoteStreamAdded(peer,event);};
       peer.connection.onremovestream=function(event){onRemoteStreamRemoved(peer,event);};
       peer.connection.oniceconnectionstatechange=function(event){onIceConnectionStateChange(peer,event);};
-      peer.connection.onnegotiationneeded=function(){onNegotiationneeded(peer);};
+      peer.connection.onnegotiationneeded=function(){onNegotiationneeded(peers[peer.id]);};
       peer.connection.onsignalingstatechange=function(){onSignalingStateChange(peer);};
       //DataChannel
       peer.connection.ondatachannel=function(event){
@@ -555,7 +540,9 @@ Woogeen.PeerClient=function (pcConfig) {
 
   var createPeer=function(peerId){
     if(!peers[peerId]){
-      peers[peerId]={state:PeerState.READY, id:peerId, pendingStreams:[], pendingUnpublishStreams:[], remoteIceCandidates:[], dataChannels:{}, pendingMessages:[], negotiationState:NegotiationState.READY, lastDisconnect:(new Date('2099/12/31')).getTime(),publishedStreams:[]};
+      // Default value for |lastDisconnect| makes sure now-|lastDisconnect| < 0.
+      // Default value for |isCaller| is true, it will be changed to false when send acceptance. If both sides send invitation at the same time, one side will send acceptance and change |isCaller| to false. This is handled in |chatInvitationHandler|.
+      peers[peerId]={state:PeerState.READY, id:peerId, pendingStreams:[], pendingUnpublishStreams:[], remoteIceCandidates:[], dataChannels:{}, pendingMessages:[], negotiationState:NegotiationState.READY, lastDisconnect:(new Date('2099/12/31')).getTime(),publishedStreams:[], isCaller:true};
     }
     return peers[peerId];
   };
@@ -564,31 +551,15 @@ Woogeen.PeerClient=function (pcConfig) {
     var peer=peers[peerId];
     L.Logger.debug(myId+': Remote side needs negotiation.');
     if(peer){
-      // If current client is caller and want to send offer, then wait for another client's acceptance.
-      if(peer.negotiationState===NegotiationState.REQUESTED&&(compareID(myId,peerId)>0)){
-        L.Logger.debug('This side already needs negotiation.');
-        peer.isRemoteNegotiationNeeded=true;
-        return;
-      }
-      else if(!navigator.mozGetUserMedia&&peer.negotiationState!==NegotiationState.NEGOTIATING&&gab){  // Doesn't accept renegotiation if local is FireFox
-        L.Logger.debug('Send negotiation accept from '+myId+ ' because remote side need negotiation.');
-        gab.sendNegotiationAccepted(peerId);
-        changeNegotiationState(peer,NegotiationState.READY);
-        peer.isRemoteNegotiationNeeded=false;
-      }
-      else{
-        L.Logger.warning('Other reason blocks negotiation.');
-        peer.isRemoteNegotiationNeeded=true;
+      if(peer.isCaller&&peer.connection.signalingState==='stable'&&peer.negotiationState===NegotiationState.READY){
+        doRenegotiate(peer);
+      } else {
+        peer.isNegotiationNeeded=true;
+        L.Logger.error('Should not receive negotiation needed request because user is callee.');
       }
     }
   };
 
-  var negotiationAcceptedHandler=function(peerId){
-    var peer=peers[peerId];
-    if(peer){
-      doRenegotiate(peer);
-    }
-  };
 /**
    * @function connect
    * @instance
@@ -613,7 +584,6 @@ p2p.connect({host:'http://61.152.239.56:8095/',token:'user1'});
     gab.onChatSignal=chatSignalHandler;
     gab.onStreamType=streamTypeHandler;
     gab.onNegotiationNeeded=negotiationNeededHandler;
-    gab.onNegotiationAccepted=negotiationAcceptedHandler;
     gab.onAuthenticated=authenticatedHandler;
     gab.onForceDisconnect=forceDisconnectHandler;
     gab.connect(loginInfo,successCallback,failureCallback);
@@ -764,6 +734,7 @@ p2p.addEventListener('chat-invited',function(e){
       createPeer(peerId);
     }
     var peer=peers[peerId];
+    peer.isCaller=false;
     if(peer.state===PeerState.PENDING){
       peer.state=PeerState.MATCHED;
       gab.sendChatAccepted(peerId, successCallback, function(errCode){
@@ -813,14 +784,7 @@ p2p.addEventListener('chat-invited',function(e){
       return;
     }
     drainPendingStreams(peer);
-    // Create data channel before first offer to avoid remote video disappear when renegotiation.
-    if(peer.pendingMessages.length&&!peer.dataChannels[DataChannelLabel.MESSAGE]){
-      doCreateDataChannel(peer.id);
-    }
-    // If the client is FireFox and publish without stream.
-    if(navigator.mozGetUserMedia&&!peer.pendingStreams.length&&!peer.connection.getLocalStreams().length){
-      createDataChannel(peer.id);
-    }
+    peer.isNegotiationNeeded=false;
     peer.connection.createOffer(function(desc) {
       desc.sdp = replaceSdp(desc.sdp);
       peer.connection.setLocalDescription(desc,function(){
@@ -855,6 +819,10 @@ p2p.addEventListener('chat-invited',function(e){
       L.Logger.debug('Peer connection is ready for draining pending streams.');
       for(var i=0;i<peer.pendingStreams.length;i++){
         var stream=peer.pendingStreams[i];
+        // OnNegotiationNeeded event will be triggered immediately after adding stream to PeerConnection in FireFox.
+        // And OnNegotiationNeeded handler will execute drainPendingStreams. To avoid add the same stream multiple times,
+        // shift it from pending stream list before adding it to PeerConnection.
+        peer.pendingStreams.shift();
         if(!stream.mediaStream){  // The stream has been closed. Skip it.
           continue;
         }
@@ -904,6 +872,7 @@ p2p.addEventListener('chat-invited',function(e){
       return;
     }
     drainPendingStreams(peer);
+    peer.isNegotiationNeeded=false;
     peer.connection.createAnswer(function(desc) {
       desc.sdp = replaceSdp(desc.sdp);
       peer.connection.setLocalDescription(desc,function(){
@@ -1145,11 +1114,6 @@ p2p.unpublish(localStream,'user1');
     * @param {stream} stream Local stream. A instance of Woogeen.Stream.
     */
   var sendStreamType=function(stream,peer){
-    // If local is FireFox and remote is Chrome, streams will be labeled as 'default' in remote side.
-    if(navigator.mozGetUserMedia&&gab&&(stream!==null)) {
-      gab.sendStreamType(peer.id, {streamId:'default', type:'video'});
-      return;
-    }
     if(stream!==null) {
       var type='audio';
       if(stream.isScreen()) {
@@ -1399,8 +1363,8 @@ p2p.send($('#data').val(), $('#target-uid').val());
      }
   };
 
-  var onDataChannelClose=function(peerId){ /*jshint ignore:line*/ //peerId is unused.
-    L.Logger.debug("Data Channel is closed");
+  var onDataChannelClose=function(peerId){
+    L.Logger.debug('Data Channel for '+peerId+' is closed.');
   };
 
   var onLocalStreamEnded=function(stream){
@@ -1414,21 +1378,7 @@ p2p.send($('#data').val(), $('#target-uid').val());
 
   //codec preference setting.
   var replaceSdp = function(sdp) {
-    sdp = removeRTX(sdp);  // Resolve sdp issue for Chrome 37
     sdp = setMaxBW(sdp); // set vide band width
-    return sdp;
-  };
-
-  // Remove 96 video codec from sdp when chatting between chrome 37 and <37.
-  var removeRTX = function(sdp){
-    var mLineReg = /video \d*? RTP\/SAVPF( \d*?)* 96/ig;
-    var mLineElement = sdp.match(mLineReg);
-    if(mLineElement && mLineElement.length) {
-      mLineElement[0] = mLineElement[0].replace(' 96','');
-      sdp = sdp.replace(mLineReg,mLineElement[0]);
-      sdp = sdp.replace(/a=rtpmap:96 rtx\/90000\r\n/ig,'');
-      sdp = sdp.replace(/a=fmtp:96 apt=100\r\n/ig,'');
-     }
     return sdp;
   };
 
