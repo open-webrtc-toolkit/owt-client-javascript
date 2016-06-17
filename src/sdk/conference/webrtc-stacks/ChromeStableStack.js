@@ -66,6 +66,35 @@ Erizo.ChromeStableStack = function (spec) {
         return sdp;
     };
 
+    var setVideoCodec = function(sdp){
+        if(!spec.videoCodec) {
+            return sdp;
+        }
+        var videoCodecMap = {'vp8': 100, 'vp9': 101, 'h264': 107};
+        var preferredCodecType = videoCodecMap[spec.videoCodec.toLowerCase()];
+        if(!preferredCodecType){
+            L.Logger.warning('Invalid video codec.');
+            return sdp;
+        }
+        try {
+            var mLine = sdp.match(/m=video.*\r\n/g)[0];
+            if(!mLine.includes(' ' + preferredCodecType)){
+                L.Logger.warning('Preferred video codec is not supported.');
+                return sdp;
+            }
+            var newMLine = mLine.replace(' ' + preferredCodecType, '')
+                .replace('SAVPF ','SAVPF ' + preferredCodecType + ' ');
+            return sdp.replace(mLine, newMLine);
+        } catch (e) {
+            return sdp;
+        }
+    };
+
+    var updateSdp = function (sdp) {
+        var newSdp = setVideoCodec(sdp);
+        return newSdp;
+    };
+
     /**
      * Closes the connection.
      */
@@ -126,7 +155,7 @@ Erizo.ChromeStableStack = function (spec) {
 
     var setLocalDesc = function (sessionDescription) {
         sessionDescription.sdp = setMaxBW(sessionDescription.sdp);
-        sessionDescription.sdp = sessionDescription.sdp.replace(/a=ice-options:google-ice\r\n/g, "");
+        sessionDescription.sdp = updateSdp(sessionDescription.sdp.replace(/a=ice-options:google-ice\r\n/g, ""));
         spec.callback({
             type: sessionDescription.type,
             sdp: sessionDescription.sdp
