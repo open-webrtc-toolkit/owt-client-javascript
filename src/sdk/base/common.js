@@ -1,3 +1,5 @@
+/*global adapter, attachMediaStream:true*/
+
 /*
  * Woogeen.Common provides common functions for WooGeen SDK
  */
@@ -122,4 +124,13 @@ Woogeen.Common.parseStats = function(stats) {
     }
   }
   return statusReport;
+};
+
+/*
+ * Following UI code is for backward compability. Delete it when it is old enough.
+ * Detailed reason: we provide global function |attachMediaStream| in the old adapter.js. However, it has been move to adapter.browserShim.attachMediaStream in the latest code, and it will be removed in the future. We should modify adapter.js as less as possible. So we provide |attachMediaStream| in Woogeen.UI namespace.
+ */
+attachMediaStream = function(){
+  L.Logger.warning('Global attachMediaStream is deprecated, pleause include woogeen.sdk.ui.js and use Woogeen.UI.attachMediaStream instead.');
+  adapter.browserShim.attachMediaStream.apply(this, arguments);
 };
