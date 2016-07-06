@@ -25,6 +25,7 @@ module.exports = function (config){
     './src/samples/p2p/js/sc.websocket.js',
     './src/sdk/conference/property.js',
     './src/sdk/base/adapter.js',
+    './src/sdk/base/common.js',
     './src/sdk/base/socket.io.js',
     './src/sdk/base/events.js',
     './src/sdk/base/L.Base64.js',
@@ -34,6 +35,7 @@ module.exports = function (config){
     './src/sdk/p2p/errors.js',
     './src/sdk/p2p/gab.proxy.js',
     './src/sdk/p2p/peer.js',
+    './src/sdk/ui/ui.js',
     './test/p2pInteractionTest/errorHandler.js',
     './test/p2pInteractionTest/js/test_functions.js',
     './test/p2pInteractionTest/js/video_detector.js',
@@ -94,7 +96,17 @@ module.exports = function (config){
     // - PhantomJS
     // - IE (only Windows)
     // CLI --browsers Chrome,Firefox,Safari
-    browsers : ["C:/Users/yzha176/Documents/webrtc-javascript-sdk/test/p2pInteractionTest/.travis/chrome-start2.bat"],
+    browsers : ["/home/yanbin/workspace/project/webrtc-javascript-sdk/test/p2pInteractionTest/.travis/chrome-start2.sh"],
+    //browsers : ["FirefoxAutoAllowGUM"],
+/*
+    customLaunchers: {
+    FirefoxAutoAllowGUM: {
+        base: 'Firefox',
+        prefs: {
+            'media.navigator.permission.disabled': true
+        }
+     }
+    },*/
   //  browsers : ["Chrome"],
     browserDisconnectTimeout : 60000,
     browserNoActivityTimeout : 60000,

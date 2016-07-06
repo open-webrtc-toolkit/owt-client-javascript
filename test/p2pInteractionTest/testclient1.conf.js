@@ -16,25 +16,26 @@ module.exports = function (config){
     files : [
     //  JASMINE,
     //  JASMINE_ADAPTER,
-	'./test/p2pInteractionTest/vendor/jquery-latest.js',
-	'./test/p2pInteractionTest/vendor/bootstrap.min.js',
-	'./test/p2pInteractionTest/vendor/pnotify.custom.min.js',
-	'./test/p2pInteractionTest/vendor/pnotify.custom.min.css',
+    './test/p2pInteractionTest/vendor/jquery-latest.js',
+    './test/p2pInteractionTest/vendor/bootstrap.min.js',
+    './test/p2pInteractionTest/vendor/pnotify.custom.min.js',
+    './test/p2pInteractionTest/vendor/pnotify.custom.min.css',
     './src/samples/p2p/js/jquery-1.10.2.min.js',
     './src/samples/p2p/js/utils.js',
     './src/samples/p2p/js/sc.websocket.js',
-    './src/sdk/base/socket.io.js',
     './src/sdk/conference/property.js',
+    './src/sdk/base/adapter.js',
+    './src/sdk/base/common.js',
+    './src/sdk/base/socket.io.js',
     './src/sdk/base/events.js',
     './src/sdk/base/L.Base64.js',
     './src/sdk/base/L.Logger.js',
     './src/sdk/base/stream.js',
-    './src/sdk/base/ieMediaStream.js',
     './src/sdk/base/strophe.js',
     './src/sdk/p2p/errors.js',
     './src/sdk/p2p/gab.proxy.js',
     './src/sdk/p2p/peer.js',
-    './src/sdk/base/adapter.js',
+    './src/sdk/ui/ui.js',
     './test/p2pInteractionTest/errorHandler.js',
     './test/p2pInteractionTest/js/test_functions.js',
     './test/p2pInteractionTest/js/video_detector.js',
@@ -95,8 +96,17 @@ module.exports = function (config){
     // - PhantomJS
     // - IE (only Windows)
     // CLI --browsers Chrome,Firefox,Safari
-    browsers : ["IE"],
-   // browsers : [".travis/chrome-start1.bat"],
+//    browsers : ["IE"],
+  //  browsers : ["/home/yanbin/workspace/project/webrtc-javascript-sdk/test/p2pInteractionTest/.travis/chrome-start1.sh"],
+    browsers: ['FirefoxAutoAllowGUM'],
+    customLaunchers: {
+       FirefoxAutoAllowGUM: {
+           base: 'Firefox',
+           prefs: {
+                'media.navigator.permission.disabled': true
+           }
+        }
+    },
     browserDisconnectTimeout : 60000,
     browserNoActivityTimeout : 60000,
 

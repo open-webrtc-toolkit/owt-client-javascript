@@ -468,9 +468,9 @@ TestClient.prototype = {
                  document.body.appendChild(para);
              // document.getElementById('myVideo').appendChild(canvas);
               if(stream instanceof Woogeen.LocalStream){
-                attachMediaStream(canvas, stream.mediaStream);
+                Woogeen.UI.attachMediaStream(canvas, stream.mediaStream);
               }else{
-                attachRemoteMediaStream(canvas, stream.mediaStream, stream.mediaStream.attachedPCID);
+                Woogeen.UI.attachRemoteMediaStream(canvas, stream.mediaStream, stream.mediaStream.attachedPCID);
               }
               // attachMediaStream(canvas, stream.mediaStream);
               console.log('stream added..'+stream.mediaStream);
@@ -493,7 +493,7 @@ TestClient.prototype = {
     var node = document.createTextNode(tag);
     para.appendChild(node);
     document.body.appendChild(para);
-    attachMediaStream(video, stream.mediaStream);
+    Woogeen.UI.attachMediaStream(video, stream.mediaStream);
     this.request[videoId] = startDetection(videoId, "320", "240");
 	
 		 
@@ -545,7 +545,7 @@ TestClient.prototype = {
       config = {};
     }
     this.peerClient = new Woogeen.PeerClient(config);
-    this.serverURL = serverURL || "http://10.239.44.127:8095/";
+    this.serverURL = serverURL || "http://localhost:8095/";
     this.user = user || "user" + new Date().getTime();
     this.request = {};
   }
