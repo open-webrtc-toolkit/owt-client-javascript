@@ -250,7 +250,7 @@ TestClient.prototype = {
     video.setAttribute("class", "video");
     video.setAttribute("autoplay", "autoplay");
     document.body.appendChild(video);
-    attachMediaStream(video, stream.mediaStream);
+    Woogeen.UI.attachMediaStream(video, stream.mediaStream);
     this.request[videoId] = startDetection(videoId, "320", "240");
   },
   removeVideo: function(stream) {
