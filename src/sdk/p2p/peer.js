@@ -1067,6 +1067,13 @@ p2p.unpublish(localStream,'user1');
 */
   var unpublish=function(stream, targetId, successCallback, failureCallback){
     L.Logger.debug('Unpublish stream.');
+    if(navigator.mozGetUserMedia){
+      L.Logger.error('Unpublish is not supported on FireFox.');
+      if(failureCallback){
+        failureCallback(Woogeen.Error.P2P_CLIENT_UNSUPPORTED_METHOD);
+      }
+      return;
+    }
     if(!(stream instanceof Woogeen.LocalStream)){
       L.Logger.warning('Invalid argument stream');
       if(failureCallback){
