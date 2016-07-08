@@ -19,7 +19,7 @@ module.exports = function (config){
     './src/samples/p2p/js/jquery-1.10.2.min.js',
     './src/samples/p2p/js/utils.js',
     './src/samples/p2p/js/sc.websocket.js',
-    './src/sdk/conference/property.js',
+    './src/sdk/base/property.js',
     './src/sdk/base/adapter.js',
     './src/sdk/base/common.js',
     './src/sdk/base/socket.io.js',

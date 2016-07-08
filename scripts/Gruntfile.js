@@ -3,7 +3,7 @@
 module.exports = function(grunt) {
 
   var srcFiles = [
-    '../src/sdk/conference/property.js',
+    '../src/sdk/base/property.js',
     '../src/sdk/base/events.js',
     '../src/sdk/base/common.js',
     '../src/sdk/base/L.Base64.js',
