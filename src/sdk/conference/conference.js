@@ -488,6 +488,7 @@ client.setIceServers([{
           iceServers: self.getIceServers(),
           maxAudioBW: options.maxAudioBW,
           maxVideoBW: options.maxVideoBW,
+          audioCodec: options.audioCodec,
           videoCodec: options.videoCodec
         });
 
