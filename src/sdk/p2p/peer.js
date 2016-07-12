@@ -115,6 +115,10 @@ Woogeen.PeerClient=function (pcConfig) {
   var sdpConstraints={'offerToReceiveAudio':true, 'offerToReceiveVideo':true };
   var config = null;
 
+  var sysInfo = Woogeen.Common.sysInfo();
+  var supportsPlanB = navigator.mozGetUserMedia?false:true;
+  var supportsUnifiedPlan = navigator.mozGetUserMedia?true:false;
+
   // Set configuration for PeerConnection
   if(pcConfig){
     config={iceServers: pcConfig.iceServers};
@@ -157,6 +161,18 @@ Woogeen.PeerClient=function (pcConfig) {
     }
   };
 
+  var handleRemoteCapability = function(peer, ua){
+    if(ua.sdk&&ua.sdk&&ua.sdk.type==="JavaScript"&&ua.runtime&&ua.runtime.name==="FireFox"){
+      peer.remoteSideSupportsRemoveStream=false;
+      peer.remoteSideSupportsPlanB=false;
+      peer.remoteSideSupportsUnifiedPlan=true;
+    } else {  // Remote side is iOS/Android/C++ which uses Chrome stack.
+      peer.remoteSideSupportsRemoveStream=true;
+      peer.remoteSideSupportsPlanB=true;
+      peer.remoteSideSupportsUnifiedPlan=false;
+    }
+  };
+
   /* Event handlers name convention:
    *
    * **Handler for network events.
@@ -180,7 +196,7 @@ Woogeen.PeerClient=function (pcConfig) {
     that.dispatchEvent(new Woogeen.ClientEvent({type: 'server-disconnected'}));
   };
 
-  var chatInvitationHandler=function(senderId){
+  var chatInvitationHandler=function(senderId, data){
     // !peers[senderId] means this peer haven't been interacted before, so we
     // can treat it as READY.
     var peer=peers[senderId];
@@ -189,6 +205,7 @@ Woogeen.PeerClient=function (pcConfig) {
       createPeer(senderId);
       peer=peers[senderId];
     }
+    handleRemoteCapability(peer, data.ua);
     if(peer.state===PeerState.READY || peer.state===PeerState.PENDING){
       peers[senderId].state=PeerState.PENDING;
       that.dispatchEvent(new Woogeen.ChatEvent({type: 'chat-invited', senderId: senderId}));
@@ -220,11 +237,12 @@ Woogeen.PeerClient=function (pcConfig) {
     that.dispatchEvent(new Woogeen.ChatEvent({type: 'chat-denied', senderId: senderId}));
   };
 
-  var chatAcceptedHandler=function(senderId){
+  var chatAcceptedHandler=function(senderId, data){
     L.Logger.debug('Received chat accepted.');
     var peer=peers[senderId];
     if(peer){
       peer.state=PeerState.MATCHED;
+      handleRemoteCapability(peer, data.ua);
       createPeerConnection(peer);
       peer.state=PeerState.CONNECTING;
       createDataChannel(peer.id);  // PeerConnection without streams and data channel is not allowed by FireFox.
@@ -542,7 +560,7 @@ Woogeen.PeerClient=function (pcConfig) {
     if(!peers[peerId]){
       // Default value for |lastDisconnect| makes sure now-|lastDisconnect| < 0.
       // Default value for |isCaller| is true, it will be changed to false when send acceptance. If both sides send invitation at the same time, one side will send acceptance and change |isCaller| to false. This is handled in |chatInvitationHandler|.
-      peers[peerId]={state:PeerState.READY, id:peerId, pendingStreams:[], pendingUnpublishStreams:[], remoteIceCandidates:[], dataChannels:{}, pendingMessages:[], negotiationState:NegotiationState.READY, lastDisconnect:(new Date('2099/12/31')).getTime(),publishedStreams:[], isCaller:true};
+      peers[peerId]={state:PeerState.READY, id:peerId, pendingStreams:[], pendingUnpublishStreams:[], remoteIceCandidates:[], dataChannels:{}, pendingMessages:[], negotiationState:NegotiationState.READY, lastDisconnect:(new Date('2099/12/31')).getTime(),publishedStreams:[], isCaller:true, remoteSideSupportsRemoveStream:false, remoteSideSupportsPlanB:false, remoteSideSupportsUnifiedPlan:false};
     }
     return peers[peerId];
   };
@@ -668,7 +686,7 @@ p2p.invite('user2');
     if(peer.state===PeerState.READY||peer.state===PeerState.OFFERED){
       L.Logger.debug('Send invitation to '+peerId);
       peer.state=PeerState.OFFERED;
-      gab.sendChatInvitation(peerId, function(){
+      gab.sendChatInvitation(peerId, {ua:sysInfo}, function(){
         if(successCallback){
           successCallback();
         }
@@ -737,7 +755,7 @@ p2p.addEventListener('chat-invited',function(e){
     peer.isCaller=false;
     if(peer.state===PeerState.PENDING){
       peer.state=PeerState.MATCHED;
-      gab.sendChatAccepted(peerId, successCallback, function(errCode){
+      gab.sendChatAccepted(peerId, {ua: sysInfo}, successCallback, function(errCode){
         peer.state=PeerState.PENDING;
         failureCallback(Woogeen.Error.getErrorByCode(errCode));
       });
@@ -998,6 +1016,17 @@ p2p.publish(localStream,'user1');
       createPeer(peerId);
     }
     var peer=peers[peerId];
+
+    var multipleStreams = (peer.publishedStreams.length+peer.pendingStreams.length>0);
+    var sameMultipleMediaSourcesPlan = ((peer.remoteSideSupportsUnifiedPlan&&supportsUnifiedPlan)||peer.remoteSideSupportsPlanB&&supportsPlanB);
+    if(multipleStreams&&!sameMultipleMediaSourcesPlan){
+      L.Logger.warning('Cannot publish more than one streams if local and remote use different multiple media sources plan.');
+      if(failureCallback){
+        failureCallback(Woogeen.Error.P2P_CLIENT_UNSUPPORTED_METHOD);
+      }
+      return;
+    }
+
     // Check peer state
     switch (peer.state){
       case PeerState.OFFERED:
@@ -1067,13 +1096,6 @@ p2p.unpublish(localStream,'user1');
 */
   var unpublish=function(stream, targetId, successCallback, failureCallback){
     L.Logger.debug('Unpublish stream.');
-    if(navigator.mozGetUserMedia){
-      L.Logger.error('Unpublish is not supported on FireFox.');
-      if(failureCallback){
-        failureCallback(Woogeen.Error.P2P_CLIENT_UNSUPPORTED_METHOD);
-      }
-      return;
-    }
     if(!(stream instanceof Woogeen.LocalStream)){
       L.Logger.warning('Invalid argument stream');
       if(failureCallback){
@@ -1101,6 +1123,13 @@ p2p.unpublish(localStream,'user1');
       return;
     }
     var peer=peers[peerId];
+    if(navigator.mozGetUserMedia || !peer.remoteSideSupportsRemoveStream){
+      L.Logger.error('Unpublish is not supported on FireFox.');
+      if(failureCallback){
+        failureCallback(Woogeen.Error.P2P_CLIENT_UNSUPPORTED_METHOD);
+      }
+      return;
+    }
     var i=contains(peer.publishedStreams,stream);
     peer.publishedStreams.splice(i,1);
     peer.pendingUnpublishStreams.push(stream);

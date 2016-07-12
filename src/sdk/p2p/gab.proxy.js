@@ -73,12 +73,12 @@ function Gab(loginInfo){ /*jshint ignore:line*/ //loginInfo is unused.
     switch(dataObj.type){
       case 'chat-invitation':
         if(self.onChatInvitation){
-          self.onChatInvitation(from);
+          self.onChatInvitation(from, dataObj.data);
         }
         break;
       case 'chat-accepted':
         if(self.onChatAccepted){
-          self.onChatAccepted(from);
+          self.onChatAccepted(from, dataObj.data);
         }
         break;
       case 'chat-denied':
@@ -127,10 +127,10 @@ function Gab(loginInfo){ /*jshint ignore:line*/ //loginInfo is unused.
    * @memberOf Gab#
    * @param {string} uid Remote user's ID
    */
-  this.sendChatInvitation= function(uid, successCallback, failureCallback){
+  this.sendChatInvitation= function(uid, ua, successCallback, failureCallback){
     var msg={type:'chat-closed'};
     sc.sendMessage(JSON.stringify(msg),uid);
-    msg={type:'chat-invitation'};
+    msg={type:'chat-invitation', data: ua};
     sc.sendMessage(JSON.stringify(msg),uid, successCallback, failureCallback);
   };
 
@@ -139,8 +139,8 @@ function Gab(loginInfo){ /*jshint ignore:line*/ //loginInfo is unused.
    * @memberOf Gab#
    * @param {string} uid Remote user's ID
    */
-  this.sendChatAccepted=function(uid, successCallback, failureCallback){
-    var msg={type:'chat-accepted'};
+  this.sendChatAccepted=function(uid, ua, successCallback, failureCallback){
+    var msg={type:'chat-accepted', data:ua};
     sc.sendMessage(JSON.stringify(msg),uid, successCallback, failureCallback);
   };
 

@@ -70,8 +70,9 @@ div#videocontainer {
   <script src="js/sc.websocket.js" type="text/javascript"></script>
   <!-- SDK -->
   <script src="../../sdk/base/socket.io.js" type="text/javascript"></script>
-
-  <script src="../../sdk/conference/property.js" type="text/javascript"></script>
+  <script src="../../sdk/base/adapter.js" type="text/javascript"></script>
+  <script src="../../sdk/base/property.js" type="text/javascript"></script>
+  <script src="../../sdk/base/common.js" type="text/javascript"></script>
   <script src="../../sdk/base/events.js" type="text/javascript"></script>
   <script src="../../sdk/base/L.Base64.js" type="text/javascript"></script>
   <script src="../../sdk/base/L.Logger.js" type="text/javascript"></script>
@@ -80,14 +81,12 @@ div#videocontainer {
   <script src="../../sdk/p2p/errors.js" type="text/javascript"></script>
   <script src="../../sdk/p2p/gab.proxy.js" type="text/javascript"></script>
   <script src="../../sdk/p2p/peer.js" type="text/javascript"></script>
-
-  <script src="../../sdk/base/adapter.js" type="text/javascript"></script>
-
+  <script src="../../sdk/ui/ui.js" type="text/javascript"></script>
   <!-- SDK Stops -->
   <h1>Intel<sup>&reg;</sup> Collaboration Suite for WebRTC</h1>
   <h2>P2P Direct Call Sample</h2>
   <div id="description">
-    <p>This sample works with the latest Chrome and IE 10/11.</p>
+    <p>This sample works with the latest Chrome and FireFox.</p>
   </div>
   <div id="control">
     <p><input id="uid" type="text" /><button id="login">Login</button><button id="logoff">Logoff</button></p>
@@ -200,7 +199,7 @@ div#videocontainer {
           if (navigator.userAgent.indexOf('MSIE') !== -1 || navigator.appVersion.indexOf('Trident/') > 0) {  // If IE
             attachMediaStream($('#local').children('canvas').get(0),localStream.mediaStream)  // Show local stream
           }else{
-            attachMediaStream($('#local').children('video').get(0),localStream.mediaStream)  // Show local stream
+            Woogeen.UI.attachMediaStream($('#local').children('video').get(0),localStream.mediaStream)  // Show local stream
           }
           p2p.publish(localStream,$('#target-uid').val());  // Publish local stream to remote client
         });
@@ -266,7 +265,7 @@ div#videocontainer {
         attachRemoteMediaStream($('#screen canvas').get(0), e.stream.mediaStream, e.stream.mediaStream.attachedPCID);  // Show remote screen stream.
       }else{
         $('#screen video').show();
-        attachMediaStream($('#screen video').get(0), e.stream.mediaStream);  // Show remote screen stream.
+        Woogeen.UI.attachMediaStream($('#screen video').get(0), e.stream.mediaStream);  // Show remote screen stream.
       }
     } else if(e.stream.hasVideo()) {
       if (navigator.userAgent.indexOf('MSIE') !== -1 || navigator.appVersion.indexOf('Trident/') > 0) {  // If IE

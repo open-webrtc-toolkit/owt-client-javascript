@@ -4,6 +4,9 @@
  * Woogeen.Common provides common functions for WooGeen SDK
  */
 Woogeen.Common = (function(){
+
+  var sdkVersion='3.2';
+
   // Convert W3C defined statistic data to SDK format.
   // TODO: stats data is Chrome specified at this time. So this function only
   // supports Chrome now.
@@ -206,9 +209,29 @@ Woogeen.Common = (function(){
 
 /* Above functions are copied from apprtc with modifications */
 
+  // Returns system information.
+  // Format: {sdk:{version:**, type:**}, runtime:{version:**, name:**}};
+  var sysInfo = function(){
+    var info = Object.create({});
+    info.sdk = {version:sdkVersion, type:'JavaScript'};
+    var userAgent = navigator.userAgent;
+    var firefoxRegex = /Firefox\/([0-9\.]+)/;
+    var chromeRegex = /Chrome\/([0-9\.]+)/;
+    var result = chromeRegex.exec(userAgent);
+    if(result){
+      info.runtime = {name:'Chrome', version:result[1]};
+    } else if(result=firefoxRegex.exec(userAgent)){
+      info.runtime = {name:'FireFox', version:result[1]};
+    } else {
+      info.runtime = {name:'Unknown', version:''};
+    }
+    return info;
+  };
+
   return {
     parseStats: parseStats,
-    setPreferredCodec: setPreferredCodec
+    setPreferredCodec: setPreferredCodec,
+    sysInfo:sysInfo
   };
 }());
 
