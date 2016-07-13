@@ -170,11 +170,53 @@
       if (shareButton) {
         shareButton.setAttribute('style', 'display:block');
         shareButton.onclick = (function () {
+          conference.getConnectionStats(localStream, function(stats){
+            console.log(stats);
+          }, function(err){
+            console.log(err);
+          });
+          return;
+          /*
           conference.shareScreen({resolution: myResolution}, function (stream) {
             document.getElementById('myScreen').setAttribute('style', 'width:320px; height: 240px;');
             stream.show('myScreen');
           }, function (err) {
             L.Logger.error('share screen failed:', err);
+          });*/
+        });
+      }
+      var shareCameraButton = document.getElementById('shareCamera');
+      if (shareCameraButton) {
+        shareCameraButton.setAttribute('style', 'display:block');
+        shareCameraButton.onclick = (function() {
+          Woogeen.LocalStream.create({
+            video: {
+              device: 'camera',
+              resolution: myResolution
+            },
+            audio: true
+          }, function (err, stream) {
+            if (err) {
+              return L.Logger.error('create LocalStream failed:', err);
+            }
+            localStream = stream;
+            if (window.navigator.appVersion.indexOf('Trident') < 0){
+              localStream.show('myVideo');
+            }
+            if (window.navigator.appVersion.indexOf('Trident') > -1){
+              var canvas = document.createElement('canvas');
+              canvas.width = 320;
+              canvas.height = 240;
+              canvas.setAttribute('autoplay', 'autoplay::autoplay');
+              document.getElementById('myVideo').appendChild(canvas);
+              attachMediaStream(canvas, localStream.mediaStream);
+            }
+            conference.publish(localStream, {}, function (st) {
+              shareCameraButton.setAttribute('style', 'display:none');
+              L.Logger.info('stream published:', st.id());
+            }, function (err) {
+               L.Logger.error('publish failed:', err);
+            });
           });
         });
       }
@@ -232,44 +274,13 @@
                L.Logger.error('publish failed:', err);
             });
           });
-        } else if (shareScreen === false) {
-          Woogeen.LocalStream.create({
-            video: {
-              device: 'camera',
-              resolution: myResolution
-            },
-            audio: true
-          }, function (err, stream) {
-            if (err) {
-              return L.Logger.error('create LocalStream failed:', err);
-            }
-            localStream = stream;
-            if (window.navigator.appVersion.indexOf('Trident') < 0){
-              localStream.show('myVideo');
-            }
-            if (window.navigator.appVersion.indexOf('Trident') > -1){
-              var canvas = document.createElement('canvas');
-              canvas.width = 320;
-              canvas.height = 240;
-              canvas.setAttribute('autoplay', 'autoplay::autoplay');
-              document.getElementById('myVideo').appendChild(canvas);
-              attachMediaStream(canvas, localStream.mediaStream);
-            }
-            conference.publish(localStream, {}, function (st) {
-              L.Logger.info('stream published:', st.id());
-            }, function (err) {
-               L.Logger.error('publish failed:', err);
-            });
-          });
-        } else if (isHttps) {
+        } else if (shareScreen && isHttps) {
           conference.shareScreen({resolution: myResolution}, function (stream) {
             document.getElementById('myScreen').setAttribute('style', 'width:320px; height: 240px;');
             stream.show('myScreen');
           }, function (err) {
             L.Logger.error('share screen failed:', err);
           });
-        } else {
-          L.Logger.error('Share screen must be done in https enviromnent!');
         }
         var streams = resp.streams;
         streams.map(function (stream) {
