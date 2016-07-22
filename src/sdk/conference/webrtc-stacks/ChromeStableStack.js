@@ -66,32 +66,23 @@ Erizo.ChromeStableStack = function (spec) {
         return sdp;
     };
 
+    var setAudioCodec = function(sdp){
+        if(!spec.audioCodec) {
+            return sdp;
+        }
+        return Woogeen.Common.setPreferredCodec(sdp, 'audio', spec.audioCodec);
+    };
+
     var setVideoCodec = function(sdp){
         if(!spec.videoCodec) {
             return sdp;
         }
-        var videoCodecMap = {'vp8': 100, 'vp9': 101, 'h264': 107};
-        var preferredCodecType = videoCodecMap[spec.videoCodec.toLowerCase()];
-        if(!preferredCodecType){
-            L.Logger.warning('Invalid video codec.');
-            return sdp;
-        }
-        try {
-            var mLine = sdp.match(/m=video.*\r\n/g)[0];
-            if(!mLine.includes(' ' + preferredCodecType)){
-                L.Logger.warning('Preferred video codec is not supported.');
-                return sdp;
-            }
-            var newMLine = mLine.replace(' ' + preferredCodecType, '')
-                .replace('SAVPF ','SAVPF ' + preferredCodecType + ' ');
-            return sdp.replace(mLine, newMLine);
-        } catch (e) {
-            return sdp;
-        }
+        return Woogeen.Common.setPreferredCodec(sdp, 'video', spec.videoCodec);
     };
 
     var updateSdp = function (sdp) {
-        var newSdp = setVideoCodec(sdp);
+        var newSdp = setAudioCodec(sdp);
+        newSdp = setVideoCodec(newSdp);
         return newSdp;
     };
 

@@ -58,23 +58,23 @@ Erizo.FirefoxStack = function (spec) {
         }
     };
 
+    var setAudioCodec = function(sdp){
+        if(!spec.audioCodec) {
+            return sdp;
+        }
+        return Woogeen.Common.setPreferredCodec(sdp, 'audio', spec.audioCodec);
+    };
+
     var setVideoCodec = function(sdp){
-        if (spec.videoCodec !== 'H264' && spec.videoCodec !== 'h264') {
+        if(!spec.videoCodec) {
             return sdp;
         }
-        // Put H264 in front of VP8(120)
-        try {
-            var mLine = sdp.match(/m=video.*\r\n/g)[0];
-            var newMLine = mLine.replace(/\s120/, '').replace('\r\n','') + ' 120\r\n';
-            return sdp.replace(mLine, newMLine);
-        } catch (e) {
-            return sdp;
-        }
+        return Woogeen.Common.setPreferredCodec(sdp, 'video', spec.videoCodec);
     };
 
     var updateSdp = function(sdp) {
-        var newSdp = setVideoCodec(sdp);
-        // Add other operations here, e.g. set bandwidth.
+        var newSdp = setAudioCodec(sdp);
+        newSdp = setVideoCodec(newSdp);
         return newSdp;
     };
 
