@@ -196,7 +196,7 @@ Woogeen.PeerClient=function (pcConfig) {
     that.dispatchEvent(new Woogeen.ClientEvent({type: 'server-disconnected'}));
   };
 
-  var chatInvitationHandler=function(senderId, data){
+  var chatInvitationHandler=function(senderId, ua){
     // !peers[senderId] means this peer haven't been interacted before, so we
     // can treat it as READY.
     var peer=peers[senderId];
@@ -205,7 +205,7 @@ Woogeen.PeerClient=function (pcConfig) {
       createPeer(senderId);
       peer=peers[senderId];
     }
-    handleRemoteCapability(peer, data.ua);
+    handleRemoteCapability(peer, ua);
     if(peer.state===PeerState.READY || peer.state===PeerState.PENDING){
       peers[senderId].state=PeerState.PENDING;
       that.dispatchEvent(new Woogeen.ChatEvent({type: 'chat-invited', senderId: senderId}));
@@ -237,12 +237,12 @@ Woogeen.PeerClient=function (pcConfig) {
     that.dispatchEvent(new Woogeen.ChatEvent({type: 'chat-denied', senderId: senderId}));
   };
 
-  var chatAcceptedHandler=function(senderId, data){
+  var chatAcceptedHandler=function(senderId, ua){
     L.Logger.debug('Received chat accepted.');
     var peer=peers[senderId];
     if(peer){
       peer.state=PeerState.MATCHED;
-      handleRemoteCapability(peer, data.ua);
+      handleRemoteCapability(peer, ua);
       createPeerConnection(peer);
       peer.state=PeerState.CONNECTING;
       createDataChannel(peer.id);  // PeerConnection without streams and data channel is not allowed by FireFox.
@@ -686,7 +686,7 @@ p2p.invite('user2');
     if(peer.state===PeerState.READY||peer.state===PeerState.OFFERED){
       L.Logger.debug('Send invitation to '+peerId);
       peer.state=PeerState.OFFERED;
-      gab.sendChatInvitation(peerId, {ua:sysInfo}, function(){
+      gab.sendChatInvitation(peerId, sysInfo, function(){
         if(successCallback){
           successCallback();
         }
@@ -755,7 +755,7 @@ p2p.addEventListener('chat-invited',function(e){
     peer.isCaller=false;
     if(peer.state===PeerState.PENDING){
       peer.state=PeerState.MATCHED;
-      gab.sendChatAccepted(peerId, {ua: sysInfo}, successCallback, function(errCode){
+      gab.sendChatAccepted(peerId, sysInfo, successCallback, function(errCode){
         peer.state=PeerState.PENDING;
         failureCallback(Woogeen.Error.getErrorByCode(errCode));
       });
