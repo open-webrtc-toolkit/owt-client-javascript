@@ -122,7 +122,7 @@ Erizo.VideoPlayer = function (spec) {
         }
       }
       return function (tag) {
-        if (window.innerWidth == screen.width) _exitFullScreen();
+        if (window.outerWidth == screen.width) _exitFullScreen();
         else _enterFullScreen(tag);
       };
     }());
