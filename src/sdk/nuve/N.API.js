@@ -215,6 +215,10 @@ N.API.getRoom(roomID, function(room) {
 }, errorCallback);
    */
     getRoom = function (room, callback, callbackError, params) {
+        if (room.trim() === '') {
+          callbackError('Empty room ID');
+          return;
+        }
         send(callback, callbackError, 'GET', undefined, 'rooms/' + room, params);
     };
 
@@ -344,6 +348,10 @@ N.API.getService(service, function(service) {
 }, errorCallback);
    */
     getService = function (service, callback, callbackError, params) {
+        if (service.trim() === '') {
+          callbackError('Empty service ID');
+          return;
+        }
         send(callback, callbackError, 'GET', undefined, 'services/' + service, params);
     };
 
