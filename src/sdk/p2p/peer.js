@@ -387,6 +387,9 @@ Woogeen.PeerClient=function (pcConfig) {
       var stream= new Woogeen.RemoteStream(streamSpec);
       stream.mediaStream=mediaStream;
       stream.from=peer.id;
+      stream.id=function(){
+        return mediaStream.id;
+      };
       return stream;
     }
   };
