@@ -546,13 +546,8 @@ L.Logger.info('stream added:', stream.id());
 
   function getReso(w, h) {
     return {
-      mandatory: {
-        minWidth: w,
-        minHeight: h,
-        maxWidth: w,
-        maxHeight: h
-      },
-      optional: []
+      width: w,
+      height: h
     };
   }
 
@@ -638,8 +633,7 @@ L.Logger.info('stream added:', stream.id());
 
        if(!isLegacyIE()){
           if (!isLegacyChrome() && option.video.frameRate instanceof Array && option.video.frameRate.length >= 2) {
-            mediaOption.video.mandatory.minFrameRate = option.video.frameRate[0];
-            mediaOption.video.mandatory.maxFrameRate = option.video.frameRate[1];
+            mediaOption.video.frameRate = {exact: option.video.frameRate[0], ideal: option.video.frameRate[1]};
           }
         }
       }
@@ -671,7 +665,7 @@ L.Logger.info('stream added:', stream.id());
       }
       if (mediaOption.video) {
         // set default bit rate
-        switch (mediaOption.video.mandatory.maxWidth) {
+        switch (mediaOption.video.width) {
         case 320:
           localStream.bitRate.maxVideoBW = 512;
           break;
