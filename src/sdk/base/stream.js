@@ -84,12 +84,12 @@ stream.attr("custom_key", "custom_value");
     };
 /**
    * @function id
-   * @desc This function returns stream Id assigned by server.
+   * @desc This function returns stream Id.
 <br><b>Remarks:</b><br>
-For local stream, it returns null if the stream has not been published; once published, stream Id should be updated by server.
+For local stream, it returns MediaStream's ID if the stream has not been published; once published, stream Id should be updated by server.
    * @memberOf Woogeen.Stream
    * @instance
-   * @return {string} Stream Id assigned by server.
+   * @return {string} Stream ID.
    * @example
 <script type="text/JavaScript">
 L.Logger.info('stream added:', stream.id());
@@ -652,6 +652,7 @@ L.Logger.info('stream added:', stream.id());
 
     var onSuccess = function (mediaStream) {
       option.mediaStream = mediaStream;
+      option.id = mediaStream.id;
       var localStream = new Woogeen.LocalStream(option);
       if (option.video && option.video.device === 'screen') {
         // when <Stop sharing> button in Browser was pressed, `onended' would
