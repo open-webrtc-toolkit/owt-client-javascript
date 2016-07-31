@@ -1100,44 +1100,37 @@ conference.leave();
     };
 
   /**
-     * @function startRtspOut
+     * @function addExternalOutput
      * @instance
-     * @desc This function starts streaming corresponding media stream in the conference room to specified remote RTSP server.
-     <br><b>options:</b><br>
+     * @desc This function starts streaming corresponding media stream in the conference room to a specified target.
+     <b>options:</b><br>
      {<br>
     streamId: xxxxxx,<br>
-    url: 'rtsp://SERVER_ADDRESS:PORT/APPLICATION/'<br>
     }
      * @memberOf Woogeen.ConferenceClient
-     * @param {string} options RTSP streaming options.<br>
+     * @param {string} url Target URL.
+     * @param {string} options External output options.<br>
       <ul>
      <li>streamId: stream id to be streamed. (optional, if unspecified, the mixed stream will be streamed by default)</li>
-     <li>url: remote RTSP server url. (required)</li>
-     <li>resolution: video resolution setting only valid for mixed stream, an json object with format {width:xxx,height:xxx} or a string like 'vga'.
+     <li>resolution: an json object with format {width:xxx,height:xxx} or a string like 'vga'.
         Retrieve resolution information of a mixed stream: <code>stream.resolutions()</code>.
        (optional)</li>
      </ul>
-     * @param {function} onSuccess(resp) (optional) Success callback. The following information will be
-   returned as well:<br>
-      <ul>
-     <li>id: rtsp streaming id.</li>
-     <li>url: full path of rtsp streaming accessable via media player.</li>
-     </ul>
+     * @param {function} onSuccess() (optional) Success callback.
      * @param {function} onFailure(err) (optional) Failure callback.
      * @example
   <script type="text/JavaScript">
   var conference = Woogeen.ConferenceClient.create();
   // ……
-  conference.startRtspOut({
-    url: 'rtsp://localhost:1935/live'
-  }, function (resp) {
-    L.Logger.info('start rtsp streaming, id:', resp.id, 'URL:', resp.url);
+  conference.addExternalOutput(url: 'rtsp://localhost:1935/live', {streamId: xxx
+  }, function () {
+    L.Logger.info('Start external streaming success.');
   }, function (err) {
-    L.Logger.error('start rtsp streaming failed:', err);
+    L.Logger.error('Start external streaming failed:', err);
   });
   </script>
      */
-    this.startRtspOut = function (options, onSuccess, onFailure) {
+    this.addExternalOutput = function (url, options, onSuccess, onFailure) {
       var self = this;
       if (typeof options === 'function') {
         onFailure = onSuccess;
@@ -1146,52 +1139,94 @@ conference.leave();
       } else if (typeof options !== 'object' || options === null) {
         options = {};
       }
+      options.url = url;
 
-      sendMsg(self.socket, 'startRtspOut', options, function (err, resp) {
+      sendMsg(self.socket, 'addExternalOutput', options, function (err) {
         if (err) {return safeCall(onFailure, err);}
-        safeCall(onSuccess, resp);
+        safeCall(onSuccess);
       });
     };
 
   /**
-     * @function stopRtspOut
+     * @function updateExternalOutput
      * @instance
-     * @desc This function stops streaming media stream in the conference room to specified remote RTSP server.
+     * @desc This function updates target URL's content with specified stream.
+     <b>options:</b><br>
+     {<br>
+    streamId: xxxxxx,<br>
+    }
+     * @memberOf Woogeen.ConferenceClient
+     * @param {string} url Target URL.
+     * @param {string} options External output options.<br>
+      <ul>
+     <li>streamId: stream id to be streamed. (optional, if unspecified, the mixed stream will be streamed by default)</li>
+     <li>resolution: an json object with format {width:xxx,height:xxx} or a string like 'vga'.
+        Retrieve resolution information of a mixed stream: <code>stream.resolutions()</code>.
+       (optional)</li>
+     </ul>
+     * @param {function} onSuccess() (optional) Success callback.
+     * @param {function} onFailure(err) (optional) Failure callback.
+     * @example
+  <script type="text/JavaScript">
+  var conference = Woogeen.ConferenceClient.create();
+  // ……
+  conference.updateExternalOutput(url: 'rtsp://localhost:1935/live', {streamId: xxx
+  }, function () {
+    L.Logger.info('Update external streaming success.');
+  }, function (err) {
+    L.Logger.error('Update external streaming failed:', err);
+  });
+  </script>
+     */
+    this.updateExternalOutput = function (url, options, onSuccess, onFailure) {
+      var self = this;
+      if (typeof options === 'function') {
+        onFailure = onSuccess;
+        onSuccess = options;
+        options = {};
+      } else if (typeof options !== 'object' || options === null) {
+        options = {};
+      }
+      options.url = url;
+
+      sendMsg(self.socket, 'updateExternalOutput', options, function (err) {
+        if (err) {return safeCall(onFailure, err);}
+        safeCall(onSuccess);
+      });
+    };
+
+  /**
+     * @function removeExternalOutput
+     * @instance
+     * @desc This function stops streaming media stream in the conference room to specified URL.
      <br><b>options:</b><br>
   {<br>
     id: xxxxxx<br>
   }
      * @memberOf Woogeen.ConferenceClient
-     * @param {string} options (required) RTSP streaming options. id: rtsp streaming id to be stopped.
-     * @param {function} onSuccess(resp) (optional) Success callback. The following information will be returned as well:
-     <ul>
-     <li>id: rtsp streaming id.</li>
-     </ul>
+     * @param {string} url (required) Target URL.
+     * @param {function} onSuccess(resp) (optional) Success callback.
      * @param {function} onFailure(error) (optional) Failure callback.
      * @example
   <script type="text/JavaScript">
   var conference = Woogeen.ConferenceClient.create();
   // ……
-  conference.stopRtspOut({id: rtspIdToStop}, function (resp) {
-    L.Logger.info('stop rtsp streaming, id:', resp.id);
+  conference.removeExternalOutput({id: rtspIdToStop}, function () {
+    L.Logger.info('Stop external streaming success.');
   }, function (err) {
-    L.Logger.error('stop rtsp streaming failed:', err);
+    L.Logger.error('Stop external streaming failed:', err);
   });
   </script>
    */
-    this.stopRtspOut = function (options, onSuccess, onFailure) {
+    this.removeExternalOutput = function (url, onSuccess, onFailure) {
       var self = this;
-      if (typeof options === 'function') {
-        onFailure = onSuccess;
-        onSuccess = options;
-        options = {};
-      } else if (typeof options !== 'object' || options === null) {
-        options = {};
+      if (typeof url !== 'string') {
+        safeCall(onFailure, 'URL should be string.');
+        return;
       }
-
-      sendMsg(self.socket, 'stopRtspOut', options, function (err, resp) {
+      sendMsg(self.socket, 'removeExternalOutput', {url: url}, function (err) {
         if (err) {return safeCall(onFailure, err);}
-        safeCall(onSuccess, resp);
+        safeCall(onSuccess);
       });
     };
 
