@@ -87,6 +87,7 @@ N.API.init('5188b9af6e53c84ffd600413', '21989', 'http://61.129.90.140:3000/')
             <li>layout describes video layout in mix stream</li>
                 <ul>
                     <li>"base" is the base template (choose from "void", "fluid", "lecture")</li>
+                    <li>If base layout is set to 'void', user must input customized layout for the room, otherwise the video layout would be treated as invalid. </li>
                     <li>"custom" is user-defined customized video layout. Here we give out an example to show you the details of a valid customized video layout.A valid customized video layout should be a JSON string which represents an array of video layout definition. More details see [customized video layout](@ref layout) . </li>
                     <li>MCU would try to combine the two entries for mixing video if user sets both.</li>
                 </ul>
@@ -165,7 +166,7 @@ N.API.createRoom('myRoom',
       bitrate: 0,
       bkColor: {"r":1, "g":2, "b":255},
       layout: {
-        base: 'fluid',
+        base: 'fluid'
       },
       avCoordinated: 1,
       crop: 1
