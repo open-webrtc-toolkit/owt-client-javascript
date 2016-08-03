@@ -164,6 +164,7 @@
     var myRoom = getParameterByName('room');
     var isHttps = (location.protocol === 'https:');
     var mediaUrl = getParameterByName('url');
+    var isPublish = getParameterByName('publish');
 
     if (isHttps) {
       var shareButton = document.getElementById('shareScreen');
@@ -231,34 +232,36 @@
             });
           });
         } else if (shareScreen === false) {
-          Woogeen.LocalStream.create({
-            video: {
-              device: 'camera',
-              resolution: myResolution
-            },
-            audio: true
-          }, function (err, stream) {
-            if (err) {
-              return L.Logger.error('create LocalStream failed:', err);
-            }
-            localStream = stream;
-            if (window.navigator.appVersion.indexOf('Trident') < 0){
-              localStream.show('myVideo');
-            }
-            if (window.navigator.appVersion.indexOf('Trident') > -1){
-              var canvas = document.createElement('canvas');
-              canvas.width = 320;
-              canvas.height = 240;
-              canvas.setAttribute('autoplay', 'autoplay::autoplay');
-              document.getElementById('myVideo').appendChild(canvas);
-              attachMediaStream(canvas, localStream.mediaStream);
-            }
-            conference.publish(localStream, {}, function (st) {
-              L.Logger.info('stream published:', st.id());
-            }, function (err) {
-               L.Logger.error('publish failed:', err);
+          if(isPublish !== 'false') {
+            Woogeen.LocalStream.create({
+              video: {
+                device: 'camera',
+                resolution: myResolution
+              },
+              audio: true
+            }, function (err, stream) {
+              if (err) {
+                return L.Logger.error('create LocalStream failed:', err);
+              }
+              localStream = stream;
+              if (window.navigator.appVersion.indexOf('Trident') < 0){
+                localStream.show('myVideo');
+              }
+              if (window.navigator.appVersion.indexOf('Trident') > -1){
+                var canvas = document.createElement('canvas');
+                canvas.width = 320;
+                canvas.height = 240;
+                canvas.setAttribute('autoplay', 'autoplay::autoplay');
+                document.getElementById('myVideo').appendChild(canvas);
+                attachMediaStream(canvas, localStream.mediaStream);
+              }
+              conference.publish(localStream, {}, function (st) {
+                L.Logger.info('stream published:', st.id());
+              }, function (err) {
+                 L.Logger.error('publish failed:', err);
+              });
             });
-          });
+          }
         } else if (isHttps) {
           conference.shareScreen({resolution: myResolution}, function (stream) {
             document.getElementById('myScreen').setAttribute('style', 'width:320px; height: 240px;');
