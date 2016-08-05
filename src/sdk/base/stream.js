@@ -759,6 +759,7 @@ L.Logger.info('stream added:', stream.id());
             }
             return;
           }
+          mediaOption.video.mandatory = mediaOption.video.mandatory || {};
           mediaOption.video.mandatory.chromeMediaSource = 'desktop';
           mediaOption.video.mandatory.chromeMediaSourceId = response.streamId;
           getMedia.apply(navigator, [mediaOption, onSuccess, onFailure]);
