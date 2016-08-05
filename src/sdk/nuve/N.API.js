@@ -38,6 +38,8 @@ N.API.rejectUnauthorizedCert(false);
 /**
    * @function init
    * @desc This function completes the essential configuration.
+<br><b>Remarks:</b><br>
+Make sure you use the correct nuve url, according to the nuve ssl configuration.
    * @memberOf N.API
    * @param {string} service The ID of your service.
    * @param {string} key The key of your service
