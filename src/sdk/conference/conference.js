@@ -637,6 +637,10 @@ client.setIceServers([{
       return safeCall(onFailure, 'no audio or video to subscribe.');
     }
 
+    if (!stream.isMixed() && typeof options.video === 'object' && options.video.resolution){
+      return safeCall(onFailure, 'Resolution setting is not available for non-mixed stream.');
+    }
+
     sendSdp(self.socket, 'subscribe', {
       streamId: stream.id(),
       audio: stream.hasAudio() && (options.audio !== false),
