@@ -852,7 +852,7 @@ conference.leave();
      * @instance
      * @desc This function send message to conference room. The receiver should be a valid clientId, which is carried by 'user-joined' event; or default 0, which means send to all participants in the conference (broadcast) except himself.
      * @memberOf Woogeen.ConferenceClient
-     * @param {string/function} data Message/object to send.
+     * @param {string/function} data text message to send.
      * @param {string/function} receiver Receiver, optional, with default value 0.
      * @param {function} onSuccess() (optional) Success callback.
      * @param {function} onFailure(err) (optional) Failure callback.
@@ -860,8 +860,8 @@ conference.leave();
   <script type="text/JavaScript">
   var conference = Woogeen.ConferenceClient.create();
   // ……
-  conference.send(message, receiver, function (obj) {
-      L.Logger.info('object sent:', obj.id());
+  conference.send(message, receiver, function () {
+      L.Logger.info('mesage send success.');
     }, function (err) {
       L.Logger.error('send failed:', err);
     }
