@@ -67,17 +67,16 @@ div#videocontainer {
 <body>
   <script src="js/jquery-1.10.2.min.js" type="text/javascript"></script>
   <script src="js/utils.js" type="text/javascript"></script>
-  <script src="js/sc.websocket.js" type="text/javascript"></script>
-  <!-- SDK -->
   <script src="../../sdk/base/socket.io.js" type="text/javascript"></script>
   <script src="../../sdk/base/adapter.js" type="text/javascript"></script>
+  <script src="js/sc.websocket.js" type="text/javascript"></script>
+  <!-- SDK Starts -->
   <script src="../../sdk/base/property.js" type="text/javascript"></script>
   <script src="../../sdk/base/common.js" type="text/javascript"></script>
   <script src="../../sdk/base/events.js" type="text/javascript"></script>
   <script src="../../sdk/base/L.Base64.js" type="text/javascript"></script>
   <script src="../../sdk/base/L.Logger.js" type="text/javascript"></script>
   <script src="../../sdk/base/stream.js" type="text/javascript"></script>
-  <script src="../../sdk/base/ieMediaStream.js" type="text/javascript"></script>
   <script src="../../sdk/p2p/errors.js" type="text/javascript"></script>
   <script src="../../sdk/p2p/gab.proxy.js" type="text/javascript"></script>
   <script src="../../sdk/p2p/peer.js" type="text/javascript"></script>
@@ -113,17 +112,14 @@ div#videocontainer {
     <div id="local">
       <h2>LocalView</h2>
       <video width="320px" height="240px" id="localVideo" muted="muted" autoplay="autoplay"></video>
-      <canvas width="320px" height="240px" id="ieLocalVideo" style="muted:muted autoplay:autoplay"></canvas>
     </div>
     <div id="remote">
       <h2>RemoteView</h2>
       <video width="320px" height="240px" id="remoteVideo" autoplay="autoplay"></video>
-      <canvas width="320px" height="240px" id="ieRemoteVideo" style="autoplay:autoplay"></canvas>
     </div>
     <div id="screen">
       <h2>ScreenView</h2>
       <video width="640px" height="480px" id="screenVideo" autoplay="autoplay"></video>
-      <canvas width="640px" height="480px" id="screenVideo" autoplay="autoplay::autoplay"></canvas>
     </div>
   </div>
 
@@ -131,12 +127,12 @@ div#videocontainer {
   <div id="infoDiv"></div>
   <script type="text/javascript">
   var isVideo=1;
-  var serverAddress='http://61.152.239.56:8095';  // Please  change 61.152.239.56 to signaling server's address.
+  var serverAddress='https://jianjun-ubuntu.sh.intel.com:8096';  // Please  change 61.152.239.56 to signaling server's address.
   var p2p=new Woogeen.PeerClient({
     iceServers : [ {
-      urls : "stun:61.152.239.60"
+      urls : "stun:61.152.239.47"
     }, {
-      urls : ["turn:61.152.239.60:4478?transport=udp","turn:61.152.239.60:443?transport=udp","turn:61.152.239.60:4478?transport=tcp","turn:61.152.239.60:443?transport=tcp"],
+      urls : ["turn:61.152.239.47:4478?transport=udp","turn:61.152.239.47:443?transport=udp","turn:61.152.239.47:4478?transport=tcp","turn:61.152.239.47:443?transport=tcp"],
       credential : "master",
       username : "woogeen"
     } ]
@@ -188,7 +184,8 @@ div#videocontainer {
         Woogeen.LocalStream.create({
           video:{
             device:"camera",
-            resolution:"sif"
+            resolution:"hd720p",
+            frameRate: [30, 30]
           },
         audio: true
         }, function(err, stream){
@@ -196,11 +193,7 @@ div#videocontainer {
             return L.Logger.error('create LocalStream failed:', err);
           }
           localStream = stream;
-          if (navigator.userAgent.indexOf('MSIE') !== -1 || navigator.appVersion.indexOf('Trident/') > 0) {  // If IE
-            attachMediaStream($('#local').children('canvas').get(0),localStream.mediaStream)  // Show local stream
-          }else{
-            Woogeen.UI.attachMediaStream($('#local').children('video').get(0),localStream.mediaStream)  // Show local stream
-          }
+          $('#local').children('video').get(0).srcObject=localStream.mediaStream;
           p2p.publish(localStream,$('#target-uid').val());  // Publish local stream to remote client
         });
       }
@@ -252,29 +245,14 @@ div#videocontainer {
     video.setAttribute("width", "320px");
     video.setAttribute("height", "240px");
     video.setAttribute("autoplay", "autoplay");
-    //video.id = e.stream.id();
+    video.id = e.stream.id();
 
-    var canvas = document.createElement("canvas");
-    canvas.setAttribute("width", "320px");
-    canvas.setAttribute("height", "240px");
-    canvas.setAttribute("autoplay", "autoplay::autoplay");
-    //canvas.id = e.stream.id();
     if(e.stream.isScreen()){
-      if (navigator.userAgent.indexOf('MSIE') !== -1 || navigator.appVersion.indexOf('Trident/') > 0) {  // If IE
-        $('#screen canvas').show();
-        attachRemoteMediaStream($('#screen canvas').get(0), e.stream.mediaStream, e.stream.mediaStream.attachedPCID);  // Show remote screen stream.
-      }else{
-        $('#screen video').show();
-        Woogeen.UI.attachMediaStream($('#screen video').get(0), e.stream.mediaStream);  // Show remote screen stream.
-      }
+      $('#screen video').show();
+      $('#screen video').get(0).srcObject=e.stream.mediaStream;
     } else if(e.stream.hasVideo()) {
-      if (navigator.userAgent.indexOf('MSIE') !== -1 || navigator.appVersion.indexOf('Trident/') > 0) {  // If IE
-        $('#remote canvas').show();
-        attachRemoteMediaStream($('#remote canvas').get(0), e.stream.mediaStream, e.stream.mediaStream.attachedPCID);  // Show remote video stream.
-      }else{
-        $('#remote video').show();
-        attachMediaStream($('#remote video').get(0), e.stream.mediaStream);  // Show remote video stream.
-      }
+      $('#remote video').show();
+      $('#remote video').get(0).srcObject=e.stream.mediaStream;
     }
     isVideo++;
   });
@@ -282,10 +260,8 @@ div#videocontainer {
   p2p.on('stream-removed',function(e){  // A remote stream is available.
     var stream = e.stream;
     if(stream && stream.isScreen()){
-      $("#screen canvas").hide();
       $("#screen video").hide();
     } else {
-      $("#remote canvas").hide();
       $("#remote video").hide();
     }
     console.log('Stream removed. Stream ID: '+e.stream.mediaStream.id);
@@ -297,11 +273,7 @@ div#videocontainer {
     $('#target-video-publish').prop('disabled',true);
     $('#target-video-unpublish').prop('disabled',true);
     $('#target-screen').prop('disabled',true);
-    if (navigator.userAgent.indexOf('MSIE') !== -1 || navigator.appVersion.indexOf('Trident/') > 0) { // If IE
-      $('#remote canvas').hide();
-    } else {
-      $('#remote video').hide();
-    }
+    $('#remote video').hide();
     if(localStream){
       localStream.close();
       localStream=undefined;

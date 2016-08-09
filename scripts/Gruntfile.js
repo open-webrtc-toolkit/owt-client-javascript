@@ -166,8 +166,8 @@ window.L = L;\n\
           {expand: true,cwd:'../src/samples/conference/',src:['initcert.js'],dest:'../dist/samples/conference/',flatten:false,mode:true},
           {expand: true,cwd:'../src/samples/conference/cert/',src:['.woogeen.keystore'],dest:'../dist/samples/conference/cert/',flatten:false,mode:true},
           {expand: true,cwd:'../src/samples/sipgw/',src:['**'],dest:'../dist/samples/sipgw/',flatten:false},
-          {expand: true,cwd:'../src/sdk/base/',src:['strophe.js','socket.io.js'],dest:'../dist/sdk/dependencies/',flatten:false},
-          {expand: true,cwd:'../src/sdk/base/',src:['adapter.js'],dest:'../dist/sdk/',flatten:false},
+          {expand: true,cwd:'../src/sdk/base/',src:['socket.io.js'],dest:'../dist/sdk/dependencies/',flatten:false},
+          {expand: true,cwd:'../src/sdk/base/',src:['adapter.js'],dest:'../dist/sdk/dependencies',flatten:false},
           {expand: true,cwd:'../src/sdk/base/',src:['adapter.js'],dest:'../dist/samples/conference/public/',flatten:false},
           {expand: true,cwd:'../src/sdk/base/',src:['adapter.js'],dest:'../dist/samples/sipgw/public/',flatten:false},
           {expand: true,cwd:'../src/extension/',src:['**'],dest:'../dist/',flatten:false},
@@ -192,15 +192,19 @@ window.L = L;\n\
         replacements: [
           {
             pattern: '<script src="../../sdk/base/adapter.js" type="text/javascript"></script>',
-            replacement: '<script src="../../sdk/adapter.js" type="text/javascript"></script>'
+            replacement: '<script src="../../sdk/dependencies/adapter.js" type="text/javascript"></script>'
           },
           {
             pattern: '<script src="../../sdk/base/socket.io.js" type="text/javascript"></script>',
             replacement: '<script src="../../sdk/dependencies/socket.io.js" type="text/javascript"></script>'
           },
           {
-            pattern: '<script src="../../sdk/conference/property.js" type="text/javascript"></script>\n  <script src="../../sdk/base/events.js" type="text/javascript"></script>\n  <script src="../../sdk/base/L.Base64.js" type="text/javascript"></script>\n  <script src="../../sdk/base/L.Logger.js" type="text/javascript"></script>\n  <script src="../../sdk/base/stream.js" type="text/javascript"></script>\n  <script src="../../sdk/base/ieMediaStream.js" type="text/javascript"></script>\n  <script src="../../sdk/p2p/errors.js" type="text/javascript"></script>\n  <script src="../../sdk/p2p/gab.proxy.js" type="text/javascript"></script>\n  <script src="../../sdk/p2p/peer.js" type="text/javascript"></script>',
+            pattern: /<!-- SDK Starts -->[\w\W]+<!-- SDK Stops -->/gm,
             replacement: '<script src="../../sdk/woogeen.sdk.js" type="text/javascript"></script>'
+          },
+          {
+            pattern: /var serverAddress.*/g,
+            replacement: 'var serverAddress=\'https://61.152.239.56:8096\';  // Please change 61.152.239.56 to signaling server\'s address.'
           }
          ]
         }

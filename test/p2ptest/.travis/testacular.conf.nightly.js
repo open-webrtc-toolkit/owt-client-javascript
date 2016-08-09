@@ -17,7 +17,7 @@ module.exports = function (config){
     '../dist/samples/p2p/js/jquery-1.10.2.min.js',
     '../dist/samples/p2p/js/utils.js',
     '../dist/samples/p2p/js/sc.websocket.js',
-    '../dist/sdk/adapter.js',
+    '../dist/sdk/dependencies/adapter.js',
     '../dist/sdk/woogeen.sdk.js',
     '../dist/sdk/woogeen.sdk.ui.js',
     '../dist/sdk/dependencies/socket.io.js',
