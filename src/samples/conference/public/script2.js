@@ -187,7 +187,7 @@
       var stopExternalOutput = 'stop external streaming';
       externalOutputButton.innerHTML = startExternalOutput;
       return function () {
-        var url = document.getElementById('rtspOutURL');
+        var url = document.getElementById('externalOutputURL');
         if (!url || !url.value) {
           L.Logger.error('invalid url of rtsp server.');
           return;
