@@ -633,7 +633,7 @@ L.Logger.info('stream added:', stream.id());
 
        if(!isLegacyIE()){
           if (!isLegacyChrome() && option.video.frameRate instanceof Array && option.video.frameRate.length >= 2) {
-            mediaOption.video.frameRate = {exact: option.video.frameRate[0], ideal: option.video.frameRate[1]};
+            mediaOption.video.frameRate = {min: option.video.frameRate[0], max: option.video.frameRate[1]};
           }
         }
       }
