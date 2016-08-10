@@ -56,19 +56,14 @@ The Intel CS for WebRTC Client SDK for JavaScript has been tested on the followi
             <td><b>Ubuntu*</b></td>
         </tr>
         <tr width="12pt">
-            <td>Chrome* 49</td>
+            <td>Chrome* 52</td>
             <td>&radic;</td>
             <td>&radic;</td>
         </tr>
         <tr>
-            <td>Firefox* 45</td>
+            <td>Firefox* 48</td>
             <td>&radic;</td>
             <td>&radic;</td>
-        </tr>
-        <tr>
-            <td>Internet Explorer* 9/10/11</td>
-            <td>&radic;</td>
-            <td>&nbsp;</td>
         </tr>
         <tr>
             <td><b>P2P Mode</b></td>
@@ -76,48 +71,28 @@ The Intel CS for WebRTC Client SDK for JavaScript has been tested on the followi
             <td><b>Ubuntu</b></td>
         </tr>
         <tr>
-            <td>Chrome 49</td>
+            <td>Chrome* 52</td>
             <td>&radic;</td>
             <td>&radic;</td>
         </tr>
         <tr>
-            <td>Internet Explorer 9/10/11</td>
+            <td>FireFox* 48</td>
             <td>&radic;</td>
-            <td>&nbsp;</td>
+            <td>&radic;</td>
         </tr>
     </tbody>
 </table>
 @endhtmlonly
 
-Internet Explorer (IE) does not support WebRTC natively.  End user needs to install the IE plugin provided in the Intel CS for WebRTC package in order to enable WebRTC capability.
-
-# 3 Plugin for Internet Explorer (IE) {#section3}
-If you are developing a WebRTC web app which is intended to support IE browser, your end users must install the WebRTC IE plugin package provided in the `CS_WebRTC_Client_SDK_JavaScript.&lt;ver&gt;.zip` file to enable WebRTC capability.
-
-> **Note:** Canvas is used to render the WebRTC streams since IE's video tag cannot render them; and performance may not be as comparable to what you get with Chrome and FireFox.  Also, you must close the local stream and stop all conversations when the tab is closed. The following code is for reference.
-
-
-~~~~~~{.js}
-window.onbeforeunload = function(){
-      if(localStream){
-      p2p.unpublish(localStream,$('#target-uid').val());
-      localStream.close();
-    }
-    p2p.stop($('#target-uid').val());
-  }
-~~~~~~
-
-For IE Plugin, the way to attach local media stream and remote media stream to canvas is different.  For local stream, call `attachMediaStream()` with the first parameter set to your canvas, and second parameter to the localStream's `mediaStream` member; for remote stream, instead you have to call `attachRemoteMediaStream` with the first parameter set to canvas, second parameter set to remote stream's `mediaStream` member, and third parameter set to remote stream's `mediaStream.attachedPCID` member. Refer to the p2p sample html page for more details.
-
-# 4 Screen sharing extension {#section4}
+# 3 Screen sharing extension {#section3}
 We provide source code of a Chrome screen sharing extension sample. Developers should edit manifest.json and publish it to Chrome App Store to make it work for their products. After your extension is published, you will get an extension ID. This ID will be used when create screen sharing stream.
 
 > **Note:** End users need to install your extension and visit your site with https if they want to use screen sharing.
 
-# 5 NAT and firewall traversal {#section5}
+# 4 NAT and firewall traversal {#section4}
 Intel CS for WebRTC Client SDK for JavaScript fully supports NAT and firewall traversal with STUN / TURN / ICE. The rfc5766-turn-server version 3.2.3.6 from https://code.google.com/p/rfc5766-turn-server/ has been verified.
 
-# 6 Peer-to-peer (P2P) mode{#section6}
+# 5 Peer-to-peer (P2P) mode{#section5}
 To enable P2P chat, copy and paste the following code into the head section of your HTML document:
 ~~~~~~{.js}
 <script type="text/JavaScript" src="sc.websocket.js"></script>
@@ -125,7 +100,7 @@ To enable P2P chat, copy and paste the following code into the head section of y
 ~~~~~~
 The SDK supports Web sockets signaling channel in P2P mode; You need to include `sc.websocket.js` and `socket.io.js` in your HTML files. Please include `socket.io.js` after `woogeen.p2p.js`.
 
-## 6.1 P2P direct call chat {#section6_1}
+## 5.1 P2P direct call chat {#section5_1}
 
 Direct call chat refers to the discovery of another client by chatting with that user's ID. This is a synchronous call and requires that the two clients be online on the signaling server.
 ~~~~~~{.js}
@@ -268,16 +243,16 @@ p2p.on('data-received',function(e){  // Received data from datachannel.
 </script>
 ~~~~~~
 
-## 6.2 Customize signaling channel {#section6_2}
+## 5.2 Customize signaling channel {#section5_2}
 
 Signaling channel is an implementation to transmit signaling data for creating a WebRTC session. Signaling channel for P2P sessions can be customized by writing your own `sc.*.js`. The default Socket.IO signaling channel has been provided in the release package with name `sc.websocket.js`.
 
 In the customized signaling channel, you need to implement `connect`, `disconnect` and `sendMessage`, invoke `onMessage` when a new message arrives, and invoke `onServerDisconnected` when the connection is lost. Then include your customized `sc.*.js` into the HTML page.
 
-# 7 Conference mode {#section7}
+# 6 Conference mode {#section6}
 Conference mode is designed for applications with multiple participants. The JavaScript SDK includes a demo application for this.
 
-## 7.1 Create a room from the server side {#section7_1}
+## 6.1 Create a room from the server side {#section6_1}
 
 Server-side APIs are run on Node.js, and act as a Node.js module:
 ~~~~~~{.js}
@@ -301,7 +276,7 @@ Woogeen.API.createRoom (room.name, function (resp) {
 }, room);
 ~~~~~~
 
-## 7.2 Join a conference from the client side {#section7_2}
+## 6.2 Join a conference from the client side {#section6_2}
 To initialize your HTML code, copy and paste the following code into the head section of your HTML document:
 ~~~~~~{.js}
 <script type="text/javascript" src="socket.io.js"></script>
@@ -378,10 +353,10 @@ createToken(roomId, 'user', 'presenter', function (response) {
 });
 </script>
 ~~~~~~
-# 8 JavaScript API quick start guide {#section8}
+# 7 JavaScript API quick start guide {#section7}
 This discussion describes how to quickly grasp the API usages of Intel CS for WebRTC Client SDK for JavaScript. Unless mentioned elsewhere, all APIs are under namespace `Woogeen`.
 
-## 8.1 Objects {#section8_1}
+## 7.1 Objects {#section7_1}
 The following table describes the key objects provided in the JavaScript SDK.
 @htmlonly
 <table class="doxtable">
@@ -412,7 +387,7 @@ The following table describes the key objects provided in the JavaScript SDK.
     </tbody>
 </table>
 @endhtmlonly
-## 8.2 Example: Get PeerClient {#section8_2}
+## 7.2 Example: Get PeerClient {#section7_2}
 ~~~~~~{.js}
 <script type="text/JavaScript">
   var peer = new Woogeen.PeerClient({
@@ -427,7 +402,7 @@ The following table describes the key objects provided in the JavaScript SDK.
   });
 </script>
 ~~~~~~
-## 8.3 Example: Get ConferenceClient {#section8_3}
+## 7.3 Example: Get ConferenceClient {#section7_3}
 
 ~~~~~~{.js}
 <script type="text/JavaScript">
@@ -435,7 +410,7 @@ The following table describes the key objects provided in the JavaScript SDK.
 </script>
 ~~~~~~
 
-## 8.4 Example: Create LocalStream and receive RemoteStream {#section8_4}
+## 7.4 Example: Create LocalStream and receive RemoteStream {#section7_4}
 
 ~~~~~~{.js}
 <script type="text/javascript">
@@ -461,13 +436,13 @@ The following table describes the key objects provided in the JavaScript SDK.
 </script>
 ~~~~~~
 
-# 9 Events {#Events}
+# 8 Events {#Events}
 
 The JavaScript objects (described earlier in this section) throw events using EventDispatchers, inlucluding {@link Woogeen.PeerClient PeerClient}, {@link Woogeen.ConferenceClient ConferenceClient}, {@link Woogeen.SipClient SipClient}, {@link Woogeen.RemoteStream RemoteStream}, etc.
 
 Detailed events please refer to the specific class description page.
 
-## 9.1 Example for conference:{#section9_1}
+## 8.1 Example for conference:{#section8_1}
 
 ~~~~~~{.js}
 <script type="text/JavaScript">
@@ -495,7 +470,7 @@ conference.subscribe(stream, function () {
 </script>
 ~~~~~~
 
-## 9.2 Example for p2p:{#section9_2}
+## 8.2 Example for p2p:{#section8_2}
 
 ~~~~~~{.js}
 <script type="text/JavaScript">
