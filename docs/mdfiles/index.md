@@ -15,7 +15,7 @@ The following table lists the basic JavaScript objects provided in the JavaScrip
     <tbody>
     <thead>
         <tr>
-            <th><b>JavaScript  object</b></th>
+            <th><b>JavaScript object</b></th>
             <th><b>Description</b></th>
         </tr>
     </thead>
@@ -90,7 +90,7 @@ We provide source code of a Chrome screen sharing extension sample. Developers s
 > **Note:** End users need to install your extension and visit your site with https if they want to use screen sharing.
 
 # 4 NAT and firewall traversal {#section4}
-Intel CS for WebRTC Client SDK for JavaScript fully supports NAT and firewall traversal with STUN / TURN / ICE. The rfc5766-turn-server version 3.2.3.6 from https://code.google.com/p/rfc5766-turn-server/ has been verified.
+Intel CS for WebRTC Client SDK for JavaScript fully supports NAT and firewall traversal with STUN / TURN / ICE. The Coturn TURN server from https://github.com/coturn/coturn can be one choice.
 
 # 5 Peer-to-peer (P2P) mode{#section5}
 To enable P2P chat, copy and paste the following code into the head section of your HTML document:
