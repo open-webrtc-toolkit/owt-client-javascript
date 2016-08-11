@@ -204,7 +204,7 @@ window.L = L;\n\
           },
           {
             pattern: /var serverAddress.*/g,
-            replacement: 'var serverAddress=\'https://61.152.239.56:8096\';  // Please change 61.152.239.56 to signaling server\'s address.'
+            replacement: 'var serverAddress=\'https://example.com:8096\';  // Please change example.com to signaling server\'s address.'
           }
          ]
         }

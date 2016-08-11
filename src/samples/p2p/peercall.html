@@ -127,14 +127,14 @@ div#videocontainer {
   <div id="infoDiv"></div>
   <script type="text/javascript">
   var isVideo=1;
-  var serverAddress='https://jianjun-ubuntu.sh.intel.com:8096';  // Please  change 61.152.239.56 to signaling server's address.
+  var serverAddress='https://example.com:8096';  // Please change example.com to signaling server's address.
   var p2p=new Woogeen.PeerClient({
     iceServers : [ {
-      urls : "stun:61.152.239.47"
+      urls : "stun:example.com:port"
     }, {
-      urls : ["turn:61.152.239.47:4478?transport=udp","turn:61.152.239.47:443?transport=udp","turn:61.152.239.47:4478?transport=tcp","turn:61.152.239.47:443?transport=tcp"],
-      credential : "master",
-      username : "woogeen"
+      urls : ["turn:example.com:port?transport=udp","turn:example.com:port?transport=tcp"],
+      credential : "password",
+      username : "username"
     } ]
   });  // Initialize a Peer object
   var localStream;
