@@ -42,7 +42,7 @@ The Intel CS for WebRTC Client SDK for JavaScript has been tested on the followi
 
 @htmlonly
 <table class="doxtable">
-<caption><b>table 2: Browser requirements</b></caption>
+<caption><b>Table 2: Browser requirements</b></caption>
     <tbody>
     <thead>
         <tr>
