@@ -14,7 +14,7 @@ describe('TestDevice1', function() {
 
         actorUserName = "User1",
         targetUserName = "User2",
-        serverIP = 'http://10.239.10.122:8095/',
+        serverIP = 'http://192.168.1.4:8095/',
         waitInterval = 20000;
 
     beforeEach(function(done) {
@@ -32,6 +32,7 @@ describe('TestDevice1', function() {
                     actorUser.request["chat-denied_success"]++;
                 });
                 actorUser.bindListener("chat-started", function(e) {
+                    console.log("chat-started event");
                     actorUser.request["chat-started_success"]++;
                 });
                 actorUser.bindListener("chat-stopped", function(e) {
@@ -535,43 +536,35 @@ describe('TestDevice1', function() {
                 //wait lock
                 return waitLock('User2Connect');
             }, actorUserName + " wait lock: User2Connect ", waitInterval)
-            .runs(function() {
+             .waitsFor(function() {
+                // wait lock
+                return waitLock('User2InviteUser1');
+            }, actorUserName + "wait lock:User2InviteUser1", waitInterval)
+            .waitsFor(function() {
                 //check wait
-                //action
-                actorUser.invited(targetUserName);
+                return actorUser.request["chat-invited_success"] == 1;
+            }, actorUserName + " chat-invited event", waitInterval)
+            .runs(function() {
+                // action
+                actorUser.accept(targetUserName);
             })
             .waitsFor(function() {
                 //check action
-                return actorUser.request["invite_success"] == 1;
-            }, actorUserName + " check action: invite ", waitInterval)
+                return actorUser.request["accept_success"] == 1;
+            }, actorUserName + "check action: accept", waitInterval)
             .runs(function() {
                 // notify lock
-                notifyLock('User1InviteUser2')
+                notifyLock('User1AcceptUser2')
             })
-            //4. User2AcceptUser1
-            //5. User1CreateLocalStream
+
             .waitsFor(function() {
                 // wait lock
-                return waitLock('User2AcceptUser1');
-            }, actorUserName + " wait lock: User2AcceptUser1", waitInterval)
+                return waitLock('User2InviteUser1Again');
+            }, actorUserName + "wait lock:User2InviteUser1", waitInterval)
             .waitsFor(function() {
                 //check wait
-                return actorUser.request["chat-started_success"] == 1;
-            }, actorUserName + " check wait: chat-started", waitInterval)
-            //invite again
-            .runs(function() {
-                //check wait
-                //action
-                actorUser.invited(targetUserName);
-            })
-            .waitsFor(function() {
-                //check action
-                return actorUser.request["invite_failed"] == 1;
-            }, actorUserName + " check action: invite ", waitInterval)
-            .runs(function() {
-                // notify lock
-                notifyLock('User1InviteUser2Again')
-            })
+                return actorUser.request["chat-invited_success"] == 1;
+            }, actorUserName + " chat-invited event", waitInterval)
              .waits('test end',waitInterval)
             .runs(function() {
                 console.log('test end');
@@ -3221,10 +3214,6 @@ describe('TestDevice1', function() {
                 // start test
                 debug(actorUserName + "test start!");
             })
-            .waitsFor(function() {
-                //wait lock
-                return waitLock('User2Connect');
-            }, actorUserName + " wait lock: User2Connect ", waitInterval)
 
             .runs(function() {
                 // action
@@ -3256,7 +3245,10 @@ describe('TestDevice1', function() {
             })
             // 2. User2Connect
             // 3. User1InviteUser2
-
+            .waitsFor(function() {
+                //wait lock
+                return waitLock('User2Connect');
+            }, actorUserName + " wait lock: User2Connect ", waitInterval)
             .waits('test end',waitInterval)
             .runs(function() {
                 // ends the case
@@ -3294,17 +3286,6 @@ describe('TestDevice1', function() {
                 //notify lock
                 notifyLock('User1Connect');
             })
-
-             .waitsFor(function() {
-                // wait lock
-                return waitLock('User2StopChatWithUser1')
-            }, actorUserName + "wait lock: User2StopChatWithUser1", waitInterval)
-            .waitsFor(function() {
-                //check wait
-                return actorUser.request["chat-stopped_success"] == 0;
-            }, actorUserName + " check wait: chat-stopped ", waitInterval)
-
-
             .waitsFor(function() {
                 //wait lock
                 return waitLock('User2Connect');

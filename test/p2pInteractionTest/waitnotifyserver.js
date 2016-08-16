@@ -1,6 +1,6 @@
 var beanLock = 'beanLock';
 var beanTargetLock = 'beanTargetLock';
-var wnsocket = io.connect('http://10.239.10.122:9092');
+var wnsocket = io.connect('http://192.168.1.4:9092');
 var printWait = true;
 var wnconnectted = false;
 wnsocket.on('connect', function() {

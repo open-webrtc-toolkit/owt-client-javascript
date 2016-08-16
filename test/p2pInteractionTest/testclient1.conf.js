@@ -23,7 +23,7 @@ module.exports = function (config){
     './src/samples/p2p/js/jquery-1.10.2.min.js',
     './src/samples/p2p/js/utils.js',
     './src/samples/p2p/js/sc.websocket.js',
-    './src/sdk/conference/property.js',
+    './src/sdk/base/property.js',
     './src/sdk/base/adapter.js',
     './src/sdk/base/common.js',
     './src/sdk/base/socket.io.js',
@@ -97,7 +97,8 @@ module.exports = function (config){
     // - IE (only Windows)
     // CLI --browsers Chrome,Firefox,Safari
 //    browsers : ["IE"],
-  //  browsers : ["/home/yanbin/workspace/project/webrtc-javascript-sdk/test/p2pInteractionTest/.travis/chrome-start1.sh"],
+    browsers : ["/home/yanbin/workspace/project/webrtc-javascript-sdk/test/p2pInteractionTest/.travis/chrome-start1.sh"],
+/*
     browsers: ['FirefoxAutoAllowGUM'],
     customLaunchers: {
        FirefoxAutoAllowGUM: {
@@ -106,7 +107,7 @@ module.exports = function (config){
                 'media.navigator.permission.disabled': true
            }
         }
-    },
+    },*/
     browserDisconnectTimeout : 60000,
     browserNoActivityTimeout : 60000,
 

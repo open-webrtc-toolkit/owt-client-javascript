@@ -261,10 +261,10 @@ TestClient.prototype = {
     this.request["publish_failed"] = this.request["publish_failed"] || 0;
     if (typeof tc === "string") {
       this.peerClient.publish(this.localStream, tc, function() {
-        that.debug("publish:", "publish to user: " + tc.user + " success");
+        that.debug("publish:", "publish to user: " + tc + " success");
         that.request["publish_success"]++;
       }, function() {
-        that.debug("publish:", "publish to user: " + tc.user + " failed");
+        that.debug("publish:", "publish to user: " + tc + " failed");
         that.request["publish_failed"]++;
       });
     } else {
