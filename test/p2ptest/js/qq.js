@@ -982,6 +982,7 @@
                 }
             }]);
 
+
             return deferred.promise;
         };
 
@@ -998,17 +999,20 @@
             }
         }
 
-        function waitsForHelper(latchfunc, timeout) {
+        function waitsForHelper(latchfunc, tiout) {
+            var timeout;
             var WAIT_INTERVAL = 500;
             var TIMEOUT = 5000;
             var condition = false;
             var calls, deferred, started;
               deferred = Q.defer();
-            if (!timeout) {
+            if (!tiout) {
                 timeout = TIMEOUT;
+            }else{
+                timeout = tiout;
             }
             var debugFunction = function(msg, result) {
-                console.log('++++ Error message from waitsForAndRuns:' , msg, "actual is ", result);           
+                console.log('++++ Error message from waitsForAndRuns:' , msg, "actual is ", result);
             };
             var selfTimeOut = setTimeout(function doWaitsFor() {
                     clearInterval(interval);
@@ -1016,10 +1020,12 @@
                    if(message){
                        if ( message.length > 0 ) {
                         console.log("Event Error: ",message, "do not triggered after ",tiout);
+                          expect(0).toEqual(1);
+                            console.log("Event Error2: ",message, "do not triggered after ",tiout);
                            if(message instanceof Array) {
                                for(var i = 0; i < message.length; i ++) {
                                   debugFunction("expect"+ message[i][2] +"to equal " + message[i][1], message[i][0] );
-                                //  expect(message[i][0]).toEqual(message[i][1]);
+                                 expect(message[i][0]).toEqual(message[i][1]);
                                };
                             };
                        };
@@ -1111,6 +1117,17 @@
         }]);
 
         return deferred.promise;
+    };
+
+    Promise.prototype.waits = function(message, tiout) {
+        console.log('waits '+message+' for time: '+tiout);
+        return this.then(function(value) {
+            var deferred = defer();
+            setTimeout(function() {
+                deferred.resolve(value);
+            }, tiout);
+            return deferred.promise;
+        });
     };
 
     Q.tap = function(promise, callback) {
