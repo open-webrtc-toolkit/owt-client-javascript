@@ -17,8 +17,6 @@
     if (window.navigator.userAgent.match("Firefox") !== null) {
       // Firefox
       browser = "mozilla";
-    } else if (window.navigator.appVersion.indexOf('Trident') > -1) {
-      browser = 'internet-explorer';
     } else if (window.navigator.userAgent.match("Bowser") !==null){
       browser = "bowser";
     } else if (window.navigator.userAgent.match("Chrome") !==null) {
@@ -43,9 +41,6 @@
     if (that.browser === 'mozilla') {
       L.Logger.debug("Firefox Stack");
       that = Erizo.FirefoxStack(spec);
-    } else if (that.browser === 'internet-explorer'){
-      L.Logger.debug("IE Stack");
-      that = Erizo.IEStableStack(spec);
     } else if (that.browser === 'bowser'){
       L.Logger.debug("Bowser Stack");
       that = Erizo.BowserStack(spec);
@@ -667,9 +662,6 @@ client.setIceServers([{
 
       stream.channel.onaddstream = function (evt) {
         stream.mediaStream = evt.stream;
-        if (navigator.appVersion.indexOf('Trident') > -1) {
-          stream.pcid = evt.pcid;
-        }
         if (channelIsReady && (mediaStreamIsReady === false)) {
           mediaStreamIsReady = true;
           safeCall(onSuccess, stream);
