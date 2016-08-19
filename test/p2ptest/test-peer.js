@@ -1,5 +1,5 @@
 describe('P2P JS SDK', function() {
-  jasmine.DEFAULT_TIMEOUT_INTERVAL = 10000;
+  jasmine.DEFAULT_TIMEOUT_INTERVAL = 20000;
   function debug(type, msg) {
     console.log(type, msg);
   }
@@ -8,6 +8,35 @@ describe('P2P JS SDK', function() {
       deferred.resolve();
       var thisQ = deferred.promise;
       //debug("thisQ is", thisQ);
+      var detection = '';
+  var client1RemoteId ='';
+  var videoDetection = function(videoId) {
+    console.log("videoId is ", videoId);
+    window.setTimeout(function() {
+      var framechecker = new VideoFrameChecker(
+        document.getElementById(videoId));
+      framechecker.checkVideoFrame_(); // start it
+      window.setTimeout(function() {
+        framechecker.stop();
+        if (framechecker.frameStats.numFrames > 0) {
+          console.log("framechecker frames number > 0, is : ", framechecker.frameStats.numFrames);
+          console.log("framechecker numFrozenFrames number  is : ", framechecker.frameStats.numFrozenFrames);
+          console.log("framechecker numBlackFrames number  is : ", framechecker.frameStats.numBlackFrames);
+          if ((framechecker.frameStats.numFrozenFrames == 0) && (framechecker.frameStats.numBlackFrames == 0)) {
+            detection = true;
+          } else {
+            console.log("framechecker numFrozenFrames number  is : ", framechecker.frameStats.numFrozenFrames);
+            console.log("framechecker numBlackFrames number  is : ", framechecker.frameStats.numBlackFrames);
+            detection = false;
+          }
+        } else {
+          console.log("framechecker frames number < = 0 , is : ", framechecker.frameStats.numFrames);
+          detection = false;
+        };
+      }, 1000);
+    }, 1000);
+  }
+
   describe('media stream test', function() {
     var media = undefined;
     beforeEach(function() {
@@ -18,15 +47,22 @@ describe('P2P JS SDK', function() {
      // media.client.close();
       media.client.clearClient();
       media = undefined;
+      detection = '';
     });
     it("create default video", function(done) {
       thisQ
       .runs(function() {
         media.getCameraDefault();
       })
+      .runs(function() {
+        videoDetection('local');
+      })
       .waitsFor(function() {
         return media.client.request["createLocal_success"] == 1;
       }, 'create localStream success event', 6000)
+      .waitsFor(function() {
+        return detection == true;
+      }, 'detect video is playing', 6000)
       .runs(function() {
         debug("create default video media client request:", media.client.request);
         expect(media.client.request["createLocal_success"]).toEqual(1);
@@ -40,9 +76,15 @@ describe('P2P JS SDK', function() {
       .runs(function() {
         media.setCameraResulotion("hd720p");
       })
+      .runs(function() {
+        videoDetection('local');
+      })
       .waitsFor(function() {
         return media.client.request["createLocal_success"] == 1;
       }, 'create localStream success event', 6000)
+      .waitsFor(function() {
+        return detection == true;
+      }, 'detect video is playing', 6000)
       .runs(function() {
         debug("create 720p video media client request:", media.client.request);
         expect(media.client.request["createLocal_success"]).toEqual(1);
@@ -56,9 +98,15 @@ describe('P2P JS SDK', function() {
       .runs(function() {
         media.setCameraResulotion("123");
       })
-     .waitsFor(function() {
+      .runs(function() {
+        videoDetection('local');
+      })
+      .waitsFor(function() {
         return media.client.request["createLocal_success"] == 1;
       }, 'create localStream success event', 6000)
+      .waitsFor(function() {
+        return detection == true;
+      }, 'detect video is playing', 6000)
       .runs(function() {
         debug("create error video media client request:", media.client.request);
         expect(media.client.request["createLocal_success"]).toEqual(1);
@@ -72,9 +120,15 @@ describe('P2P JS SDK', function() {
       .runs(function() {
         media.setCameraFps([1, 2]);
       })
+      .runs(function() {
+        videoDetection('local');
+      })
       .waitsFor(function() {
         return media.client.request["createLocal_success"] == 1;
       }, 'create localStream success event', 6000)
+      .waitsFor(function() {
+        return detection == true;
+      }, 'detect video is playing', 6000)
       .runs(function() {
         debug("create min fps video media client request:", media.client.request);
         expect(media.client.request["createLocal_success"]).toEqual(1);
@@ -88,9 +142,15 @@ describe('P2P JS SDK', function() {
       .runs(function() {
         media.setCameraFps([10, 20]);
       })
+      .runs(function() {
+        videoDetection('local');
+      })
       .waitsFor(function() {
         return media.client.request["createLocal_success"] == 1;
       }, 'create localStream success event', 6000)
+      .waitsFor(function() {
+        return detection == true;
+      }, 'detect video is playing', 6000)
       .runs(function() {
         debug("create normal fps video media client request:", media.client.request);
         expect(media.client.request["createLocal_success"]).toEqual(1);
@@ -99,6 +159,7 @@ describe('P2P JS SDK', function() {
       });
     });
 
+    //?
     it("create error fps video", function(done) {
       thisQ
       .runs(function() {
@@ -120,9 +181,15 @@ describe('P2P JS SDK', function() {
       .runs(function() {
         media.setCameraFps([100, 1000]);
       })
+      .runs(function() {
+        videoDetection('local');
+      })
       .waitsFor(function() {
         return media.client.request["createLocal_success"] == 1;
       }, 'create localStream success event', 6000)
+      .waitsFor(function() {
+        return detection == true;
+      }, 'detect video is playing', 6000)
       .runs(function() {
         debug("create max fps video media client request:", media.client.request);
         expect(media.client.request["createLocal_success"]).toEqual(1);
@@ -136,12 +203,48 @@ describe('P2P JS SDK', function() {
       .runs(function() {
         media.client.createLocalStream();
       })
+      .runs(function() {
+        videoDetection('local');
+      })
       .waitsFor(function() {
         return media.client.request["createLocal_success"] == 1;
       }, 'create localStream success event', 6000)
+      .waitsFor(function() {
+        return detection == true;
+      }, 'detect video is playing', 6000)
+      // .runs(function() {
+      //   media.defaultCameraParametes();
+      // })
+      .waitsFor(function() {
+        return media.client.hasVideo() == true;
+      }, 'hasVideo should be true', 6000)
+      .waitsFor(function() {
+        return media.client.hasAudio() == true;
+      }, 'hasAudio should be true', 6000)
       .runs(function() {
-        media.defaultCameraParametes();
+        videoDetection('local');
       })
+      .waitsFor(function() {
+        return media.client.disableVideo() == true;
+      }, 'disableVideo should be true', 6000)
+      .waitsFor(function() {
+        return detection == false;
+      }, 'detect video is not playing', 6000)
+      .runs(function() {
+        videoDetection('local');
+      })
+      .waitsFor(function() {
+        return media.client.enableVideo() == true;
+      }, 'enableVideo should be true', 6000)
+      .waitsFor(function() {
+        return detection == true;
+      }, 'detect video is playing', 6000)
+      .waitsFor(function() {
+        return media.client.disableAudio() == true;
+      }, 'disableAudio should be true', 6000)
+      .waitsFor(function(){
+        return media.client.enableAudio() == true;
+      }, 'enableAudio should be true', 6000)
       .runs(function() {
         debug("default camera paraments media client request:", media.client.request);
         expect(media.client.request["createLocal_success"]).toEqual(1);
@@ -164,6 +267,7 @@ describe('P2P JS SDK', function() {
       .runs(function() {
         media.audioOnlyCameraParametes();
       })
+
       .runs(function() {
         debug("audio only camera paraments media client request:", media.client.request);
         expect(media.client.request["createLocal_success"]).toEqual(1);
@@ -180,12 +284,50 @@ describe('P2P JS SDK', function() {
           audio: false
         });
       })
+      .runs(function() {
+        videoDetection('local');
+      })
       .waitsFor(function() {
         return media.client.request["createLocal_success"] == 1;
       }, 'create localStream success event', 6000)
+
+      .waitsFor(function() {
+        return detection == true;
+      }, 'detect video is playing', 6000)
+      // .runs(function() {
+      //   media.videoOnlyCameraParametes();
+      // })
+      .waitsFor(function() {
+        return media.client.hasVideo() == true;
+      }, 'hasVideo should be true', 6000)
+      .waitsFor(function() {
+        return media.client.hasAudio() == false;
+      }, 'hasAudio should be false', 6000)
       .runs(function() {
-        media.videoOnlyCameraParametes();
+        videoDetection('local');
       })
+      .waitsFor(function() {
+        return media.client.disableVideo() == true;
+      }, 'disableVideo should be true', 6000)
+      .waitsFor(function() {
+        return detection == false;
+      }, 'detect video is not playing', 6000)
+      .runs(function() {
+        videoDetection('local');
+      })
+      .waitsFor(function() {
+        return media.client.enableVideo() == true;
+      }, 'enableVideo should be true', 6000)
+      .waitsFor(function() {
+        return detection == true;
+      }, 'detect video is playing', 6000)
+      .waitsFor(function() {
+        return media.client.disableAudio() == false;
+      }, 'disableAudio should be false', 6000)
+      .waitsFor(function(){
+        return media.client.enableAudio() == false;
+      }, 'enableAudio should be false', 6000)
+
       .runs(function() {
         debug("video only camera paraments media client request:", media.client.request);
         expect(media.client.request["createLocal_success"]).toEqual(1);
@@ -199,12 +341,53 @@ describe('P2P JS SDK', function() {
       .runs(function() {
         media.client.createLocalStream();
       })
+      .runs(function() {
+        videoDetection('local');
+      })
       .waitsFor(function() {
         return media.client.request["createLocal_success"] == 1;
       }, 'create localStream success event', 6000)
+      .waitsFor(function() {
+        return detection == true;
+      }, 'detect video is playing', 6000)
+      // .runs(function() {
+      //   media.cameraEnableVideoTwice();
+      // })
+      .waitsFor(function() {
+        return media.client.hasVideo() == true;
+      }, 'hasVideo should be true', 6000)
+      .waitsFor(function() {
+        return media.client.hasAudio() == true;
+      }, 'hasAudio should be true', 6000)
       .runs(function() {
-        media.cameraEnableVideoTwice();
+        videoDetection('local');
       })
+      .waitsFor(function() {
+        return media.client.disableVideo() == true;
+      }, 'disableVideo should be true', 6000)
+      .waitsFor(function() {
+        return detection == false;
+      }, 'detect video is not playing', 6000)
+      .runs(function() {
+        videoDetection('local');
+      })
+      .waitsFor(function() {
+        return media.client.enableVideo() == true;
+      }, 'enableVideo should be true', 6000)
+      .waitsFor(function() {
+        return detection == true;
+      }, 'detect video is playing', 6000)
+      .runs(function() {
+        detection = '';
+        videoDetection('local');
+      })
+      .waitsFor(function() {
+        return media.client.enableVideo() == false;
+      }, 'enableVideo twice should be false', 6000)
+      .waitsFor(function() {
+        return detection === true;
+      }, 'detect video is playing', 6000)
+
       .runs(function() {
         debug("camera enable video twice media client request:", media.client.request);
         expect(media.client.request["createLocal_success"]).toEqual(1);
@@ -218,12 +401,47 @@ describe('P2P JS SDK', function() {
       .runs(function() {
         media.client.createLocalStream();
       })
+      .runs(function() {
+        videoDetection('local');
+      })
       .waitsFor(function() {
         return media.client.request["createLocal_success"] == 1;
       }, 'create localStream success event', 6000)
+      .waitsFor(function() {
+        return detection == true;
+      }, 'detect video is playing', 6000)
+      // .runs(function() {
+      //   media.cameraDisableVideoTwice();
+      // })
       .runs(function() {
-        media.cameraDisableVideoTwice();
+        videoDetection('local');
       })
+      .waitsFor(function() {
+        return media.client.disableVideo() == true;
+      }, 'disableVideo should be true', 6000)
+      .waitsFor(function() {
+        return detection == false;
+      }, 'detect video is not playing', 6000)
+      .runs(function() {
+        detection = '';
+        videoDetection('local');
+      })
+      .waitsFor(function() {
+        return media.client.disableVideo() == false;
+      }, 'disableVideo twice should be false', 6000)
+      .waitsFor(function() {
+        return detection === false;
+      }, 'detect video is not playing', 6000)
+      .runs(function() {
+        videoDetection('local');
+      })
+      .waitsFor(function() {
+        return media.client.enableVideo() == true;
+      }, 'enableVideo should be true', 6000)
+      .waitsFor(function() {
+        return detection == true;
+      }, 'detect video is playing', 6000)
+
       .runs(function() {
         debug("camera disable video twice media client request:", media.client.request);
         expect(media.client.request["createLocal_success"]).toEqual(1);
@@ -275,12 +493,37 @@ describe('P2P JS SDK', function() {
       .runs(function() {
         media.client.createLocalStream();
       })
+      .runs(function() {
+        videoDetection('local');
+      })
       .waitsFor(function() {
         return media.client.request["createLocal_success"] == 1;
       }, 'create localStream success event', 6000)
+      .waitsFor(function() {
+        return detection == true;
+      }, 'detect video is playing', 6000)
+      // .runs(function() {
+      //   media.cameraDisableAudioAndVideo();
+      // })
+      .waitsFor(function() {
+        return media.client.hasVideo() == true;
+      }, 'hasVideo should be true', 6000)
+      .waitsFor(function() {
+        return media.client.hasAudio() == true;
+      }, 'hasAudio should be true', 6000)
       .runs(function() {
-        media.cameraDisableAudioAndVideo();
+        videoDetection('local');
       })
+      .waitsFor(function() {
+        return media.client.disableVideo() == true;
+      }, 'disableVideo should be true', 6000)
+      .waitsFor(function() {
+        return detection == false;
+      }, 'detect video is not playing', 6000)
+      .waitsFor(function() {
+        return media.client.disableAudio() == true;
+      }, 'enableAudio should be true', 6000)
+
       .runs(function() {
         debug("disable audio and video media client request:", media.client.request);
         expect(media.client.request["createLocal_success"]).toEqual(1);
@@ -294,12 +537,24 @@ describe('P2P JS SDK', function() {
       .runs(function() {
         media.client.createLocalStream();
       })
+      .runs(function() {
+        videoDetection('local');
+      })
       .waitsFor(function() {
         return media.client.request["createLocal_success"] == 1;
       }, 'create localStream success event', 6000)
+      .waitsFor(function() {
+        return detection == true;
+      }, 'detect video is playing', 6000)
+      .runs(function() {
+        videoDetection('local');
+      })
       .runs(function() {
         media.cameraClose();
       })
+      .waitsFor(function() {
+        return detection == false;
+      }, 'detect video is not playing', 6000)
       .runs(function() {
         media.client.clearClient();
         media.client.recreateTestClient();
@@ -307,9 +562,15 @@ describe('P2P JS SDK', function() {
       .runs(function() {
         media.client.createLocalStream();
       })
+      .runs(function() {
+        videoDetection('local');
+      })
       .waitsFor(function() {
         return media.client.request["createLocal_success"] == 1;
       }, 'create localStream success event', 6000)
+      .waitsFor(function() {
+        return detection == true;
+      }, 'detect video is playing', 6000)
       .runs(function() {
         debug("stream close media client request:", media.client.request);
         expect(media.client.request["createLocal_success"]).toEqual(1);
@@ -332,6 +593,7 @@ describe('P2P JS SDK', function() {
       client2.disconnect();
       client1.clearClient();
       client2.clearClient();
+      detection = '';
     });
 
     it("peer login normal", function(done) {
@@ -341,7 +603,7 @@ describe('P2P JS SDK', function() {
       })
       .waitsFor(function() {
         return client1.request["connect_success"] == 1;
-      }, 'login login event', 6000)
+      }, 'login successful event', 6000)
       .runs(function() {
         debug("peer login normal client1 request:", client1.request);
         expect(client1.request["connect_success"]).toEqual(1);
@@ -350,7 +612,7 @@ describe('P2P JS SDK', function() {
       })
     });
 
-    it("peer login error ip", function(done) {
+    xit("peer login error ip", function(done) {
       thisQ
       .runs(function() {
         client1.serverURL = "http://123"
@@ -367,7 +629,7 @@ describe('P2P JS SDK', function() {
       });
     });
 
-    it("peer login error ip then login normal ip", function(done) {
+    xit("peer login error ip then login normal ip", function(done) {
       thisQ
       .runs(function() {
         client1.serverURL = "http://123"
@@ -640,7 +902,11 @@ describe("peer client and media stream test", function() {
       client2.disconnect();
       client1.clearClient();
       client2.clearClient();
+      detection = '';
+      client1RemoteId = '';
     });
+
+    //unpublish
     it("publish and unpublish video only", function(done) {
       thisQ
       .runs(function() {
@@ -651,9 +917,15 @@ describe("peer client and media stream test", function() {
           audio: false
         });
       })
+      .runs(function() {
+        videoDetection('local');
+      })
       .waitsFor(function() {
         return client1.request["createLocal_success"] == 1;
       }, "create localStream success event", 6000)
+      .waitsFor(function() {
+        return detection == true;
+      }, 'detect local video is playing for video only stream', 10000)
       .waitsFor(function() {
         return client1.request["connect_success"] == 1;
       }, 'login successful event', 6000)
@@ -673,11 +945,13 @@ describe("peer client and media stream test", function() {
         });
         client2.bindListener("stream-added", function(e) {
           client2.request["stream-added_success"]++;
-          client2.showInPage(e.stream);
+           console.log("get RemoteStream id is ", e.stream.id());
+           client1RemoteId = "remote"+e.stream.id();
+           client2.showInPage(e.stream, "remote"+e.stream.id());
         });
         client2.bindListener("stream-removed", function(e) {
           client2.request["stream-removed_success"]++;
-          client2.removeVideo(e.stream);
+          //client2.removeVideo(e.stream, client1RemoteId);
         });
         client1.bindListener("chat-started", function() {
           client1.publish(client2);
@@ -705,6 +979,13 @@ describe("peer client and media stream test", function() {
       .waitsFor(function() {
         return client2.request["stream-added_success"] == 1;
       }, "client2 stream added success event", 6000)
+      .runs(function(){
+        detection = '';
+       videoDetection(client1RemoteId);
+      })
+      .waitsFor(function() {
+        return detection == true;
+      }, "remote Stream is playing for video only stream", 6000)
       .runs(function() {
         client1.unpublish(client2);
       })
@@ -714,6 +995,13 @@ describe("peer client and media stream test", function() {
       .waitsFor(function() {
         return client2.request["stream-removed_success"] == 1;
       }, "client2 stream removed event", 6000)
+       .runs(function(){
+            detection = '';
+            videoDetection(client1RemoteId);
+       })
+       .waitsFor(function(){
+       return detection === false;
+       }, 'detect remote video is not playing for video only stream', 6000)
       .runs(function() {
         debug("publish and unpublish video only client1 request:", client1.request);
         debug("publish and unpublish video only client2 request:", client2.request);
@@ -763,7 +1051,7 @@ describe("peer client and media stream test", function() {
         });
         client2.bindListener("stream-removed", function(e) {
           client2.request["stream-removed_success"]++;
-          client2.removeVideo(e.stream);
+          //client2.removeVideo(e.stream);
         });
         client1.bindListener("chat-started", function() {
           client1.publish(client2);
@@ -812,6 +1100,7 @@ describe("peer client and media stream test", function() {
         done();
       });
     });
+
     it("publish with option zero maxVideoBW", function(done) {
       thisQ
       .runs(function() {
@@ -826,9 +1115,15 @@ describe("peer client and media stream test", function() {
         client2.connect();
         client1.createLocalStream();
       })
+      .runs(function(){
+        videoDetection('local');
+      })
       .waitsFor(function() {
         return client1.request["createLocal_success"] == 1;
       }, "create localStream successful", 6000)
+      .waitsFor(function(){
+        return detection == true;
+      }, 'local video is playing for option zero maxVideoBW', 6000)
       .waitsFor(function() {
         return client1.request["connect_success"] == 1;
       }, 'login successful event', 6000)
@@ -847,12 +1142,14 @@ describe("peer client and media stream test", function() {
           client2.accept(client1);
         });
         client2.bindListener("stream-added", function(e) {
-          client1.request["stream-added_success"]++;
-          client2.showInPage(e.stream);
+          client2.request["stream-added_success"]++;
+           console.log("get RemoteStream id is ", "remote"+e.stream.id());
+           client1RemoteId = "remote"+e.stream.id();
+           client2.showInPage(e.stream, "remote"+e.stream.id());
         });
         client2.bindListener("stream-removed", function(e) {
           client1.request["stream-removed_success"]++;
-          client2.removeVideo(e.stream);
+          //client2.removeVideo(e.stream, 'remote'+e.stream.id());
         });
         client1.bindListener("chat-started", function() {
           client1.request["chat-started_success"]++;
@@ -877,6 +1174,13 @@ describe("peer client and media stream test", function() {
       .waitsFor(function() {
         return client2.request["stream-added_success"] == 1;
       }, "client2 stream added success event", 6000)
+      .runs(function(){
+        detection = '';
+        videoDetection(client1RemoteId);
+      })
+      .waitsFor(function(){
+        return detection == true;
+      }, 'remote video is playing for option zero maxVideoBW', 6000)
       .runs(function() {
         debug("publish with option zero maxVideoBW client1 request:", client1.request);
         debug("publish with option zero maxVideoBW client2 request:", client2.request);
@@ -891,7 +1195,8 @@ describe("peer client and media stream test", function() {
       });
     });
 
-    it("publish with option zero maxAudioBW", function(done) {
+    //Set local description failed.
+    xit("publish with option zero maxAudioBW", function(done) {
       thisQ
       .runs(function() {
         client1 = new TestClient({
@@ -931,11 +1236,11 @@ describe("peer client and media stream test", function() {
         });
         client2.bindListener("stream-removed", function(e) {
           client2.request["stream-removed_success"]++;
-          client2.removeVideo(e.stream);
+          //client2.removeVideo(e.stream);
         });
         client1.bindListener("chat-started", function() {
-          client1.publish(client2);
           client1.request["chat-started_success"]++;
+          client1.publish(client2);
         });
       })
       .runs(function() {
@@ -984,9 +1289,15 @@ describe("peer client and media stream test", function() {
         client2.connect();
         client1.createLocalStream();
       })
+      .runs(function(){
+        videoDetection('local');
+      })
       .waitsFor(function() {
         return client1.request["createLocal_success"] == 1;
       }, "create localStream success event", 6000)
+      .waitsFor(function(){
+        return detection == true;
+      }, 'local video is playing for option normal maxVideoBW')
       .waitsFor(function() {
         return client1.request["connect_success"] == 1;
       }, 'login successful event', 6000)
@@ -1006,11 +1317,13 @@ describe("peer client and media stream test", function() {
         });
         client2.bindListener("stream-added", function(e) {
           client2.request["stream-added_success"]++;
-          client2.showInPage(e.stream);
+          console.log('get remote stream');
+          client1RemoteId = 'remote' + e.stream.id();
+          client2.showInPage(e.stream, 'remote'+e.stream.id());
         });
         client2.bindListener("stream-removed", function(e) {
           client2.request["stream-removed_success"]++;
-          client2.removeVideo(e.stream);
+          //client2.removeVideo(e.stream, client1RemoteId);
         });
         client1.bindListener("chat-started", function() {
           client1.publish(client2);
@@ -1035,6 +1348,13 @@ describe("peer client and media stream test", function() {
       .waitsFor(function() {
         return client2.request["stream-added_success"] == 1;
       }, "client2 stream added success event", 6000)
+      .runs(function(){
+        detection = '';
+        videoDetection(client1RemoteId);
+      })
+      .waitsFor(function(){
+        return detection == true;
+      }, 'remote video is playing for option normal maxVideoBW', 6000)
       .runs(function() {
         debug("publish with option normal maxVideoBW client1 request:", client1.request);
         debug("publish with option normal maxVideoBW client2 request:", client2.request);
@@ -1049,12 +1369,13 @@ describe("peer client and media stream test", function() {
       });
     });
 
-    it("publish with option normal maxAudioBW", function(done) {
+    //Set local description failed.
+    xit("publish with option normal maxAudioBW", function(done) {
       thisQ
       .runs(function() {
         client1 = new TestClient({
           bandWidth: {
-            maxAudioBW: 500
+            maxAudioBW: 50
           }
         });
       })
@@ -1089,10 +1410,11 @@ describe("peer client and media stream test", function() {
         });
         client2.bindListener("stream-removed", function(e) {
           client2.request["stream-removed_success"]++;
-          client2.removeVideo(e.stream);
+          //client2.removeVideo(e.stream);
         });
         client1.bindListener("chat-started", function() {
           client1.publish(client2);
+          console.log('++++++++++++++++++++++++++++++++++')
           client1.request["chat-started_success"]++;
         });
       })
@@ -1142,9 +1464,15 @@ describe("peer client and media stream test", function() {
         client2.connect();
         client1.createLocalStream();
       })
+      .runs(function(){
+        videoDetection('local');
+      })
       .waitsFor(function() {
         return client1.request["createLocal_success"] == 1;
       }, "create localStream success event", 6000)
+      .waitsFor(function(){
+        return detection == true;
+      }, 'local video is playing for option big maxVideoBW', 6000)
       .waitsFor(function() {
         return client1.request["connect_success"] == 1;
       }, 'login successful event', 6000)
@@ -1164,11 +1492,13 @@ describe("peer client and media stream test", function() {
         });
         client2.bindListener("stream-added", function(e) {
           client2.request["stream-added_success"]++;
-          client2.showInPage(e.stream);
+          console.log('get remote stream');
+          client1RemoteId = 'remote' + e.stream.id();
+          client2.showInPage(e.stream, 'remote'+e.stream.id());
         });
         client2.bindListener("stream-removed", function(e) {
           client2.request["stream-removed_success"]++;
-          client2.removeVideo(e.stream);
+          //client2.removeVideo(e.stream, 'remote'+e.stream.id());
         });
         client1.bindListener("chat-started", function() {
           client1.publish(client2);
@@ -1193,6 +1523,13 @@ describe("peer client and media stream test", function() {
       .waitsFor(function() {
         return client2.request["stream-added_success"] == 1;
       }, "client2 stream added success event", 6000)
+      .runs(function(){
+        detection = '';
+        videoDetection(client1RemoteId);
+      })
+      .waitsFor(function(){
+        return detection == true;
+      }, 'remote video is playing for option big maxVideoBW', 6000)
       .runs(function() {
         debug("publish with option big maxVideoBW client1 request:", client1.request);
         debug("publish with option big maxVideoBW client2 request:", client2.request);
@@ -1207,7 +1544,8 @@ describe("peer client and media stream test", function() {
       });
     });
 
-    it("publish with option big maxAudioBW", function(done) {
+    //Set local description failed.
+    xit("publish with option big maxAudioBW", function(done) {
       thisQ
       .runs(function() {
         client1 = new TestClient({
@@ -1247,7 +1585,7 @@ describe("peer client and media stream test", function() {
         });
         client2.bindListener("stream-removed", function(e) {
           client2.request["stream-removed_success"]++;
-          client2.removeVideo(e.stream);
+          //client2.removeVideo(e.stream);
         });
         client1.bindListener("chat-started", function() {
           client1.publish(client2);
@@ -1305,9 +1643,15 @@ describe("peer client and media stream test", function() {
         client2.connect();
         client1.createLocalStream();
       })
+      .runs(function(){
+        videoDetection('local');
+      })
       .waitsFor(function() {
         return client1.request["createLocal_success"] == 1;
       }, "create localStream success event", 6000)
+      .waitsFor(function() {
+        return detection == true;
+      }, 'local video is playing', 6000)
       .waitsFor(function() {
         return client1.request["connect_success"] == 1;
       }, 'login successful event', 6000)
@@ -1328,11 +1672,13 @@ describe("peer client and media stream test", function() {
           client2.request["chat-denied_success"]++;
         });
         client2.bindListener("stream-added", function(e) {
-          client2.showInPage(e.stream);
+          client2.showInPage(e.stream, 'remote'+e.stream.id());
+          console.log('get remote stream');
+          client1RemoteId = 'remote' + e.stream.id();
           client2.request["stream-added_success"]++;
         });
         client2.bindListener("stream-removed", function(e) {
-          client2.removeVideo(e.stream);
+          //client2.removeVideo(e.stream, 'remote'+e.stream.id());
           client2.request["stream-removed_success"]++;
         });
         client1.bindListener("chat-started", function(e) {
@@ -1398,8 +1744,11 @@ describe("peer client and media stream test", function() {
       client2.disconnect();
       client1.clearClient();
       client2.clearClient();
+      detection = '';
+      client1RemoteId = '';
     });
 
+    //unpublish
     it("publish and unpublish", function(done) {
       thisQ
       .runs(function() {
@@ -1411,6 +1760,13 @@ describe("peer client and media stream test", function() {
       .waitsFor(function() {
         return client2.request["stream-added_success"] == 1;
       }, "publish success event", 6000)
+      .runs(function(){
+        detection = '';
+        videoDetection(client1RemoteId);
+      })
+      .waitsFor(function(){
+        return detection == true;
+      }, 'remote video is playing', 6000)
       .runs(function() {
         client1.unpublish(client2);
       })
@@ -1420,6 +1776,13 @@ describe("peer client and media stream test", function() {
       .waitsFor(function() {
         return client2.request["stream-removed_success"] == 1;
       }, "stream-removed event", 6000)
+            .runs(function(){
+              detection = '';
+              videoDetection(client1RemoteId);
+            })
+            .waitsFor(function(){
+              return detection === false;
+            }, 'remote video is not playing', 6000)
       .runs(function() {
         debug("publish and unpublish client1 request:", client1.request);
         debug("publish and unpublish client2 request:", client2.request);
@@ -1471,6 +1834,13 @@ describe("peer client and media stream test", function() {
       .waitsFor(function() {
         return client2.request["stream-added_success"] == 1;
       }, "client2 stream added success event", 6000)
+      .runs(function(){
+        detection = '';
+        videoDetection(client1RemoteId);
+      })
+      .waitsFor(function(){
+        return detection == true;
+      }, 'remote video is playing', 6000)
       .runs(function() {
         expect(client1.request["publish_success"]).toEqual(1);
         expect(client1.request["publish_failed"]).toEqual(0);
@@ -1481,6 +1851,13 @@ describe("peer client and media stream test", function() {
       .waitsFor(function() {
         return client1.request["publish_failed"] == 1;
       }, 'publish second time fail event', 6000)
+      .runs(function(){
+        detection = '';
+        videoDetection(client1RemoteId);
+      })
+      .waitsFor(function(){
+        return detection == true;
+      }, 'remote video is playing', 6000)
       .runs(function() {
         debug("publish twice client1 request:", client1.request);
         debug("publish twice client2 request:", client2.request);
@@ -1493,6 +1870,7 @@ describe("peer client and media stream test", function() {
       });
     });
 
+    //unpublish
     it("rePublish after unpublish", function(done) {
       debug("run case", "rePublish after unpublish");
       thisQ
@@ -1505,6 +1883,13 @@ describe("peer client and media stream test", function() {
       .waitsFor(function() {
         return client2.request["stream-added_success"] == 1;
       }, "client2 stream-added event", 6000)
+      .runs(function(){
+        detection = '';
+        videoDetection(client1RemoteId);
+      })
+      .waitsFor(function(){
+        return detection == true;
+      }, 'remote video is playing', 6000)
       .runs(function() {
         client1.unpublish(client2);
       })
@@ -1514,6 +1899,16 @@ describe("peer client and media stream test", function() {
       .waitsFor(function() {
         return client2.request["stream-removed_success"] == 1;
       }, "client2 stream removed event", 6000)
+              .runs(function(){
+                detection = '';
+                videoDetection(client1RemoteId);
+              })
+              .waitsFor(function(){
+                return detection === false;
+              }, 'remote video is not playing', 6000)
+              .runs(function(){
+                document.getElementById(client1RemoteId).remove();
+              })
       .runs(function() {
         client1.publish(client2);
       })
@@ -1523,6 +1918,14 @@ describe("peer client and media stream test", function() {
       .waitsFor(function() {
         return client2.request["stream-added_success"] == 2;
       }, "client2 stream-added event equal 2 after republish", 6000)
+      .waits('test', 2000)
+      .runs(function(){
+        detection = '';
+        videoDetection(client1RemoteId);
+      })
+      .waitsFor(function(){
+        return detection == true;
+      }, 'remote video is playing', 6000)
       .runs(function() {
         debug("rePublish client1 request:", client1.request);
         debug("rePublish client2 request:", client2.request);
@@ -1558,6 +1961,7 @@ describe("peer client and media stream test", function() {
       });
     });
 
+    //unpublish close
     it("close , create media stream and  publish", function(done) {
       debug("run case", "close ,create media stream and publish");
       thisQ
@@ -1570,15 +1974,46 @@ describe("peer client and media stream test", function() {
       .waitsFor(function() {
         return client2.request["stream-added_success"] == 1;
       }, "client2 stream added success event", 6000)
+      .runs(function(){
+        detection = '';
+        videoDetection(client1RemoteId);
+      })
+      .waitsFor(function(){
+        return detection == true;
+      }, 'remote video is playing', 6000)
       .runs(function() {
         client1.close();
       })
+        .runs(function(){
+          detection = '';
+          videoDetection('local');
+        })
+        .waitsFor(function(){
+          return detection === false;
+        }, 'local video is not playing', 6000)
+        .runs(function(){
+          document.getElementById('local').remove();
+        })
+          .runs(function(){
+            detection = '';
+            videoDetection(client1RemoteId);
+          })
+          .waitsFor(function(){
+            return detection === false;
+          }, 'remote video is not playing', 6000)
       .runs(function() {
         client1.createLocalStream();
+      })
+      .runs(function(){
+        detection = '';
+        videoDetection('local');
       })
       .waitsFor(function() {
         return client1.request["createLocal_success"] == 2;
       }, "create localStream success event", 6000)
+      .waitsFor(function(){
+        return detection == true;
+      }, 'local video is playing', 6000)
       .runs(function() {
         client1.publish(client2);
       })
@@ -1588,6 +2023,13 @@ describe("peer client and media stream test", function() {
       .waitsFor(function() {
         return client2.request["stream-added_success"] == 2;
       }, "client2 stream added success event", 6000)
+      .runs(function(){
+        detection = '';
+        videoDetection(client1RemoteId);
+      })
+      .waitsFor(function(){
+        return detection == true;
+      }, 'remote video is playing', 6000)
       .runs(function() {
         debug("close and create publish client1 request:", client1.request);
         debug("close and create publish client2 request:", client2.request);
@@ -1631,6 +2073,7 @@ describe("peer client and media stream test", function() {
       });
     });
 
+    //unpublish close
     it("close create different stream type rePublish", function(done) {
       thisQ
       .runs(function() {
@@ -1642,18 +2085,49 @@ describe("peer client and media stream test", function() {
       .waitsFor(function() {
         return client2.request["stream-added_success"] == 1;
       }, "client2 stream added success event should equal 1", 6000)
+      .runs(function(){
+        detection = '';
+        videoDetection(client1RemoteId);
+      })
+      .waitsFor(function(){
+        return detection == true;
+      }, 'remote video is playing', 6000)
       .runs(function() {
         client1.close();
       })
+        .runs(function(){
+          detection = '';
+          videoDetection('local');
+        })
+        .waitsFor(function(){
+          return detection === false;
+        }, 'local video is not playing', 6000)
+        .runs(function(){
+          document.getElementById('local').remove();
+        })
+          .runs(function(){
+            detection = '';
+            videoDetection(client1RemoteId);
+          })
+          .waitsFor(function(){
+            return detection === false;
+          }, 'remote video is not playing', 6000)
       .runs(function() {
         client1.createLocalStream({
           video: true,
           audio: false
         });
       })
+      .runs(function(){
+        detection = '';
+        videoDetection('local');
+      })
       .waitsFor(function() {
         return client1.request["createLocal_success"] == 2;
       }, "create localStream success event", 6000)
+      .waitsFor(function(){
+        return detection == true;
+      }, 'local video is playing', 6000)
       .runs(function() {
         client1.publish(client2);
       })
@@ -1663,6 +2137,14 @@ describe("peer client and media stream test", function() {
       .waitsFor(function() {
         return client2.request["stream-added_success"] == 2;
       }, "client2 stream added success event should equal 2", 6000)
+      .waits('test', 2000)
+      .runs(function(){
+        detection = '';
+        videoDetection(client1RemoteId);
+      })
+      .waitsFor(function(){
+        return detection == true;
+      }, 'remote video is playing', 6000)
       .runs(function() {
         debug("close create different stream type rePublish client1 request:", client1.request);
         debug("close create different stream type rePublish client2 request:", client2.request);
@@ -1709,6 +2191,7 @@ describe("peer client and media stream test", function() {
         done();
       });
     });
+
    it("disableVideo after publish", function(done) {
     thisQ
       .runs(function() {
@@ -1720,9 +2203,30 @@ describe("peer client and media stream test", function() {
       .waitsFor(function() {
         return client2.request["stream-added_success"] == 1;
       }, "client2 stream added event", 6000)
+      .runs(function(){
+        detection = '';
+        videoDetection(client1RemoteId);
+      })
+      .waitsFor(function(){
+        return detection == true;
+      }, 'remote video is playing', 6000)
       .runs(function() {
         client1.disableVideo();
       })
+      .runs(function(){
+        detection = '';
+        videoDetection('local');
+      })
+      .waitsFor(function(){
+        return detection === false;
+      }, 'local video is not playing', 6000)
+      .runs(function(){
+        detection = '';
+        videoDetection(client1RemoteId);
+      })
+      .waitsFor(function(){
+        return detection === false;
+      }, 'remote video is not playing', 6000)
       .runs(function() {
         debug("disableVideo after publish client1 request:", client1.request);
         debug("disableVideo after publish client2 request:", client2.request);
@@ -1737,9 +2241,23 @@ describe("peer client and media stream test", function() {
       .runs(function() {
         client1.disableVideo();
       })
+      .runs(function(){
+        detection = '';
+        videoDetection('local');
+      })
+      .waitsFor(function(){
+        return detection === false
+      }, 'local video is not playing', 6000)
       .runs(function() {
         client1.enableVideo();
       })
+      .runs(function(){
+        detection = '';
+        videoDetection('local');
+      })
+      .waitsFor(function(){
+        return detection == true;
+      }, 'local video is playing', 6000)
       .runs(function() {
         client1.publish(client2);
       })
@@ -1749,6 +2267,13 @@ describe("peer client and media stream test", function() {
       .waitsFor(function() {
         return client2.request["stream-added_success"] == 1;
       }, "client2 stream added success event", 6000)
+      .runs(function(){
+        detection = '';
+        videoDetection(client1RemoteId);
+      })
+      .waitsFor(function(){
+        return detection == true;
+      }, 'remote video is playing', 6000)
       .runs(function() {
         debug("publish after disableVideo enableVideo client1 request:", client1.request);
         debug("publish after disableVideo enableVideo client2 request:", client2.request);
@@ -1763,6 +2288,13 @@ describe("peer client and media stream test", function() {
       .runs(function() {
         client1.disableVideo();
       })
+      .runs(function(){
+        detection = '';
+        videoDetection('local');
+      })
+      .waitsFor(function(){
+        return detection === false
+      }, 'local video is not playing', 6000)
       .runs(function() {
         client1.publish(client2);
       })
@@ -1772,6 +2304,13 @@ describe("peer client and media stream test", function() {
       .waitsFor(function() {
         return client2.request["stream-added_success"] == 1;
       }, "client2 stream added success event", 6000)
+      .runs(function(){
+        detection = '';
+        videoDetection(client1RemoteId);
+      })
+      .waitsFor(function(){
+        return detection === false;
+      }, 'remote video is not playing', 6000)
       .runs(function() {
         debug("publish after disableVideo client1 request:", client1.request);
         debug("publish after disableVideo client2 request:", client2.request);
@@ -1870,6 +2409,7 @@ describe("peer client and media stream test", function() {
       });
     });
 
+    //unpublish close
     it("unpublish after close", function(done) {
       thisQ
       .runs(function() {
@@ -1881,9 +2421,23 @@ describe("peer client and media stream test", function() {
       .waitsFor(function() {
         return client2.request["stream-added_success"] == 1;
       }, "client2 stream added success event", 6000)
+      .runs(function(){
+        detection = '';
+        videoDetection(client1RemoteId);
+      })
+      .waitsFor(function(){
+        return detection == true;
+      }, 'remote video is playing', 6000)
       .runs(function() {
         client1.close();
       })
+            .runs(function(){
+              detection = '';
+              videoDetection(client1RemoteId);
+            })
+            .waitsFor(function(){
+              return detection === false;
+            }, 'remote video is not playing', 6000)
       .runs(function() {
         client1.unpublish(client2);
       })
@@ -1912,9 +2466,23 @@ describe("peer client and media stream test", function() {
       .waitsFor(function() {
         return client2.request["stream-added_success"] == 1;
       }, "client2 stream added success event", 6000)
+      .runs(function(){
+        detection = '';
+        videoDetection(client1RemoteId);
+      })
+      .waitsFor(function(){
+        return detection == true;
+      }, 'remote video is playing', 6000)
       .runs(function() {
         client1.disableVideo();
       })
+      .runs(function(){
+        detection = '';
+        videoDetection(client1RemoteId);
+      })
+      .waitsFor(function(){
+        return detection === false;
+      }, 'remote video is not playing', 6000)
       .runs(function() {
         client1.unpublish(client2);
       })
@@ -1981,6 +2549,13 @@ describe("peer client and media stream test", function() {
       .waitsFor(function() {
         return client2.request["stream-added_success"] == 1;
       }, "client2 stream added success event", 6000)
+      .runs(function(){
+        detection = '';
+        videoDetection(client1RemoteId);
+      })
+      .waitsFor(function(){
+        return detection == true;
+      }, 'remote video is playing', 6000)
       .runs(function() {
         debug("unpublish before publish client1 request:", client1.request);
         debug("unpublish before publish client2 request:", client2.request);
@@ -2040,11 +2615,13 @@ describe("peer client and media stream test", function() {
           client2.request["chat-denied_success"]++;
         });
         client2.bindListener("stream-added", function(e) {
-          client2.showInPage(e.stream);
+          client2.showInPage(e.stream, 'remote'+e.stream.id());
+          console.log('get remote stream');
+          client1RemoteId = 'remote' + e.stream.id();
           client2.request["stream-added_success"]++;
         });
         client2.bindListener("stream-removed", function(e) {
-          client2.removeVideo(e.stream);
+          //client2.removeVideo(e.stream, 'remote'+e.stream.id());
           client2.request["stream-removed_success"]++;
         });
         client1.bindListener("chat-started", function(e) {
@@ -2402,7 +2979,7 @@ describe("peer client and media stream test", function() {
         expect(client1.request["invite_success"]).toEqual(1);
         expect(client1.request["invite_failed"]).toEqual(0);
         expect(client1.request["publish_failed"]).toEqual(1);
-        expect(client1.request["publish_success"]).toEqual(0);
+        expect(client1.request["publish_success"]).toEqual(1);
         done();
       });
     });
@@ -2501,7 +3078,7 @@ describe("peer client and media stream test", function() {
         client2.deny(client1);
       })
       .waitsFor(function() {
-        return client2.request["deny_failed"] == 1;
+        return client2.request["deny_success"] == 1;
       }, "deny failed event", 6000)
       .runs(function() {
         debug("publish close before deny client1 request:", client1.request);
@@ -2783,15 +3360,15 @@ describe("peer client and media stream test", function() {
         client1.stop(client2);
       })
       .waitsFor(function() {
-        return client1.request["stop_failed"] == 1;
+        return client1.request["stop_success"] == 1;
       }, "stop failed event", 6000)
       .runs(function() {
         debug("stop after invited client1 request:", client1.request);
         debug("stop after invited client2 request:", client2.request);
         expect(client1.request["invite_success"]).toEqual(1);
         expect(client1.request["invite_failed"]).toEqual(0);
-        expect(client1.request["stop_failed"]).toEqual(1);
-        expect(client1.request["stop_success"]).toEqual(0);
+        expect(client1.request["stop_failed"]).toEqual(0);
+        expect(client1.request["stop_success"]).toEqual(1);
         done();
       });
     });

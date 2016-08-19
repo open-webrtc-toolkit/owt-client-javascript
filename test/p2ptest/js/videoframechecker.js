@@ -87,7 +87,7 @@ function VideoFrameChecker(videoElement) {
 
   this.nonBlackPixelLumaThreshold = 20;
   this.previousFrame_ = [];
-  this.identicalFrameSsimThreshold = 0.982;
+  this.identicalFrameSsimThreshold = 0.985;
   this.differenceThreshold = 0;
   this.frameComparator = new Ssim();
 
@@ -109,8 +109,12 @@ VideoFrameChecker.prototype = {
   getCurrentImageData_: function() {
     console.log("VideoFrameChecker videoElements videoWith is ,", this.videoElement_.videoWidth);
     console.log("VideoFrameChecker videoElements videoHeightis ,", this.videoElement_.videoHeight);
-     this.canvas_.width = this.videoElement_.videoWidth;
+    this.canvas_.width = this.videoElement_.videoWidth;
     this.canvas_.height = this.videoElement_.videoHeight;
+
+    if(this.canvas_.width == 0 || this.canvas_.height == 0) {
+      return;
+    }
 
     var context = this.canvas_.getContext('2d');
     context.drawImage(this.videoElement_, 0, 0, this.canvas_.width,
@@ -127,6 +131,11 @@ VideoFrameChecker.prototype = {
     }
 
     var imageData = this.getCurrentImageData_();
+
+    if(!imageData) {
+      //console.log("cureentImageData is ", imageData.data);
+      return;
+    }
     //console.log("cureentImageData is ", imageData.data);
    // console.log("previousFrame is ", this.previousFrame_);
     if (this.isBlackFrame_(imageData.data, imageData.data.length)) {

@@ -35,6 +35,7 @@ module.exports = function (config){
     './test/p2ptest/errorHandler.js',
     './test/p2ptest/js/test_functions.js',
     './test/p2ptest/js/video_detector.js',
+    './test/p2ptest/js/videoframechecker.js',
     './test/p2ptest/js/test.js',
     './test/p2ptest/js/qq.js',
     './test/p2ptest/js/MediaStreamTest.js',

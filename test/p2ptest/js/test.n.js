@@ -66,7 +66,7 @@ TestClient.prototype = {
       that.debug("create stream", "success");
       that.localStream = stream;
       that.request["createLocal_success"]++;
-      that.showInPage(stream);
+      that.showInPage(stream, type);
     }, function(err) {
       that.request["createLocal_failed"]++;
     });
@@ -241,9 +241,9 @@ TestClient.prototype = {
     var stream = tc.localStream;
     stream.close();
   },
-  showInPage: function(stream) {
+  showInPage: function(stream, type) {
     var video = document.createElement("video"),
-      videoId = "stream" + stream.id();
+      videoId = type;
     video.setAttribute("id", videoId);
     video.setAttribute("width", "320px");
     video.setAttribute("height", "240px");
@@ -253,10 +253,10 @@ TestClient.prototype = {
     attachMediaStream(video, stream.mediaStream);
     this.request[videoId] = startDetection(videoId, "320", "240");
   },
-  removeVideo: function(stream) {
+  removeVideo: function(stream, type) {
     var videos = document.getElementsByClassName("video");
     if (stream) {
-      videos = [document.getElementById("stream" + stream.id())]
+      videos = [document.getElementById(type)]
     };
     for (var i = 0; i < videos.length; i++) {
       document.body.removeChild(videos[i]);
