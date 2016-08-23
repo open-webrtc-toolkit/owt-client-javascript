@@ -66,7 +66,7 @@ TestClient.prototype = {
       that.debug("create stream", "success");
       that.localStream = stream;
       that.request["createLocal_success"]++;
-      that.showInPage(stream, type);
+      that.showInPage(stream, 'local');
     }, function(err) {
       that.request["createLocal_failed"]++;
     });

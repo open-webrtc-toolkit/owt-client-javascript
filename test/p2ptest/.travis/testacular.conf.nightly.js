@@ -27,7 +27,7 @@ module.exports = function (config){
     './js/test.n.js',
     './js/qq.js',
     './js/MediaStreamTest.js',
-    './js/videoframecheker.js'
+    './js/videoframechecker.js',
     'test-peer.js'
     ],
 
