@@ -8,122 +8,197 @@ Woogeen.Common = (function(){
   var sdkVersion='3.2';
 
   // Convert W3C defined statistic data to SDK format.
-  // TODO: stats data is Chrome specified at this time. So this function only
-  // supports Chrome now.
   var parseStats = function(stats) {
     'use strict';
     var index = 0;
     var statusReport = [];
-    var result = stats.result();
-    for (var i = 0; i < result.length; i++) {
-      var res = result[i];
-      var curStat;
-      var match = false;
-      if (res.type === "ssrc") {
-        // This is a ssrc report. Check if it is send/recv
-        match = true;
-        if (res.stat("bytesSent")) {
-          // check if it"s audio or video
-          if (res.stat("googFrameHeightSent")) {
-            // video send
-            var adaptReason;
-            if (res.stat("googCpuLimitedResolution") === true) {
-              adaptReason = 1;
-            } else if (res.stat("googBandwidthLimitedResolution") === true) {
-              adaptReason = 2;
-            } else if (res.stat("googViewLimitedResolution") === true) {
-              adaptReason = 3;
-            } else {
-              adaptReason = 99;
+    if(navigator.mozGetUserMedia){// Firefox, unsupported properties return -1 or ""
+      stats.forEach(function(stat, id){
+        var curStat;
+        var match = false;
+        if(id.indexOf("outbound_rtp_audio_") >= 0){
+          match = true;
+          curStat = {
+            "type": "ssrc_audio_send",
+            "id": stat.id,
+            "stats": {
+              "bytes_sent": stat.bytesSent,
+              "codec_name": "",
+              "packets_sent": stat.packetsSent,
+              "packets_lost": stats.get("outbound_rtcp_audio_" + id.slice(19)).packetsLost,
+              "rtt_ms": stats.get("outbound_rtcp_audio_" + id.slice(19)).mozRtt
             }
-            curStat = {
-              "type": "ssrc_video_send",
-              "id": res.id,
-              "stats": {
-                "bytes_sent": res.stat("bytesSent"),
-                "codec_name": res.stat("googCodecName"),
-                "packets_sent": res.stat("packetsSent"),
-                "packets_lost": res.stat("packetsLost"),
-                "firs_rcvd": res.stat("googFirsReceived"),
-                "plis_rcvd": res.stat("googPlisReceived"),
-                "nacks_rcvd": res.stat("googNacksReceived"),
-                "send_frame_width": res.stat("googFrameWidthSent"),
-                "send_rame_height": res.stat("googFrameHeightSent"),
-                "adapt_reason": adaptReason,
-                "adapt_changes": res.stat("googAdaptationChanges"),
-                "framerate_sent": res.stat("googFrameRateSent"),
-                "rtt_ms": res.stat("googRtt")
-              }
-            };
-          } else {
-            // audio send
-            curStat = {
-              "type": "ssrc_audio_send",
-              "id": res.id,
-              "stats": {
-                "bytes_sent": res.stat("bytesSent"),
-                "codec_name": res.stat("googCodecName"),
-                "packets_sent": res.stat("packetsSent"),
-                "packets_lost": res.stat("packetsLost"),
-                "rtt_ms": res.stat("googRtt")
-              }
-            };
-          }
-        } else {
-          // this is ssrc receive report.
-          if (res.stat("googFrameHeightReceived")) {
-            // video receive
-            curStat = {
-              "type": "ssrc_video_recv",
-              "id": res.id,
-              "stats": {
-                "bytes_rcvd": res.stat("bytesReceived"),
-                "packets_rcvd": res.stat("packetsReceived"),
-                "packets_lost": res.stat("packetsLost"),
-                "firs_sent": res.stat("googFirsSent"),
-                "nacks_sent": res.stat("googNacksSent"),
-                "plis_sent": res.stat("googPlisSent"),
-                "frame_width": res.stat("googFrameWidthReceived"),
-                "frame_height": res.stat("googFrameHeightReceived"),
-                "framerate_rcvd": res.stat("googFrameRateReceived"),
-                "framerate_output": res.stat("googFrameRateDecoded"),
-                "current_delay_ms": res.stat("googCurrentDelayMs"),
-                "codec_name": res.stat("googCodecName")
-              }
-            };
-          } else {
-            // audio receive
-            curStat = {
-              "type": "ssrc_audio_recv",
-              "id": res.id,
-              "stats": {
-                "bytes_rcvd": res.stat("bytesReceived"),
-                "delay_estimated_ms": res.stat("googCurrentDelayMs"),
-                "packets_rcvd": res.stat("packetsReceived"),
-                "packets_lost": res.stat("packetsLost"),
-                "codec_name": res.stat("googCodecName")
-              }
-            };
-          }
+          };
+        }else if(id.indexOf("outbound_rtp_video_") >= 0){
+          match = true;
+          curStat = {
+            "type": "ssrc_video_send",
+            "id": stat.id,
+            "stats": {
+              "bytes_sent": stat.bytesSent,
+              "codec_name": "",
+              "packets_sent": stat.packetsSent,
+              "packets_lost": stats.get("outbound_rtcp_video_" + id.slice(19)).packetsLost,
+              "firs_rcvd": -1,
+              "plis_rcvd": -1,
+              "nacks_rcvd": -1,
+              "send_frame_width": -1,
+              "send_rame_height": -1,
+              "adapt_reason": -1,
+              "adapt_changes": -1,
+              "framerate_sent": stat.framerateMean,
+              "rtt_ms": stats.get("outbound_rtcp_video_" + id.slice(19)).mozRtt
+            }
+          };
+        }else if(id.indexOf("inbound_rtp_audio_") >= 0){
+          match = true;
+          curStat = {
+            "type": "ssrc_audio_recv",
+            "id": stat.id,
+            "stats": {
+              "bytes_rcvd": stat.bytesReceived,
+              "delay_estimated_ms": -1,
+              "packets_rcvd": stat.packetsReceived,
+              "packets_lost": stat.packetsLost,
+              "codec_name": ""
+            }
+          };
+        }else if(id.indexOf("inbound_rtp_video_") >= 0){
+          match = true;
+          curStat = {
+            "type": "ssrc_video_recv",
+            "id": stat.id,
+            "stats": {
+              "bytes_rcvd": stat.bytesReceived,
+              "packets_rcvd": stat.packetsReceived,
+              "packets_lost": stat.packetsLost,
+              "firs_sent": -1,
+              "nacks_sent": -1,
+              "plis_sent": -1,
+              "frame_width": -1,
+              "frame_height": -1,
+              "framerate_rcvd": stat.framerateMean,
+              "framerate_output": -1,
+              "current_delay_ms": -1,
+              "codec_name": ""
+            }
+          };
         }
-      } else if (res.type === "VideoBwe") {
-        match = true;
-        curStat = {
-          "type": "VideoBWE",
-          "id": "",
-          "stats": {
-            "available_send_bandwidth": res.stat("googAvailableSendBandwidth"),
-            "available_receive_bandwidth":
-                res.stat("googAvailableReceiveBandwidth"),
-            "transmit_bitrate": res.stat("googTransmitBitrate"),
-            "retransmit_bitrate": res.stat("googRetransmitBitrate")
+        if(match) {
+          statusReport[index] = curStat;
+          index++;
+        }
+      });
+    }else{
+      stats.forEach(function(res){
+        var curStat;
+        var match = false;
+        if (res.type === "ssrc") {
+          // This is a ssrc report. Check if it is send/recv
+          match = true;
+          if (res.bytesSent) {
+            // check if it"s audio or video
+            if (res.googFrameHeightSent) {
+              // video send
+              var adaptReason;
+              if (res.googCpuLimitedResolution === true) {
+                adaptReason = 1;
+              } else if (res.googBandwidthLimitedResolution === true) {
+                adaptReason = 2;
+              } else if (res.googViewLimitedResolution === true) {
+                adaptReason = 3;
+              } else {
+                adaptReason = 99;
+              }
+              curStat = {
+                "type": "ssrc_video_send",
+                "id": res.id,
+                "stats": {
+                  "bytes_sent": res.bytesSent,
+                  "codec_name": res.googCodecName,
+                  "packets_sent": res.packetsSent,
+                  "packets_lost": res.packetsLost,
+                  "firs_rcvd": res.googFirsReceived,
+                  "plis_rcvd": res.googPlisReceived,
+                  "nacks_rcvd": res.googNacksReceived,
+                  "send_frame_width": res.googFrameWidthSent,
+                  "send_rame_height": res.googFrameHeightSent,
+                  "adapt_reason": adaptReason,
+                  "adapt_changes": res.googAdaptationChanges,
+                  "framerate_sent": res.googFrameRateSent,
+                  "rtt_ms": res.googRtt
+                }
+              };
+            } else {
+              // audio send
+              curStat = {
+                "type": "ssrc_audio_send",
+                "id": res.id,
+                "stats": {
+                  "bytes_sent": res.bytesSent,
+                  "codec_name": res.googCodecName,
+                  "packets_sent": res.packetsSent,
+                  "packets_lost": res.packetsLost,
+                  "rtt_ms": res.googRtt
+                }
+              };
+            }
+          } else {
+            // this is ssrc receive report.
+            if (res.googFrameHeightReceived) {
+              // video receive
+              curStat = {
+                "type": "ssrc_video_recv",
+                "id": res.id,
+                "stats": {
+                  "bytes_rcvd": res.bytesReceived,
+                  "packets_rcvd": res.packetsReceived,
+                  "packets_lost": res.packetsLost,
+                  "firs_sent": res.googFirsSent,
+                  "nacks_sent": res.googNacksSent,
+                  "plis_sent": res.googPlisSent,
+                  "frame_width": res.googFrameWidthReceived,
+                  "frame_height": res.googFrameHeightReceived,
+                  "framerate_rcvd": res.googFrameRateReceived,
+                  "framerate_output": res.googFrameRateDecoded,
+                  "current_delay_ms": res.googCurrentDelayMs,
+                  "codec_name": res.googCodecName
+                }
+              };
+            } else {
+              // audio receive
+              curStat = {
+                "type": "ssrc_audio_recv",
+                "id": res.id,
+                "stats": {
+                  "bytes_rcvd": res.bytesReceived,
+                  "delay_estimated_ms": res.googCurrentDelayMs,
+                  "packets_rcvd": res.packetsReceived,
+                  "packets_lost": res.packetsLost,
+                  "codec_name": res.googCodecName
+                }
+              };
+            }
           }
-        };
-      }
-      if (match) {
-        statusReport[index] = curStat;
-        index++;
-      }
+        } else if (res.type === "VideoBwe") {
+          match = true;
+          curStat = {
+            "type": "VideoBWE",
+            "id": "",
+            "stats": {
+              "available_send_bandwidth": res.googAvailableSendBandwidth,
+              "available_receive_bandwidth":
+                  res.googAvailableReceiveBandwidth,
+              "transmit_bitrate": res.googTransmitBitrate,
+              "retransmit_bitrate": res.googRetransmitBitrate
+            }
+          };
+        }
+        if (match) {
+          statusReport[index] = curStat;
+          index++;
+        }
+      });
     }
     return statusReport;
   };

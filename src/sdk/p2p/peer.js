@@ -1299,17 +1299,17 @@ p2p.getConnectionStats($('#target-uid').val(), successcallback, failurecallback)
       // If user doesn't provide a success callback, no reason to getStats().
       return;
     }
-    peer.connection.getStats(function(stats){
-      if(window.navigator.appVersion.indexOf("Trident") > -1){
-        successCallback(stats);
-      } else {
-        successCallback(Woogeen.Common.parseStats(stats));
-      }
-    }, function(err){
-      if(failureCallback){
-        failureCallback(err);
-      }
-    });
+    peer.connection.getStats(null, function(stats){
+        if(window.navigator.appVersion.indexOf("Trident") > -1){
+          successCallback(stats);
+        } else {
+          successCallback(Woogeen.Common.parseStats(stats));
+        }
+      }, function(err){
+        if(failureCallback){
+          failureCallback(err);
+        }
+      });
   };
 
 /**
@@ -1336,6 +1336,13 @@ p2p.getAudioLevels($('#target-uid').val(), successcallback, failurecallback);
     var peer=peers[peerId];
     if(!peer||(!peer.connection)||(peer.state!==PeerState.CONNECTED)){
       failureCallback("Invalid peer connection status.");
+    }
+    if(navigator.mozGetUserMedia){
+      L.Logger.error('GetAudioLevels is not supported on FireFox.');
+      if(failureCallback){
+        failureCallback(Woogeen.Error.P2P_CLIENT_UNSUPPORTED_METHOD);
+      }
+      return;
     }
     getPeerConnectionAudioLevels(peer.connection, successCallback, failureCallback);/*jshint ignore:line*/
   };
