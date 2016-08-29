@@ -612,7 +612,7 @@ describe('P2P JS SDK', function() {
       })
     });
 
-    xit("peer login error ip", function(done) {
+    it("peer login error ip", function(done) {
       thisQ
       .runs(function() {
         client1.serverURL = "http://123"
@@ -629,7 +629,7 @@ describe('P2P JS SDK', function() {
       });
     });
 
-    xit("peer login error ip then login normal ip", function(done) {
+    it("peer login error ip then login normal ip", function(done) {
       thisQ
       .runs(function() {
         client1.serverURL = "http://123"
@@ -1196,7 +1196,7 @@ describe("peer client and media stream test", function() {
     });
 
     //Set local description failed.
-    xit("publish with option zero maxAudioBW", function(done) {
+    it("publish with option zero maxAudioBW", function(done) {
       thisQ
       .runs(function() {
         client1 = new TestClient({
@@ -1370,7 +1370,7 @@ describe("peer client and media stream test", function() {
     });
 
     //Set local description failed.
-    xit("publish with option normal maxAudioBW", function(done) {
+    it("publish with option normal maxAudioBW", function(done) {
       thisQ
       .runs(function() {
         client1 = new TestClient({
@@ -1545,7 +1545,7 @@ describe("peer client and media stream test", function() {
     });
 
     //Set local description failed.
-    xit("publish with option big maxAudioBW", function(done) {
+    it("publish with option big maxAudioBW", function(done) {
       thisQ
       .runs(function() {
         client1 = new TestClient({
