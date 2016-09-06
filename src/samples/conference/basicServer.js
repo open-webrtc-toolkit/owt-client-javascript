@@ -125,15 +125,6 @@ app.get('/getRoom/:room', function (req, res) {
         res.send(err);
     });
 });
-app.get('/getUsers/:room', function (req, res) {
-    'use strict';
-    var room = req.params.room;
-    N.API.getUsers(room, function (users) {
-        res.send(users);
-    },function (err) {
-        res.send(err);
-    });
-});
 
 app.get('/room/:room/user/:user', function (req, res) {
     'use strict';
