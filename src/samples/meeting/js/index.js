@@ -482,7 +482,7 @@ function addRoomEventListener() {
         }
         if (stream.isScreen() && !isLocalScreenSharing) {
             remoteScreen = stream;
-            thatName = streamObj[stream.from].attributes()["name"];
+            thatName = getUserFromId(stream.from)["name"];
             remoteScreenName = thatName;
             shareScreenChanged(true, false);
             sendIm(thatName + ' is sharing screen now.', 'System');
@@ -535,7 +535,7 @@ function addRoomEventListener() {
                 $('#screen').addClass('pluse');
                 // remoteScreen.close();
                 remoteScreen = null;
-                var user = streamObj[stream.from].attributes();
+                var user = getUserFromId(stream.from);
                 sendIm(user['name'] + ' has stopped screen sharing.',
                     'System');
             }
@@ -732,7 +732,7 @@ function addVideo(stream, isLocal) {
             .children().children('div').remove();
         $('#video-panel .largest').removeClass("largest");
         $('#screen').addClass("largest");
-        $('#screen').append('<div class="ctrl" id="original"><a href="#" class="ctrl-btn original"></a><a href="#" class="ctrl-btn enlarge"></a><a href="#" class="ctrl-btn ' + 'fullscreen"></a></div>').append('<div class="ctrl-name">' + 'Screen Sharing from ' + streamObj[stream.from].attributes()['name'] + '</div>');
+        $('#screen').append('<div class="ctrl" id="original"><a href="#" class="ctrl-btn original"></a><a href="#" class="ctrl-btn enlarge"></a><a href="#" class="ctrl-btn ' + 'fullscreen"></a></div>').append('<div class="ctrl-name">' + 'Screen Sharing from ' + getUserFromId(stream.from)['name'] + '</div>');
         $('#local-screen').remove();
         changeMode(MODES.LECTURE, !isLocalScreenSharing);
         streamObj["screen"] = stream;
