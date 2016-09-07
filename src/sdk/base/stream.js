@@ -552,8 +552,8 @@ L.Logger.info('stream added:', stream.id());
   }
 
   var supportedVideoList = {
-    'true': {mandatory: {}},
-    'unspecified': {mandatory: {}},
+    'true': {},
+    'unspecified': {},
     'sif': getReso(320, 240),
     'vga': getReso(640, 480),
     'hd720p': getReso(1280, 720),

@@ -115,28 +115,6 @@ describe('P2P JS SDK', function() {
       });
     });
 
-    it("create min fps video", function(done) {
-      thisQ
-      .runs(function() {
-        media.setCameraFps([1, 2]);
-      })
-      .runs(function() {
-        videoDetection('local');
-      })
-      .waitsFor(function() {
-        return media.client.request["createLocal_success"] == 1;
-      }, 'create localStream success event', 6000)
-      .waitsFor(function() {
-        return detection == true;
-      }, 'detect video is playing', 6000)
-      .runs(function() {
-        debug("create min fps video media client request:", media.client.request);
-        expect(media.client.request["createLocal_success"]).toEqual(1);
-        expect(media.client.request["createLocal_failed"]).toEqual(0);
-        done();
-      });
-    });
-
     it("create normal fps video", function(done) {
       thisQ
       .runs(function() {
@@ -166,12 +144,12 @@ describe('P2P JS SDK', function() {
         media.setCameraFps([-1, -2]);
       })
       .waitsFor(function() {
-        return media.client.request["createLocal_success"] == 1;
+        return media.client.request["createLocal_failed"] == 1;
       }, [[media.client.request["createLocal_success"], 1, "media.client.request\[\"createLocal_success\"]"]], 6000)
       .runs(function() {
         debug("create error fps video media client request:", media.client.request);
-        expect(media.client.request["createLocal_success"]).toEqual(1);
-        expect(media.client.request["createLocal_failed"]).toEqual(0);
+        expect(media.client.request["createLocal_success"]).toEqual(0);
+        expect(media.client.request["createLocal_failed"]).toEqual(1);
         done();
       });
     });
