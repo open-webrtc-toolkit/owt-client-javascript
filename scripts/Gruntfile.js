@@ -149,7 +149,6 @@ window.L = L;\n\
       dist: {
         files: {
           '../dist/sdk/<%= pkg.name %>.js': ['../dist/sdk/<%= pkg.name %>.js'],
-          '../dist/sdk/<%= pkg.name %>.ui.js': ['../dist/sdk/<%= pkg.name %>.ui.js'],
           '../dist/sdk/nuve.js': ['../dist/sdk/nuve.js']
         },
         options: {
