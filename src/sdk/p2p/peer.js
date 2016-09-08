@@ -79,7 +79,7 @@ Woogeen.PeerClient=function (pcConfig) {
     FILE:'file'
   };
 
-  var spec = pcConfig ? pcConfig.bandWidth : undefined;
+  var spec = pcConfig;
 
   /**
    * @function isArray
@@ -990,7 +990,7 @@ p2p.publish(localStream,'user1');
       }
       return;
     }
-    doPublish(stream,targetId, successCallback, failureCallback);
+    doPublish(stream, targetId, successCallback, failureCallback);
   };
 
   /**
@@ -1425,6 +1425,8 @@ p2p.send($('#data').val(), $('#target-uid').val());
   //codec preference setting.
   var replaceSdp = function(sdp) {
     sdp = setMaxBW(sdp); // set vide band width
+    sdp = setVideoCodec(sdp);
+    sdp = setAudioCodec(sdp);
     return sdp;
   };
 
@@ -1432,10 +1434,24 @@ p2p.send($('#data').val(), $('#target-uid').val());
     var mLineReg = /m=video.*\r\n/;
     var mLineElement = sdp.match(mLineReg);
     if (mLineElement && mLineElement.length) {
-      var tempString = mLineElement[0] + "b=AS:" + (spec ? spec.maxVideoBW : 500) + "\r\n";
+      var tempString = mLineElement[0] + "b=AS:" + (spec.bandWidth && spec.bandWidth.maxVideoBW ? spec.bandWidth.maxVideoBW : 500) + "\r\n";
       sdp = sdp.replace(mLineElement[0], tempString);
     }
     return sdp;
+  };
+
+  var setAudioCodec = function(sdp){
+      if(!spec.options || !spec.options.audioCodec) {
+          return sdp;
+      }
+      return Woogeen.Common.setPreferredCodec(sdp, 'audio', spec.options.audioCodec);
+  };
+
+  var setVideoCodec = function(sdp){
+      if(!spec.options || !spec.options.videoCodec) {
+          return sdp;
+      }
+      return Woogeen.Common.setPreferredCodec(sdp, 'video', spec.options.videoCodec);
   };
 
   /**
