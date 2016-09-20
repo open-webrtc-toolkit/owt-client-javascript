@@ -651,6 +651,16 @@ L.Logger.info('stream added:', stream.id());
     }
 
     var onSuccess = function (mediaStream) {
+      // Check whether the media stream has audio/video track as requested.
+      if ((option.audio && mediaStream.getAudioTracks().length == 0) || (option.video && mediaStream.getVideoTracks().length == 0)) {
+        for (let track of mediaStream.getTracks()) {
+          track.stop();
+        }
+        let err = {code: 1104, msg: 'Not all device requests are satisfied.'};
+        callback(err);
+        return;
+      }
+
       option.mediaStream = mediaStream;
       option.id = mediaStream.id;
       var localStream = new Woogeen.LocalStream(option);
