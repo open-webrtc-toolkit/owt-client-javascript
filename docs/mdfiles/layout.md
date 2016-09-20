@@ -13,7 +13,7 @@ A valid customized video layout should be a JSON string which represents an arra
         "id": "1",  //main pane
         "left": 0,
         "top": 0,
-        "relativesize": 1,
+        "relativesize": 1
       }
     ]
   },
@@ -24,13 +24,13 @@ A valid customized video layout should be a JSON string which represents an arra
         "id": "1",  //main pane
         "left": 0,
         "top": 0.25,
-        "relativesize": 0.5,
+        "relativesize": 0.5
      },
      {
         "id": "2",
         "left": 0.5,
         "top": 0.25,
-        "relativesize": 0.5,
+        "relativesize": 0.5
      }
    ]
   },
@@ -41,37 +41,37 @@ A valid customized video layout should be a JSON string which represents an arra
         "id": "1",   //main pane
         "left": 0,
         "top": 0,
-        "relativesize": 0.667,
+        "relativesize": 0.667
       },
       {
         "id": "2",
         "left": 0.667,
         "top": 0,
-        "relativesize": 0.333,
+        "relativesize": 0.333
       },
       {
         "id": "3",
         "left": 0.667,
         "top": 0.333,
-        "relativesize": 0.333,
+        "relativesize": 0.333
       },
       {
         "id": "4",
         "left": 0.667,
         "top": 0.667,
-        "relativesize": 0.333,
+        "relativesize": 0.333
       },
       {
         "id": "5",
         "left": 0.333,
         "top": 0.667,
-        "relativesize": 0.333,
+        "relativesize": 0.333
       },
       {
         "id": "6",
         "left": 0,
         "top": 0.667,
-        "relativesize": 0.333,
+        "relativesize": 0.333
       }
     ]
   }
