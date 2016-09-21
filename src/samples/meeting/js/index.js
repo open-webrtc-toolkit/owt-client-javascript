@@ -788,6 +788,7 @@ function addVideo(stream, isLocal) {
             name = "MIX Stream";
             $("#client-" + id).attr("isMix", "true");
             muteBtn = '<a href="#" class="ctrl-btn unmute"></a>';
+            player.append('<div id="pause-' + id + '" class="pause" style="display: none; width: 100%; height: auto; position: absolute; text-align: center; font: bold 30px Arial;">Paused</canvas>');
         }
         streamIndices['client-' + id] = stream.id();
 
@@ -1175,6 +1176,14 @@ function resizeStream(newMode) {
             top: "0px",
             left: hasLeft ? -(4 / 3 * height / 2 - width / 2) + "px" : "0px"
         });
+        if(element.find('.pause').length > 0){
+            element.find('.pause').css({
+                width: hasLeft ? "calc(100% + " + (4 / 3 * height - width) + "px)" : "100%",
+                height: "auto",
+                top: height/2.2 + "px",
+                left: hasLeft ? -(4 / 3 * height / 2 - width / 2) + "px" : "0px"
+            });
+        }
     }
  }
 }
@@ -1306,6 +1315,8 @@ function pauseVideo(){
           room.pauseVideo(stream);
         }
       };
+      $('[ismix=true]').children().children('.video').css('display', 'none');
+      $('[ismix=true]').children().children('.pause').css('display', 'block');
       localStream.disableVideo();
       room.pauseVideo(localStream, function() {
         console.log("Pause video Successfully");
@@ -1321,6 +1332,8 @@ function pauseVideo(){
           room.playVideo(stream);
         }
       };
+      $('[ismix=true]').children().children('.video').css('display', 'block');
+      $('[ismix=true]').children().children('.pause').css('display', 'none');
       localStream.enableVideo();
       room.playVideo(localStream, function() {
         console.log("Play video Successfully");
@@ -1335,6 +1348,7 @@ function pauseVideo(){
 function pauseAudio(){
     var msg={muted:true};
      if(!isPauseAudio){
+        $('#pauseAudio').text("Muting...");
         room.pauseAudio(localStream, function() {
         console.log("Pause Audio Successfully");
         $('#pauseAudio').text("Unmute Me");
@@ -1343,6 +1357,7 @@ function pauseAudio(){
         function() {console.log("Fail to pasuse audio.");}
         );
     }else{
+        $('#pauseAudio').text("Unmuting...");
         room.playAudio(localStream, function() {
         console.log("Play Audio Successfully");
         $('#pauseAudio').text("Mute Me");
