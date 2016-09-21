@@ -775,6 +775,20 @@ L.Logger.info('stream added:', stream.id());
           mediaOption.video.mandatory = mediaOption.video.mandatory || {};
           mediaOption.video.mandatory.chromeMediaSource = 'desktop';
           mediaOption.video.mandatory.chromeMediaSourceId = response.streamId;
+          // Transfrom new constraint format to the old style. Because chromeMediaSource only supported in the old style, and mix new and old style will result type error: "Cannot use both optional/mandatory and specific or advanced constraints.".
+          if(mediaOption.video.height) {
+            mediaOption.video.mandatory.maxHeight = mediaOption.video.mandatory.minHeight = mediaOption.video.height;
+            delete mediaOption.video.height;
+          }
+          if(mediaOption.video.width) {
+            mediaOption.video.mandatory.maxWidth = mediaOption.video.mandatory.minWidth = mediaOption.video.width;
+            delete mediaOption.video.width;
+          }
+          if(mediaOption.video.frameRate instanceof Array) {
+            mediaOption.video.mandatory.minFrameRate = mediaOption.video.frameRate[0];
+            mediaOption.video.mandatory.maxFrameRate = mediaOption.video.frameRate[1];
+            delete mediaOption.video.frameRate;
+          }
           getMedia.apply(navigator, [mediaOption, onSuccess, onFailure]);
         });
       } catch (err) {
