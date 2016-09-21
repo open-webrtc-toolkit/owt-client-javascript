@@ -652,11 +652,11 @@ L.Logger.info('stream added:', stream.id());
 
     var onSuccess = function (mediaStream) {
       // Check whether the media stream has audio/video track as requested.
-      if ((option.audio && mediaStream.getAudioTracks().length == 0) || (option.video && mediaStream.getVideoTracks().length == 0)) {
-        for (let track of mediaStream.getTracks()) {
-          track.stop();
+      if ((option.audio && mediaStream.getAudioTracks().length === 0) || (option.video && mediaStream.getVideoTracks().length === 0)) {
+        for (var i = 0; i < mediaStream.getTracks().length; i++) {
+          mediaStream.getTracks()[i].stop();
         }
-        let err = {code: 1104, msg: 'Not all device requests are satisfied.'};
+        var err = {code: 1104, msg: 'Not all device requests are satisfied.'};
         callback(err);
         return;
       }
