@@ -1,4 +1,4 @@
-(function () {
+var runSocketIOSample = function () {
   'use strict';
   var localStream;
   function getParameterByName (name) {
@@ -308,4 +308,4 @@
     }
   };
 
-}());
+};

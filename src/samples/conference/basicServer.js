@@ -97,7 +97,6 @@ app.post('/createToken/', function(req, res) {
     });
 });
 
-
 app.post('/createRoom/', function (req, res) {
     'use strict';
     var name = req.body.name;
@@ -157,6 +156,23 @@ app.delete('/room/:room', function (req, res) {
         res.send(err);
     });
 })
+
+app.post('/tokens/:type', function(req, res) {
+    'use strict';
+    var type = req.params.type,
+        room = req.body.room || myRoom,
+        username = req.body.username,
+        role = req.body.role;
+    if (type !== 'socketio' && type !== 'rest') {
+        return res.status(404).send('Invalid token type');
+    }
+    N.API.createToken(room, username, role, function(token) {
+        res.send(token);
+    },function (err){
+        res.send(err);
+    }, {type: type});
+});
+
 
 app.listen(3001);
 

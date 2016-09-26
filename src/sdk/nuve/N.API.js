@@ -289,16 +289,19 @@ N.API.updateRoom(XXXXXXXXXX, {
    * @param {string} role Participant's role
    * @param {function} callback(token) Callback function on success
    * @param {function} callbackError(err) Callback function on error
+   * @param {object} params Additional parameters to the creation
    * @example
 var roomID = '51c10d86909ad1f939000001';
 var name = 'john';
 var role = 'guest';
-N.API.createToken(roomID, name, role, function(token) {
+var params = {type: 'rest'};
+N.API.createToken(type, roomID, name, role, function(token) {
   console.log ('Token created:' token);
-}, errorCallback);
+}, errorCallback, params);
    */
     createToken = function (room, username, role, callback, callbackError, params) {
-        send(callback, callbackError, 'POST', undefined, 'rooms/' + room + '/tokens', params, username, role);
+        var type = (params && params.type) || 'socketio';
+        send(callback, callbackError, 'POST', undefined, 'rooms/' + room + '/tokens/' + type, params, username, role);
     };
 
 /**
