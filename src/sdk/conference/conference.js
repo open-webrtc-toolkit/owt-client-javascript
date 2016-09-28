@@ -1238,7 +1238,7 @@ conference.leave();
      * @function startRecorder
      * @instance
      * @desc This function starts the recording of a video stream and an audio stream in the conference room and saves it to a .mkv file, according to the configurable "recording.path" in agent.toml file.<br>
-  Three events are defined for media recording: 'recorder-added' for the creation of media recorder; 'recorder-removed' for the removal of media recorder; 'recorder-continued' for the continuous recording.
+  Three events are defined for media recording: 'recorder-added' for the creation of media recorder; 'recorder-removed' for the removal of media recorder.
      <br><b>options:</b><br>
      {<br>
     videoStreamId: xxxxxx,<br>
@@ -1253,7 +1253,7 @@ conference.leave();
      <li>videoStreamId: video stream id to be recorded. If unspecified and audioStreamId is valid, audio stream will be recorded without video.</li>
      <li>audioStreamId: audio stream id to be recorded. If unspecified and videoStreamId is valid, video stream will be recorded without audio.</li>
      <li>videoCodec: preferred video codec to be recorded. If unspecified, 'vp8' will be used by default. Currently, there is no video transcoding for forward stream with the consideration of system load.</li>
-     <li>audioCodec: preferred audio codec to be recorded. If unspecified, 'pcmu' will be used by default.</li>
+     <li>audioCodec: preferred audio codec to be recorded. If unspecified, 'opus' will be used by default.</li>
      <li>recorderId: recorder id to be reused.</li>
      </ul>
      Important Note: In the case of continuous media recording among different streams, the recorderId is the key to make sure each switched stream go to the same recording url. Do not stop the recorder when you want the continuous media recording functionality, unless all the required media content has been recorded successfully.<br>

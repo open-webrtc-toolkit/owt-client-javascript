@@ -53,10 +53,6 @@ Woogeen.EventDispatcher = function (spec) {
             <td>recorder-removed</td>
             <td>Indicates the recorder has been removed.</td>
         </tr>
-        <tr valign="top">
-            <td>recorder-continued</td>
-            <td>Indicates the recorder has been reused for continuous recording.</td>
-        </tr>
     </thead>
 </table>
 @endhtmlonly
