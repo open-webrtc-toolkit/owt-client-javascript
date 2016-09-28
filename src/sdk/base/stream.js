@@ -784,9 +784,9 @@ L.Logger.info('stream added:', stream.id());
             mediaOption.video.mandatory.maxWidth = mediaOption.video.mandatory.minWidth = mediaOption.video.width;
             delete mediaOption.video.width;
           }
-          if(mediaOption.video.frameRate instanceof Array) {
-            mediaOption.video.mandatory.minFrameRate = mediaOption.video.frameRate[0];
-            mediaOption.video.mandatory.maxFrameRate = mediaOption.video.frameRate[1];
+          if(mediaOption.video.frameRate) {
+            mediaOption.video.mandatory.minFrameRate = mediaOption.video.frameRate.min;
+            mediaOption.video.mandatory.maxFrameRate = mediaOption.video.frameRate.max;
             delete mediaOption.video.frameRate;
           }
           getMedia.apply(navigator, [mediaOption, onSuccess, onFailure]);
