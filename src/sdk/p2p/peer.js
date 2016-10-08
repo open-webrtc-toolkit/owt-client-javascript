@@ -1,4 +1,4 @@
-/* global Gab,RTCIceCandidate,RTCSessionDescription,getPeerConnectionAudioLevels,remoteIceCandidates*/
+/* global Gab,RTCIceCandidate,RTCSessionDescription,remoteIceCandidates*/
 /* Depend on woogeen.js, gab-websocket.js, WooGeen.Error.js*/
 
 var Woogeen = Woogeen || {}; /*jshint ignore:line*/ //Woogeen is defined.
@@ -1348,7 +1348,17 @@ p2p.getAudioLevels($('#target-uid').val(), successcallback, failurecallback);
       }
       return;
     }
-    getPeerConnectionAudioLevels(peer.connection, successCallback, failureCallback);/*jshint ignore:line*/
+    if(!successCallback){
+      // If user doesn't provide a success callback, no reason to getStats().
+      return;
+    }
+    peer.connection.getStats(function(stats){
+        successCallback(Woogeen.Common.parseAudioLevel(stats));
+      }, function(err){
+        if(failureCallback){
+          failureCallback(err);
+        }
+      });
   };
 
 /**

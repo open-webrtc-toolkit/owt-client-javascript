@@ -203,6 +203,58 @@ Woogeen.Common = (function(){
     return statusReport;
   };
 
+  var parseAudioLevel = function(stats) {
+    var inLevelIdx = 0;
+    var outLevelIdx = 0;
+    var stats_Report = {};
+    var curInputLevels = [];
+    var curOutputLevels = [];
+    var match = false;
+    var results = stats.result();
+    for(var i = 0; i < results.length; i++){
+      var res = results[i];
+      if(res.type === "ssrc"){
+      //This is a ssrc report. Check if it is send/recv
+        if(res.stat("bytesSent")){
+        //check if it"s audio or video
+          if(res.stat("googFrameHeightSent")){
+          //video send, not setting audio levels
+          }else{
+          //audio send
+            match = true;
+            var curObj = {};
+            curObj.ssrc = res.id;
+            curObj.level = res.stat("audioInputLevel");
+            curInputLevels[inLevelIdx] = curObj;
+            inLevelIdx++;
+          }
+        }else{
+        //this is ssrc receive report.
+          if(res.stat("googFrameHeightReceived")){
+          //video receive
+          }else{
+          //audio receive
+            match = true;
+            var curObj = {};/*jshint ignore:line*/
+            curObj.ssrc = res.id;
+            curObj.level = res.stat("audioOutputLevel");
+            curOutputLevels[outLevelIdx] = curObj;
+            outLevelIdx++;
+          }
+        }
+      }
+    }
+    if(match){
+      if(inLevelIdx > 0){
+        stats_Report.audioInputLevels = curInputLevels;
+      }
+      if(outLevelIdx > 0){
+        stats_Report.audioOutputLevels = curOutputLevels;
+      }
+    }
+    return stats_Report;
+  };
+
 /* Following functions are copied from apprtc with modifications */
 
   // Find the line in sdpLines that starts with |prefix|, and, if specified,
@@ -305,6 +357,7 @@ Woogeen.Common = (function(){
 
   return {
     parseStats: parseStats,
+    parseAudioLevel: parseAudioLevel,
     setPreferredCodec: setPreferredCodec,
     sysInfo:sysInfo
   };
