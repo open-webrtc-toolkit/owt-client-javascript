@@ -440,7 +440,7 @@ N.API.deleteUser(roomID, name, function(res) {
     send = function (callback, callbackError, method, body, url, params, username, role) {
         var service, key, timestamp, cnounce, toSign, header, signed, req;
 
-        if (params === undefined) {
+        if (params === undefined || (params.service === undefined && params.key === undefined && params.url === undefined)) {
             service = N.API.params.service;
             key = N.API.params.key;
             url = N.API.params.url + url;
@@ -450,7 +450,7 @@ N.API.deleteUser(roomID, name, function(res) {
             url = params.url + url;
         }
 
-        if (service === '' || key === '') {
+        if (service === '' || service === undefined || key === '' || key === undefined) {
             if (typeof callbackError === 'function')
                 callbackError(401, 'ServiceID and Key are required!!');
             return;
