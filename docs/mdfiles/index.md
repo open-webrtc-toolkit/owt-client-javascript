@@ -98,7 +98,7 @@ To enable P2P chat, copy and paste the following code into the head section of y
 <script type="text/JavaScript" src="sc.websocket.js"></script>
 <script type="text/JavaScript" src="woogeen.sdk.js"></script>
 ~~~~~~
-The SDK supports Web sockets signaling channel in P2P mode; You need to include `sc.websocket.js` and `socket.io.js` in your HTML files. Please include `socket.io.js` after `woogeen.p2p.js`.
+The SDK supports Web sockets signaling channel in P2P mode; You need to include `sc.websocket.js` and `socket.io.js` in your HTML files. Please include `socket.io.js` after `woogeen.sdk.js`.
 
 ## 5.1 P2P direct call chat {#section5_1}
 
