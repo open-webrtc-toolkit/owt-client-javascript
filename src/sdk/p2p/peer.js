@@ -1231,11 +1231,20 @@ p2p.stop();
       stopChatLocally(peer, myId);
       delete peers[peerId];
     }else{  // Stop all chats
+      var isEmpty = true;
       for(var peerIndex in peers){
+        isEmpty = false;
         var peer_all=peers[peerIndex];
         gab.sendChatStopped(peer_all.id);
         stopChatLocally(peer_all, myId);
         delete peers[peer_all.id];
+      }
+      if(isEmpty){
+        if(failureCallback){
+          L.Logger.warning('No active connections can be stopped.');
+          failureCallback(Woogeen.Error.P2P_CLIENT_INVALID_STATE);
+        }
+        return;
       }
     }
     if(successCallback){
