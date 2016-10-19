@@ -1,4 +1,4 @@
-/* global Gab,room,RTCIceCandidate,RTCSessionDescription,getPeerConnectionAudioLevels,remoteIceCandidates*/
+/* global Gab,RTCIceCandidate,RTCSessionDescription,getPeerConnectionAudioLevels,remoteIceCandidates*/
 /* Depend on woogeen.js, gab-websocket.js, WooGeen.Error.js*/
 
 var Woogeen = Woogeen || {}; /*jshint ignore:line*/ //Woogeen is defined.
@@ -1007,10 +1007,7 @@ p2p.publish(localStream,'user1');
 
     var peerId=getPeerId(targetId);
     if(!peerId){
-      if(room&&successCallback){
-        successCallback();
-      }
-      else if(!room&&failureCallback){
+      if(failureCallback){
         failureCallback(Woogeen.Error.P2P_CLIENT_ILLEGAL_ARGUMENT);
       }
       return;
@@ -1110,10 +1107,7 @@ p2p.unpublish(localStream,'user1');
 
     var peerId=getPeerId(targetId);
     if(!peerId){
-      if(room&&successCallback){  // Joined room and waiting for another one.
-        successCallback();
-      }
-      else if(!room&&failureCallback){
+      if(failureCallback){
         L.Logger.warning('Invalid argument targetId');
         failureCallback(Woogeen.Error.P2P_CLIENT_ILLEGAL_ARGUMENT);
       }
