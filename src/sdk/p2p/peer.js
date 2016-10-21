@@ -79,6 +79,13 @@ Woogeen.PeerClient=function (pcConfig) {
     FILE:'file'
   };
 
+  var ConnectionState = {
+    READY: 1,
+    CONNECTING: 2,
+    CONNECTED: 3
+  };
+  var state = ConnectionState.READY;
+
   var spec = pcConfig;
 
   /**
@@ -181,6 +188,7 @@ Woogeen.PeerClient=function (pcConfig) {
 
   var connectedHandler=function(){
     isConnectedToSignalingChannel=true;
+    state = ConnectionState.CONNECTED;
   };
 
   var connectFailedHandler=function(){
@@ -193,6 +201,7 @@ Woogeen.PeerClient=function (pcConfig) {
 
   var disconnectedHandler=function(){
     isConnectedToSignalingChannel=false;
+    state = ConnectionState.READY;
     that.dispatchEvent(new Woogeen.ClientEvent({type: 'server-disconnected'}));
   };
 
@@ -595,6 +604,15 @@ p2p.connect({host:'http://61.152.239.56:8095/',token:'user1'});
 </script>
 */
   var connect=function(loginInfo, successCallback, failureCallback){
+    if(state === ConnectionState.READY){
+      state = ConnectionState.CONNECTING;
+    }else{
+      L.Logger.warning('Another peer has already connected');
+      if(failureCallback){
+        failureCallback(Woogeen.Error.P2P_CLIENT_INVALID_STATE);
+      }
+      return;
+    }
     gab=new Gab(loginInfo);
     gab.onConnected=connectedHandler;
     gab.onDisconnected=disconnectedHandler;
