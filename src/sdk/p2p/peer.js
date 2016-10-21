@@ -1365,7 +1365,14 @@ p2p.getAudioLevels($('#target-uid').val(), successcallback, failurecallback);
 p2p.send($('#data').val(), $('#target-uid').val());
 </script>
 */
-  var send=function(message,targetId, successCallback, failureCallback){
+  var send=function(message, targetId, successCallback, failureCallback){
+    if(!message){
+      L.Logger.warning("Message cannot be undefined, null or empty.");
+      if(failureCallback){
+        failureCallback(Woogeen.Error.P2P_CLIENT_ILLEGAL_ARGUMENT);
+      }
+      return;
+    }
     if(message.length>65535){
       L.Logger.warning("Message too long. Max size: 65535.");
       if(failureCallback){
