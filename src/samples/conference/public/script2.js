@@ -88,6 +88,35 @@ var runSocketIOSample = function () {
     }
   }
 
+  function subscribeDifferentResolution (resolution) {
+    for(var i in conference.remoteStreams){
+      if(conference.remoteStreams[i].isMixed()){
+        var stream = conference.remoteStreams[i];
+        if(subscribeMix === 'true'){
+          conference.unsubscribe(stream, function(et) {
+            L.Logger.info(stream.id(), 'unsubscribe stream');
+            conference.subscribe(stream, {video: {resolution: resolution}}, function () {
+              L.Logger.info('subscribed:', stream.id());
+              displayStream(stream, resolution);
+            }, function (err) {
+              L.Logger.error(stream.id(), 'subscribe failed:', err);
+            });
+          }, function(err) {
+            L.Logger.error(stream.id(), 'unsubscribe failed:', err);
+          });
+        }else{
+          conference.subscribe(stream, {video: {resolution: resolution}}, function () {
+            L.Logger.info('subscribed:', stream.id());
+            displayStream(stream, resolution);
+            subscribeMix = 'true';
+          }, function (err) {
+            L.Logger.error(stream.id(), 'subscribe failed:', err);
+          });
+        }
+      }
+    }
+  }
+
   conference.onMessage(function (event) {
     L.Logger.info('Message Received:', event.msg);
   });
@@ -253,6 +282,17 @@ var runSocketIOSample = function () {
         }
         var streams = resp.streams;
         streams.map(function (stream) {
+          if(stream.resolutions){
+            var selectResolution = document.getElementById('resolutions');
+            stream.resolutions().map(function(resolution){
+              var button = document.createElement('button');
+              button.innerHTML = resolution.width + 'x' + resolution.height;
+              button.onclick = function(){
+                subscribeDifferentResolution(resolution);
+              }
+              selectResolution.appendChild(button);
+            });
+          }
           L.Logger.info('stream in conference:', stream.id());
           trySubscribeStream(stream);
         });
