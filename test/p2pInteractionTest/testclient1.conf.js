@@ -42,6 +42,7 @@ module.exports = function (config){
     './test/p2pInteractionTest/js/test.js',
     './test/p2pInteractionTest/js/qq.js',
     './test/p2pInteractionTest/js/MediaStreamTest.js',
+    './test/p2pInteractionTest/js/videoframechecker.js',
     //'./test/p2ptest/test-peer.js',
     './test/p2pInteractionTest/waitnotifyserver.js',
     './test/p2pInteractionTest/test-peerwn-user1.js'
@@ -97,9 +98,9 @@ module.exports = function (config){
     // - IE (only Windows)
     // CLI --browsers Chrome,Firefox,Safari
 //    browsers : ["IE"],
-    browsers : ["/home/yanbin/workspace/project/webrtc-javascript-sdk/test/p2pInteractionTest/.travis/chrome-start1.sh"],
-/*
-    browsers: ['FirefoxAutoAllowGUM'],
+    browsers : ["/home/fengwei/zyh/webrtc-javascript-sdk/test/p2pInteractionTest/.travis/chrome-start1.sh"],
+
+    /*browsers: ['FirefoxAutoAllowGUM'],
     customLaunchers: {
        FirefoxAutoAllowGUM: {
            base: 'Firefox',

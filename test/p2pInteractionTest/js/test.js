@@ -74,6 +74,9 @@ TestClient.prototype = {
       that.debug("create stream", "success");
       that.localStream = stream;
       that.request["createLocal_success"]++;
+      that.request["localStreamId"] = stream.id();
+      that.debug("create stream id:", stream.id());
+      //that.request["localStreamId"] ='local';
       that.showInPage(stream, "LOCAL STREAM");
     }, function(err) {
       that.request["createLocal_failed"]++;
@@ -141,6 +144,36 @@ TestClient.prototype = {
           });
 	  });
   },
+
+  connectByName: function(name) {
+    var that = this;
+    this.request["connect_success"] = this.request["connect_success"] || 0;
+    this.request["connect_failed"] = this.request["connect_failed"] || 0;
+    console.log('urll:'+this.serverURL);
+    this.peerClient.connect({
+      host: this.serverURL,
+      token: name
+    }, function() {
+      that.debug("connect peer", "success");
+      that.request["connect_success"]++;
+
+    }, function() {
+      that.debug("connect peer", "failed");
+      that.request["connect_failed"]++;
+    });
+      $(function(){
+          var notice = new PNotify({
+            title: 'API: Connection',
+            text: "Connect .......",
+            type: 'error',
+            hide: false
+          });
+          notice.get().click(function() {
+            notice.remove();
+          });
+    });
+  },
+
   disconnect: function() {
     var that = this;
     this.request["disconnect_success"] = this.request["disconnect_success"] || 0;
@@ -157,7 +190,7 @@ TestClient.prototype = {
     var that = this;
     this.request["accept_success"] = this.request["accept_success"] || 0;
     this.request["accept_failed"] = this.request["accept_failed"] || 0;
-    if (typeof tc === "string") {
+    if (typeof tc === "string"  || typeof tc === 'undefined') {
       this.peerClient.accept(tc, function() {
         that.debug("accept:", "accept user: " + tc + " success");
         that.request["accept_success"]++;
@@ -192,7 +225,7 @@ TestClient.prototype = {
     var that = this;
     this.request["deny_success"] = this.request["deny_success"] || 0;
     this.request["deny_failed"] = this.request["deny_failed"] || 0;
-    if (typeof tc === "string") {
+    if (typeof tc === "string"  || typeof tc === 'undefined') {
       this.peerClient.deny(tc, function() {
         that.debug("deny:", "deny user: " + tc + " success");
         that.request["deny_success"]++;
@@ -225,7 +258,7 @@ TestClient.prototype = {
     var that = this;
     this.request["invite_success"] = this.request["invite_success"] || 0;
     this.request["invite_failed"] = this.request["invite_failed"] || 0;
-    if (typeof tc === "string") {
+    if (typeof tc === "string"  || typeof tc === 'undefined') {
       this.peerClient.invite(tc, function() {
         that.debug("invite:", "invite user: " + tc + " success");
         that.request["invite_success"]++;
@@ -259,12 +292,12 @@ TestClient.prototype = {
     var that = this;
     this.request["publish_success"] = this.request["publish_success"] || 0;
     this.request["publish_failed"] = this.request["publish_failed"] || 0;
-    if (typeof tc === "string") {
+    if (typeof tc === "string"  || typeof tc === 'undefined') {
       this.peerClient.publish(this.localStream, tc, function() {
         that.debug("publish:", "publish to user: " + tc + " success");
         that.request["publish_success"]++;
       }, function() {
-        that.debug("publish:", "publish to user: " + tc + " failed");
+        that.debug("publish:", "publish to user: " + "failed");
         that.request["publish_failed"]++;
       });
     } else {
@@ -288,11 +321,36 @@ TestClient.prototype = {
           });
      });
   },
+
+  publishError: function(stream,id) {
+    var that = this;
+    this.request["publish_success"] = this.request["publish_success"] || 0;
+    this.request["publish_failed"] = this.request["publish_failed"] || 0;
+     this.peerClient.publish(stream, id, function() {
+        that.debug("publish:", "publish to user: " + tc + " success");
+        that.request["publish_success"]++;
+      }, function() {
+        that.debug("publish:", "publish to user: " + "failed");
+        that.request["publish_failed"]++;
+      });
+  $(function(){
+          var notice = new PNotify({
+            title: 'API:publish',
+            text: 'publish .......',
+            type: 'error',
+            hide: false
+          });
+          notice.get().click(function() {
+            notice.remove();
+          });
+     });
+  },
+
   unpublish: function(tc) {
     var that = this;
     this.request["unpublish_success"] = this.request["unpublish_success"] || 0;
     this.request["unpublish_failed"] = this.request["unpublish_failed"] || 0;
-    if (typeof tc === "string") {
+    if (typeof tc === "string" || typeof tc === 'undefined') {
       this.peerClient.unpublish(this.localStream, tc, function() {
         that.debug("unpublish:", "unpublish to user: " + tc + " success");
         that.request["unpublish_success"]++;
@@ -321,11 +379,37 @@ TestClient.prototype = {
           });
      });
   },
+
+
+  unpublishError: function(stream,id) {
+    var that = this;
+    this.request["unpublish_success"] = this.request["unpublish_success"] || 0;
+    this.request["unpublish_failed"] = this.request["unpublish_failed"] || 0;
+      this.peerClient.unpublish(stream, id, function() {
+        that.debug("unpublish:", "unpublish to user: "  + " success");
+        that.request["unpublish_success"]++;
+      }, function() {
+        that.debug("unpublish:", "unpublish to user: " + " failed");
+        that.request["unpublish_failed"]++;
+      });
+  $(function(){
+          var notice = new PNotify({
+            title: 'API:unpublish',
+            text: "unpublish .......",
+            type: 'error',
+            hide: false
+          });
+          notice.get().click(function() {
+            notice.remove();
+          });
+     });
+  },
+
   send: function(tc, msg) {
     var that = this;
     this.request["send_success"] = this.request["send_success"] || 0;
     this.request["send_failed"] = this.request["send_failed"] || 0;
-    if (typeof tc === "string") {
+    if (typeof tc === "string"  || typeof tc === 'undefined' ) {
       console.log("*********send", "tc.user is", tc, " msg is ", msg);
       this.peerClient.send(msg, tc, function() {
         that.debug("send success:", "send to user: " + tc + " success");
@@ -350,7 +434,7 @@ TestClient.prototype = {
     var that = this;
     this.request["stop_success"] = this.request["stop_success"] || 0;
     this.request["stop_failed"] = this.request["stop_failed"] || 0;
-    if (typeof tc === "string") {
+    if (typeof tc === "string"  || typeof tc === 'undefined' ) {
       this.peerClient.stop(tc, function() {
         that.debug("stop:", "stop to user: " + tc + " success");
         that.request["stop_success"]++;
@@ -380,6 +464,483 @@ TestClient.prototype = {
      });
 
   },
+
+  getConnectionStatus: function(tc,exceptvalue){
+    var result = true;
+    var send_flag = false;
+    var receive_flag = false;
+    var that = this;
+    this.request["getConnectionStatus_success"] = this.request["getConnectionStatus_success"] || 0;
+    this.request["getConnectionStatus_failed"] = this.request["getConnectionStatus_failed"] || 0;
+
+    this.peerClient.getConnectionStats(tc, function(stats) {
+        that.debug("getConnectionStats:", tc + " success");
+          var status = JSON.stringify(stats);
+          var status_string = JSON.parse(status);
+          that.debug("stats:"+status);
+          if(!(exceptvalue.length === undefined)){
+            if(status_string.length != exceptvalue.length){
+                 that.debug("real getConnectionStatslength is "+status_string.length  +" but exceptlength is "+ exceptvalue.length);
+                  result = false;
+            }
+          }
+          for(var i=0;i<status_string.length;i++){
+              if(status_string[i].type == "ssrc_video_send"){
+                send_flag = true;
+                if(!(exceptvalue.codec_name ===undefined)){
+                  if(status_string[i].stats.codec_name != exceptvalue.send_codec_name){
+                       that.debug("real codec_name is "+status_string[i].stats.codec_name  +" but exceptsend_codec_name is "+ exceptvalue.codec_name);
+                      result = false
+                  }
+                }
+
+                if(!(exceptvalue.frame_width ===undefined)){
+                  if(status_string[i].stats.send_frame_width != exceptvalue.send_frame_width){
+                      that.debug("real send_frame_width is "+status_string[i].stats.send_frame_width  +" but exceptsend_frame_width is "+ exceptvalue.send_frame_width);
+                      result = false
+                  }
+                }
+                if(!(exceptvalue.frame_height === undefined)){
+                  if(status_string[i].stats.send_rame_height != exceptvalue.send_frame_height){
+                      that.debug("real frame_height is "+status_string[i].stats.send_rame_height  +" but exceptsend_frame_height is "+ exceptvalue.send_fame_height);
+                      result = false
+                  }
+                }
+              }
+
+
+              if(status_string[i].type == "ssrc_video_recv"){
+                 receive_flag = true;
+                if(!(exceptvalue.codec_name ===undefined)){
+                  if(status_string[i].stats.codec_name != exceptvalue.codec_name){
+                       that.debug("real codec_name is "+status_string[i].stats.codec_name  +" but exceptcodec_name is "+ exceptvalue.codec_name);
+                      result = false
+                  }
+                }
+
+                if(!(exceptvalue.frame_width ===undefined)){
+                  if(status_string[i].stats.frame_width != exceptvalue.frame_width){
+                      that.debug("real frame_width is "+status_string[i].stats.frame_width  +" but exceptframe_width is "+ exceptvalue.frame_width);
+                      result = false
+                  }
+                }
+                if(!(exceptvalue.frame_height === undefined)){
+                  if(status_string[i].stats.frame_height != exceptvalue.frame_height){
+                      that.debug("real frame_height is "+status_string[i].stats.frame_height  +" but exceptframe_height is "+ exceptvalue.frame_height);
+                      result = false
+                  }
+                }
+            }
+          }
+
+           if(!(exceptvalue.send_codec_name === undefined) || !(exceptvalue.send_frame_width ===undefined) || !(exceptvalue.send_frame_height ===undefined)){
+                if(!send_flag){
+                   that.debug("ssrc_video_send is not exist");
+                  result = false;
+                }else{
+                  that.debug("ssrc_video_send is exist");
+                }
+           }
+
+          if(!(exceptvalue.codec_name === undefined) || !(exceptvalue.frame_width ===undefined) || !(exceptvalue.frame_height ===undefined)){
+                if(!receive_flag){
+                   that.debug("ssrc_video_recv is not exist");
+                  result = false;
+                }else{
+                  that.debug("ssrc_video_recv is exist");
+                }
+           }
+
+          that.debug("result:"+result);
+          if(result){
+            that.request["getConnectionStatus_success"]++;
+          }else{
+            that.request["getConnectionStatus_failed"]++;
+          }
+      }, function(msg) {
+        that.debug("getConnectionStats:" ,msg);
+        that.request["getConnectionStatus_failed"]++;
+      });
+
+      $(function(){
+          var notice = new PNotify({
+            title: 'API:checkConnectionStatus',
+            text: "checkConnectionStatus .......",
+            type: 'error',
+            hide: false
+          });
+          notice.get().click(function() {
+            notice.remove();
+          });
+     });
+
+  },
+
+
+
+
+getConnectionStatusBylastStream: function(tc,exceptvalue){
+    var result = true;
+    var send_flag = false;
+    var receive_flag = false;
+     var lastreceive_flag = false;
+    var that = this;
+    this.request["getConnectionStatus_success"] = this.request["getConnectionStatus_success"] || 0;
+    this.request["getConnectionStatus_failed"] = this.request["getConnectionStatus_failed"] || 0;
+
+    this.peerClient.getConnectionStats(tc, function(stats) {
+        that.debug("getConnectionStats:", tc + " success");
+          var status = JSON.stringify(stats);
+          var status_string = JSON.parse(status);
+          that.debug("stats:"+status);
+          if(!(exceptvalue.length === undefined)){
+            if(status_string.length != exceptvalue.length){
+                 that.debug("real getConnectionStatslength is "+status_string.length  +" but exceptlength is "+ exceptvalue.length);
+                  result = false;
+            }
+          }
+          for(var i=0;i<status_string.length;i++){
+              if(status_string[i].type == "ssrc_video_send"){
+                send_flag = true;
+                if(!(exceptvalue.codec_name ===undefined)){
+                  if(status_string[i].stats.codec_name != exceptvalue.send_codec_name){
+                       that.debug("real codec_name is "+status_string[i].stats.codec_name  +" but exceptsend_codec_name is "+ exceptvalue.codec_name);
+                      result = false
+                  }
+                }
+
+                if(!(exceptvalue.frame_width ===undefined)){
+                  if(status_string[i].stats.send_frame_width != exceptvalue.send_frame_width){
+                      that.debug("real send_frame_width is "+status_string[i].stats.send_frame_width  +" but exceptsend_frame_width is "+ exceptvalue.send_frame_width);
+                      result = false
+                  }
+                }
+                if(!(exceptvalue.frame_height === undefined)){
+                  if(status_string[i].stats.send_rame_height != exceptvalue.send_frame_height){
+                      that.debug("real frame_height is "+status_string[i].stats.send_rame_height  +" but exceptsend_frame_height is "+ exceptvalue.send_fame_height);
+                      result = false
+                  }
+                }
+              }
+
+
+              if(status_string[i].type == "ssrc_video_recv" && !receive_flag){
+                 receive_flag = true;
+                if(!(exceptvalue.codec_name ===undefined)){
+                  if(status_string[i].stats.codec_name != exceptvalue.codec_name){
+                       that.debug("real codec_name is "+status_string[i].stats.codec_name  +" but exceptcodec_name is "+ exceptvalue.codec_name);
+                      result = false
+                  }
+                }
+
+                if(!(exceptvalue.first_frame_width ===undefined)){
+                  if(status_string[i].stats.frame_width != exceptvalue.first_frame_width){
+                      that.debug("real frame_width is "+status_string[i].stats.frame_width  +" but except frist frame_width is "+ exceptvalue.first_frame_width);
+                      result = false
+                  }
+                }
+                if(!(exceptvalue.first_frame_height === undefined)){
+                  if(status_string[i].stats.frame_height != exceptvalue.first_frame_height){
+                      that.debug("real frame_height is "+status_string[i].stats.frame_height  +" but except first frame_height is "+ exceptvalue.first_frame_height);
+                      result = false
+                  }
+                }
+
+            }
+          }
+
+           if(status_string[status_string.length-1].type == "ssrc_video_recv"){
+                 lastreceive_flag = true;
+                if(!(exceptvalue.codec_name ===undefined)){
+                  if(status_string[status_string.length-1].stats.codec_name != exceptvalue.codec_name){
+                       that.debug("real lastcodec_name is "+status_string[status_string.length-1].stats.codec_name  +" but except lastcodec_name is "+ exceptvalue.codec_name);
+                      result = false
+                  }
+                }
+
+                if(!(exceptvalue.last_frame_width ===undefined)){
+                  if(status_string[status_string.length-1].stats.frame_width != exceptvalue.last_frame_width){
+                      that.debug("real frame_width is "+status_string[status_string.length-1].stats.frame_width  +" but except last rame_width is "+ exceptvalue.last_frame_width);
+                      result = false
+                  }
+                }
+                if(!(exceptvalue.last_frame_height === undefined)){
+                  if(status_string[status_string.length-1].stats.frame_height != exceptvalue.last_frame_height){
+                      that.debug("real frame_height is "+status_string[status_string.length-1].stats.frame_height  +" but except last frame_height is "+ exceptvalue.last_frame_height);
+                      result = false
+                  }
+                }
+            }
+
+
+           if(!(exceptvalue.send_codec_name === undefined) || !(exceptvalue.send_frame_width ===undefined) || !(exceptvalue.send_frame_height ===undefined)){
+                if(!send_flag){
+                   that.debug("ssrc_video_send is not exist");
+                  result = false;
+                }else{
+                  that.debug("ssrc_video_send is exist");
+                }
+           }
+
+          if(!(exceptvalue.first_codec_name === undefined) || !(exceptvalue.first_frame_width ===undefined) || !(exceptvalue.first_frame_height ===undefined)){
+                if(!receive_flag){
+                   that.debug("first ssrc_video_recv is not exist");
+                  result = false;
+                }else{
+                  that.debug("first ssrc_video_recv is exist");
+                }
+           }
+          if(!(exceptvalue.last_codec_name === undefined) || !(exceptvalue.last_frame_width ===undefined) || !(exceptvalue.last_frame_height ===undefined)){
+                if(!lastreceive_flag){
+                   that.debug("last ssrc_video_recv is not exist");
+                  result = false;
+                }else{
+                  that.debug("last ssrc_video_recv is exist");
+                }
+            }
+          that.debug("result:"+result);
+          if(result){
+            that.request["getConnectionStatus_success"]++;
+          }else{
+            that.request["getConnectionStatus_failed"]++;
+          }
+      }, function(msg) {
+        that.debug("getConnectionStats:" ,msg);
+        that.request["getConnectionStatus_failed"]++;
+      });
+
+      $(function(){
+          var notice = new PNotify({
+            title: 'API:checkConnectionStatus',
+            text: "checkConnectionStatus .......",
+            type: 'error',
+            hide: false
+          });
+          notice.get().click(function() {
+            notice.remove();
+          });
+     });
+
+  },
+
+getConnectionStatusByVideoOnly: function(tc,exceptvalue){
+    var result = true;
+    var that = this;
+    this.request["getConnectionStatus_success"] = this.request["getConnectionStatus_success"] || 0;
+    this.request["getConnectionStatus_failed"] = this.request["getConnectionStatus_failed"] || 0;
+
+    if (typeof tc === "string"  || typeof tc === 'undefined' ) {
+      this.peerClient.getConnectionStats(tc, function(stats) {
+        console.log(stats)
+        that.debug("getConnectionStats:", tc + " success");
+          var status = JSON.stringify(stats);
+          var status_string = JSON.parse(status);
+          that.debug("stats:"+status);
+          if(!(exceptvalue.length === undefined)){
+            if(status_string.length != exceptvalue.length){
+                 that.debug("real getConnectionStatslength is "+status_string.length  +" but exceptlength is "+ exceptvalue.length);
+                  result = false;
+            }
+          }
+          if(status_string.length != exceptvalue.length){
+            result = false
+          }
+          if(status_string[status_string.length-1].type == "ssrc_video_recv" || status_string[status_string.length-1].type == "ssrc_video_send"){           
+                if(!(exceptvalue.codec_name ===undefined)){
+                  if(status_string[status_string.length-1].stats.codec_name != exceptvalue.codec_name){
+                       that.debug("real codec_name is "+status_string[status_string.length-1].stats.codec_name  +" but exceptcodec_name is "+ exceptvalue.codec_name);
+                      result = false
+                  }
+                }
+
+                if(!(exceptvalue.frame_width ===undefined)){
+                  if(status_string[status_string.length-1].stats.frame_width != exceptvalue.frame_width){
+                      that.debug("real frame_width is "+status_string[status_string.length-1].stats.frame_width  +" but exceptframe_width is "+ exceptvalue.frame_width);
+                      result = false
+                  }
+                }
+                if(!(exceptvalue.frame_height === undefined)){
+                  if(status_string[status_string.length-1].stats.frame_height != exceptvalue.frame_height){
+                      that.debug("real frame_height is "+status_string[status_string.length-1].stats.frame_height  +" but exceptframe_height is "+ exceptvalue.frame_height);
+                      result = false
+                  }
+                }
+            }else{
+               that.debug("ssrc_video_recv or ssrc_video_send is not exist");
+                result = false
+            }
+          that.debug("result:"+result);
+          if(result){
+            that.request["getConnectionStatus_success"]++;
+          }else{
+            that.request["getConnectionStatus_failed"]++;
+          }
+      }, function(msg) {
+        that.debug("getConnectionStats:" ,msg);
+        that.request["getConnectionStatus_failed"]++;
+      });
+    } else {
+      this.peerClient.getConnectionStats(tc.user, function(stats) {
+        that.debug("getConnectionStats:",tc.user + " success");
+        that.debug("stats:"+JSON.stringify(stats));
+        that.request["getConnectionStats_success"]++;
+      }, function() {
+        that.debug("getConnectionStats:", tc.user + " failed");
+        that.request["getConnectionStatus_failed"]++;
+      });
+    }
+          $(function(){
+          var notice = new PNotify({
+            title: 'API:checkConnectionStatus',
+            text: "checkConnectionStatus .......",
+            type: 'error',
+            hide: false
+          });
+          notice.get().click(function() {
+            notice.remove();
+          });
+     });
+
+  },
+
+
+getConnectionStatusByAudioOnly: function(tc,exceptvalue){
+    var result = true;
+    var audio_send = false;
+    var audio_receive = false;
+    var that = this;
+    this.request["getConnectionStatus_success"] = this.request["getConnectionStatus_success"] || 0;
+    this.request["getConnectionStatus_failed"] = this.request["getConnectionStatus_failed"] || 0;
+
+    if (typeof tc === "string"  || typeof tc === 'undefined' ) {
+      this.peerClient.getConnectionStats(tc, function(stats) {
+        console.log(stats)
+        that.debug("getConnectionStats:", tc + " success");
+          var status = JSON.stringify(stats);
+          var status_string = JSON.parse(status);
+          that.debug("stats:"+status);
+          if(!(exceptvalue.length === undefined)){
+            if(status_string.length != exceptvalue.length){
+                 that.debug("real getConnectionStatslength is "+status_string.length  +" but exceptlength is "+ exceptvalue.length);
+                  result = false;
+            }
+          }
+          if(status_string.length != exceptvalue.length){
+            result = false
+          }
+
+
+
+          for(var i=0;i<status_string.length;i++){
+             if(status_string[i].type == "ssrc_audio_send" ){
+                audio_send = true;
+                if(!(exceptvalue.send_codec_name ===undefined)){
+                  if(status_string[i].stats.codec_name != exceptvalue.send_codec_name){
+                       that.debug("real codec_name is "+status_string[i].stats.codec_name  +" but except send_codec_name is "+ exceptvalue.send_codec_name);
+                      result = false
+                  }
+                }
+            }
+
+            if(status_string[i].type == "ssrc_audio_recv"){
+                audio_receive = true;
+                if(!(exceptvalue.receive_codec_name ===undefined)){
+                  if(status_string[i].stats.codec_name != exceptvalue.receive_codec_name){
+                       that.debug("real codec_name is "+status_string[i].stats.codec_name  +" but except receive_codec_name is "+ exceptvalue.receive_codec_name);
+                      result = false
+                  }
+                }
+            }
+          }
+
+          if(!(exceptvalue.send_codec_name === undefined)){
+                if(!audio_send){
+                   that.debug(" ssrc_audio_send is not exist");
+                  result = false;
+                }else{
+                  that.debug("ssrc_audio_send is exist");
+                }
+            }
+
+            if(!(exceptvalue.receive_codec_name === undefined)){
+                if(!audio_receive){
+                   that.debug("ssrc_audio_recv is not exist");
+                  result = false;
+                }else{
+                  that.debug("ssrc_audio_recv is exist");
+                }
+            }
+          that.debug("result:"+result);
+          if(result){
+            that.request["getConnectionStatus_success"]++;
+          }else{
+            that.request["getConnectionStatus_failed"]++;
+          }
+      }, function(msg) {
+        that.debug("getConnectionStats:" ,msg);
+        that.request["getConnectionStatus_failed"]++;
+      });
+    } else {
+      this.peerClient.getConnectionStats(tc.user, function(stats) {
+        that.debug("getConnectionStats:",tc.user + " success");
+        that.debug("stats:"+JSON.stringify(stats));
+        that.request["getConnectionStats_success"]++;
+      }, function() {
+        that.debug("getConnectionStats:", tc.user + " failed");
+        that.request["getConnectionStatus_failed"]++;
+      });
+    }
+          $(function(){
+          var notice = new PNotify({
+            title: 'API:checkConnectionStatus',
+            text: "checkConnectionStatus .......",
+            type: 'error',
+            hide: false
+          });
+          notice.get().click(function() {
+            notice.remove();
+          });
+     });
+
+  },
+
+   getAudioLevels: function(tc) {
+    var that = this;
+    this.request["getAudioLevels_success"] = this.request["getAudioLevels_success"] || 0;
+    this.request["getAudioLevels_failed"] = this.request["getAudioLevels_failed"] || 0;
+    if (typeof tc === "string"  || typeof tc === 'undefined' ) {
+      this.peerClient.getAudioLevels(tc, function(levels) {
+        that.debug("getAudioLevels:", " success");
+         that.debug("current level"+JSON.stringify(levels));
+
+        that.request["getAudioLevels_success"]++;
+      }, function() {
+        that.debug("getAudioLevels:",  " failed");
+        that.request["getAudioLevels_failed"]++;
+      });
+    } else {
+      this.peerClient.getAudioLevels(tc.user, function() {
+        that.debug("getAudioLevels:",  " success");
+        that.request["getAudioLevels_success"]++;
+      }, function() {
+        that.debug("getAudioLevels:", " failed");
+        that.request["getAudioLevels_failed"]++;
+      });
+    }
+          $(function(){
+          var notice = new PNotify({
+            title: 'API:getAudioLevels',
+            text: "getAudioLevels .......",
+            type: 'error',
+            hide: false
+          });
+          notice.get().click(function() {
+            notice.remove();
+          });
+     });
+
+  },
+
   enableVideo: function(tc) {
     tc = tc || this;
     var stream = tc.localStream;
@@ -430,7 +991,7 @@ TestClient.prototype = {
           }
   },
   showInPage: function(stream, tag) {
-    console.log('showInPage!')
+    console.log('showInPage! stream' , stream.id())
 	 	$(function(){
           var notice = new PNotify({
             title: 'API:show',
@@ -477,8 +1038,11 @@ TestClient.prototype = {
               return;
             }
     }
+
     var video = document.createElement("video"),
-      videoId = "stream" + stream.id();
+    //console.log('showInPage id1 ,stream' + stream.id());
+    videoId = "stream" + stream.id();
+   //videoId ="local"
     video.setAttribute("id", videoId);
     video.setAttribute("width", "320px");
     video.setAttribute("height", "240px");
@@ -494,9 +1058,7 @@ TestClient.prototype = {
     para.appendChild(node);
     document.body.appendChild(para);
     Woogeen.UI.attachMediaStream(video, stream.mediaStream);
-    this.request[videoId] = startDetection(videoId, "320", "240");
-	
-		 
+   // this.request[videoId] = startDetection(videoId, "320", "240");
   },
   removeVideo: function(stream) {
     var videos = document.getElementsByClassName("video");
