@@ -219,11 +219,7 @@ Erizo.ChromeStableStack = function (spec) {
             }, function (error) {
                 L.Logger.error("Error setting Remote Description", error);
             });
-
-
         } else if (msg.type === 'answer') {
-
-
             // // For compatibility with only audio in Firefox Revisar
             // if (answer.match(/a=ssrc:55543/)) {
             //     answer = answer.replace(/a=sendrecv\\r\\na=mid:video/, 'a=recvonly\\r\\na=mid:video');
@@ -248,7 +244,6 @@ Erizo.ChromeStableStack = function (spec) {
                         // IMPORTANT: preserve ordering of candidates
                         spec.callback({type: 'candidate', candidate: spec.localCandidates.shift()});
                     }
-
                 });
             });
 

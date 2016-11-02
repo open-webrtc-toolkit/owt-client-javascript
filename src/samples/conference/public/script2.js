@@ -250,7 +250,7 @@ var runSocketIOSample = function () {
             });
           });
         } else if (shareScreen === false) {
-          if(isPublish !== 'false') {
+          if (isPublish !== 'false') {
             Woogeen.LocalStream.create({
               video: {
                 device: 'camera',
@@ -263,6 +263,7 @@ var runSocketIOSample = function () {
               }
               localStream = stream;
               localStream.show('myVideo');
+
               conference.publish(localStream, {}, function (st) {
                 L.Logger.info('stream published:', st.id());
               }, function (err) {

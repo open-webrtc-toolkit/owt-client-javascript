@@ -561,7 +561,7 @@ L.Logger.info('stream added:', stream.id());
   };
 
   var getMedia = (navigator.getUserMedia || navigator.webkitGetUserMedia ||
-                     navigator.mozGetUserMedia || navigator.msGetUserMedia);
+                  navigator.mozGetUserMedia || navigator.msGetUserMedia);
 
 
   /*
@@ -802,9 +802,10 @@ L.Logger.info('stream added:', stream.id());
       }
       return;
     }
-    if(!isLegacyIE()){
+
+    if (!isLegacyIE()) {
       getMedia.apply(navigator, [mediaOption, onSuccess, onFailure]);
-    }else{
+    } else {
       navigator.getUserMedia(mediaOption, onSuccess, onFailure);
     }
   }

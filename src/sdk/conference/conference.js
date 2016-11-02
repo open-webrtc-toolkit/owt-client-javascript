@@ -17,9 +17,11 @@
     if (window.navigator.userAgent.match("Firefox") !== null) {
       // Firefox
       browser = "mozilla";
-    } else if (window.navigator.userAgent.match("Bowser") !==null){
+    } else if (window.navigator.userAgent.match("Bowser") !== null){
       browser = "bowser";
-    } else if (window.navigator.userAgent.match("Chrome") !==null) {
+    } else if (window.navigator.userAgent.match(/Edge\/(\d+).(\d+)$/) !== null) {
+      browser = "edge";
+    } else if (window.navigator.userAgent.match("Chrome") !== null) {
       if (window.navigator.appVersion.match(/Chrome\/([\w\W]*?)\./)[1] >= 26) {
         browser = "chrome-stable";
       }
@@ -37,22 +39,24 @@
     var that = {};
 
     that.browser = getBrowser();
-
     if (that.browser === 'mozilla') {
       L.Logger.debug("Firefox Stack");
       that = Erizo.FirefoxStack(spec);
-    } else if (that.browser === 'bowser'){
+    } else if (that.browser === 'bowser') {
       L.Logger.debug("Bowser Stack");
       that = Erizo.BowserStack(spec);
     } else if (that.browser === 'chrome-stable') {
       L.Logger.debug("Stable!");
       that = Erizo.ChromeStableStack(spec);
+    } else if (that.browser === 'edge') {
+      L.Logger.debug("Edge Stack");
+      that = Erizo.EdgeORTCStack(spec);
     } else {
       L.Logger.debug("None!");
       throw "WebRTC stack not available";
     }
-    if (!that.updateSpec){
-      that.updateSpec = function(newSpec, callback){
+    if (!that.updateSpec) {
+      that.updateSpec = function(newSpec, callback) {
         L.Logger.error("Update Configuration not implemented in this browser");
         if (callback) {
             callback ("unimplemented");

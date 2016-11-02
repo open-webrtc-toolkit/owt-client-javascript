@@ -38,7 +38,7 @@ Erizo.FirefoxStack = function (spec) {
 
     spec.localCandidates = [];
 
-    that.peerConnection.onicecandidate =  function (event) {
+    that.peerConnection.onicecandidate = function (event) {
         if (event.candidate) {
             gotCandidate = true;
 
@@ -210,7 +210,6 @@ Erizo.FirefoxStack = function (spec) {
             },function(error){
                L.Logger.error("Failure setting Local Description", error);
             });
-
         } else if (msg.type === 'candidate') {
             try {
                 var obj;

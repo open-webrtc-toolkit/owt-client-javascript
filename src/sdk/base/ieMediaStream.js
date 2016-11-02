@@ -12,7 +12,7 @@ var ieTrack = function(ieStream) {
   };
 };
 
-  Woogeen.ieplugin.ieMediaStream =function (label) {
+Woogeen.ieplugin.ieMediaStream =function (label) {
   'use strict';
 
   var that = this;
@@ -66,7 +66,7 @@ var ieTrack = function(ieStream) {
   };
 };
 
-  Woogeen.ieplugin.ieRTCDataChannel=function(label, pcid) {
+Woogeen.ieplugin.ieRTCDataChannel=function(label, pcid) {
   'use strict';
   var that = this;
   var pendingMessages = [];
@@ -122,8 +122,7 @@ var ieTrack = function(ieStream) {
   };
 };
 
-
-  Woogeen.ieplugin.ieRTCPeerConnection= function (config, constraints) {
+Woogeen.ieplugin.ieRTCPeerConnection= function (config, constraints) {
   var that = this;
   this.myId = pc_id+1;
   pc_id = pc_id +1;
@@ -274,7 +273,6 @@ var ieTrack = function(ieStream) {
       that.ondatachannel(evt);
     }
   };
-
 
   // Peer connection properties
   this.iceConnectionState = "new";

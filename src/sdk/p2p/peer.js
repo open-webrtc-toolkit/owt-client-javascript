@@ -127,7 +127,7 @@ Woogeen.PeerClient=function (pcConfig) {
   var supportsUnifiedPlan = navigator.mozGetUserMedia?true:false;
 
   // Set configuration for PeerConnection
-  if(pcConfig){
+  if (pcConfig) {
     config={iceServers: pcConfig.iceServers};
   }
 
