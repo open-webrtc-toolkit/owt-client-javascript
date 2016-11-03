@@ -816,7 +816,7 @@ When the video/audio parameters are not supported by the browser, a fallback par
 <br><b>options:</b>
 <ul>
     <li>audio: true/false.</li>
-    <li>video: device, resolution, frameRate, extensionId.</li>
+    <li>video: boolean or object. If the value is a boolean, it indicates whether video is enabled or not. If the value is an object, it may have following properties: device, resolution, frameRate, extensionId.</li>
         <ul>
             <li>Valid device list:</li>
                 <ul>
