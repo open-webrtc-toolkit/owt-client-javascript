@@ -2,7 +2,7 @@
  * Class EventDispatcher provides event handling to sub-classes.
  * It is inherited from Publisher, Room, etc.
  */
-Woogeen.EventDispatcher = function (spec) {
+Woogeen.EventDispatcher = function(spec) {
   'use strict';
   var that = {};
   // Private vars
@@ -11,63 +11,63 @@ Woogeen.EventDispatcher = function (spec) {
 
   // Public functions
 
-/**
-   * @function addEventListener
-   * @desc This function registers a callback function as a handler for the corresponding event. It's shortened form is on(eventType, listener). See the event description in the following table.<br>
-   @htmlonly
-<table class="doxtable">
-    <thead>
-        <tr valign="top">
-            <th><b>Event name</b></th>
-            <th><b>Description</b></th>
-        </tr>
-        <tr valign="top">
-            <td>server-disconnected</td>
-            <td>Indicates the client has been disconnected to the server.</td>
-        </tr>
-        <tr valign="top">
-            <td>user-joined</td>
-            <td>Indicates that there is a new user joined. </td>
-        </tr>
-        <tr valign="top">
-            <td>user-left</td>
-            <td>Indicates that a user has left conference.</td>
-        </tr>
-        <tr valign="top">
-            <td>message-received</td>
-            <td>Indicates there is a new message delivered by server</td>
-        </tr>
-        <tr valign="top">
-            <td>stream-added</td>
-            <td>Indicates there is a new stream available.</td>
-        </tr>
-        <tr valign="top">
-            <td>stream-removed </td>
-            <td>Indicates one existed stream has been removed. </td>
-        </tr>
-        <tr valign="top">
-            <td>recorder-added</td>
-            <td>Indicates there is a new recorder added by server.</td>
-        </tr>
-        <tr valign="top">
-            <td>recorder-removed</td>
-            <td>Indicates the recorder has been removed.</td>
-        </tr>
-    </thead>
-</table>
-@endhtmlonly
-   * @memberOf Woogeen.ConferenceClient
-   * @instance
-   * @param {string} eventType Event string.
-   * @param {function} listener Callback function.
-   * @example
-<script type="text/JavaScript">
-...
-//client.on("server-disconnected", function (evt) {...});
-client.addEventListener("server-disconnected", function (evt) {...});
-</script>
-   */
-   /**
+  /**
+     * @function addEventListener
+     * @desc This function registers a callback function as a handler for the corresponding event. It's shortened form is on(eventType, listener). See the event description in the following table.<br>
+     @htmlonly
+  <table class="doxtable">
+      <thead>
+          <tr valign="top">
+              <th><b>Event name</b></th>
+              <th><b>Description</b></th>
+          </tr>
+          <tr valign="top">
+              <td>server-disconnected</td>
+              <td>Indicates the client has been disconnected to the server.</td>
+          </tr>
+          <tr valign="top">
+              <td>user-joined</td>
+              <td>Indicates that there is a new user joined. </td>
+          </tr>
+          <tr valign="top">
+              <td>user-left</td>
+              <td>Indicates that a user has left conference.</td>
+          </tr>
+          <tr valign="top">
+              <td>message-received</td>
+              <td>Indicates there is a new message delivered by server</td>
+          </tr>
+          <tr valign="top">
+              <td>stream-added</td>
+              <td>Indicates there is a new stream available.</td>
+          </tr>
+          <tr valign="top">
+              <td>stream-removed </td>
+              <td>Indicates one existed stream has been removed. </td>
+          </tr>
+          <tr valign="top">
+              <td>recorder-added</td>
+              <td>Indicates there is a new recorder added by server.</td>
+          </tr>
+          <tr valign="top">
+              <td>recorder-removed</td>
+              <td>Indicates the recorder has been removed.</td>
+          </tr>
+      </thead>
+  </table>
+  @endhtmlonly
+     * @memberOf Woogeen.ConferenceClient
+     * @instance
+     * @param {string} eventType Event string.
+     * @param {function} listener Callback function.
+     * @example
+  <script type="text/JavaScript">
+  ...
+  //client.on("server-disconnected", function (evt) {...});
+  client.addEventListener("server-disconnected", function (evt) {...});
+  </script>
+     */
+  /**
    * @function addEventListener
    * @desc This function registers a callback function as a handler for the corresponding event. It's shortened form is on(eventType, listener). See the event description in the following table.<br>
    @htmlonly
@@ -119,7 +119,7 @@ client.addEventListener("server-disconnected", function (evt) {...});
 client.addEventListener("server-disconnected", function (evt) {...});
 </script>
    */
-   /**
+  /**
    * @function addEventListener
    * @desc This function registers a callback function as a handler for the corresponding event. It's shortened form is on(eventType, listener). See the event description in the following table.<br>
    @htmlonly
@@ -175,24 +175,24 @@ client.addEventListener("server-disconnected", function (evt) {...});
 client.addEventListener("server-disconnected", function (evt) {...});
 </script>
    */
-  that.addEventListener = function (eventType, listener) {
+  that.addEventListener = function(eventType, listener) {
     if (spec.dispatcher.eventListeners[eventType] === undefined) {
       spec.dispatcher.eventListeners[eventType] = [];
     }
     spec.dispatcher.eventListeners[eventType].push(listener);
   };
 
-/**
+  /**
    * @function on
    * @desc This function equals to {@link Woogeen.ConferenceClient#addEventListener addEventListener}.
    * @memberOf Woogeen.ConferenceClient
    * @instance
    * @param {string} eventType Event string.
    * @param {function} listener Callback function.
-*/
+   */
   that.on = that.addEventListener;
 
-/**
+  /**
    * @function removeEventListener
    * @desc This function removes a registered event listener.
    * @memberOf Woogeen.ConferenceClient&Woogeen.SipClient
@@ -200,30 +200,34 @@ client.addEventListener("server-disconnected", function (evt) {...});
    * @param {string} eventType Event string.
    * @param {function} listener Callback function.
    */
-  that.removeEventListener = function (eventType, listener) {
-    if (!spec.dispatcher.eventListeners[eventType]) {return;}
+  that.removeEventListener = function(eventType, listener) {
+    if (!spec.dispatcher.eventListeners[eventType]) {
+      return;
+    }
     var index = spec.dispatcher.eventListeners[eventType].indexOf(listener);
     if (index !== -1) {
       spec.dispatcher.eventListeners[eventType].splice(index, 1);
     }
   };
 
-/**
+  /**
    * @function clearEventListener
    * @desc This function removes all event listeners for one type.
    * @memberOf Woogeen.ConferenceClient&Woogeen.SipClient
    * @instance
    * @param {string} eventType Event string.
    */
-  that.clearEventListener = function (eventType) {
+  that.clearEventListener = function(eventType) {
     spec.dispatcher.eventListeners[eventType] = [];
   };
 
   // It dispatch a new event to the event listeners, based on the type
   // of event. All events are intended to be LicodeEvents.
-  that.dispatchEvent = function (event) {
-    if (!spec.dispatcher.eventListeners[event.type]) {return;}
-    spec.dispatcher.eventListeners[event.type].map(function (listener) {
+  that.dispatchEvent = function(event) {
+    if (!spec.dispatcher.eventListeners[event.type]) {
+      return;
+    }
+    spec.dispatcher.eventListeners[event.type].map(function(listener) {
       listener(event);
     });
   };
@@ -233,7 +237,7 @@ client.addEventListener("server-disconnected", function (evt) {...});
 
 // **** EVENTS ****
 
-function WoogeenEvent (spec) { // base event class
+function WoogeenEvent(spec) { // base event class
   'use strict';
   this.type = spec.type;
   this.attributes = spec.attributes;
@@ -247,7 +251,7 @@ function WoogeenEvent (spec) { // base event class
  * 'stream-added' - indicates that there is a new stream available in the room.
  * 'stream-removed' - shows that a previous available stream has been removed from the room.
  */
-Woogeen.StreamEvent = function WoogeenStreamEvent (spec) {
+Woogeen.StreamEvent = function WoogeenStreamEvent(spec) {
   'use strict';
   WoogeenEvent.call(this, spec);
   this.stream = spec.stream;
@@ -263,7 +267,7 @@ Woogeen.StreamEvent = function WoogeenStreamEvent (spec) {
  * 'peer-joined' - indicates that there is a new peer joined.
  * 'peer-left' - indicates that a peer has left.
  */
-Woogeen.ClientEvent = function WoogeenClientEvent (spec) {
+Woogeen.ClientEvent = function WoogeenClientEvent(spec) {
   'use strict';
   WoogeenEvent.call(this, spec);
   this.user = spec.user;
@@ -272,7 +276,7 @@ Woogeen.ClientEvent = function WoogeenClientEvent (spec) {
 /*
  * Class MessageEvent represents an event related to a custom message.
  */
-Woogeen.MessageEvent = function WoogeenMessageEvent (spec) {
+Woogeen.MessageEvent = function WoogeenMessageEvent(spec) {
   'use strict';
   WoogeenEvent.call(this, spec);
   this.msg = spec.msg;
@@ -281,7 +285,7 @@ Woogeen.MessageEvent = function WoogeenMessageEvent (spec) {
 /*
  * Class ChatEvent represents an event related to P2P chat.
  */
-Woogeen.ChatEvent = function WoogeenChatEvent (spec) {
+Woogeen.ChatEvent = function WoogeenChatEvent(spec) {
   'use strict';
   WoogeenEvent.call(this, spec);
   this.type = spec.type;
@@ -292,7 +296,7 @@ Woogeen.ChatEvent = function WoogeenChatEvent (spec) {
 /*
  * Class DataEvent represents an event related to data channel.
  */
-Woogeen.DataEvent = function WoogeenDataEvent (spec) {
+Woogeen.DataEvent = function WoogeenDataEvent(spec) {
   'use strict';
   WoogeenEvent.call(this, spec);
   this.type = spec.type;
@@ -303,7 +307,7 @@ Woogeen.DataEvent = function WoogeenDataEvent (spec) {
 /*
  * Class RecorderEvent represents an event related to media recording.
  */
-Woogeen.RecorderEvent = function WoogeenRecorderEvent (spec) {
+Woogeen.RecorderEvent = function WoogeenRecorderEvent(spec) {
   'use strict';
   WoogeenEvent.call(this, spec);
   this.recorderId = spec.id;

@@ -1,4 +1,6 @@
-<!DOCTYPE html><html>
+<!DOCTYPE html>
+<html>
+
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <title>WebRTC Gateway Basic Example</title>
@@ -7,88 +9,81 @@
     <link rel="stylesheet" href="vendor/bootstrap.min.css">
     <script src="vendor/bootstrap.min.js"></script>
     <script type="text/javascript" src="vendor/pnotify.custom.min.js"></script>
-    <link href="vendor/pnotify.custom.min.css" media="all" rel="stylesheet" type="text/css" />
+    <link href="vendor/pnotify.custom.min.css" media="all" rel="stylesheet" type="text/css"
+    />
     <script type="text/javascript" src="/woogeen.sdk.js"></script>
     <script type="text/javascript" src="/socket.io.js"></script>
     <script type="text/javascript" src="/woogeen.sdk.ui.js"></script>
     <script type="text/javascript" src="/adapter.js"></script>
     <script type="text/javascript" src="/webrtc.js"></script>
-  <style type="text/css">
-  .vivid {
-    padding-left: 0px;
-    padding-right: 0px;
-    margin-left: 10px;
-    margin-right: 10px;
-    margin-top: 10px;
-    margin-bottom: 10px;
-  }
-  </style>
-<style type="text/css">
+    <style type="text/css">
+      .vivid {
+        padding-left: 0px;
+        padding-right: 0px;
+        margin-left: 10px;
+        margin-right: 10px;
+        margin-top: 10px;
+        margin-bottom: 10px;
+      }
+    </style>
+    <style type="text/css">
+      #style-overwrite {
+        border-top-left-radius: 0px;
+        border-top-right-radius: 0px;
+        border-bottom-left-radius: 95px;
+        border-bottom-right-radius: 95px;
+        background-color: #231F20;
+        color: white;
+      }
+      #style-overwrite:before {
+        content: url('./raw/left.svg');
+        position: absolute;
+        left: -100px;
+        top: 0px;
+      }
+      #style-overwrite:after {
+        content: url('./raw/right.svg');
+        position: absolute;
+        left: calc(100% + 0px);
+        top: 0px;
+      }
+      #style-overwrite2 {
+        background-color: #231F20;
+        border-radius: 50px;
+      }
+      #webrtc-title {
+        position: relative;
+        top: 25px;
+        font-family: Helvetica, Arial;
+        font-size: 50px;
+        margin-left: 50px;
+      }
+      #enabled-by {
+        position: relative;
+        margin-top: 20px;
+        left: 80%;
+        font-family: Helvetica, Arial;
+        font-size: 14px;
+      }
+      #sample-video-container {
+        position: absolute;
+        top: 450px;
+        left: 50px;
+        width: calc(100% - 100px);
+      }
+      .sample-video-elem {
+        /*float: left;*/
+        background-color: #808080;
+        border: 8px solid rgba(58, 75, 159, 0.65);
+        border-radius: 8px;
+        box-shadow: 0px 0px 10px 0px rgba(0, 0, 0, 0.4);
+      }
+      .sample-video-elem-local {
+        border: 8px solid rgba(255, 121, 68, 0.65);
+      }
+    </style>
+  </head>
 
-#style-overwrite {
-  border-top-left-radius: 0px;
-  border-top-right-radius: 0px;
-  border-bottom-left-radius: 95px;
-  border-bottom-right-radius: 95px;
-  background-color: #231F20;
-  color: white;
-}
-
-#style-overwrite:before{
-  content: url('./raw/left.svg');
-  position: absolute;
-  left: -100px;
-  top: 0px;
-}
-
-#style-overwrite:after{
-  content: url('./raw/right.svg');
-  position: absolute;
-  left: calc(100% + 0px);
-  top: 0px;
-}
-
-#style-overwrite2 {
-  background-color: #231F20;
-  border-radius: 50px;
-}
-
-#webrtc-title {
-  position: relative;
-  top: 25px;
-  font-family: Helvetica, Arial;
-  font-size: 50px;
-  margin-left: 50px;
-}
-
-#enabled-by {
-  position: relative;
-  margin-top: 20px;
-  left: 80%;
-  font-family: Helvetica, Arial;
-  font-size: 14px;
-}
-
-#sample-video-container {
-  position: absolute;
-  top: 450px;
-  left: 50px;
-  width: calc(100% - 100px);
-}
-
-.sample-video-elem {
-  /*float: left;*/
-  background-color: #808080;
-  border: 8px solid rgba(58, 75, 159, 0.65);
-  border-radius: 8px;
-  box-shadow: 0px 0px 10px 0px rgba(0, 0, 0, 0.4);
-}
-
-.sample-video-elem-local {
-  border: 8px solid rgba(255, 121, 68, 0.65);
-}
-</style>
-</head>
   <body style="background-color: #E7CA6B">
     <div class="container">
       <div class="row clearfix" id="launcher">
@@ -97,10 +92,10 @@
             <div>
               <span id="webrtc-title">WebRTC SIPGateway Call</span><br>
               <div id="enabled-by">
-                  <span>Enabled by &nbsp;&nbsp;</span><img src="raw/intel.png" width="80">
+                <span>Enabled by &nbsp;&nbsp;</span><img src="raw/intel.png" width="80">
               </div>
             </div>
-            <div  class="col-lg-4">
+            <div class="col-lg-4">
               <div id="hangupCall" style="display:none">
                 <div class="btn-group">
                   <button type="button" class="btn btn-danger" id="call-hangup">Hangup!</button>
@@ -159,19 +154,21 @@
             <div>
               <label>SIP Name</label>
               <div class="input-group">
-                <input id="sip_name" class="form-control" type="text" placehoder="John"/>
+                <input id="sip_name" class="form-control" type="text" placehoder="John" />
               </div>
             </div>
             <div>
               <label>SIP Password</label>
               <div class="input-group">
-                <input id="sip_password" class="form-control" type="password" placeholder="Enter passwrod" />
+                <input id="sip_password" class="form-control" type="password" placeholder="Enter passwrod"
+                />
               </div>
             </div>
             <div>
               <label>SIP Server URI</label>
               <div class="input-group">
-                <input id="sip_server" class="form-control" type="text" placeholder="sip.example.com" />
+                <input id="sip_server" class="form-control" type="text" placeholder="sip.example.com"
+                />
                 <span class="input-group-btn">
                   <button class="btn btn-default" type="button" id="go">Go!</button>
                 </span>
@@ -184,7 +181,8 @@
           <div class="col-lg-4"></div>
           <div class="col-lg-4">
             <div class="input-group">
-              <input id="calleeURI" class="form-control" type="text" placeholder="buddy@sip.example.com" />
+              <input id="calleeURI" class="form-control" type="text" placeholder="buddy@sip.example.com"
+              />
               <span class="input-group-btn">
                 <button class="btn btn-default" type="button" id="call-make" disabled>Call!</button>
                 <button class="btn btn-default" type="button" id="call-accept" disabled>Accept</button>
@@ -195,7 +193,8 @@
           <div class="col-lg-4"></div>
         </div>
         <div class="col-md-12 column" id="gVideo">
-          <div class="col-md-1 column vivid sample-video-elem sample-video-elem-local" style="display:none" id='localVideo'></div>
+          <div class="col-md-1 column vivid sample-video-elem sample-video-elem-local" style="display:none"
+            id='localVideo'></div>
         </div>
       </div>
     </div>
@@ -204,8 +203,8 @@
       L.Logger.setLogLevel(L.Logger.INFO);
       PNotify.prototype.options.styling = "bootstrap2";
       var gWidth = $('#launcher .column').width();
-      var vWidth = gWidth-20-16;
-      $('#enable-video').click(function (evt) {
+      var vWidth = gWidth - 20 - 16;
+      $('#enable-video').click(function(evt) {
         var isEnabled = $('#enable-video').prop('checked');
         if (!isEnabled) {
           $('#media-option button').attr('disabled', 'disabled');
@@ -213,65 +212,67 @@
           $('#media-option button').removeAttr('disabled');
         }
       });
-      $('#media-option .btn-group a').click(function (evt) {
+      $('#media-option .btn-group a').click(function(evt) {
         var resolution = evt.currentTarget.text;
         $('#media-option .btn-group button')[0].textContent = resolution;
       });
-      $('#call-make').click(function (evt) {
+      $('#call-make').click(function(evt) {
         evt.preventDefault();
         var option = {
-            calleeURI: $('input#calleeURI').val(),
-            audio: true,
-            video: $('#enable-video').prop('checked')
+          calleeURI: $('input#calleeURI').val(),
+          audio: true,
+          video: $('#enable-video').prop('checked')
         };
         console.log(option);
         makeCall(option);
         $('#call-form').hide();
       });
-      $('#call-accept').click(function (evt) {
+      $('#call-accept').click(function(evt) {
         evt.preventDefault();
         acceptCall();
         $('#call-form').hide();
       });
-      $('#call-reject').click(function (evt) {
+      $('#call-reject').click(function(evt) {
         evt.preventDefault();
         rejectCall();
         $('#call-make').removeAttr('disabled');
       });
-      $('#call-hangup').click(function (evt) {
+      $('#call-hangup').click(function(evt) {
         evt.preventDefault();
         hangupCall();
       });
-      $('#login-form button#go').click(function (evt){
+      $('#login-form button#go').click(function(evt) {
         evt.preventDefault();
         var info = {
           display_name: $('input#display_name').val(),
-          sip_name:      $('input#sip_name').val(),
+          sip_name: $('input#sip_name').val(),
           sip_password: $('input#sip_password').val(),
-          sip_server:   $('input#sip_server').val()
+          sip_server: $('input#sip_server').val()
         };
         $('div#login-form').hide();
         $('div#media-option').hide();
         $('div#gVideo').width(gWidth);
-        $('div#gVideo').height(gWidth/4*3);
+        $('div#gVideo').height(gWidth / 4 * 3);
         Connect(info);
       });
-      $('#publish').click(function (evt) {
+      $('#publish').click(function(evt) {
         evt.preventDefault();
         publish();
       });
-      $('#unpublish').click(function (evt) {
+      $('#unpublish').click(function(evt) {
         evt.preventDefault();
         unpublish();
       });
-      $('#subscribe').click(function (evt) {
+      $('#subscribe').click(function(evt) {
         evt.preventDefault();
         subscribe();
       });
-      $('#unsubscribe').click(function (evt) {
+      $('#unsubscribe').click(function(evt) {
         evt.preventDefault();
         unsubscribe();
       });
       init();
     </script>
-</body></html>
+  </body>
+
+</html>

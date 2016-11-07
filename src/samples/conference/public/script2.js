@@ -1,20 +1,26 @@
-var runSocketIOSample = function () {
+var runSocketIOSample = function() {
   'use strict';
   var localStream;
-  function getParameterByName (name) {
+
+  function getParameterByName(name) {
     name = name.replace(/[\[]/, '\\\[').replace(/[\]]/, '\\\]');
     var regex = new RegExp('[\\?&]' + name + '=([^&#]*)'),
-        results = regex.exec(location.search);
-    return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
+      results = regex.exec(location.search);
+    return results === null ? '' : decodeURIComponent(results[1].replace(
+      /\+/g, ' '));
   }
 
   var subscribeMix = getParameterByName('mix') || 'true';
 
-  function createToken (room, userName, role, callback) {
+  function createToken(room, userName, role, callback) {
     var req = new XMLHttpRequest();
     var url = '/createToken/';
-    var body = {room: room, username: userName, role: role};
-    req.onreadystatechange = function () {
+    var body = {
+      room: room,
+      username: userName,
+      role: role
+    };
+    req.onreadystatechange = function() {
       if (req.readyState === 4) {
         callback(req.responseText);
       }
@@ -26,27 +32,37 @@ var runSocketIOSample = function () {
 
   var conference = Woogeen.ConferenceClient.create({});
 
-  function displayStream (stream, resolution) {
+  function displayStream(stream, resolution) {
     var div = document.createElement('div');
     var streamId = stream.id();
     if (stream instanceof Woogeen.RemoteMixedStream) {
-      resolution = resolution || {width: 640, height: 480};
+      resolution = resolution || {
+        width: 640,
+        height: 480
+      };
     } else {
-      resolution = resolution || {width: 320, height: 240};
+      resolution = resolution || {
+        width: 320,
+        height: 240
+      };
     }
     if (!resolution.width || !resolution.height || resolution.width > 640) {
-      resolution = {width: 640, height: 480};
+      resolution = {
+        width: 640,
+        height: 480
+      };
     }
-    div.setAttribute('style', 'width: '+resolution.width+'px; height: '+resolution.height+'px;');
+    div.setAttribute('style', 'width: ' + resolution.width + 'px; height: ' +
+      resolution.height + 'px;');
     div.setAttribute('id', 'test' + streamId);
     div.setAttribute('title', 'Stream#' + streamId);
     document.body.appendChild(div);
     stream.show('test' + streamId);
   }
 
-  function trySubscribeStream (stream) {
+  function trySubscribeStream(stream) {
     if (stream instanceof Woogeen.RemoteMixedStream) {
-      stream.on('VideoLayoutChanged', function () {
+      stream.on('VideoLayoutChanged', function() {
         L.Logger.info('stream', stream.id(), 'VideoLayoutChanged');
       });
       if (subscribeMix === 'true') {
@@ -55,31 +71,36 @@ var runSocketIOSample = function () {
         var videoOpt = true;
         var resolution;
         if (resolutions.length > 1) {
-          resolution = resolutions[Math.floor(Math.random()*10)%2];
-          videoOpt = {resolution: resolution};
+          resolution = resolutions[Math.floor(Math.random() * 10) % 2];
+          videoOpt = {
+            resolution: resolution
+          };
           L.Logger.info('subscribe stream with option:', resolution);
         }
-        conference.subscribe(stream, {video: videoOpt}, function () {
+        conference.subscribe(stream, {
+          video: videoOpt
+        }, function() {
           L.Logger.info('subscribed:', stream.id());
           displayStream(stream, resolution);
-        }, function (err) {
+        }, function(err) {
           L.Logger.error(stream.id(), 'subscribe failed:', err);
         });
       } else {
         L.Logger.info('won`t subscribe', stream.id());
       }
     } else {
-      ['VideoEnabled', 'AudioEnabled', 'VideoDisabled', 'AudioDisabled'].map(function (event_name) {
-        stream.on(event_name, function () {
-          L.Logger.info('stream', stream.id(), event_name);
+      ['VideoEnabled', 'AudioEnabled', 'VideoDisabled', 'AudioDisabled'].map(
+        function(event_name) {
+          stream.on(event_name, function() {
+            L.Logger.info('stream', stream.id(), event_name);
+          });
         });
-      });
       if (subscribeMix !== 'true' || stream.isScreen()) {
         L.Logger.info('subscribing:', stream.id());
-        conference.subscribe(stream, function () {
+        conference.subscribe(stream, function() {
           L.Logger.info('subscribed:', stream.id());
           displayStream(stream);
-        }, function (err) {
+        }, function(err) {
           L.Logger.error(stream.id(), 'subscribe failed:', err);
         });
       } else {
@@ -88,28 +109,36 @@ var runSocketIOSample = function () {
     }
   }
 
-  function subscribeDifferentResolution (resolution) {
-    for(var i in conference.remoteStreams){
-      if(conference.remoteStreams[i].isMixed()){
+  function subscribeDifferentResolution(resolution) {
+    for (var i in conference.remoteStreams) {
+      if (conference.remoteStreams[i].isMixed()) {
         var stream = conference.remoteStreams[i];
-        if(subscribeMix === 'true'){
+        if (subscribeMix === 'true') {
           conference.unsubscribe(stream, function(et) {
             L.Logger.info(stream.id(), 'unsubscribe stream');
-            conference.subscribe(stream, {video: {resolution: resolution}}, function () {
+            conference.subscribe(stream, {
+              video: {
+                resolution: resolution
+              }
+            }, function() {
               L.Logger.info('subscribed:', stream.id());
               displayStream(stream, resolution);
-            }, function (err) {
+            }, function(err) {
               L.Logger.error(stream.id(), 'subscribe failed:', err);
             });
           }, function(err) {
             L.Logger.error(stream.id(), 'unsubscribe failed:', err);
           });
-        }else{
-          conference.subscribe(stream, {video: {resolution: resolution}}, function () {
+        } else {
+          conference.subscribe(stream, {
+            video: {
+              resolution: resolution
+            }
+          }, function() {
             L.Logger.info('subscribed:', stream.id());
             displayStream(stream, resolution);
             subscribeMix = 'true';
-          }, function (err) {
+          }, function(err) {
             L.Logger.error(stream.id(), 'subscribe failed:', err);
           });
         }
@@ -117,15 +146,15 @@ var runSocketIOSample = function () {
     }
   }
 
-  conference.onMessage(function (event) {
+  conference.onMessage(function(event) {
     L.Logger.info('Message Received:', event.msg);
   });
 
-  conference.on('server-disconnected', function () {
+  conference.on('server-disconnected', function() {
     L.Logger.info('Server disconnected');
   });
 
-  conference.on('stream-added', function (event) {
+  conference.on('stream-added', function(event) {
     var stream = event.stream;
     // if(stream.id() !== localStream.id()) return;
     L.Logger.info('stream added:', stream.id());
@@ -139,43 +168,47 @@ var runSocketIOSample = function () {
       }
     }
     if (fromMe) {
-      L.Logger.info('stream', stream.id(), 'is from me; will not be subscribed.');
+      L.Logger.info('stream', stream.id(),
+        'is from me; will not be subscribed.');
       return;
     }
     trySubscribeStream(stream);
   });
 
-  conference.on('stream-removed', function (event) {
+  conference.on('stream-removed', function(event) {
     var stream = event.stream;
     L.Logger.info('stream removed: ', stream.id());
-    var id = stream.elementId !==undefined ? stream.elementId : 'test' + stream.id();
+    var id = stream.elementId !== undefined ? stream.elementId : 'test' +
+      stream.id();
     if (id !== undefined) {
       var element = document.getElementById(id);
-      if (element) {document.body.removeChild(element);}
+      if (element) {
+        document.body.removeChild(element);
+      }
     }
   });
 
-  conference.on('user-joined', function (event) {
+  conference.on('user-joined', function(event) {
     L.Logger.info('user joined:', event.user);
   });
 
-  conference.on('user-left', function (event) {
+  conference.on('user-left', function(event) {
     L.Logger.info('user left:', event.user);
   });
 
-  conference.on('recorder-added', function (event) {
+  conference.on('recorder-added', function(event) {
     L.Logger.info('media recorder added:', event.recorderId);
   });
 
-  conference.on('recorder-continued', function (event) {
+  conference.on('recorder-continued', function(event) {
     L.Logger.info('media recorder continued:', event.recorderId);
   });
 
-  conference.on('recorder-removed', function (event) {
+  conference.on('recorder-removed', function(event) {
     L.Logger.info('media recorder removed:', event.recorderId);
   });
 
-  window.onload = function () {
+  window.onload = function() {
     L.Logger.setLogLevel(L.Logger.INFO);
     var myResolution = getParameterByName('resolution') || 'vga';
     var shareScreen = getParameterByName('screen') || false;
@@ -188,11 +221,14 @@ var runSocketIOSample = function () {
       var shareButton = document.getElementById('shareScreen');
       if (shareButton) {
         shareButton.setAttribute('style', 'display:block');
-        shareButton.onclick = (function () {
-          conference.shareScreen({resolution: myResolution}, function (stream) {
-            document.getElementById('myScreen').setAttribute('style', 'width:320px; height: 240px;');
+        shareButton.onclick = (function() {
+          conference.shareScreen({
+            resolution: myResolution
+          }, function(stream) {
+            document.getElementById('myScreen').setAttribute(
+              'style', 'width:320px; height: 240px;');
             stream.show('myScreen');
-          }, function (err) {
+          }, function(err) {
             L.Logger.error('share screen failed:', err);
           });
         });
@@ -200,53 +236,55 @@ var runSocketIOSample = function () {
     }
 
     var externalOutputButton = document.getElementById('externalOutput');
-    externalOutputButton.onclick = (function () {
+    externalOutputButton.onclick = (function() {
       var isOutputing;
       var startExternalOutput = 'start external streaming';
       var stopExternalOutput = 'stop external streaming';
       externalOutputButton.innerHTML = startExternalOutput;
-      return function () {
+      return function() {
         var url = document.getElementById('externalOutputURL');
         if (!url || !url.value) {
-          L.Logger.error('invalid url of rtsp server.');
+          L.Logger.error('invalid url of rtsp server.');
           return;
         }
         if (!isOutputing) {
-          conference.addExternalOutput(url.value, function () {
-            L.Logger.info('started external streaming');
+          conference.addExternalOutput(url.value, function() {
+            L.Logger.info('started external streaming');
             isOutputing = true;
             externalOutputButton.innerHTML = stopExternalOutput;
-          }, function (err) {
-            L.Logger.error('start external streaming failed:', err);
-          });
+          }, function(err) {
+            L.Logger.error('start external streaming failed:',
+              err);
+          });
         } else {
-          conference.removeExternalOutput(url.value, function () {
-            L.Logger.info('stopped external streaming');
+          conference.removeExternalOutput(url.value, function() {
+            L.Logger.info('stopped external streaming');
             isOutputing = false;
             externalOutputButton.innerHTML = startExternalOutput;
-          }, function (err) {
-            L.Logger.error('stop external streaming failed:', err);
-          });
+          }, function(err) {
+            L.Logger.error('stop external streaming failed:', err);
+          });
         }
       };
     }());
 
-    createToken(myRoom, 'user', 'presenter', function (response) {
+    createToken(myRoom, 'user', 'presenter', function(response) {
       var token = response;
 
-      conference.join(token, function (resp) {
+      conference.join(token, function(resp) {
         if (typeof mediaUrl === 'string' && mediaUrl !== '') {
-            Woogeen.ExternalStream.create({
+          Woogeen.ExternalStream.create({
             url: mediaUrl
-          }, function (err, stream) {
+          }, function(err, stream) {
             if (err) {
-              return L.Logger.error('create ExternalStream failed:', err);
+              return L.Logger.error(
+                'create ExternalStream failed:', err);
             }
             localStream = stream;
-            conference.publish(localStream, {}, function (st) {
+            conference.publish(localStream, {}, function(st) {
               L.Logger.info('stream published:', st.id());
-            }, function (err) {
-               L.Logger.error('publish failed:', err);
+            }, function(err) {
+              L.Logger.error('publish failed:', err);
             });
           });
         } else if (shareScreen === false) {
@@ -257,38 +295,45 @@ var runSocketIOSample = function () {
                 resolution: myResolution
               },
               audio: true
-            }, function (err, stream) {
+            }, function(err, stream) {
               if (err) {
-                return L.Logger.error('create LocalStream failed:', err);
+                return L.Logger.error(
+                  'create LocalStream failed:', err);
               }
               localStream = stream;
               localStream.show('myVideo');
 
-              conference.publish(localStream, {}, function (st) {
+              conference.publish(localStream, {}, function(st) {
                 L.Logger.info('stream published:', st.id());
-              }, function (err) {
-                 L.Logger.error('publish failed:', err);
+              }, function(err) {
+                L.Logger.error('publish failed:', err);
               });
             });
           }
         } else if (isHttps) {
-          conference.shareScreen({resolution: myResolution}, function (stream) {
-            document.getElementById('myScreen').setAttribute('style', 'width:320px; height: 240px;');
+          conference.shareScreen({
+            resolution: myResolution
+          }, function(stream) {
+            document.getElementById('myScreen').setAttribute(
+              'style', 'width:320px; height: 240px;');
             stream.show('myScreen');
-          }, function (err) {
+          }, function(err) {
             L.Logger.error('share screen failed:', err);
           });
         } else {
-          L.Logger.error('Share screen must be done in https enviromnent!');
+          L.Logger.error(
+            'Share screen must be done in https enviromnent!');
         }
         var streams = resp.streams;
-        streams.map(function (stream) {
-          if(stream.resolutions){
-            var selectResolution = document.getElementById('resolutions');
-            stream.resolutions().map(function(resolution){
+        streams.map(function(stream) {
+          if (stream.resolutions) {
+            var selectResolution = document.getElementById(
+              'resolutions');
+            stream.resolutions().map(function(resolution) {
               var button = document.createElement('button');
-              button.innerHTML = resolution.width + 'x' + resolution.height;
-              button.onclick = function(){
+              button.innerHTML = resolution.width + 'x' +
+                resolution.height;
+              button.onclick = function() {
                 subscribeDifferentResolution(resolution);
               }
               selectResolution.appendChild(button);
@@ -299,20 +344,21 @@ var runSocketIOSample = function () {
         });
         var users = resp.users;
         if (users instanceof Array) {
-          users.map(function (u) {
+          users.map(function(u) {
             L.Logger.info('user in conference:', u);
           });
         }
-      }, function (err) {
+      }, function(err) {
         L.Logger.error('server connection failed:', err);
       });
     });
   };
 
   window.onbeforeunload = function() {
-    if (localStream){
+    if (localStream) {
       localStream.close();
-      if (localStream.channel && typeof localStream.channel.close === 'function') {
+      if (localStream.channel && typeof localStream.channel.close ===
+        'function') {
         localStream.channel.close();
       }
     }

@@ -4,49 +4,49 @@
  * @class Gab
  * @classDesc A proxy to bridge old gab to new signaling channel.
  */
-function Gab(loginInfo){ /*jshint ignore:line*/ //loginInfo is unused.
+function Gab(loginInfo) { /*jshint ignore:line*/ //loginInfo is unused.
   'use strict';
 
-  var self=this;
+  var self = this;
 
-  var sc=new SignalingChannel();
+  var sc = new SignalingChannel();
 
   // Event handlers.
   /**
    * @property {function} onConnected
    * @memberOf Gab#
    */
-  this.onConnected=null;
+  this.onConnected = null;
   /**
    * @property {function} onDisconnect
    * @memberOf Gab#
    */
-  this.onDisconnected=null;
+  this.onDisconnected = null;
   /**
    * @property {function} onConnectFailed This function will be executed after connect to server failed. Parameter: errorCode for error code.
    * @memberOf Gab#
    */
-  this.onConnectFailed=null;
+  this.onConnectFailed = null;
   /**
    * @property {function} onChatInvitation Parameter: senderId for sender's ID.
    * @memberOf Gab#
    */
-  this.onChatInvitation=null;
+  this.onChatInvitation = null;
   /**
    * @property {function} onChatDenied Parameter: senderId for sender's ID.
    * @memberOf Gab#
    */
-  this.onChatDenied=null;
+  this.onChatDenied = null;
   /**
    * @property {function} onChatStopped Parameter: senderId for sender's ID.
    * @memberOf Gab#
    */
-  this.onChatStopped=null;
+  this.onChatStopped = null;
   /**
    * @property {function} onChatAccepted Parameter: senderId for sender's ID.
    * @memberOf Gab#
    */
-  this.onChatAccepted=null;
+  this.onChatAccepted = null;
   /**
    * @property {function} onChatError Parameter: errorCode.
    * @memberOf Gab#
@@ -56,58 +56,58 @@ function Gab(loginInfo){ /*jshint ignore:line*/ //loginInfo is unused.
    * @property {function} onChatSignal Parameter: signaling message, sender ID.
    * @memberOf Gab#
    */
-  this.onChatSignal=null;
+  this.onChatSignal = null;
   /**
    * @property {function} onStreamType Parameter: video type message, sender ID.
    * @memberOf Gab#
    */
-  this.onStreamType=null;
+  this.onStreamType = null;
   /**
    * @property {function} onAuthenticated
    * @memberOf Gab#
    */
-  this.onAuthenticated=null;
+  this.onAuthenticated = null;
 
-  sc.onMessage=function(data,from){
-    var dataObj=JSON.parse(data);
-    switch(dataObj.type){
+  sc.onMessage = function(data, from) {
+    var dataObj = JSON.parse(data);
+    switch (dataObj.type) {
       case 'chat-invitation':
-        if(self.onChatInvitation){
+        if (self.onChatInvitation) {
           self.onChatInvitation(from, dataObj.ua);
         }
         break;
       case 'chat-accepted':
-        if(self.onChatAccepted){
+        if (self.onChatAccepted) {
           self.onChatAccepted(from, dataObj.ua);
         }
         break;
       case 'chat-denied':
-        if(self.onChatDenied){
+        if (self.onChatDenied) {
           self.onChatDenied(from);
         }
         break;
       case 'chat-closed':
-        if(self.onChatStopped){
+        if (self.onChatStopped) {
           self.onChatStopped(from);
         }
         break;
       case 'stream-type':
-        if(self.onStreamType){
-          self.onStreamType(dataObj.data,from);
+        if (self.onStreamType) {
+          self.onStreamType(dataObj.data, from);
         }
         break;
       case 'chat-signal':
-        if(self.onChatSignal){
-          self.onChatSignal(dataObj.data,from);
+        if (self.onChatSignal) {
+          self.onChatSignal(dataObj.data, from);
         }
         break;
       case 'chat-negotiation-needed':
-        if(self.onNegotiationNeeded){
+        if (self.onNegotiationNeeded) {
           self.onNegotiationNeeded(from);
         }
         break;
       case 'chat-negotiation-accepted':
-        if(self.onNegotiationAccepted){
+        if (self.onNegotiationAccepted) {
           self.onNegotiationAccepted(from);
         }
         break;
@@ -116,8 +116,8 @@ function Gab(loginInfo){ /*jshint ignore:line*/ //loginInfo is unused.
     }
   };
 
-  sc.onServerDisconnected=function(){
-    if(self.onDisconnected){
+  sc.onServerDisconnected = function() {
+    if (self.onDisconnected) {
       self.onDisconnected();
     }
   };
@@ -127,11 +127,16 @@ function Gab(loginInfo){ /*jshint ignore:line*/ //loginInfo is unused.
    * @memberOf Gab#
    * @param {string} uid Remote user's ID
    */
-  this.sendChatInvitation= function(uid, ua, successCallback, failureCallback){
-    var msg={type:'chat-closed'};
-    sc.sendMessage(JSON.stringify(msg),uid);
-    msg={type:'chat-invitation', ua: ua};
-    sc.sendMessage(JSON.stringify(msg),uid, successCallback, failureCallback);
+  this.sendChatInvitation = function(uid, ua, successCallback, failureCallback) {
+    var msg = {
+      type: 'chat-closed'
+    };
+    sc.sendMessage(JSON.stringify(msg), uid);
+    msg = {
+      type: 'chat-invitation',
+      ua: ua
+    };
+    sc.sendMessage(JSON.stringify(msg), uid, successCallback, failureCallback);
   };
 
   /**
@@ -139,9 +144,12 @@ function Gab(loginInfo){ /*jshint ignore:line*/ //loginInfo is unused.
    * @memberOf Gab#
    * @param {string} uid Remote user's ID
    */
-  this.sendChatAccepted=function(uid, ua, successCallback, failureCallback){
-    var msg={type:'chat-accepted', ua:ua};
-    sc.sendMessage(JSON.stringify(msg),uid, successCallback, failureCallback);
+  this.sendChatAccepted = function(uid, ua, successCallback, failureCallback) {
+    var msg = {
+      type: 'chat-accepted',
+      ua: ua
+    };
+    sc.sendMessage(JSON.stringify(msg), uid, successCallback, failureCallback);
   };
 
   /**
@@ -149,9 +157,11 @@ function Gab(loginInfo){ /*jshint ignore:line*/ //loginInfo is unused.
    * @memberOf Gab#
    * @param {string} uid Remote user's ID
    */
-  this.sendChatDenied=function(uid, successCallback, failureCallback){
-    var msg={type:'chat-denied'};
-    sc.sendMessage(JSON.stringify(msg),uid, successCallback, failureCallback);
+  this.sendChatDenied = function(uid, successCallback, failureCallback) {
+    var msg = {
+      type: 'chat-denied'
+    };
+    sc.sendMessage(JSON.stringify(msg), uid, successCallback, failureCallback);
   };
 
   /**
@@ -159,9 +169,11 @@ function Gab(loginInfo){ /*jshint ignore:line*/ //loginInfo is unused.
    * @memberOf Gab#
    * @param {string} uid Remote user's ID
    */
-  this.sendChatStopped=function(uid, successCallback, failureCallback){
-    var msg={type:'chat-closed'};
-    sc.sendMessage(JSON.stringify(msg),uid, successCallback, failureCallback);
+  this.sendChatStopped = function(uid, successCallback, failureCallback) {
+    var msg = {
+      type: 'chat-closed'
+    };
+    sc.sendMessage(JSON.stringify(msg), uid, successCallback, failureCallback);
   };
 
   /**
@@ -170,9 +182,12 @@ function Gab(loginInfo){ /*jshint ignore:line*/ //loginInfo is unused.
    * @param {string} uid Remote user's ID
    * @param {string} stream to Remote user, it is like: {streamId:'label of stream', type:'audio'} or {streamId:'label of stream', type:'video'} or {streamId:'label of stream', type:'screen'}
    */
-  this.sendStreamType=function(uid, stream, successCallback, failureCallback){
-    var msg={type:'stream-type', data:stream};
-    sc.sendMessage(JSON.stringify(msg),uid, successCallback, failureCallback);
+  this.sendStreamType = function(uid, stream, successCallback, failureCallback) {
+    var msg = {
+      type: 'stream-type',
+      data: stream
+    };
+    sc.sendMessage(JSON.stringify(msg), uid, successCallback, failureCallback);
   };
 
   /**
@@ -181,9 +196,13 @@ function Gab(loginInfo){ /*jshint ignore:line*/ //loginInfo is unused.
    * @param {string} uid Remote user's ID
    * @param {string} message Signal message
    */
-  this.sendSignalMessage=function(uid, message, successCallback, failureCallback){
-    var msg={type:'chat-signal', data:message};
-    sc.sendMessage(JSON.stringify(msg),uid, successCallback, failureCallback);
+  this.sendSignalMessage = function(uid, message, successCallback,
+    failureCallback) {
+    var msg = {
+      type: 'chat-signal',
+      data: message
+    };
+    sc.sendMessage(JSON.stringify(msg), uid, successCallback, failureCallback);
   };
 
   /**
@@ -191,9 +210,11 @@ function Gab(loginInfo){ /*jshint ignore:line*/ //loginInfo is unused.
    * @memberOf Gab#
    * @param {string} uid Remote user's ID
    */
-  this.sendNegotiationNeeded=function(uid, successCallback, failureCallback){
-    var msg={type:'chat-negotiation-needed'};
-    sc.sendMessage(JSON.stringify(msg),uid, successCallback, failureCallback);
+  this.sendNegotiationNeeded = function(uid, successCallback, failureCallback) {
+    var msg = {
+      type: 'chat-negotiation-needed'
+    };
+    sc.sendMessage(JSON.stringify(msg), uid, successCallback, failureCallback);
   };
 
   /**
@@ -201,16 +222,18 @@ function Gab(loginInfo){ /*jshint ignore:line*/ //loginInfo is unused.
    * @memberOf Gab#
    * @param {string} uid Remote user's ID
    */
-  this.sendNegotiationAccepted=function(uid, successCallback, failureCallback){
-    var msg={type:'chat-negotiation-accepted'};
-    sc.sendMessage(JSON.stringify(msg),uid, successCallback, failureCallback);
+  this.sendNegotiationAccepted = function(uid, successCallback, failureCallback) {
+    var msg = {
+      type: 'chat-negotiation-accepted'
+    };
+    sc.sendMessage(JSON.stringify(msg), uid, successCallback, failureCallback);
   };
 
   /**
    * Finalize
    * @memberOf Gab#
    */
-  this.finalize=function(){
+  this.finalize = function() {
     sc.disconnect();
   };
 
@@ -218,17 +241,17 @@ function Gab(loginInfo){ /*jshint ignore:line*/ //loginInfo is unused.
    * Connect to signaling server
    * @memberOf Gab#
    */
-  this.connect=function(loginInfo, successCallback, failureCallback){
-    sc.connect(loginInfo,function(id){
-      if(self.onConnected){
+  this.connect = function(loginInfo, successCallback, failureCallback) {
+    sc.connect(loginInfo, function(id) {
+      if (self.onConnected) {
         self.onConnected();
       }
-      if(self.onAuthenticated){
+      if (self.onAuthenticated) {
         self.onAuthenticated(id);
       }
-      if(successCallback){
+      if (successCallback) {
         successCallback(id);
       }
-    },failureCallback);
+    }, failureCallback);
   };
 }

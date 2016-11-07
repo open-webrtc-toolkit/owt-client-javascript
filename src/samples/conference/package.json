@@ -14,11 +14,11 @@
     "mcu"
   ],
   "dependencies": {
-    "body-parser":"~1.14.1",
-    "express":"",
-    "errorhandler":"",
-    "morgan":"",
-    "socket.io":""
+    "body-parser": "~1.14.1",
+    "express": "",
+    "errorhandler": "",
+    "morgan": "",
+    "socket.io": ""
   },
   "engines": {
     "node": ">=0.10"

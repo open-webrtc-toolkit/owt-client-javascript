@@ -3,20 +3,20 @@
 /*
  * Woogeen.Common provides common functions for WooGeen SDK
  */
-Woogeen.Common = (function(){
+Woogeen.Common = (function() {
 
-  var sdkVersion='3.2.1';
+  var sdkVersion = '3.2.1';
 
   // Convert W3C defined statistic data to SDK format.
   var parseStats = function(stats) {
     'use strict';
     var index = 0;
     var statusReport = [];
-    if(navigator.mozGetUserMedia){// Firefox, unsupported properties return -1 or ""
-      stats.forEach(function(stat, id){
+    if (navigator.mozGetUserMedia) { // Firefox, unsupported properties return -1 or ""
+      stats.forEach(function(stat, id) {
         var curStat;
         var match = false;
-        if(id.indexOf("outbound_rtp_audio_") >= 0){
+        if (id.indexOf("outbound_rtp_audio_") >= 0) {
           match = true;
           curStat = {
             "type": "ssrc_audio_send",
@@ -25,11 +25,13 @@ Woogeen.Common = (function(){
               "bytes_sent": stat.bytesSent,
               "codec_name": "",
               "packets_sent": stat.packetsSent,
-              "packets_lost": stats.get("outbound_rtcp_audio_" + id.slice(19)).packetsLost,
-              "rtt_ms": stats.get("outbound_rtcp_audio_" + id.slice(19)).mozRtt
+              "packets_lost": stats.get("outbound_rtcp_audio_" + id
+                .slice(19)).packetsLost,
+              "rtt_ms": stats.get("outbound_rtcp_audio_" + id.slice(
+                19)).mozRtt
             }
           };
-        }else if(id.indexOf("outbound_rtp_video_") >= 0){
+        } else if (id.indexOf("outbound_rtp_video_") >= 0) {
           match = true;
           curStat = {
             "type": "ssrc_video_send",
@@ -38,7 +40,8 @@ Woogeen.Common = (function(){
               "bytes_sent": stat.bytesSent,
               "codec_name": "",
               "packets_sent": stat.packetsSent,
-              "packets_lost": stats.get("outbound_rtcp_video_" + id.slice(19)).packetsLost,
+              "packets_lost": stats.get("outbound_rtcp_video_" + id
+                .slice(19)).packetsLost,
               "firs_rcvd": -1,
               "plis_rcvd": -1,
               "nacks_rcvd": -1,
@@ -47,10 +50,11 @@ Woogeen.Common = (function(){
               "adapt_reason": -1,
               "adapt_changes": -1,
               "framerate_sent": stat.framerateMean,
-              "rtt_ms": stats.get("outbound_rtcp_video_" + id.slice(19)).mozRtt
+              "rtt_ms": stats.get("outbound_rtcp_video_" + id.slice(
+                19)).mozRtt
             }
           };
-        }else if(id.indexOf("inbound_rtp_audio_") >= 0){
+        } else if (id.indexOf("inbound_rtp_audio_") >= 0) {
           match = true;
           curStat = {
             "type": "ssrc_audio_recv",
@@ -63,7 +67,7 @@ Woogeen.Common = (function(){
               "codec_name": ""
             }
           };
-        }else if(id.indexOf("inbound_rtp_video_") >= 0){
+        } else if (id.indexOf("inbound_rtp_video_") >= 0) {
           match = true;
           curStat = {
             "type": "ssrc_video_recv",
@@ -84,13 +88,13 @@ Woogeen.Common = (function(){
             }
           };
         }
-        if(match) {
+        if (match) {
           statusReport[index] = curStat;
           index++;
         }
       });
-    }else{
-      stats.forEach(function(res){
+    } else {
+      stats.forEach(function(res) {
         var curStat;
         var match = false;
         if (res.type === "ssrc") {
@@ -187,8 +191,7 @@ Woogeen.Common = (function(){
             "id": "",
             "stats": {
               "available_send_bandwidth": res.googAvailableSendBandwidth,
-              "available_receive_bandwidth":
-                  res.googAvailableReceiveBandwidth,
+              "available_receive_bandwidth": res.googAvailableReceiveBandwidth,
               "transmit_bitrate": res.googTransmitBitrate,
               "retransmit_bitrate": res.googRetransmitBitrate
             }
@@ -211,16 +214,16 @@ Woogeen.Common = (function(){
     var curOutputLevels = [];
     var match = false;
     var results = stats.result();
-    for(var i = 0; i < results.length; i++){
+    for (var i = 0; i < results.length; i++) {
       var res = results[i];
-      if(res.type === "ssrc"){
-      //This is a ssrc report. Check if it is send/recv
-        if(res.stat("bytesSent")){
-        //check if it"s audio or video
-          if(res.stat("googFrameHeightSent")){
-          //video send, not setting audio levels
-          }else{
-          //audio send
+      if (res.type === "ssrc") {
+        //This is a ssrc report. Check if it is send/recv
+        if (res.stat("bytesSent")) {
+          //check if it"s audio or video
+          if (res.stat("googFrameHeightSent")) {
+            //video send, not setting audio levels
+          } else {
+            //audio send
             match = true;
             var curObj = {};
             curObj.ssrc = res.id;
@@ -228,14 +231,14 @@ Woogeen.Common = (function(){
             curInputLevels[inLevelIdx] = curObj;
             inLevelIdx++;
           }
-        }else{
-        //this is ssrc receive report.
-          if(res.stat("googFrameHeightReceived")){
-          //video receive
-          }else{
-          //audio receive
+        } else {
+          //this is ssrc receive report.
+          if (res.stat("googFrameHeightReceived")) {
+            //video receive
+          } else {
+            //audio receive
             match = true;
-            var curObj = {};/*jshint ignore:line*/
+            var curObj = {}; /*jshint ignore:line*/
             curObj.ssrc = res.id;
             curObj.level = res.stat("audioOutputLevel");
             curOutputLevels[outLevelIdx] = curObj;
@@ -244,18 +247,18 @@ Woogeen.Common = (function(){
         }
       }
     }
-    if(match){
-      if(inLevelIdx > 0){
+    if (match) {
+      if (inLevelIdx > 0) {
         stats_Report.audioInputLevels = curInputLevels;
       }
-      if(outLevelIdx > 0){
+      if (outLevelIdx > 0) {
         stats_Report.audioOutputLevels = curOutputLevels;
       }
     }
     return stats_Report;
   };
 
-/* Following functions are copied from apprtc with modifications */
+  /* Following functions are copied from apprtc with modifications */
 
   // Find the line in sdpLines that starts with |prefix|, and, if specified,
   // contains |substr| (case-insensitive search).
@@ -270,7 +273,7 @@ Woogeen.Common = (function(){
     for (var i = startLine; i < realEndLine; ++i) {
       if (sdpLines[i].indexOf(prefix) === 0) {
         if (!substr ||
-            sdpLines[i].toLowerCase().indexOf(substr.toLowerCase()) !== -1) {
+          sdpLines[i].toLowerCase().indexOf(substr.toLowerCase()) !== -1) {
           return i;
         }
       }
@@ -310,8 +313,8 @@ Woogeen.Common = (function(){
 
   // Modify m-line. Put preferred payload type in the front of other types.
   // mediaType is 'audio' or 'video'.
-  var setPreferredCodec = function(sdp, mediaType, codecName){
-    if(!mediaType||!codecName){
+  var setPreferredCodec = function(sdp, mediaType, codecName) {
+    if (!mediaType || !codecName) {
       L.Logger.warning('Media type or codec name is not provided.');
       return sdp;
     }
@@ -327,30 +330,43 @@ Woogeen.Common = (function(){
     // If the codec is available, set it as the default in m line.
     var payload = getCodecPayloadType(sdpLines, codecName);
     if (payload) {
-      sdpLines[mLineIndex] = setDefaultCodec(sdpLines[mLineIndex], payload);
+      sdpLines[mLineIndex] = setDefaultCodec(sdpLines[mLineIndex],
+        payload);
     }
 
     sdp = sdpLines.join('\r\n');
     return sdp;
   };
 
-/* Above functions are copied from apprtc with modifications */
+  /* Above functions are copied from apprtc with modifications */
 
   // Returns system information.
   // Format: {sdk:{version:**, type:**}, runtime:{version:**, name:**}};
-  var sysInfo = function(){
+  var sysInfo = function() {
     var info = Object.create({});
-    info.sdk = {version:sdkVersion, type:'JavaScript'};
+    info.sdk = {
+      version: sdkVersion,
+      type: 'JavaScript'
+    };
     var userAgent = navigator.userAgent;
     var firefoxRegex = /Firefox\/([0-9\.]+)/;
     var chromeRegex = /Chrome\/([0-9\.]+)/;
     var result = chromeRegex.exec(userAgent);
-    if(result){
-      info.runtime = {name:'Chrome', version:result[1]};
-    } else if(result=firefoxRegex.exec(userAgent)){
-      info.runtime = {name:'FireFox', version:result[1]};
+    if (result) {
+      info.runtime = {
+        name: 'Chrome',
+        version: result[1]
+      };
+    } else if (result = firefoxRegex.exec(userAgent)) {
+      info.runtime = {
+        name: 'FireFox',
+        version: result[1]
+      };
     } else {
-      info.runtime = {name:'Unknown', version:''};
+      info.runtime = {
+        name: 'Unknown',
+        version: ''
+      };
     }
     return info;
   };
@@ -359,7 +375,7 @@ Woogeen.Common = (function(){
     parseStats: parseStats,
     parseAudioLevel: parseAudioLevel,
     setPreferredCodec: setPreferredCodec,
-    sysInfo:sysInfo
+    sysInfo: sysInfo
   };
 }());
 
@@ -367,7 +383,9 @@ Woogeen.Common = (function(){
  * Following UI code is for backward compability. Delete it when it is old enough.
  * Detailed reason: we provide global function |attachMediaStream| in the old adapter.js. However, it has been move to adapter.browserShim.attachMediaStream in the latest code, and it will be removed in the future. We should modify adapter.js as less as possible. So we provide |attachMediaStream| in Woogeen.UI namespace.
  */
-attachMediaStream = function(){
-  L.Logger.warning('Global attachMediaStream is deprecated, pleause include woogeen.sdk.ui.js and use Woogeen.UI.attachMediaStream instead.');
+attachMediaStream = function() {
+  L.Logger.warning(
+    'Global attachMediaStream is deprecated, pleause include woogeen.sdk.ui.js and use Woogeen.UI.attachMediaStream instead.'
+  );
   adapter.browserShim.attachMediaStream.apply(this, arguments);
 };

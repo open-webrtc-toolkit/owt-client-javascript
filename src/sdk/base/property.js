@@ -5,10 +5,14 @@ var Woogeen = (function() {
 
   Object.defineProperties(Woogeen, {
     version: {
-      get: function() { return '<%= pkg.version %>'; }
+      get: function() {
+        return '<%= pkg.version %>';
+      }
     },
     name: {
-      get: function() { return '<%= pkg.title %>'; }
+      get: function() {
+        return '<%= pkg.title %>';
+      }
     }
   });
 

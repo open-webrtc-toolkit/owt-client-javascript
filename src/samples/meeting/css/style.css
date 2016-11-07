@@ -1,202 +1,236 @@
 html,
 body {
-	width: 100%;
-	height: 100%;
-	margin: 0px;
-	padding: 0px;
-	overflow: hidden;
-	background-color: rgb(0, 60, 113);
+  width: 100%;
+  height: 100%;
+  margin: 0px;
+  padding: 0px;
+  overflow: hidden;
+  background-color: rgb(0, 60, 113);
 }
+
 a,
 a:hover,
 a:active,
 a:visited {
-	font-size: 14px;
-	color: rgb(0, 113, 197);
-	text-decoration: none;
+  font-size: 14px;
+  color: rgb(0, 113, 197);
+  text-decoration: none;
 }
+
 .login {
-	width: 100%;
-	height: 100%;
-	display: -webkit-box;
-	-webkit-box-orient: horizontal;
-	-webkit-box-pack: center;
-	-webkit-box-align: center;
-	display: none;
+  width: 100%;
+  height: 100%;
+  display: -webkit-box;
+  -webkit-box-orient: horizontal;
+  -webkit-box-pack: center;
+  -webkit-box-align: center;
+  display: none;
 }
+
 .context {
-	width: 100%;
-	height: 100%;
+  width: 100%;
+  height: 100%;
 }
-.login > .content {
-	width: 320px;
-	height: 202px;
-	border: 1px solid rgb(0, 174, 239);
-	border-radius: 10px;
-	background-color: rgba(255, 255, 255, 0.7);
-	transition: width 1s, height 1s;
+
+.login>.content {
+  width: 320px;
+  height: 202px;
+  border: 1px solid rgb(0, 174, 239);
+  border-radius: 10px;
+  background-color: rgba(255, 255, 255, 0.7);
+  transition: width 1s, height 1s;
 }
-.login > .content > .setting-view {
-	display: none;
+
+.login>.content>.setting-view {
+  display: none;
 }
-.login > .content > .login-view,
-.login > .content > .setting-view {
-	width: 100%;
-	height: 100%;
+
+.login>.content>.login-view,
+.login>.content>.setting-view {
+  width: 100%;
+  height: 100%;
 }
-.login > .content > .login-view > .title,
-.login > .content > .setting-view > .title {
-	height: 60px;
-	width: calc(100% - 15px);
-	font-size: 24px;
-	font-weight: bold;
-	padding-left: 15px;
-	line-height: 60px;
-	color: #333333;
+
+.login>.content>.login-view>.title,
+.login>.content>.setting-view>.title {
+  height: 60px;
+  width: calc(100% - 15px);
+  font-size: 24px;
+  font-weight: bold;
+  padding-left: 15px;
+  line-height: 60px;
+  color: #333333;
 }
-.login > .content > .login-view input[type="text"] {
-	margin-left: 15px;
-	height: 28px;
-	font-size: 14px;
-	border: 1px solid rgba(0, 174, 239, 0.5);
-	border-radius: 5px;
-	width: calc(100% - 32px);
-	outline: none;
+
+.login>.content>.login-view input[type="text"] {
+  margin-left: 15px;
+  height: 28px;
+  font-size: 14px;
+  border: 1px solid rgba(0, 174, 239, 0.5);
+  border-radius: 5px;
+  width: calc(100% - 32px);
+  outline: none;
 }
-.login > .content > .login-view > .setting,
-.login > .content > .login-view > .login_btn,
-.login > .content > .setting-view > .video_audio_set,
-.login > .content > .setting-view > .resolution_set,
-.login > .content > .setting-view > .local_set,
-.login > .content > .setting-view > .save_btn {
-	width: calc(100% - 30px);
-	height: 30px;
-	line-height: 30px;
-	font-size: 14px;
-	margin-left: 15px;
+
+.login>.content>.login-view>.setting,
+.login>.content>.login-view>.login_btn,
+.login>.content>.setting-view>.video_audio_set,
+.login>.content>.setting-view>.resolution_set,
+.login>.content>.setting-view>.local_set,
+.login>.content>.setting-view>.save_btn {
+  width: calc(100% - 30px);
+  height: 30px;
+  line-height: 30px;
+  font-size: 14px;
+  margin-left: 15px;
 }
-.login > .content > .setting-view > .save_btn {
-	height: 50px;
-	line-height: 50px;
+
+.login>.content>.setting-view>.save_btn {
+  height: 50px;
+  line-height: 50px;
 }
-.login > .content > .login-view > .setting > .col {
-	width: calc(50% - 2px);
-	height: 100%;
-	display: inline-block;
+
+.login>.content>.login-view>.setting>.col {
+  width: calc(50% - 2px);
+  height: 100%;
+  display: inline-block;
 }
-.login > .content > .login-view > .login_btn {
-	height: 80px;
-	line-height: 80px;
+
+.login>.content>.login-view>.login_btn {
+  height: 80px;
+  line-height: 80px;
 }
+
 .show_setting {
-	transition: width 1s, height 1s;
+  transition: width 1s, height 1s;
 }
-.login > .show_setting_set {
-	width: 380px;
-	height: 300px;
+
+.login>.show_setting_set {
+  width: 380px;
+  height: 300px;
 }
-.login > .content > .setting-view > .title {
-	height: 50px;
-	font-size: 20px;
-	line-height: 50px;
+
+.login>.content>.setting-view>.title {
+  height: 50px;
+  font-size: 20px;
+  line-height: 50px;
 }
-.context > .room_title {
-	width: 100%;
-	height: 60px;
-	line-height: 60px;
-	font-size: 24px;
-	background-color: rgb(0, 113, 197);
+
+.context>.room_title {
+  width: 100%;
+  height: 60px;
+  line-height: 60px;
+  font-size: 24px;
+  background-color: rgb(0, 113, 197);
 }
-.room_title > .title_text {
-	text-indent: 24px;
-	color: rgba(255, 255, 255, 0.9);
+
+.room_title>.title_text {
+  text-indent: 24px;
+  color: rgba(255, 255, 255, 0.9);
 }
-.context > .remotes {
-	width: 100%;
-	height: calc(100% - 60px);
+
+.context>.remotes {
+  width: 100%;
+  height: calc(100% - 60px);
 }
-.remotes > .remote {
-	width: 100%;
-	height: 100%;
-	position: relative;
+
+.remotes>.remote {
+  width: 100%;
+  height: 100%;
+  position: relative;
 }
-.remotes > .remote > .menus {
-	width: 50px;
-	position: absolute;
-	bottom: 20px;
-	left: 20px;
-	z-index: 1000000;
+
+.remotes>.remote>.menus {
+  width: 50px;
+  position: absolute;
+  bottom: 20px;
+  left: 20px;
+  z-index: 1000000;
 }
-.remotes > .remote > .menus > .menu {
-	width: 30px;
-	height: 30px;
-	margin-top: 20px;
-	border-radius: 50%;
-	background-color: rgb(0, 113, 197);
-	cursor: pointer;
+
+.remotes>.remote>.menus>.menu {
+  width: 30px;
+  height: 30px;
+  margin-top: 20px;
+  border-radius: 50%;
+  background-color: rgb(0, 113, 197);
+  cursor: pointer;
 }
-.remotes > .remote > .video {
-	width: 100%;
-	height: 100%;
+
+.remotes>.remote>.video {
+  width: 100%;
+  height: 100%;
 }
-.audio{
-	background-image: url(../imgs/audio.png);
-	background-repeat: no-repeat;
-	background-position: center center;
+
+.audio {
+  background-image: url(../imgs/audio.png);
+  background-repeat: no-repeat;
+  background-position: center center;
 }
+
 .btn,
 .radio {
-	width: auto;
-	height: 26px;
-	font-size: 14px;
-	line-height: 26px;
-	text-align: center;
-	color: rgba(255, 255, 255, 0.8);
-	border: 0px;
-	padding: 0px 10px;
-	display: inline-block;
-	border-radius: 5px;
-	background-color: rgb(0, 175, 240);
-	cursor: pointer;
-	text-indent: 0px;
+  width: auto;
+  height: 26px;
+  font-size: 14px;
+  line-height: 26px;
+  text-align: center;
+  color: rgba(255, 255, 255, 0.8);
+  border: 0px;
+  padding: 0px 10px;
+  display: inline-block;
+  border-radius: 5px;
+  background-color: rgb(0, 175, 240);
+  cursor: pointer;
+  text-indent: 0px;
 }
+
 .btn:active {
-	background-color: rgb(0, 105, 174);
+  background-color: rgb(0, 105, 174);
 }
+
 .radio {
-	width: auto;
-	padding: 3px 8px;
-	border: 2px solid rgb(0, 131, 215);
-	height: 23px;
-	line-height: 23px;
+  width: auto;
+  padding: 3px 8px;
+  border: 2px solid rgb(0, 131, 215);
+  height: 23px;
+  line-height: 23px;
 }
+
 .radio-visited {
-	background-color: transparent;
-	border: 2px solid rgb(0, 131, 215);
-	color: rgb(0, 131, 215);
+  background-color: transparent;
+  border: 2px solid rgb(0, 131, 215);
+  color: rgb(0, 131, 215);
 }
+
 .col_left {
-	width: 50%;
-	height: 100%;
-	display: inline-block;
+  width: 50%;
+  height: 100%;
+  display: inline-block;
 }
+
 .col_right {
-	width: calc(50% - 50px);
-	height: 100%;
-	display: inline-block;
+  width: calc(50% - 50px);
+  height: 100%;
+  display: inline-block;
 }
+
 .margin_left15 {
-	margin-left: 15px;
+  margin-left: 15px;
 }
+
 .margin_left5 {
-	margin-left: 5px;
+  margin-left: 5px;
 }
+
 .text_right {
-	text-align: right;
+  text-align: right;
 }
+
 .text_center {
-	text-align: center;
+  text-align: center;
 }
+
 .text_color {
-	color: #333333;
+  color: #333333;
 }
