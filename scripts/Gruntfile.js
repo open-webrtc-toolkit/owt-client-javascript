@@ -7,12 +7,10 @@ module.exports = function(grunt) {
     '../src/sdk/base/common.js',
     '../src/sdk/base/L.Base64.js',
     '../src/sdk/base/L.Logger.js',
-    '../src/sdk/base/ieMediaStream.js',
     '../src/sdk/base/stream.js',
     '../src/sdk/conference/conference.js',
     '../src/sdk/conference/webrtc-stacks/ChromeStableStack.js',
     '../src/sdk/conference/webrtc-stacks/FirefoxStack.js',
-    '../src/sdk/conference/webrtc-stacks/IEStableStack.js',
     '../src/sdk/conference/webrtc-stacks/EdgeORTCStack.js',
     '../src/sdk/p2p/errors.js',
     '../src/sdk/p2p/gab.proxy.js',
@@ -218,7 +216,7 @@ window.L = L;\n\
             replacement: '<script src="socket.io.js" type="text/javascript"></script>'
           },
           {
-            pattern: '<script src="sdk/conference/property.js" type="text/javascript"></script>\n    <script src="sdk/base/events.js" type="text/javascript"></script>\n    <script src="sdk/base/L.Base64.js" type="text/javascript"></script>\n    <script src="sdk/base/L.Logger.js" type="text/javascript"></script>\n    <script src="sdk/base/stream.js" type="text/javascript"></script>\n    <script src="sdk/base/ieMediaStream.js" type="text/javascript"></script>\n    <script src="sdk/base/adapter.js" type="text/javascript"></script>\n    <script src="sdk/conference/conference.js" type="text/javascript"></script>\n    <script src="sdk/conference/webrtc-stacks/ChromeStableStack.js" type="text/javascript"></script>\n    <script src="sdk/conference/webrtc-stacks/FirefoxStack.js" type="text/javascript"></script>\n    <script src="sdk/conference/webrtc-stacks/IEStableStack.js" type="text/javascript"></script>\n    <script src="sdk/conference/webrtc-stacks/EdgeORTCStack.js" type="text/javascript"></script>',
+            pattern: '<script src="sdk/base/adapter.js" type="text/javascript"></script>\n    <script src="sdk/conference/property.js" type="text/javascript"></script>\n    <script src="sdk/base/events.js" type="text/javascript"></script>\n    <script src="sdk/base/L.Base64.js" type="text/javascript"></script>\n    <script src="sdk/base/L.Logger.js" type="text/javascript"></script>\n    <script src="sdk/base/stream.js" type="text/javascript"></script>\n    <script src="sdk/conference/conference.js" type="text/javascript"></script>\n    <script src="sdk/conference/webrtc-stacks/ChromeStableStack.js" type="text/javascript"></script>\n    <script src="sdk/conference/webrtc-stacks/FirefoxStack.js" type="text/javascript"></script>\n    <script src="sdk/conference/webrtc-stacks/IEStableStack.js" type="text/javascript"></script>\n    <script src="sdk/conference/webrtc-stacks/EdgeORTCStack.js" type="text/javascript"></script>',
             replacement:'<script src="adapter.js" type="text/javascript"></script>\n    <script src="woogeen.sdk.js" type="text/javascript"></script>'
           },
           {
