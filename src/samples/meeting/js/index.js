@@ -45,6 +45,10 @@ var isPauseVideo = false;
 var isOriginal = true;
 var isAudioOnly = false;
 
+var showInfo = null;
+var showLevel = null;
+var scaleLevel = 3/4;
+
 function login() {
   setTimeout(function() {
     var inputName = $('#login-input').val();
@@ -54,6 +58,10 @@ function login() {
 
       $('#login-panel').hide();
       $('#container').show();
+      if(navigator.webkitGetUserMedia){
+        $('#codec').parent().css('display', 'block');
+        $('#bandwidth').parent().css('display', 'block');
+      }
       initWoogeen();
     }
   }, 400);
@@ -107,6 +115,8 @@ function userExit() {
   localStream = undefined;
   isPauseAudio = true;
   singleMute = true;
+  clearInterval(showInfo);
+  clearInterval(showLevel);
 }
 
 function stopAllStream() {
@@ -417,6 +427,71 @@ function initWoogeen() {
           addVideo(stream, false);
           console.log("subscribe");
           streamObj[stream.id()] = stream;
+          setTimeout(function() {
+            room.getConnectionStats(stream, function(stats){
+              for(let i in stats){
+                if(stats[i].type == "ssrc_video_recv"){
+                  scaleLevel = parseInt(stats[i].stats.frame_height)/parseInt(stats[i].stats.frame_width);
+                }
+              }
+              resizeStream(mode);
+            }, function(err){
+                console.log("error", err);
+            });
+          }, 2000);
+          var bad = 0, lost = 0, rcvd = 0, lostRate = 0, bits = 0, bitRate = 0;
+          var current = 0, level = 0;
+          showInfo = setInterval(function() {
+            room.getConnectionStats(stream, function(stats) {
+              var packetsLost = 0;
+              var packetsRcvd = 0;
+              var bitsRcvd = 0;
+              for (let i in stats) {
+                if (stats[i].type == "ssrc_video_recv") {
+                  packetsLost = parseInt(stats[i].stats.packets_lost);
+                  packetsRcvd = parseInt(stats[i].stats.packets_rcvd);
+                  bitsRcvd = parseInt(stats[i].stats.bytes_rcvd);
+                  bitRate = ((bitsRcvd-bits)*8/1000/1000).toFixed(3);
+                  $('#rcvd').html(packetsRcvd);
+                  $('#lost').html(packetsLost);
+                  $('#bitRate').html(bitRate);
+                  $('#codec').html(stats[i].stats.codec_name);
+                  lostRate = (packetsLost-lost) / (packetsRcvd-rcvd);
+                  lost = packetsLost;
+                  rcvd = packetsRcvd;
+                  bits = bitsRcvd;
+                  level = parseInt(bitRate/0.3);
+                }
+                if (stats[i].type == "VideoBWE") {
+                  $('#bandwidth').html((parseInt(stats[i].stats.available_receive_bandwidth)/1024/1024).toFixed(3));
+                }
+              }
+            }, function(err){
+              console.log("error", err);
+            });
+          }, 1000);
+          showLevel = setInterval(function() {
+            level = level > 4 ? 4 : level;
+            if (current < level) {
+              current++;
+              $('#wifi'+current).css('display', 'block').siblings().css('display', 'none');
+            } else if (current > level) {
+              current--;
+              $('#wifi'+current).css('display', 'block').siblings().css('display', 'none');
+            }
+            if ((lostRate >= 0.12 || level < 2) && !isPauseVideo) {
+              if(bad < 8){
+                bad++;
+              }
+            } else if (bad > 0) {
+                bad--;
+            }
+            if (bad >= 8 && $('#promt').css('opacity') == '0') {
+              $('#promt').css('opacity', '1');
+            } else if(bad == 0 && $('#promt').css('opacity') == '1') {
+              $('#promt').css('opacity', '0');
+            }
+          }, 1000);
         }, function(err) {
           L.Logger.error(stream.id(), 'subscribe failed1:', err);
         });
@@ -1246,6 +1321,9 @@ function resizeStream(newMode) {
           left: hasLeft ? -(4 / 3 * height / 2 - width / 2) + "px" : "0px"
         });
       }
+      if (element.attr('ismix') === 'true') {
+        $('#wifi').css('bottom', (height + scaleLevel * width)/2 < height ? (height + scaleLevel * width)/2 + 58 + 'px' : height + 58 + 'px');
+      }
     }
   }
 }
@@ -1387,6 +1465,7 @@ function pauseVideo() {
       console.log("Pause video Successfully");
       $('#pauseVideo').text("Play video");
       isPauseVideo = !isPauseVideo;
+      $('#promt').css('opacity', '0');
     }, function() {
       console.log("Fail to pasuse video.");
     });

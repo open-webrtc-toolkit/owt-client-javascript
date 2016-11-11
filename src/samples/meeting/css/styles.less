@@ -796,7 +796,44 @@ a {
     bottom: 0;
     left: 0;
     padding: @menu-padding 0;
+    overflow: visible;
 
+    #info{
+        padding: 5px;
+        font-size: 19px;
+        overflow: visible;
+        position: absolute;
+        bottom: 150px;
+        right: 12px;
+        color: white;
+        transition: .5s;
+        p:nth-of-type(1), p:nth-of-type(5){
+            display: none;
+        }
+    }
+    .hide {
+        opacity: 0;
+    }
+    .show {
+        opacity: 0.6;
+    }
+    #wifi {
+        overflow: visible;
+        position: absolute;
+        bottom: 0px;
+        right: 352px;
+        img {
+            width: 45px;
+            height: 45px;
+            position: absolute;
+            opacity: 0.6;
+            cursor: pointer;
+            display: none;
+        }
+        #wifi0 {
+            display: block;
+        }
+    }
     #menu {
         margin-left: @screen-padding-v;
 
@@ -873,7 +910,45 @@ a {
         position: absolute;
         right: @screen-padding-v;
         bottom: 15px;
+        overflow: visible;
 
+        #promt {
+            width: 180px;
+            height: auto;
+            border: solid 2px #7bff7a;
+            padding: 5px;
+            position: absolute;
+            top: -85px;
+            color: #7bff7a;
+            font-size: 16px;
+            overflow: visible;
+            opacity: 0;
+            transition: 1s;
+        }
+        #promt:before {
+            content: '';
+            display: block;
+            border-width: 20px 10px;
+            border-color: #7bff7a transparent transparent;
+            border-style: solid dashed dashed;
+            position: absolute;
+            bottom: -40px;
+            left: 50px;
+            line-height: 0;
+            font-size: 0;
+        }
+        #promt:after {
+            content: '';
+            display: block;
+            border-width: 20px 10px;
+            border-color: #2b4248 transparent transparent;
+            border-style: solid dashed dashed;
+            position: absolute;
+            bottom: -36px;
+            left: 50px;
+            line-height: 0;
+            font-size: 0;
+        }
         #pauseAudio{
             float: right;
             padding: 6px 15px;
@@ -884,7 +959,18 @@ a {
             text-decoration: none;
             cursor: pointer;
         }
-         #pauseVideo{
+        #pauseVideo{
+            float: right;
+            margin-right: 10px;
+            padding: 6px 15px;
+            font-size: 16px;
+            border-radius: 5px;
+            background-color: #636363;
+            color: #fff;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        #showStats{
             float: right;
             margin-right: 10px;
             padding: 6px 15px;
