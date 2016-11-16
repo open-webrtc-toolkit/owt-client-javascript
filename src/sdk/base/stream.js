@@ -504,18 +504,25 @@ L.Logger.info('stream added:', stream.id());
     };
     // Actually, we don't know whether this external stream has audio/video, but publish function will not publish audio/video if hasAudio/hasVideo returns false.
     this.hasVideo = function() {
-      return true;
+      return !!spec.video;
     };
     this.hasAudio = function() {
-      return true;
+      return !!spec.audio;
     };
     this.toJson = function() {
+      var videoOpt ;
+      if(spec.video === true){
+        videoOpt = {device: 'camera'};
+      }else if(spec.video === false){
+        videoOpt = spec.video;
+      }else if(typeof spec.video === 'object'){
+        videoOpt = spec.video;
+        videoOpt.device = spec.video.device || 'camera';
+      }
       return {
         id: this.id(),
-        audio: true,
-        video: {
-          device: 'camera'
-        },
+        audio: spec.audio,
+        video: videoOpt,
         url: this.url()
       };
     };
@@ -922,6 +929,15 @@ L.Logger.info('stream added:', stream.id());
         callback({
           code: 1107,
           msg: 'External stream must have url property'
+        });
+      }
+      return;
+    }
+    if(!option.audio && !option.video){
+      if(typeof callback === 'function'){
+        callback({
+          code: 1107,
+          msg: 'External stream must have video or audio'
         });
       }
       return;
