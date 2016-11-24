@@ -228,7 +228,14 @@
   };
 
 
-  WoogeenConferenceBase.prototype.join = function(token, onSuccess, onFailure) {
+  WoogeenConferenceBase.prototype.join = function(tokenString, onSuccess,
+    onFailure) {
+    var token;
+    try {
+      token = JSON.parse(L.Base64.decodeBase64(tokenString));
+    } catch (err) {
+      return safeCall(onFailure, 'invalid token');
+    }
     var self = this;
     var isSecured = (token.secure === true);
     var host = token.host;
@@ -445,7 +452,11 @@
     }
 
     try {
-      self.socket.emit('token', token, function(status, resp) {
+      var loginInfo = {
+        token: tokenString,
+        userAgent: Woogeen.Common.sysInfo()
+      };
+      self.socket.emit('login', loginInfo, function(status, resp) {
         if (status === 'success') {
           self.myId = resp.clientId;
           self.conferenceId = resp.id;
@@ -934,11 +945,6 @@
          */
 
       this.join = function(token, onSuccess, onFailure) {
-        try {
-          token = JSON.parse(L.Base64.decodeBase64(token));
-        } catch (err) {
-          return safeCall(onFailure, 'invalid token');
-        }
         WoogeenConferenceBase.prototype.join.call(this, token,
           onSuccess, onFailure);
       };
@@ -1731,6 +1737,9 @@
       this.join = function(token, onSuccess, onFailure) {
         token.host = this.spec.host;
         token.secure = this.spec.secure;
+        // WoogeenConferenceBase.join requires base 64 encoded token. So encode it first.
+        // ConferenceClient's token retrieve from nuve is base 64 encoded, but SipClient's token is an object. It might be a problem.
+        token = L.Base64.encodeBase64(token);
         WoogeenConferenceBase.prototype.join.call(this, token,
           onSuccess, onFailure);
       };

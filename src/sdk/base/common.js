@@ -383,16 +383,18 @@ Woogeen.Common = (function() {
   /* Above functions are copied from apprtc with modifications */
 
   // Returns system information.
-  // Format: {sdk:{version:**, type:**}, runtime:{version:**, name:**}};
+  // Format: {sdk:{version:**, type:**}, runtime:{version:**, name:**}, os:{version:**, name:**}};
   var sysInfo = function() {
     var info = Object.create({});
     info.sdk = {
       version: sdkVersion,
       type: 'JavaScript'
     };
+    // Runtime info.
     var userAgent = navigator.userAgent;
     var firefoxRegex = /Firefox\/([0-9\.]+)/;
     var chromeRegex = /Chrome\/([0-9\.]+)/;
+    var edgeRegex = /Edge\/([0-9\.]+)/;
     var result = chromeRegex.exec(userAgent);
     if (result) {
       info.runtime = {
@@ -404,10 +406,58 @@ Woogeen.Common = (function() {
         name: 'FireFox',
         version: result[1]
       };
+    } else if (result = edgeRegex.exec(userAgent)) {
+      info.runtime = {
+        name: 'Edge',
+        version: result[1]
+      };
     } else {
       info.runtime = {
         name: 'Unknown',
-        version: ''
+        version: 'Unknown'
+      };
+    }
+    // OS info.
+    var windowsRegex = /Windows NT ([0-9\.]+)/;
+    var macRegex = /Intel Mac OS X ([0-9_\.]+)/;
+    var iPhoneRegex = /iPhone OS ([0-9_\.]+)/;
+    var linuxRegex = /X11; Linux/;
+    var androidRegex = /Android( ([0-9\.]+))?/;
+    var chromiumOsRegex = /CrOS/;
+    if (result = windowsRegex.exec(userAgent)) {
+      info.os = {
+        name: 'Windows NT',
+        version: result[1]
+      };
+    } else if (result = macRegex.exec(userAgent)) {
+      info.os = {
+        name: 'Mac OS X',
+        version: result[1].replace(/_/g, '.')
+      };
+    } else if (result = iPhoneRegex.exec(userAgent)) {
+      info.os = {
+        name: 'iPhone OS',
+        version: result[1].replace(/_/g, '.')
+      };
+    } else if (result = linuxRegex.exec(userAgent)) {
+      info.os = {
+        name: 'Linux',
+        versoin: 'Unknown'
+      };
+    } else if (result = androidRegex.exec(userAgent)) {
+      info.os = {
+        name: 'Android',
+        version: result[1] || 'Unknown'
+      };
+    } else if (result = chromiumOsRegex.exec(userAgent)) {
+      info.os = {
+        name: 'Chrome OS',
+        version: 'Unknown'
+      };
+    } else {
+      info.os = {
+        name: 'Unknown',
+        version: 'Unknown'
       };
     }
     return info;
