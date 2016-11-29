@@ -33,7 +33,6 @@ var runSocketIOSample = function() {
   var conference = Woogeen.ConferenceClient.create({});
 
   function displayStream(stream, resolution) {
-    var div = document.createElement('div');
     var streamId = stream.id();
     if (stream instanceof Woogeen.RemoteMixedStream) {
       resolution = resolution || {
@@ -46,17 +45,21 @@ var runSocketIOSample = function() {
         height: 240
       };
     }
-    if (!resolution.width || !resolution.height || resolution.width > 640) {
+    if (!resolution.width || !resolution.height) {
       resolution = {
         width: 640,
         height: 480
       };
     }
+    var div = document.getElementById('test' + streamId);
+    if(!div){
+      div = document.createElement('div');
+      div.setAttribute('id', 'test' + streamId);
+      div.setAttribute('title', 'Stream#' + streamId);
+      document.body.appendChild(div);
+    }
     div.setAttribute('style', 'width: ' + resolution.width + 'px; height: ' +
       resolution.height + 'px;');
-    div.setAttribute('id', 'test' + streamId);
-    div.setAttribute('title', 'Stream#' + streamId);
-    document.body.appendChild(div);
     stream.show('test' + streamId);
   }
 
