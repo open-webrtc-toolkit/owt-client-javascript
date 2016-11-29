@@ -147,16 +147,11 @@ N.API = (function(N) {
   @endhtmlonly
      * @memberOf N.API
      * @param {string} name Room name.
+     * @param {json} options Room configuration.
      * @param {function} callback(room) Callback function on success.
      * @param {function} callbackError(err) Callback function on error.
-     * @param {json} options Room configuration.
      * @example
-  N.API.createRoom('myRoom',
-  , function (res) {
-    console.log ('Room', res.name, 'created with id:', res._id);
-  }, function (err) {
-    console.log ('Error:', err);
-  }, {
+  N.API.createRoom('myRoom', {
     mode: 'hybrid',
     publishLimit: -1,
     userLimit: 30,
@@ -175,9 +170,13 @@ N.API = (function(N) {
       },
       audio: null
     },
+  }, function (res) {
+    console.log ('Room', res.name, 'created with id:', res._id);
+  }, function (err) {
+    console.log ('Error:', err);
   });
      */
-  createRoom = function(name, callback, callbackError, options, params) {
+  createRoom = function(name, options, callback, callbackError, params) {
 
     if (!options) {
       options = {};

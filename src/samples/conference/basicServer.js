@@ -103,7 +103,8 @@ app.post('/createToken/', function(req, res) {
 app.post('/createRoom/', function(req, res) {
   'use strict';
   var name = req.body.name;
-  N.API.createRoom(name, function(response) {
+  var options = req.body.options;
+  N.API.createRoom(name, options, function(response) {
     res.send(response);
   }, function(err) {
     res.send(err);
