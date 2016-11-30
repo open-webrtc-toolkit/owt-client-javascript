@@ -49,7 +49,7 @@ function login() {
   setTimeout(function() {
     var inputName = $('#login-input').val();
     if (inputName !== '') {
-      name = inputName;
+      name = htmlEncode(inputName);
       $('#login-panel').addClass('pulse');
 
       $('#login-panel').hide();
@@ -60,6 +60,18 @@ function login() {
   if (isMobile && typeof document.body.webkitRequestFullScreen === 'function') {
     document.body.webkitRequestFullScreen();
   }
+}
+
+function htmlEncode(str) {
+  var s = "";
+  if (str.length === 0) return "";
+  s = str.replace(/&/g, "&#38;");
+  s = s.replace(/</g, "&#60;");
+  s = s.replace(/>/g, "&#62;");
+  s = s.replace(/ /g, "&#160;");
+  s = s.replace(/\'/g, "&#39;");
+  s = s.replace(/\"/g, "&#34;");
+  return s;
 }
 
 function toggleLoginSetting() {
@@ -264,7 +276,7 @@ function initWoogeen() {
   //     id: localId
   // });
   // $('#profile').text(name);
-  $('#userNameDisplay').text("Logged in as: " + name);
+  $('#userNameDisplay').html("Logged in as: " + name);
   hasMixed = !(subscribeType === SUBSCRIBETYPES.MIX);
 
   var bandWidth = 100,
