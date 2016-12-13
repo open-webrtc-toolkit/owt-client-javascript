@@ -1,10 +1,10 @@
-/*global window, console, RTCSessionDescription, RTCIceCandidate, webkitRTCPeerConnection*/
+/*global window, console, RTCSessionDescription, RTCIceCandidate, RTCPeerConnection*/
 
 Erizo.ChromeStableStack = function(spec) {
   "use strict";
 
   var that = {},
-    WebkitRTCPeerConnection = webkitRTCPeerConnection;
+    WebkitRTCPeerConnection = RTCPeerConnection;
 
   that.pc_config = {
     "iceServers": []
@@ -291,7 +291,7 @@ Erizo.ChromeStableStack = function(spec) {
   };
 
   that.getConnectionStats = function(onSuccess, onFailure) {
-    that.peerConnection.getStats(function(stats) {
+    that.peerConnection.getStats(null, function(stats) {
       onSuccess(Woogeen.Common.parseStats(stats));
     }, onFailure);
   };
