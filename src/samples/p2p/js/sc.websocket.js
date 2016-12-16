@@ -8,7 +8,7 @@ function SignalingChannel() {
   this.onServerDisconnected = null;
 
   var clientType = 'Web';
-  var clientVersion = '3.2.1';
+  var clientVersion = '3.3';
 
   var wsServer = null;
 
