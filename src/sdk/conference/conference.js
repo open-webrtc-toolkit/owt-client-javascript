@@ -1240,6 +1240,11 @@
         }
         options.url = url;
 
+        // See http://shilv018.sh.intel.com/bugzilla_WebRTC/show_bug.cgi?id=976#c8 .
+        if (options.video && options.video.resolution) {
+          options.resolution = options.video.resolution;
+        }
+
         sendMsg(self.socket, 'addExternalOutput', options, function(
           err) {
           if (err) {
@@ -1291,6 +1296,11 @@
           options = {};
         }
         options.url = url;
+
+        // See http://shilv018.sh.intel.com/bugzilla_WebRTC/show_bug.cgi?id=976#c8 .
+        if (options.video && options.video.resolution) {
+          options.resolution = options.video.resolution;
+        }
 
         sendMsg(self.socket, 'updateExternalOutput', options,
           function(err) {
@@ -1837,3 +1847,4 @@ sipClient = Woogeen.SipClient.create({
   }());
 
 }());
+
