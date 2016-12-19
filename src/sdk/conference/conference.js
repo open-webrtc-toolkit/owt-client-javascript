@@ -1360,7 +1360,7 @@
          <li>audioStreamId: audio stream id to be recorded. If unspecified and videoStreamId is valid, video stream will be recorded without audio.</li>
          <li>videoCodec: preferred video codec to be recorded. If unspecified, 'vp8' will be used by default. Currently, there is no video transcoding for forward stream with the consideration of system load.</li>
          <li>audioCodec: preferred audio codec to be recorded. If unspecified, 'opus' will be used by default.</li>
-         <li>recorderId: recorder id to be reused.</li>
+         <li>recorderId: recorder id to be reused. Id can only be alphanumeric. If the id is not set, server will generate one.</li>
          </ul>
          Important Note: In the case of continuous media recording among different streams, the recorderId is the key to make sure each switched stream go to the same recording url. Do not stop the recorder when you want the continuous media recording functionality, unless all the required media content has been recorded successfully.<br>
       The recommendation is to invoke another startRecorder with new videoStreamId and audioStreamId (default to mixed stream) right after the previous call of startRecorder, but the same recorderId should be kept.
@@ -1368,9 +1368,9 @@
          * @param {function} onSuccess(resp) (optional) Success callback. The following information will be
        returned as well:<br>
           <ul>
-         <li>recorderId: recorder id.</li>
+         <li>recorderId: Recorder id.</li>
          <li>host: Host server address.</li>
-         <li>path: Recorded file path </li>
+         <li>path: Recorded file path.</li>
          </ul>
          * @param {function} onFailure(err) (optional) Failure callback.
          * @example
