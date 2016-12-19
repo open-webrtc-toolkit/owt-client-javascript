@@ -211,8 +211,9 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
         p2p.connect({
           host: serverAddress,
           token: $('#uid').val()
+        }, function() {
+          $('#uid').prop('disabled', true);
         }); // Connect to peer server
-        $('#uid').prop('disabled', true);
       });
 
       $('#logoff').click(function() {
