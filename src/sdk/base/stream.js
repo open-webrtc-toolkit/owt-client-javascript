@@ -955,6 +955,9 @@ L.Logger.info('stream added:', stream.id());
   <br><b>options:</b>
   <ul>
       <li>url: RTSP stream URL</li>
+      <li>video: boolean or object. If the value is a boolean, it indicates whether video is enabled or not. If the value is an object, it may have device property ,e.g.,{device: 'camera'} indicates the stream is from camera.</li>
+      <li>audio: true/false</li>
+      <li><b>Note:</b>if both video and audio are false or undefined, it will fail to publish an ExternalStream.</li>
   </ul>
   <br><b>callback:</b>
   <br>Upon success, err is null, and externalStream is an instance of Woogeen.ExternalStream; upon failure externalStream is undefined and err is one of the following:<br>
@@ -963,14 +966,16 @@ L.Logger.info('stream added:', stream.id());
   </ul>
      * @memberOf Woogeen.ExternalStream
      * @static
-     * @param {json} options Stream creation options.
+     * @param {json} options Stream creation options.The options must have url property and must have video or audio.
      * @param {function} callback callback(err, externalStream) will be invoked when ExternalStream creation is done.
      * @example
   <script type="text/javascript">
   // ExternalStream
   var externalStream;
   Woogeen.ExternalStream.create({
-    url: 'http://www.example.com/camera'
+    url: 'http://www.example.com/camera',
+    video: true,
+    audio: true
   }, function (err, stream) {
     if (err) {
       return console.log('create ExternalStream failed:', err);
