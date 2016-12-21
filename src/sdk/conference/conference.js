@@ -568,8 +568,8 @@
             self.unpublish(stream, onSuccess, onFailure);
           };
           safeCall(onSuccess, stream);
+          onFailure = function() {};
           onChannelReady = function() {};
-          onChannelFailed = function() {};
         };
         var onChannelFailed = function() {
           sendMsg(self.socket, 'unpublish', id, function() {},
@@ -766,8 +766,8 @@
         } else {
           channelIsReady = true;
         }
+        onFailure = function() {};
         onChannelReady = function() {};
-        onChannelFailed = function() {};
       };
       var onChannelFailed = function() {
         sendMsg(self.socket, 'unsubscribe', stream.id(), function() {},
