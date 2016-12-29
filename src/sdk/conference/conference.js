@@ -918,6 +918,8 @@
       </script>
          */
       this.leave = function() {
+        sendMsg(this.socket, 'logout');
+        this.socket.disconnect();
         var evt = new Woogeen.ClientEvent({
           type: 'server-disconnected'
         });
