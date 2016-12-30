@@ -866,7 +866,7 @@ p2p.disconnect();
   </script>
   */
   var accept = function(peerId, successCallback, failureCallback) {
-    if (!gab) {
+    if (!gab && failureCallback) {
       failureCallback(Woogeen.Error.P2P_CONN_CLIENT_NOT_INITIALIZED);
     }
     if (!peers[peerId]) {
@@ -879,7 +879,9 @@ p2p.disconnect();
       gab.sendChatAccepted(peerId, sysInfo, successCallback, function(
         errCode) {
         peer.state = PeerState.PENDING;
-        failureCallback(Woogeen.Error.getErrorByCode(errCode));
+        if(failureCallback) {
+          failureCallback(Woogeen.Error.getErrorByCode(errCode));
+        }
       });
     } else {
       L.Logger.debug('Invalid state. Will not send acceptance.');
