@@ -674,7 +674,7 @@
      * @desc This function subscribes to a remote stream. The stream should be a RemoteStream instance.
      <br><b>options:</b><br>
   {<br>
-  video: true/false, {resolution: {width:xxx, height:xxx}},<br>
+  video: true/false, {resolution: {width:xxx, height:xxx}, qualityLevel:'xxx'},<br>
   audio: true/false,<br>
   videoCodec: 'h264'/'vp8'/'vp9'. This property specifies preferred video codec.<br>
   }
@@ -682,7 +682,9 @@
   Video resolution choice is only valid for subscribing {@link Woogeen.RemoteMixedStream Woogeen.RemoteMixedStream} when multistreaming output is enabled.　See {@link N.API.createRoom N.API.createRoom()} for detailed description of multistreaming.<br>
      * @memberOf Woogeen.ConferenceClient&Woogeen.SipClient
      * @param {stream} stream Stream to subscribe.
-     * @param {json} options (optional) Subscribe options.
+     * @param {json} options (optional) Subscribe options. Options could be a boolean value or an object. If it is an boolean value, it indicates whether video is enabled or not. If it is an object, video will be enabled and this object is video options. The object may have following properties:</br>
+       resolution: An object has width and height. Both width and height are number.</br>
+       qualityLevel: A string which is one of these values "BestQuality", "BetterQuality", "Standard", "BetterSpeed", "BestSpeed". It does not change resolution, but better quality leads to higher bitrate.
      * @param {function} onSuccess(stream) (optional) Success callback.
      * @param {function} onFailure(err) (optional) Failure callback.
      * @example
@@ -718,10 +720,16 @@
       return safeCall(onFailure, 'no audio or video to subscribe.');
     }
 
-    if (!stream.isMixed() && typeof options.video === 'object' && options.video
-      .resolution) {
+    if (!stream.isMixed() && typeof options.video === 'object' && (options.video
+      .resolution || options.video.qualityLevel)) {
       return safeCall(onFailure,
-        'Resolution setting is not available for non-mixed stream.');
+        'Resolution and quality level settings are not available for non-mixed stream.');
+    }
+
+    if (typeof options.video === 'object' && options.video.qualityLevel) {
+      // Socket.IO message is "quality_level" while SDK style is "qualityLevel".
+      options.video.quality_level = options.video.qualityLevel;
+      delete options.video.qualityLevel;
     }
 
     sendSdp(self.socket, 'subscribe', {
