@@ -84,6 +84,10 @@ The Intel CS for WebRTC Client SDK for JavaScript has been tested on the followi
 </table>
 @endhtmlonly
 
+Different browsers may have different supported codec list.
+
+In P2P mode, only one stream per direction can be published between FireFox and other clients. Also, "unpublish" is not available when one side is FireFox.
+
 # 3 Screen sharing extension {#section3}
 We provide source code of a Chrome screen sharing extension sample. Developers should edit manifest.json and publish it to Chrome App Store to make it work for their products. After your extension is published, you will get an extension ID. This ID will be used when create screen sharing stream.
 
