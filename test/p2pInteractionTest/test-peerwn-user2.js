@@ -10339,151 +10339,6 @@ x
      * 2. User2Connect
      * 3. User1InviteUser2
      * 4. User2AcceptUser1
-     * 5. User1CreateLocalStream
-     * 6. User1PublishToUser2
-     * 6. User1enableVideo
-     */
-    it('test152_Peer1CreateLocalStreamAnddisableVideoBeforPublishAndPeer2disableVideo', function(done) {
-        thisQ
-            .runs(function() {
-                // start test
-                debug(actorUserName + "test start!");
-            })
-            // 1. User1Connect
-            // 2. User2Connect
-            .waitsFor(function() {
-                //This sentence will cause a bug in testFrameworkTest.
-                // debug("wait User1Connect")
-                // wait lock
-                return waitLock('User1Connect');
-            }, actorUserName + "wait lock: User1Connect", waitInterval)
-            .runs(function() {
-                // check wait
-                // action
-                actorUser.connect();
-            })
-            .waitsFor(function() {
-                //check action
-                return actorUser.request["connect_success"] == 1;
-            }, actorUserName + " check action: login ", waitInterval)
-            .runs(function() {
-                // notify lock
-                notifyLock('User2Connect')
-            })
-            // 3. User1InviteUser2
-            //4. User2AcceptUser1
-            .waitsFor(function() {
-                // wait lock
-                return waitLock('User1InviteUser2');
-            }, actorUserName + "wait lock:User1InviteUser2", waitInterval)
-            .waitsFor(function() {
-                //check wait
-                return actorUser.request["chat-invited_success"] == 1;
-            }, actorUserName + " chat-invited event", waitInterval)
-            .runs(function() {
-                // action
-                actorUser.accept(targetUserName);
-            })
-            .waitsFor(function() {
-                //check action
-                return actorUser.request["accept_success"] == 1;
-            }, actorUserName + "check action: accept", waitInterval)
-            .runs(function() {
-                // notify lock
-                notifyLock('User2AcceptUser1')
-            })
-            .waitsFor(function() {
-                //check wait
-                return actorUser.request["chat-started_success"] == 1;
-            }, actorUserName + " check wait: chat-started", waitInterval)
-            //5. User1CreateLocalStream
-            // 6. User2CreateLocalStream
-            .waitsFor(function() {
-                // wait lock
-                return waitLock('User1CreateLocalStream');
-            }, actorUserName + "wait lock: User1CreateLocalStream ", waitInterval)
-
-            .waitsFor(function() {
-                // wait lock
-                return waitLock('User1PublishToUser2');
-            }, actorUserName + "wait lock: User1PublishToUser2", waitInterval)
-            .waitsFor(function() {
-                //check wait
-                return actorUser.request["stream-added_success"] == 1;
-            }, actorUserName + "check wait: stream-added", waitInterval)
-
-
-              .runs(function() {
-                // action
-                detection ="";
-                videoDetection("stream"+clientRemoteId);
-               //videoDetection("local");
-            })
-
-            .waitsFor(function() {
-                //wait lock
-                return detection == false;
-            }, actorUserName + " REMOTE STREAM IS GOOD", waitInterval)
-
-
-            .runs(function() {
-
-               //videoDetection("local");
-               var result = clientRemoteStream.disableVideo();
-                expect(result).toBeTruthy();
-            })
-
-             .runs(function() {
-                // notify lock
-                notifyLock('User2disableVideo')
-            })
-
-            .waitsFor(function() {
-                // wait lock
-                return waitLock('User1enableVideo');
-            }, actorUserName + "wait lock: User1enableVideo ", waitInterval)
-
-             .runs(function() {
-
-               //videoDetection("local");
-               var result = clientRemoteStream.enableVideo();
-                expect(result).toBeTruthy();
-            })
-
-
-              .runs(function() {
-                // action
-                detection ="";
-                videoDetection("stream"+clientRemoteId);
-               //videoDetection("local");
-            })
-
-            .waitsFor(function() {
-                //wait lock
-                return detection == true;
-            }, actorUserName + " REMOTE STREAM IS GOOD", waitInterval)
-
-
-            .waits('test end',5000)
-
-            .runs(function() {
-                // ends the case
-                console.log('test end');
-                done();
-            })
-
-    });
-
-
-
-/**
-     * Test a normal interaction process between two users.
-     * Actors: User1 and User2
-     * Story:
-     * 1. User1Connect
-     * 2. User2Connect
-     * 3. User1InviteUser2
-     * 4. User2AcceptUser1
      * 5. User1SendTwoMessagesToUser2
      * 6. User2SendTwoMessagesToUser1
      * 7. User1StopChatWithUser2
@@ -16451,5 +16306,151 @@ it('test156_Peer1VideoonlyAndPeer2audioOnlyThenPeer2checkConnectionStatusWithCod
                 done();
             })
     });
+
+
+/**
+     * Test a normal interaction process between two users.
+     * Actors: User1 and User2
+     * Story:
+     * 1. User1Connect
+     * 2. User2Connect
+     * 3. User1InviteUser2
+     * 4. User2AcceptUser1
+     * 5. User1CreateLocalStream
+     * 6. User1PublishToUser2
+     * 6. User1enableVideo
+     */
+    it('test157_Peer1CreateLocalStreamAnddisableVideoBeforPublishAndPeer2disableVideo', function(done) {
+        thisQ
+            .runs(function() {
+                // start test
+                debug(actorUserName + "test start!");
+            })
+            // 1. User1Connect
+            // 2. User2Connect
+            .waitsFor(function() {
+                //This sentence will cause a bug in testFrameworkTest.
+                // debug("wait User1Connect")
+                // wait lock
+                return waitLock('User1Connect');
+            }, actorUserName + "wait lock: User1Connect", waitInterval)
+            .runs(function() {
+                // check wait
+                // action
+                actorUser.connect();
+            })
+            .waitsFor(function() {
+                //check action
+                return actorUser.request["connect_success"] == 1;
+            }, actorUserName + " check action: login ", waitInterval)
+            .runs(function() {
+                // notify lock
+                notifyLock('User2Connect')
+            })
+            // 3. User1InviteUser2
+            //4. User2AcceptUser1
+            .waitsFor(function() {
+                // wait lock
+                return waitLock('User1InviteUser2');
+            }, actorUserName + "wait lock:User1InviteUser2", waitInterval)
+            .waitsFor(function() {
+                //check wait
+                return actorUser.request["chat-invited_success"] == 1;
+            }, actorUserName + " chat-invited event", waitInterval)
+            .runs(function() {
+                // action
+                actorUser.accept(targetUserName);
+            })
+            .waitsFor(function() {
+                //check action
+                return actorUser.request["accept_success"] == 1;
+            }, actorUserName + "check action: accept", waitInterval)
+            .runs(function() {
+                // notify lock
+                notifyLock('User2AcceptUser1')
+            })
+            .waitsFor(function() {
+                //check wait
+                return actorUser.request["chat-started_success"] == 1;
+            }, actorUserName + " check wait: chat-started", waitInterval)
+            //5. User1CreateLocalStream
+            // 6. User2CreateLocalStream
+            .waitsFor(function() {
+                // wait lock
+                return waitLock('User1CreateLocalStream');
+            }, actorUserName + "wait lock: User1CreateLocalStream ", waitInterval)
+
+            .waitsFor(function() {
+                // wait lock
+                return waitLock('User1PublishToUser2');
+            }, actorUserName + "wait lock: User1PublishToUser2", waitInterval)
+            .waitsFor(function() {
+                //check wait
+                return actorUser.request["stream-added_success"] == 1;
+            }, actorUserName + "check wait: stream-added", waitInterval)
+
+
+              .runs(function() {
+                // action
+                detection ="";
+                videoDetection("stream"+clientRemoteId);
+               //videoDetection("local");
+            })
+
+            .waitsFor(function() {
+                //wait lock
+                return detection == false;
+            }, actorUserName + " REMOTE STREAM IS GOOD", waitInterval)
+
+
+            .runs(function() {
+
+               //videoDetection("local");
+               var result = clientRemoteStream.disableVideo();
+                expect(result).toBeTruthy();
+            })
+
+             .runs(function() {
+                // notify lock
+                notifyLock('User2disableVideo')
+            })
+
+            .waitsFor(function() {
+                // wait lock
+                return waitLock('User1enableVideo');
+            }, actorUserName + "wait lock: User1enableVideo ", waitInterval)
+
+             .runs(function() {
+
+               //videoDetection("local");
+               var result = clientRemoteStream.enableVideo();
+                expect(result).toBeTruthy();
+            })
+
+
+              .runs(function() {
+                // action
+                detection ="";
+                videoDetection("stream"+clientRemoteId);
+               //videoDetection("local");
+            })
+
+            .waitsFor(function() {
+                //wait lock
+                return detection == true;
+            }, actorUserName + " REMOTE STREAM IS GOOD", waitInterval)
+
+
+            .waits('test end',5000)
+
+            .runs(function() {
+                // ends the case
+                console.log('test end');
+                done();
+            })
+
+    });
+
+
 
 });

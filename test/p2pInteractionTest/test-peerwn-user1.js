@@ -10543,151 +10543,6 @@ describe('TestDevice1', function() {
 
 
 
-/**
-     * Test a normal interaction process between two users.
-     * Actors: User1 and User2
-     * Story:
-     * 1. User1Connect
-     * 2. User2Connect
-     * 3. User1InviteUser2
-     * 4. User2AcceptUser1
-     * 5. User1CreateLocalStream
-     * 6. User1PublishToUser2
-     * 6. User1enableVideo
-     */
-    it('test152_Peer1CreateLocalStreamAnddisableVideoBeforPublishAndPeer2disableVideo',function(done){
-        thisQ
-            .runs(function() {
-                // start test
-                debug(actorUserName + "test start!");
-            })
-            // .waits('wait for user2 init', 10000)
-            // // 1. User1Connect
-            .runs(function() {
-                // action
-                actorUser.connect();
-            })
-            .waitsFor(function() {
-                //check action
-                return actorUser.request["connect_success"] == 1;
-            }, actorUserName + " check action: login ", waitInterval)
-
-            .runs(function() {
-                //notify lock
-                notifyLock('User1Connect');
-            })
-            // 2. User2Connect
-            // 3. User1InviteUser2
-            .waitsFor(function() {
-                //wait lock
-                return waitLock('User2Connect');
-            }, actorUserName + " wait lock: User2Connect ", waitInterval)
-            .runs(function() {
-                //check wait
-                //action
-                actorUser.invited(targetUserName);
-            })
-            .waitsFor(function() {
-                //check action
-                return actorUser.request["invite_success"] == 1;
-            }, actorUserName + " check action: invite ", waitInterval)
-
-
-
-            .runs(function() {
-                // notify lock
-                notifyLock('User1InviteUser2')
-            })
-            //4. User2AcceptUser1
-            //5. User1CreateLocalStream
-            .waitsFor(function() {
-                // wait lock
-                return waitLock('User2AcceptUser1');
-            }, actorUserName + " wait lock: User2AcceptUser1", waitInterval)
-            .waitsFor(function() {
-                //check wait
-                return actorUser.request["chat-started_success"] == 1;
-            }, actorUserName + " check wait: chat-started", waitInterval)
-
-
-
-            .runs(function() {
-                // action
-                actorUser.createLocalStream();
-            })
-            .waitsFor(function() {
-                // check action
-                return actorUser.request["createLocal_success"] == 1;
-            }, actorUserName + " check action: create localStream ", waitInterval)
-
-            .runs(function() {
-                // action
-                detection = "";
-                videoDetection("stream"+actorUser.request["localStreamId"]);
-               //videoDetection("local");
-            })
-
-            .waitsFor(function() {
-                //wait lock
-                return detection == true;
-            }, actorUserName + " create localstream is fail", waitInterval)
-
-             .runs(function() {
-                //check wait
-                // action
-                //TODO change wrapper of publish
-                var result = actorUser.disableVideo();
-                expect(result).toBeTruthy();
-            })
-
-            .runs(function() {
-                // notify lock
-                notifyLock('User1CreateLocalStream');
-            })
-
-            .runs(function() {
-                //check wait
-                // action
-                //TODO change wrapper of publish
-                actorUser.publish(targetUserName);
-            })
-            .waitsFor(function() {
-                //check action
-                return actorUser.request["publish_success"] == 1;
-            }, actorUserName + "check action: publish", waitInterval)
-
-            .runs(function() {
-                // notify lock
-                notifyLock('User1PublishToUser2');
-            })
-
-
-            .waitsFor(function() {
-                // wait lock
-                return waitLock('User2disableVideo');
-            }, actorUserName + " wait lock: User2disableVideo", waitInterval)
-
-            .runs(function() {
-                //check wait
-                // action
-                //TODO change wrapper of publish
-                var result = actorUser.enableVideo();
-                expect(result).toBeTruthy();
-            })
-
-            .runs(function() {
-                // notify lock
-                notifyLock('User1enableVideo');
-            })
-
-            .waits("test end",15000)
-            .runs(function() {
-                // ends the case
-                console.log('test end');
-                done();
-            })
-    });
-
 
 
  /**
@@ -17583,6 +17438,154 @@ it('test156_Peer1VideoonlyAndPeer2audioOnlyThenPeer2checkConnectionStatusWithCod
                 done();
             })
     });
+
+
+/**
+     * Test a normal interaction process between two users.
+     * Actors: User1 and User2
+     * Story:
+     * 1. User1Connect
+     * 2. User2Connect
+     * 3. User1InviteUser2
+     * 4. User2AcceptUser1
+     * 5. User1CreateLocalStream
+     * 6. User1PublishToUser2
+     * 6. User1enableVideo
+     */
+    it('test157_Peer1CreateLocalStreamAnddisableVideoBeforPublishAndPeer2disableVideo',function(done){
+        thisQ
+            .runs(function() {
+                // start test
+                debug(actorUserName + "test start!");
+            })
+            // .waits('wait for user2 init', 10000)
+            // // 1. User1Connect
+            .runs(function() {
+                // action
+                actorUser.connect();
+            })
+            .waitsFor(function() {
+                //check action
+                return actorUser.request["connect_success"] == 1;
+            }, actorUserName + " check action: login ", waitInterval)
+
+            .runs(function() {
+                //notify lock
+                notifyLock('User1Connect');
+            })
+            // 2. User2Connect
+            // 3. User1InviteUser2
+            .waitsFor(function() {
+                //wait lock
+                return waitLock('User2Connect');
+            }, actorUserName + " wait lock: User2Connect ", waitInterval)
+            .runs(function() {
+                //check wait
+                //action
+                actorUser.invited(targetUserName);
+            })
+            .waitsFor(function() {
+                //check action
+                return actorUser.request["invite_success"] == 1;
+            }, actorUserName + " check action: invite ", waitInterval)
+
+
+
+            .runs(function() {
+                // notify lock
+                notifyLock('User1InviteUser2')
+            })
+            //4. User2AcceptUser1
+            //5. User1CreateLocalStream
+            .waitsFor(function() {
+                // wait lock
+                return waitLock('User2AcceptUser1');
+            }, actorUserName + " wait lock: User2AcceptUser1", waitInterval)
+            .waitsFor(function() {
+                //check wait
+                return actorUser.request["chat-started_success"] == 1;
+            }, actorUserName + " check wait: chat-started", waitInterval)
+
+
+
+            .runs(function() {
+                // action
+                actorUser.createLocalStream();
+            })
+            .waitsFor(function() {
+                // check action
+                return actorUser.request["createLocal_success"] == 1;
+            }, actorUserName + " check action: create localStream ", waitInterval)
+
+            .runs(function() {
+                // action
+                detection = "";
+                videoDetection("stream"+actorUser.request["localStreamId"]);
+               //videoDetection("local");
+            })
+
+            .waitsFor(function() {
+                //wait lock
+                return detection == true;
+            }, actorUserName + " create localstream is fail", waitInterval)
+
+             .runs(function() {
+                //check wait
+                // action
+                //TODO change wrapper of publish
+                var result = actorUser.disableVideo();
+                expect(result).toBeTruthy();
+            })
+
+            .runs(function() {
+                // notify lock
+                notifyLock('User1CreateLocalStream');
+            })
+
+            .runs(function() {
+                //check wait
+                // action
+                //TODO change wrapper of publish
+                actorUser.publish(targetUserName);
+            })
+            .waitsFor(function() {
+                //check action
+                return actorUser.request["publish_success"] == 1;
+            }, actorUserName + "check action: publish", waitInterval)
+
+            .runs(function() {
+                // notify lock
+                notifyLock('User1PublishToUser2');
+            })
+
+
+            .waitsFor(function() {
+                // wait lock
+                return waitLock('User2disableVideo');
+            }, actorUserName + " wait lock: User2disableVideo", waitInterval)
+
+            .runs(function() {
+                //check wait
+                // action
+                //TODO change wrapper of publish
+                var result = actorUser.enableVideo();
+                expect(result).toBeTruthy();
+            })
+
+            .runs(function() {
+                // notify lock
+                notifyLock('User1enableVideo');
+            })
+
+            .waits("test end",15000)
+            .runs(function() {
+                // ends the case
+                console.log('test end');
+                done();
+            })
+    });
+
+
 /**
      * Test a normal interaction process between two users.
      * Actors: User1 and User2
