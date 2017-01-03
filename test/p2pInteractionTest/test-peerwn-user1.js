@@ -1,5 +1,5 @@
 describe('TestDevice1', function() {
-    jasmine.DEFAULT_TIMEOUT_INTERVAL = 60000;
+    jasmine.DEFAULT_TIMEOUT_INTERVAL = 80000;
     //Init Q
     var deferred = Q.defer();
     deferred.resolve();
@@ -34,7 +34,7 @@ describe('TestDevice1', function() {
                     console.log("framechecker frames number > 0, is : ", framechecker.frameStats.numFrames);
                     console.log("framechecker numFrozenFrames number  is : ", framechecker.frameStats.numFrozenFrames);
                     console.log("framechecker numBlackFrames number  is : ", framechecker.frameStats.numBlackFrames);
-                    if ((framechecker.frameStats.numFrozenFrames == 0) && (framechecker.frameStats.numBlackFrames == 0)) {
+                    if (/*(framechecker.frameStats.numFrozenFrames == 0) && */(framechecker.frameStats.numBlackFrames == 0)) {
                         detection = true;
                     } else {
                         console.log("framechecker numFrozenFrames number  is : ", framechecker.frameStats.numFrozenFrames);
@@ -47,6 +47,46 @@ describe('TestDevice1', function() {
                 };
             }, 1000);
         } , 3000);
+    }
+
+
+    var CreatePeerClientWithH264 = function(){
+                config={options:{videoCodec:"h264",audioCodec:"opus"}};
+                actorUser = new TestClient(actorUserName, serverIP,config);
+                //bind callback listners
+                actorUser.bindListener("server-disconnected", function(e) {
+                    actorUser.request["server-disconnected_success"]++;
+                });
+                actorUser.bindListener("chat-invited", function(e) {
+                    actorUser.request["chat-invited_success"]++;
+                });
+                actorUser.bindListener("chat-denied", function(e) {
+                    actorUser.request["chat-denied_success"]++;
+                });
+                actorUser.bindListener("chat-started", function(e) {
+                    console.log("chat-started event");
+                    actorUser.request["chat-started_success"]++;
+                });
+                actorUser.bindListener("chat-stopped", function(e) {
+                    actorUser.request["chat-stopped_success"]++;
+                    sender = e.senderId;
+                    actorUserPeer = e.peerId;
+                });
+                actorUser.bindListener("stream-added", function(e) {
+                    actorUser.showInPage(e.stream);
+                    clientRemoteId = e.stream.id();
+                    clientRemoteStream = e.stream;
+                    actorUser.request["stream-added_success"]++;
+                });
+                actorUser.bindListener("stream-removed", function(e) {
+                    actorUser.removeVideo(e.stream);
+                    actorUser.request["stream-removed_success"]++;
+                });
+                actorUser.bindListener("data-received", function(e) {
+                    actorUser.request["data-received_success"]++;
+                    actorUser_datasender = e.senderId;
+                    actorUser_data = e.data;
+                });
     }
 
     beforeEach(function(done) {
@@ -419,7 +459,7 @@ describe('TestDevice1', function() {
                 // notify lock
                 notifyLock('User1InviteUser2');
             })
-            .waits('test end',waitInterval)
+            .waits('test end',10000)
             .runs(function() {
                 console.log('test end');
                 done();
@@ -15194,34 +15234,6 @@ describe('TestDevice1', function() {
             }, actorUserName + "check wait: getConnectionStatus_success", waitInterval)
 
 
-            .runs(function() {
-                // action
-                actorUser.unpublish(targetUserName);
-            })
-
-
-            .waitsFor(function() {
-                // check action
-                return actorUser.request["unpublish_success"] == 1;
-            }, actorUserName + "check action: unpublish ", waitInterval)
-
-            .runs(function() {
-                // notify lock
-                notifyLock('User1UnpublishToUser2');
-            })
-
-            // 12. User2UnpublishToUser1
-            // 13. User1StopChatWithUser2
-            .waitsFor(function() {
-                // wait lock
-                return waitLock('User2UnpublishToUser1')
-            }, actorUserName + "wait lock: User2UnpublishToUser1", waitInterval)
-            .waitsFor(function() {
-                //check wait
-                return actorUser.request["stream-removed_success"] == 1;
-            }, actorUserName + "check wait: stream-removed ", waitInterval)
-
-
             .waits('test end',waitInterval)
             .runs(function() {
                 // ends the case
@@ -15541,7 +15553,7 @@ describe('TestDevice1', function() {
                 actorUser.close();
             })
 
-            .runs(function() {
+           /* .runs(function() {
                 // action
                 actorUser.unpublish(targetUserName);
             })
@@ -15550,7 +15562,7 @@ describe('TestDevice1', function() {
             .waitsFor(function() {
                 // check action
                 return actorUser.request["unpublish_success"] == 1;
-            }, actorUserName + "check action: unpublish ", waitInterval)
+            }, actorUserName + "check action: unpublish ", waitInterval)*/
 
             .runs(function() {
                 // action
@@ -16961,6 +16973,616 @@ it('test143_Peer1SendundefinedMsg',function(done){
             })
     });
 
+
+    it('test152_Peer2checkConnectionStatusByresolutionsifpAndCodecH264',function(done){
+        thisQ
+            .runs(function() {
+                // start test
+                debug(actorUserName + "test start!");
+                CreatePeerClientWithH264();
+            })
+            // .waits('wait for user2 init', 10000)
+            // // 1. User1Connect
+            .runs(function() {
+                // action
+                actorUser.connect();
+            })
+            .waitsFor(function() {
+                //check action
+                return actorUser.request["connect_success"] == 1;
+            }, actorUserName + " check action: login ", waitInterval)
+
+
+            .runs(function() {
+                //notify lock
+                notifyLock('User1Connect');
+            })
+            // 2. User2Connect
+            // 3. User1InviteUser2
+            .waitsFor(function() {
+                //wait lock
+                return waitLock('User2Connect');
+            }, actorUserName + " wait lock: User2Connect ", waitInterval)
+            .runs(function() {
+                //check wait
+                //action
+                actorUser.invited(targetUserName);
+            })
+            .waitsFor(function() {
+                //check action
+                return actorUser.request["invite_success"] == 1;
+            }, actorUserName + " check action: invite ", waitInterval)
+
+
+            .runs(function() {
+                // notify lock
+                notifyLock('User1InviteUser2')
+            })
+            //4. User2AcceptUser1
+            //5. User1CreateLocalStream
+            .waitsFor(function() {
+                // wait lock
+                return waitLock('User2AcceptUser1');
+            }, actorUserName + " wait lock: User2AcceptUser1", waitInterval)
+            .waitsFor(function() {
+                //check wait
+                return actorUser.request["chat-started_success"] == 1;
+            }, actorUserName + " check wait: chat-started", waitInterval)
+
+
+             .runs(function() {
+                // action
+
+                config = {
+                    video:{
+                         device:"camera",
+                         resolution:"sif",
+                         frameRate: [30, 30]
+                },
+                audio: true
+                };
+
+                actorUser.createLocalStream(config);
+            })
+            .waitsFor(function() {
+                // check action
+                return actorUser.request["createLocal_success"] == 1;
+            }, actorUserName + " check action: create localStream ", waitInterval)
+
+            .runs(function() {
+                // action
+                detection = "";
+                videoDetection("stream"+actorUser.request["localStreamId"]);
+               //videoDetection("local");
+            })
+
+            .waitsFor(function() {
+                //wait lock
+                return detection == true;
+            }, actorUserName + " create localstream is fail", waitInterval)
+
+
+            .runs(function() {
+                // notify lock
+                notifyLock('User1CreateLocalStream');
+            })
+
+            .runs(function() {
+                //check wait
+                // action
+                //TODO change wrapper of publish
+                actorUser.publish(targetUserName);
+            })
+            .waitsFor(function() {
+                //check action
+                return actorUser.request["publish_success"] == 1;
+            }, actorUserName + "check action: publish", waitInterval)
+
+            .runs(function() {
+                // notify lock
+                notifyLock('User1PublishToUser2');
+            })
+
+
+            .waits('test end',5000)
+            .runs(function() {
+                // ends the case
+                console.log('test end');
+                done();
+            })
+    });
+
+    it('test153_Peer1setCodech264andPeer2setCodecvp8andgetconnectionstats',function(done){
+        thisQ
+            .runs(function() {
+                // start test
+                debug(actorUserName + "test start!");
+                CreatePeerClientWithH264();
+            })
+            // .waits('wait for user2 init', 10000)
+            // // 1. User1Connect
+            .runs(function() {
+                // action
+                actorUser.connect();
+            })
+            .waitsFor(function() {
+                //check action
+                return actorUser.request["connect_success"] == 1;
+            }, actorUserName + " check action: login ", waitInterval)
+
+
+            .runs(function() {
+                //notify lock
+                notifyLock('User1Connect');
+            })
+            // 2. User2Connect
+            // 3. User1InviteUser2
+            .waitsFor(function() {
+                //wait lock
+                return waitLock('User2Connect');
+            }, actorUserName + " wait lock: User2Connect ", waitInterval)
+            .runs(function() {
+                //check wait
+                //action
+                actorUser.invited(targetUserName);
+            })
+            .waitsFor(function() {
+                //check action
+                return actorUser.request["invite_success"] == 1;
+            }, actorUserName + " check action: invite ", waitInterval)
+
+
+            .runs(function() {
+                // notify lock
+                notifyLock('User1InviteUser2')
+            })
+            //4. User2AcceptUser1
+            //5. User1CreateLocalStream
+            .waitsFor(function() {
+                // wait lock
+                return waitLock('User2AcceptUser1');
+            }, actorUserName + " wait lock: User2AcceptUser1", waitInterval)
+            .waitsFor(function() {
+                //check wait
+                return actorUser.request["chat-started_success"] == 1;
+            }, actorUserName + " check wait: chat-started", waitInterval)
+
+
+             .runs(function() {
+                // action
+
+                config = {
+                    video:{
+                         device:"camera",
+                         resolution:"sif",
+                         frameRate: [30, 30]
+                },
+                audio: true
+                };
+
+                actorUser.createLocalStream(config);
+            })
+            .waitsFor(function() {
+                // check action
+                return actorUser.request["createLocal_success"] == 1;
+            }, actorUserName + " check action: create localStream ", waitInterval)
+
+            .runs(function() {
+                // action
+                detection = "";
+                videoDetection("stream"+actorUser.request["localStreamId"]);
+               //videoDetection("local");
+            })
+
+            .waitsFor(function() {
+                //wait lock
+                return detection == true;
+            }, actorUserName + " create localstream is fail", waitInterval)
+
+
+            .runs(function() {
+                // notify lock
+                notifyLock('User1CreateLocalStream');
+            })
+
+            .runs(function() {
+                //check wait
+                // action
+                //TODO change wrapper of publish
+                actorUser.publish(targetUserName);
+            })
+            .waitsFor(function() {
+                //check action
+                return actorUser.request["publish_success"] == 1;
+            }, actorUserName + "check action: publish", waitInterval)
+
+            .runs(function() {
+                // notify lock
+                notifyLock('User1PublishToUser2');
+            })
+
+
+            .waits('test end',5000)
+            .runs(function() {
+                // ends the case
+                console.log('test end');
+                done();
+            })
+    });
+
+it('test154_Peer1setCodecVP8andPeer2setCodecH264andgetconnectionstats',function(done){
+        thisQ
+            .runs(function() {
+                // start test
+                debug(actorUserName + "test start!");
+            })
+            // .waits('wait for user2 init', 10000)
+            // // 1. User1Connect
+            .runs(function() {
+                // action
+                actorUser.connect();
+            })
+            .waitsFor(function() {
+                //check action
+                return actorUser.request["connect_success"] == 1;
+            }, actorUserName + " check action: login ", waitInterval)
+
+
+            .runs(function() {
+                //notify lock
+                notifyLock('User1Connect');
+            })
+            // 2. User2Connect
+            // 3. User1InviteUser2
+            .waitsFor(function() {
+                //wait lock
+                return waitLock('User2Connect');
+            }, actorUserName + " wait lock: User2Connect ", waitInterval)
+            .runs(function() {
+                //check wait
+                //action
+                actorUser.invited(targetUserName);
+            })
+            .waitsFor(function() {
+                //check action
+                return actorUser.request["invite_success"] == 1;
+            }, actorUserName + " check action: invite ", waitInterval)
+
+
+            .runs(function() {
+                // notify lock
+                notifyLock('User1InviteUser2')
+            })
+            //4. User2AcceptUser1
+            //5. User1CreateLocalStream
+            .waitsFor(function() {
+                // wait lock
+                return waitLock('User2AcceptUser1');
+            }, actorUserName + " wait lock: User2AcceptUser1", waitInterval)
+            .waitsFor(function() {
+                //check wait
+                return actorUser.request["chat-started_success"] == 1;
+            }, actorUserName + " check wait: chat-started", waitInterval)
+
+
+             .runs(function() {
+                // action
+
+                config = {
+                    video:{
+                         device:"camera",
+                         resolution:"vga",
+                         frameRate: [30, 30]
+                },
+                audio: true
+                };
+
+                actorUser.createLocalStream(config);
+            })
+            .waitsFor(function() {
+                // check action
+                return actorUser.request["createLocal_success"] == 1;
+            }, actorUserName + " check action: create localStream ", waitInterval)
+
+            .runs(function() {
+                // action
+                detection = "";
+                videoDetection("stream"+actorUser.request["localStreamId"]);
+               //videoDetection("local");
+            })
+
+            .waitsFor(function() {
+                //wait lock
+                return detection == true;
+            }, actorUserName + " create localstream is fail", waitInterval)
+
+
+            .runs(function() {
+                // notify lock
+                notifyLock('User1CreateLocalStream');
+            })
+
+            .runs(function() {
+                //check wait
+                // action
+                //TODO change wrapper of publish
+                actorUser.publish(targetUserName);
+            })
+            .waitsFor(function() {
+                //check action
+                return actorUser.request["publish_success"] == 1;
+            }, actorUserName + "check action: publish", waitInterval)
+
+            .runs(function() {
+                // notify lock
+                notifyLock('User1PublishToUser2');
+            })
+
+
+            .waits('test end',5000)
+            .runs(function() {
+                // ends the case
+                console.log('test end');
+                done();
+            })
+    });
+
+
+/**
+     * Test a normal interaction process between two users.
+     * Actors: User1 and User2
+     * Story:
+     * 1. User1Connect
+     * 2. User2Connect
+     * 3. User1InviteUser2
+     * 4. User2AcceptUser1
+     * 5. User2StopChatWithUser1
+     */
+    it('test155_Peer1VideoonlyAndPeer2audioOnlyThenPeer2checkConnectionStatusWithCodecH264',function(done){
+        thisQ
+            .runs(function() {
+                // start test
+                debug(actorUserName + "test start!");
+                CreatePeerClientWithH264();
+            })
+            // .waits('wait for user2 init', 10000)
+            // // 1. User1Connect
+            .runs(function() {
+                // action
+                actorUser.connect();
+            })
+            .waitsFor(function() {
+                //check action
+                return actorUser.request["connect_success"] == 1;
+            }, actorUserName + " check action: login ", waitInterval)
+
+
+            .runs(function() {
+                //notify lock
+                notifyLock('User1Connect');
+            })
+            // 2. User2Connect
+            // 3. User1InviteUser2
+            .waitsFor(function() {
+                //wait lock
+                return waitLock('User2Connect');
+            }, actorUserName + " wait lock: User2Connect ", waitInterval)
+            .runs(function() {
+                //check wait
+                //action
+                actorUser.invited(targetUserName);
+            })
+            .waitsFor(function() {
+                //check action
+                return actorUser.request["invite_success"] == 1;
+            }, actorUserName + " check action: invite ", waitInterval)
+
+
+            .runs(function() {
+                // notify lock
+                notifyLock('User1InviteUser2')
+            })
+            //4. User2AcceptUser1
+            //5. User1CreateLocalStream
+            .waitsFor(function() {
+                // wait lock
+                return waitLock('User2AcceptUser1');
+            }, actorUserName + " wait lock: User2AcceptUser1", waitInterval)
+            .waitsFor(function() {
+                //check wait
+                return actorUser.request["chat-started_success"] == 1;
+            }, actorUserName + " check wait: chat-started", waitInterval)
+
+
+             .runs(function() {
+                // action
+
+                config = {
+                    video:{
+                         device:"camera",
+                         resolution:"sif",
+                         frameRate: [30, 30]
+                },
+                audio: false
+                };
+
+                actorUser.createLocalStream(config);
+            })
+            .waitsFor(function() {
+                // check action
+                return actorUser.request["createLocal_success"] == 1;
+            }, actorUserName + " check action: create localStream ", waitInterval)
+
+            .runs(function() {
+                // action
+                detection = "";
+                videoDetection("stream"+actorUser.request["localStreamId"]);
+               //videoDetection("local");
+            })
+
+            .waitsFor(function() {
+                //wait lock
+                return detection == true;
+            }, actorUserName + " create localstream is fail", waitInterval)
+
+
+            .runs(function() {
+                // notify lock
+                notifyLock('User1CreateLocalStream');
+            })
+
+
+           .waitsFor(function() {
+                // wait lock
+                return waitLock('User2CreateLocalStream');
+            }, actorUserName + " wait lock: User1CreateLocalStream", waitInterval)
+            .runs(function() {
+                //check wait
+                // action
+                //TODO change wrapper of publish
+                actorUser.publish(targetUserName);
+            })
+            .waitsFor(function() {
+                //check action
+                return actorUser.request["publish_success"] == 1;
+            }, actorUserName + "check action: publish", waitInterval)
+
+            .runs(function() {
+                // notify lock
+                notifyLock('User1PublishToUser2');
+            })
+
+
+            .waits('test end',15000)
+            .runs(function() {
+                // ends the case
+                console.log('test end');
+                done();
+            })
+    });
+
+
+it('test156_Peer1VideoonlyAndPeer2audioOnlyThenPeer2checkConnectionStatusWithCodecVP8',function(done){
+        thisQ
+            .runs(function() {
+                // start test
+                debug(actorUserName + "test start!");
+            })
+            // .waits('wait for user2 init', 10000)
+            // // 1. User1Connect
+            .runs(function() {
+                // action
+                actorUser.connect();
+            })
+            .waitsFor(function() {
+                //check action
+                return actorUser.request["connect_success"] == 1;
+            }, actorUserName + " check action: login ", waitInterval)
+
+
+            .runs(function() {
+                //notify lock
+                notifyLock('User1Connect');
+            })
+            // 2. User2Connect
+            // 3. User1InviteUser2
+            .waitsFor(function() {
+                //wait lock
+                return waitLock('User2Connect');
+            }, actorUserName + " wait lock: User2Connect ", waitInterval)
+            .runs(function() {
+                //check wait
+                //action
+                actorUser.invited(targetUserName);
+            })
+            .waitsFor(function() {
+                //check action
+                return actorUser.request["invite_success"] == 1;
+            }, actorUserName + " check action: invite ", waitInterval)
+
+
+            .runs(function() {
+                // notify lock
+                notifyLock('User1InviteUser2')
+            })
+            //4. User2AcceptUser1
+            //5. User1CreateLocalStream
+            .waitsFor(function() {
+                // wait lock
+                return waitLock('User2AcceptUser1');
+            }, actorUserName + " wait lock: User2AcceptUser1", waitInterval)
+            .waitsFor(function() {
+                //check wait
+                return actorUser.request["chat-started_success"] == 1;
+            }, actorUserName + " check wait: chat-started", waitInterval)
+
+
+             .runs(function() {
+                // action
+
+                config = {
+                    video:{
+                         device:"camera",
+                         resolution:"hd720p",
+                         frameRate: [30, 30]
+                },
+                audio: false
+                };
+
+                actorUser.createLocalStream(config);
+            })
+            .waitsFor(function() {
+                // check action
+                return actorUser.request["createLocal_success"] == 1;
+            }, actorUserName + " check action: create localStream ", waitInterval)
+
+            .runs(function() {
+                // action
+                detection = "";
+                videoDetection("stream"+actorUser.request["localStreamId"]);
+               //videoDetection("local");
+            })
+
+            .waitsFor(function() {
+                //wait lock
+                return detection == true;
+            }, actorUserName + " create localstream is fail", waitInterval)
+
+
+            .runs(function() {
+                // notify lock
+                notifyLock('User1CreateLocalStream');
+            })
+
+
+           .waitsFor(function() {
+                // wait lock
+                return waitLock('User2CreateLocalStream');
+            }, actorUserName + " wait lock: User1CreateLocalStream", waitInterval)
+            .runs(function() {
+                //check wait
+                // action
+                //TODO change wrapper of publish
+                actorUser.publish(targetUserName);
+            })
+            .waitsFor(function() {
+                //check action
+                return actorUser.request["publish_success"] == 1;
+            }, actorUserName + "check action: publish", waitInterval)
+
+            .runs(function() {
+                // notify lock
+                notifyLock('User1PublishToUser2');
+            })
+
+
+            .waits('test end',15000)
+            .runs(function() {
+                // ends the case
+                console.log('test end');
+                done();
+            })
+    });
 /**
      * Test a normal interaction process between two users.
      * Actors: User1 and User2

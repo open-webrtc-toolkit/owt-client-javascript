@@ -1,5 +1,5 @@
 describe('TestDevice2', function() {
-    jasmine.DEFAULT_TIMEOUT_INTERVAL = 60000;
+    jasmine.DEFAULT_TIMEOUT_INTERVAL = 80000;
     //Init Q
     var deferred = Q.defer();
     deferred.resolve();
@@ -34,7 +34,7 @@ describe('TestDevice2', function() {
                     console.log("framechecker frames number > 0, is : ", framechecker.frameStats.numFrames);
                     console.log("framechecker numFrozenFrames number  is : ", framechecker.frameStats.numFrozenFrames);
                     console.log("framechecker numBlackFrames number  is : ", framechecker.frameStats.numBlackFrames);
-                    if ((framechecker.frameStats.numFrozenFrames == 0) && (framechecker.frameStats.numBlackFrames == 0)) {
+                    if (/*(framechecker.frameStats.numFrozenFrames == 0) && */(framechecker.frameStats.numBlackFrames == 0)) {
                         detection = true;
                     } else {
                         console.log("framechecker numFrozenFrames number  is : ", framechecker.frameStats.numFrozenFrames);
@@ -49,6 +49,44 @@ describe('TestDevice2', function() {
         } , 3000);
     }
 
+     var CreatePeerClientWithH264 = function(){
+                config={options:{videoCodec:"h264",audioCodec:"opus"}};
+                actorUser = new TestClient(actorUserName, serverIP,config);
+                //bind callback listners
+                actorUser.bindListener("server-disconnected", function(e) {
+                    actorUser.request["server-disconnected_success"]++;
+                });
+                actorUser.bindListener("chat-invited", function(e) {
+                    actorUser.request["chat-invited_success"]++;
+                });
+                actorUser.bindListener("chat-denied", function(e) {
+                    actorUser.request["chat-denied_success"]++;
+                });
+                actorUser.bindListener("chat-started", function(e) {
+                    console.log("chat-started event");
+                    actorUser.request["chat-started_success"]++;
+                });
+                actorUser.bindListener("chat-stopped", function(e) {
+                    actorUser.request["chat-stopped_success"]++;
+                    sender = e.senderId;
+                    actorUserPeer = e.peerId;
+                });
+                actorUser.bindListener("stream-added", function(e) {
+                    actorUser.showInPage(e.stream);
+                    clientRemoteId = e.stream.id();
+                    clientRemoteStream = e.stream;
+                    actorUser.request["stream-added_success"]++;
+                });
+                actorUser.bindListener("stream-removed", function(e) {
+                    actorUser.removeVideo(e.stream);
+                    actorUser.request["stream-removed_success"]++;
+                });
+                actorUser.bindListener("data-received", function(e) {
+                    actorUser.request["data-received_success"]++;
+                    actorUser_datasender = e.senderId;
+                    actorUser_data = e.data;
+                });
+    }
 
     beforeEach(function(done) {
         thisQ
@@ -204,7 +242,8 @@ describe('TestDevice2', function() {
 
             .runs(function() {
                 // notify lock
-                notifyLock('User2CreateLocalStream');
+                var result = notifyLock('User2CreateLocalStream');
+                debug("111111111111111111111111:"+result)
             })
 
             // 7. User1PublishToUser2
@@ -1099,6 +1138,7 @@ describe('TestDevice2', function() {
                 notifyLock('User2CreateLocalStream');
             })
 
+            //.waits("test end",2000)
             .runs(function() {
                 // action
                 actorUser.publish(targetUserName);
@@ -1113,7 +1153,7 @@ describe('TestDevice2', function() {
                 notifyLock('User2PublishToUser1');
             })
 
-            .waits("test end",waitInterval)
+            .waits("test end",10000)
              .runs(function() {
                 // ends the case
                 console.log('test end');
@@ -13871,7 +13911,16 @@ x
             }, actorUserName + "wait lock: User1CreateLocalStream ", waitInterval)
             .runs(function() {
                 // action
-                actorUser.createLocalStream();
+                config = {
+                    video:{
+                         device:"camera",
+                         resolution:"sif",
+                         frameRate: [30, 30]
+                },
+                audio: true
+                };
+
+                actorUser.createLocalStream(config);
             })
             .waitsFor(function() {
                 // check action
@@ -13937,8 +13986,7 @@ x
             .waits('test end',5000)
             .runs(function() {
                 // action
-                var exceptvalue = {"codec_name":"VP8","frame_width":"640","frame_height":"480","length":5};
-
+                var exceptvalue = {"codec_name":"VP8","frame_width":"640","frame_height":"480","send_codec_name":"VP8","send_frame_width":"320","send_frame_height":"240","length":5};
                 actorUser.getConnectionStatus(targetUserName,exceptvalue);
             })
             .waitsFor(function() {
@@ -14138,6 +14186,168 @@ x
                 done();
             })
     });
+
+/**
+     * Test a normal interaction process between two users.
+     * Actors: User1 and User2
+     * Story:
+     * 1. User1Connect
+     * 2. User2Connect
+     * 3. User1InviteUser2
+     * 4. User2AcceptUser1
+     * 5. User1CreateLocalStream
+     * 6. User2CreateLocalStream
+     * 7. User1PublishToUser2
+     * 8. User2PublishToUser1
+     * 9. User2PublishToUser1Again
+     */
+    it('test136_Peer1publishhd720pAndPeer2PublishsifAndcheckgetconnectionstatus', function(done) {
+        thisQ
+            .runs(function() {
+                // start test
+                debug(actorUserName + "test start!");
+            })
+            // 1. User1Connect
+            // 2. User2Connect
+            .waitsFor(function() {
+                //This sentence will cause a bug in testFrameworkTest.
+                // debug("wait User1Connect")
+                // wait lock
+                return waitLock('User1Connect');
+            }, actorUserName + "wait lock: User1Connect", waitInterval)
+            .runs(function() {
+                // check wait
+                // action
+                actorUser.connect();
+            })
+            .waitsFor(function() {
+                //check action
+                return actorUser.request["connect_success"] == 1;
+            }, actorUserName + " check action: login ", waitInterval)
+            .runs(function() {
+                // notify lock
+                notifyLock('User2Connect')
+            })
+            // 3. User1InviteUser2
+            //4. User2AcceptUser1
+            .waitsFor(function() {
+                // wait lock
+                return waitLock('User1InviteUser2');
+            }, actorUserName + "wait lock:User1InviteUser2", waitInterval)
+            .waitsFor(function() {
+                //check wait
+                return actorUser.request["chat-invited_success"] == 1;
+            }, actorUserName + " chat-invited event", waitInterval)
+            .runs(function() {
+                // action
+                actorUser.accept(targetUserName);
+            })
+            .waitsFor(function() {
+                //check action
+                return actorUser.request["accept_success"] == 1;
+            }, actorUserName + "check action: accept", waitInterval)
+            .runs(function() {
+                // notify lock
+                notifyLock('User2AcceptUser1')
+            })
+            //5. User1CreateLocalStream
+            // 6. User2CreateLocalStream
+            .waitsFor(function() {
+                // wait lock
+                return waitLock('User1CreateLocalStream');
+            }, actorUserName + "wait lock: User1CreateLocalStream ", waitInterval)
+            .runs(function() {
+                // action
+                config = {
+                    video:{
+                         device:"camera",
+                         resolution:"sif",
+                         frameRate: [30, 30]
+                },
+                audio: true
+                };
+
+                actorUser.createLocalStream(config);
+            })
+            .waitsFor(function() {
+                // check action
+                return actorUser.request["createLocal_success"] == 1
+            }, actorUserName + " check action: create localStream ", waitInterval)
+
+
+            .runs(function() {
+                // action
+                detection = "";
+                videoDetection("stream"+actorUser.request["localStreamId"]);
+               //videoDetection("local");
+            })
+
+            .waitsFor(function() {
+                //wait lock
+                return detection == true;
+            }, actorUserName + " create localstream is fail", waitInterval)
+
+            .runs(function() {
+                // notify lock
+                notifyLock('User2CreateLocalStream');
+            })
+            // 7. User1PublishToUser2
+            // 8. User2PublishToUser1
+            .waitsFor(function() {
+                // wait lock
+                return waitLock('User1PublishToUser2');
+            }, actorUserName + "wait lock: User1PublishToUser2", waitInterval)
+
+            .waitsFor(function() {
+                //check wait
+                return actorUser.request["stream-added_success"] == 1;
+            }, actorUserName + "check wait: stream-added", waitInterval)
+
+
+             .runs(function() {
+                // action
+                detection ="";
+                videoDetection("stream"+clientRemoteId);
+               //videoDetection("local");
+            })
+
+            .waitsFor(function() {
+                //wait lock
+                return detection == true;
+            }, actorUserName + " REMOTE STREAM IS GOOD", waitInterval)
+
+
+            .runs(function() {
+                // action
+                actorUser.publish(targetUserName);
+            })
+            .waitsFor(function() {
+                //actoin check
+                return actorUser.request["publish_success"] == 1;
+            }, actorUserName + "actoin check: publish", waitInterval)
+            .runs(function() {
+                // notify lock
+                notifyLock('User2PublishToUser1');
+            })
+
+            .waits('test end',5000)
+            .runs(function() {
+                // action
+                 var exceptvalue = {"codec_name":"VP8","frame_width":"1280","frame_height":"720","send_codec_name":"VP8","send_frame_width":"320","send_frame_height":"240","length":5};
+                actorUser.getConnectionStatus(targetUserName,exceptvalue);
+            })
+            .waitsFor(function() {
+                //check wait
+                return actorUser.request["getConnectionStatus_success"] == 1;
+            }, actorUserName + "check wait: getConnectionStatus_success", waitInterval)
+            .waits('test end',10000)
+            .runs(function() {
+                // end test
+                console.log('test end');
+                done();
+            })
+    });
+
 
 /**
      * Test a normal interaction process between two users.
@@ -15319,7 +15529,12 @@ it('test146_Peer2checkConnectionStatusByVideoOnlyEachOther',function(done){
             }, actorUserName + "check action: publish", waitInterval)
 
 
-             .waits('test end',2000)
+            .runs(function() {
+                // notify lock
+                notifyLock('User2PublishToUser1');
+            })
+
+            .waits('test end',2000)
 
 
              .runs(function() {
@@ -15438,6 +15653,11 @@ it('test147_Peer2checkConnectionStatusByAudioOnlyEachOther',function(done){
                 //check action
                 return actorUser.request["publish_success"] == 1;
             }, actorUserName + "check action: publish", waitInterval)
+
+            .runs(function() {
+                // notify lock
+                notifyLock('User2PublishToUser1');
+            })
 
              .waits('test end',1000)
              .runs(function() {
@@ -15647,5 +15867,589 @@ it('test147_Peer2checkConnectionStatusByAudioOnlyEachOther',function(done){
             // 17. User1Disconnect
     });
 
+
+    it('test152_Peer2checkConnectionStatusByresolutionsifpAndCodecH264',function(done){
+        thisQ
+            .runs(function() {
+                // start test
+                debug(actorUserName + "test start!");
+                CreatePeerClientWithH264();
+            })
+              // 2. User2Connect
+            .waitsFor(function() {
+                return waitLock('User1Connect');
+            }, actorUserName + "wait lock: User1Connect", waitInterval)
+            // .waits('wait for user2 init', 10000)
+            // // 1. User1Connect
+            .runs(function() {
+                // action
+                actorUser.connect();
+            })
+            .waitsFor(function() {
+                //check action
+                return actorUser.request["connect_success"] == 1;
+            }, actorUserName + " check action: login ", waitInterval)
+            .runs(function() {
+                //notify lock
+                notifyLock('User2Connect');
+            })
+            .waitsFor(function() {
+                //check action
+                return waitLock('User1InviteUser2');
+            }, actorUserName + " check action: User1InviteUser2 ", waitInterval)
+            .waitsFor(function() {
+                //check action
+                return actorUser.request["chat-invited_success"] == 1;
+            }, actorUserName + "check action: chat-invited", waitInterval)
+
+            .runs(function() {
+                // action
+                actorUser.accept(targetUserName);
+            })
+            .runs(function() {
+                // notify lock
+                notifyLock('User2AcceptUser1')
+            })
+           .waitsFor(function() {
+                //check action
+                return actorUser.request["accept_success"] == 1;
+            }, actorUserName + "check action: accept", waitInterval)
+            .waitsFor(function() {
+                //check wait
+                return actorUser.request["chat-started_success"] == 1;
+            }, actorUserName + " check wait: chat-started", waitInterval)
+
+
+            .waitsFor(function() {
+                // wait lock
+                return waitLock('User1CreateLocalStream');
+            }, actorUserName + "wait lock: User1CreateLocalStream", waitInterval)
+
+            .waitsFor(function() {
+                // wait lock
+                return waitLock('User1PublishToUser2');
+            }, actorUserName + "wait lock: User1PublishToUser2", waitInterval)
+            .waitsFor(function() {
+                //check wait
+                return actorUser.request["stream-added_success"] == 1;
+            }, actorUserName + "check wait: stream-added", waitInterval)
+
+              .runs(function() {
+                // action
+                detection ="";
+                videoDetection("stream"+clientRemoteId);
+               //videoDetection("local");
+            })
+
+            .waitsFor(function() {
+                //wait lock
+                return detection == true;
+            }, actorUserName + " REMOTE STREAM IS GOOD", waitInterval)
+
+
+             .runs(function() {
+                // action
+                var exceptvalue = {"codec_name":"H264","frame_width":"320","frame_height":"240","length":3};
+
+                actorUser.getConnectionStatus(targetUserName,exceptvalue);
+            })
+            .waitsFor(function() {
+                //check wait
+                return actorUser.request["getConnectionStatus_success"] == 1;
+            }, actorUserName + "check wait: getConnectionStatus_success", waitInterval)
+            .waits('test end',5000)
+            .runs(function() {
+                console.log('test end');
+                done();
+            })
+    });
+
+
+it('test153_Peer1setCodech264andPeer2setCodecvp8andgetconnectionstats',function(done){
+        thisQ
+            .runs(function() {
+                // start test
+                debug(actorUserName + "test start!");
+            })
+              // 2. User2Connect
+            .waitsFor(function() {
+                return waitLock('User1Connect');
+            }, actorUserName + "wait lock: User1Connect", waitInterval)
+            // .waits('wait for user2 init', 10000)
+            // // 1. User1Connect
+            .runs(function() {
+                // action
+                actorUser.connect();
+            })
+            .waitsFor(function() {
+                //check action
+                return actorUser.request["connect_success"] == 1;
+            }, actorUserName + " check action: login ", waitInterval)
+            .runs(function() {
+                //notify lock
+                notifyLock('User2Connect');
+            })
+            .waitsFor(function() {
+                //check action
+                return waitLock('User1InviteUser2');
+            }, actorUserName + " check action: User1InviteUser2 ", waitInterval)
+            .waitsFor(function() {
+                //check action
+                return actorUser.request["chat-invited_success"] == 1;
+            }, actorUserName + "check action: chat-invited", waitInterval)
+
+            .runs(function() {
+                // action
+                actorUser.accept(targetUserName);
+            })
+            .runs(function() {
+                // notify lock
+                notifyLock('User2AcceptUser1')
+            })
+           .waitsFor(function() {
+                //check action
+                return actorUser.request["accept_success"] == 1;
+            }, actorUserName + "check action: accept", waitInterval)
+            .waitsFor(function() {
+                //check wait
+                return actorUser.request["chat-started_success"] == 1;
+            }, actorUserName + " check wait: chat-started", waitInterval)
+
+
+            .waitsFor(function() {
+                // wait lock
+                return waitLock('User1CreateLocalStream');
+            }, actorUserName + "wait lock: User1CreateLocalStream", waitInterval)
+
+            .waitsFor(function() {
+                // wait lock
+                return waitLock('User1PublishToUser2');
+            }, actorUserName + "wait lock: User1PublishToUser2", waitInterval)
+            .waitsFor(function() {
+                //check wait
+                return actorUser.request["stream-added_success"] == 1;
+            }, actorUserName + "check wait: stream-added", waitInterval)
+
+              .runs(function() {
+                // action
+                detection ="";
+                videoDetection("stream"+clientRemoteId);
+               //videoDetection("local");
+            })
+
+            .waitsFor(function() {
+                //wait lock
+                return detection == true;
+            }, actorUserName + " REMOTE STREAM IS GOOD", waitInterval)
+
+
+             .runs(function() {
+                // action
+                var exceptvalue = {"codec_name":"H264","frame_width":"320","frame_height":"240","length":3};
+
+                actorUser.getConnectionStatus(targetUserName,exceptvalue);
+            })
+            .waitsFor(function() {
+                //check wait
+                return actorUser.request["getConnectionStatus_success"] == 1;
+            }, actorUserName + "check wait: getConnectionStatus_success", waitInterval)
+            .waits('test end',5000)
+            .runs(function() {
+                console.log('test end');
+                done();
+            })
+    });
+
+
+it('test154_Peer1setCodecVP8andPeer2setCodecH264andgetconnectionstats',function(done){
+        thisQ
+            .runs(function() {
+                // start test
+                debug(actorUserName + "test start!");
+                 CreatePeerClientWithH264();
+            })
+              // 2. User2Connect
+            .waitsFor(function() {
+                return waitLock('User1Connect');
+            }, actorUserName + "wait lock: User1Connect", waitInterval)
+            // .waits('wait for user2 init', 10000)
+            // // 1. User1Connect
+            .runs(function() {
+                // action
+                actorUser.connect();
+            })
+            .waitsFor(function() {
+                //check action
+                return actorUser.request["connect_success"] == 1;
+            }, actorUserName + " check action: login ", waitInterval)
+            .runs(function() {
+                //notify lock
+                notifyLock('User2Connect');
+            })
+            .waitsFor(function() {
+                //check action
+                return waitLock('User1InviteUser2');
+            }, actorUserName + " check action: User1InviteUser2 ", waitInterval)
+            .waitsFor(function() {
+                //check action
+                return actorUser.request["chat-invited_success"] == 1;
+            }, actorUserName + "check action: chat-invited", waitInterval)
+
+            .runs(function() {
+                // action
+                actorUser.accept(targetUserName);
+            })
+            .runs(function() {
+                // notify lock
+                notifyLock('User2AcceptUser1')
+            })
+           .waitsFor(function() {
+                //check action
+                return actorUser.request["accept_success"] == 1;
+            }, actorUserName + "check action: accept", waitInterval)
+            .waitsFor(function() {
+                //check wait
+                return actorUser.request["chat-started_success"] == 1;
+            }, actorUserName + " check wait: chat-started", waitInterval)
+
+
+            .waitsFor(function() {
+                // wait lock
+                return waitLock('User1CreateLocalStream');
+            }, actorUserName + "wait lock: User1CreateLocalStream", waitInterval)
+
+            .waitsFor(function() {
+                // wait lock
+                return waitLock('User1PublishToUser2');
+            }, actorUserName + "wait lock: User1PublishToUser2", waitInterval)
+            .waitsFor(function() {
+                //check wait
+                return actorUser.request["stream-added_success"] == 1;
+            }, actorUserName + "check wait: stream-added", waitInterval)
+
+              .runs(function() {
+                // action
+                detection ="";
+                videoDetection("stream"+clientRemoteId);
+               //videoDetection("local");
+            })
+
+            .waitsFor(function() {
+                //wait lock
+                return detection == true;
+            }, actorUserName + " REMOTE STREAM IS GOOD", waitInterval)
+
+
+             .runs(function() {
+                // action
+                var exceptvalue = {"codec_name":"H264","frame_width":"640","frame_height":"480","length":3};
+
+                actorUser.getConnectionStatus(targetUserName,exceptvalue);
+            })
+            .waitsFor(function() {
+                //check wait
+                return actorUser.request["getConnectionStatus_success"] == 1;
+            }, actorUserName + "check wait: getConnectionStatus_success", waitInterval)
+            .waits('test end',5000)
+            .runs(function() {
+                console.log('test end');
+                done();
+            })
+    });
+
+it('test155_Peer1VideoonlyAndPeer2audioOnlyThenPeer2checkConnectionStatusWithCodecH264',function(done){
+        thisQ
+            .runs(function() {
+                // start test
+                debug(actorUserName + "test start!");
+                CreatePeerClientWithH264();
+            })
+              // 2. User2Connect
+            .waitsFor(function() {
+                return waitLock('User1Connect');
+            }, actorUserName + "wait lock: User1Connect", waitInterval)
+            // .waits('wait for user2 init', 10000)
+            // // 1. User1Connect
+            .runs(function() {
+                // action
+                actorUser.connect();
+            })
+            .waitsFor(function() {
+                //check action
+                return actorUser.request["connect_success"] == 1;
+            }, actorUserName + " check action: login ", waitInterval)
+            .runs(function() {
+                //notify lock
+                notifyLock('User2Connect');
+            })
+            .waitsFor(function() {
+                //check action
+                return waitLock('User1InviteUser2');
+            }, actorUserName + " check action: User1InviteUser2 ", waitInterval)
+            .waitsFor(function() {
+                //check action
+                return actorUser.request["chat-invited_success"] == 1;
+            }, actorUserName + "check action: chat-invited", waitInterval)
+
+            .runs(function() {
+                // action
+                actorUser.accept(targetUserName);
+            })
+            .runs(function() {
+                // notify lock
+                notifyLock('User2AcceptUser1')
+            })
+           .waitsFor(function() {
+                //check action
+                return actorUser.request["accept_success"] == 1;
+            }, actorUserName + "check action: accept", waitInterval)
+            .waitsFor(function() {
+                //check wait
+                return actorUser.request["chat-started_success"] == 1;
+            }, actorUserName + " check wait: chat-started", waitInterval)
+
+            .waitsFor(function() {
+                // wait lock
+                return waitLock('User1CreateLocalStream');
+            }, actorUserName + "wait lock: User1CreateLocalStream", waitInterval)
+
+
+            .runs(function() {
+                // action
+
+                config = {
+                    video:false,
+                    audio: true
+                };
+                actorUser.createLocalStream(config);
+            })
+            .waitsFor(function() {
+                // check action
+                return actorUser.request["createLocal_success"] == 1;
+            }, actorUserName + " check action: create localStream ", waitInterval)
+
+
+            .runs(function() {
+                // notify lock
+                notifyLock('User2CreateLocalStream');
+            })
+
+            .waitsFor(function() {
+                // wait lock
+                return waitLock('User1PublishToUser2');
+            }, actorUserName + "wait lock: User1PublishToUser2", waitInterval)
+            .waitsFor(function() {
+                //check wait
+                return actorUser.request["stream-added_success"] == 1;
+            }, actorUserName + "check wait: stream-added", waitInterval)
+
+              .runs(function() {
+                // action
+                detection ="";
+                videoDetection("stream"+clientRemoteId);
+               //videoDetection("local");
+            })
+
+            .waitsFor(function() {
+                //wait lock
+                return detection == true;
+            }, actorUserName + " REMOTE STREAM IS GOOD", waitInterval)
+
+
+
+            .runs(function() {
+                //check wait
+                // action
+                //TODO change wrapper of publish
+                actorUser.publish(targetUserName);
+            })
+            .waitsFor(function() {
+                //check action
+                return actorUser.request["publish_success"] == 1;
+            }, actorUserName + "check action: publish", waitInterval)
+
+
+            .runs(function() {
+                // notify lock
+                notifyLock('User2PublishToUser1');
+            })
+
+            .waits('test end',2000)
+
+
+             .runs(function() {
+                // action
+                var exceptvalue = {"send_codec_name":"opus","length":3};
+                actorUser.getConnectionStatusByAudioOnly(targetUserName,exceptvalue);
+            })
+           .waitsFor(function() {
+                //check wait
+                return actorUser.request["getConnectionStatus_success"] == 1;
+            }, actorUserName + "check wait: getConnectionStatus_success", waitInterval)
+
+            .runs(function() {
+                // action
+                var exceptvalue = {"codec_name":"H264","frame_width":"320","frame_height":"240","length":3};
+                actorUser.getConnectionStatus(targetUserName,exceptvalue);
+            })
+           .waitsFor(function() {
+                //check wait
+                return actorUser.request["getConnectionStatus_success"] == 2;
+            }, actorUserName + "check wait: getConnectionStatus_success", waitInterval)
+
+
+            .waits('test end',5000)
+            .runs(function() {
+                console.log('test end');
+                done();
+            })
+    });
+
+it('test156_Peer1VideoonlyAndPeer2audioOnlyThenPeer2checkConnectionStatusWithCodecVP8',function(done){
+        thisQ
+            .runs(function() {
+                // start test
+                debug(actorUserName + "test start!");
+            })
+              // 2. User2Connect
+            .waitsFor(function() {
+                return waitLock('User1Connect');
+            }, actorUserName + "wait lock: User1Connect", waitInterval)
+            // .waits('wait for user2 init', 10000)
+            // // 1. User1Connect
+            .runs(function() {
+                // action
+                actorUser.connect();
+            })
+            .waitsFor(function() {
+                //check action
+                return actorUser.request["connect_success"] == 1;
+            }, actorUserName + " check action: login ", waitInterval)
+            .runs(function() {
+                //notify lock
+                notifyLock('User2Connect');
+            })
+            .waitsFor(function() {
+                //check action
+                return waitLock('User1InviteUser2');
+            }, actorUserName + " check action: User1InviteUser2 ", waitInterval)
+            .waitsFor(function() {
+                //check action
+                return actorUser.request["chat-invited_success"] == 1;
+            }, actorUserName + "check action: chat-invited", waitInterval)
+
+            .runs(function() {
+                // action
+                actorUser.accept(targetUserName);
+            })
+            .runs(function() {
+                // notify lock
+                notifyLock('User2AcceptUser1')
+            })
+           .waitsFor(function() {
+                //check action
+                return actorUser.request["accept_success"] == 1;
+            }, actorUserName + "check action: accept", waitInterval)
+            .waitsFor(function() {
+                //check wait
+                return actorUser.request["chat-started_success"] == 1;
+            }, actorUserName + " check wait: chat-started", waitInterval)
+
+            .waitsFor(function() {
+                // wait lock
+                return waitLock('User1CreateLocalStream');
+            }, actorUserName + "wait lock: User1CreateLocalStream", waitInterval)
+
+
+            .runs(function() {
+                // action
+
+                config = {
+                    video:false,
+                    audio: true
+                };
+                actorUser.createLocalStream(config);
+            })
+            .waitsFor(function() {
+                // check action
+                return actorUser.request["createLocal_success"] == 1;
+            }, actorUserName + " check action: create localStream ", waitInterval)
+
+
+            .runs(function() {
+                // notify lock
+                notifyLock('User2CreateLocalStream');
+            })
+
+            .waitsFor(function() {
+                // wait lock
+                return waitLock('User1PublishToUser2');
+            }, actorUserName + "wait lock: User1PublishToUser2", waitInterval)
+            .waitsFor(function() {
+                //check wait
+                return actorUser.request["stream-added_success"] == 1;
+            }, actorUserName + "check wait: stream-added", waitInterval)
+
+              .runs(function() {
+                // action
+                detection ="";
+                videoDetection("stream"+clientRemoteId);
+               //videoDetection("local");
+            })
+
+            .waitsFor(function() {
+                //wait lock
+                return detection == true;
+            }, actorUserName + " REMOTE STREAM IS GOOD", waitInterval)
+
+
+
+            .runs(function() {
+                //check wait
+                // action
+                //TODO change wrapper of publish
+                actorUser.publish(targetUserName);
+            })
+            .waitsFor(function() {
+                //check action
+                return actorUser.request["publish_success"] == 1;
+            }, actorUserName + "check action: publish", waitInterval)
+
+
+            .runs(function() {
+                // notify lock
+                notifyLock('User2PublishToUser1');
+            })
+
+            .waits('test end',2000)
+
+
+             .runs(function() {
+                // action
+                var exceptvalue = {"send_codec_name":"opus","length":3};
+                actorUser.getConnectionStatusByAudioOnly(targetUserName,exceptvalue);
+            })
+           .waitsFor(function() {
+                //check wait
+                return actorUser.request["getConnectionStatus_success"] == 1;
+            }, actorUserName + "check wait: getConnectionStatus_success", waitInterval)
+
+            .runs(function() {
+                // action
+                var exceptvalue = {"codec_name":"VP8","frame_width":"1280","frame_height":"720","length":3};
+                actorUser.getConnectionStatus(targetUserName,exceptvalue);
+            })
+           .waitsFor(function() {
+                //check wait
+                return actorUser.request["getConnectionStatus_success"] == 2;
+            }, actorUserName + "check wait: getConnectionStatus_success", waitInterval)
+
+
+            .waits('test end',5000)
+            .runs(function() {
+                console.log('test end');
+                done();
+            })
+    });
 
 });
