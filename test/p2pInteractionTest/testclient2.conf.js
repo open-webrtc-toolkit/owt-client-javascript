@@ -97,7 +97,7 @@ module.exports = function (config){
     // - PhantomJS
     // - IE (only Windows)
     // CLI --browsers Chrome,Firefox,Safari
-    browsers : ["/home/fengwei/zyh/webrtc-javascript-sdk/test/p2pInteractionTest/.travis/chrome-start2.sh"],
+    browsers : [".travis/chrome-start2.sh"],
 /*    browsers : ["FirefoxAutoAllowGUM"],
     customLaunchers: {
     FirefoxAutoAllowGUM: {

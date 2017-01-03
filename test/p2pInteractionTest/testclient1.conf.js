@@ -98,7 +98,7 @@ module.exports = function (config){
     // - IE (only Windows)
     // CLI --browsers Chrome,Firefox,Safari
 //    browsers : ["IE"],
-    browsers : ["/home/fengwei/zyh/webrtc-javascript-sdk/test/p2pInteractionTest/.travis/chrome-start1.sh"],
+    browsers : [".travis/chrome-start1.sh"],
 
     /*browsers: ['FirefoxAutoAllowGUM'],
     customLaunchers: {
