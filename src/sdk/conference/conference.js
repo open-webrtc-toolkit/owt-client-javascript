@@ -446,17 +446,19 @@
      * @function publish
      * @instance
      * @desc This function publishes the local stream to the server. The stream should be a valid LocalStream instance. 'stream-added' event would be triggered when the stream is published successfully.
-     <br><b>options:</b><br>
-     {<br>
-  maxVideoBW: xxx,<br>
-  unmix: false/true, // if true, this stream would not be included in mix stream<br>
-  videoCodec: 'h264'/'vp8' <br>
-  transport: 'udp'/'tcp' // rtsp connection transport type, default 'udp'; only for rtsp input<br>
-  bufferSize: integer number in bytes // udp receiving buffer size, default 2 MB; only for rtsp input (udp transport)<br>
-  }
      * @memberOf Woogeen.ConferenceClient&Woogeen.SipClient
      * @param {stream} stream Stream to publish.
-     * @param {json} options Publish options.
+     * @param {json} options Publish options. Following properties are supported:<br>
+      <ul>
+        <li>maxAudioBW: xxx.</li>
+        <li>maxVideoBW: xxx.</li>
+        <li>unmix: false/true. If true, this stream would not be included in mixed stream.</li>
+        <li>audioCodec: 'opus'/'pcmu'/'pcma'. Preferred audio codec.</li>
+        <li>videoCodec: 'h264'/'vp8'/'vp9'. Preferred video codec.</li>
+        <li>transport: 'udp'/'tcp'. RTSP connection transport type, default 'udp'; only for RTSP input.</li>
+        <li>bufferSize: integer number in bytes. UDP receiving buffer size, default 2 MB. Only for RTSP input (UDP transport).</li>
+      </ul>
+      Each codec has its own supported bitrate range. Setting incorrect maxAudioBW/maxVideoBW value may lead to connection failure.
      * @param {function} onSuccess(stream) (optional) Success callback.
      * @param {function} onFailure(err) (optional) Failure callback.
      * @example
@@ -662,7 +664,7 @@
   {<br>
   video: true/false, {resolution: {width:xxx, height:xxx}},<br>
   audio: true/false,<br>
-  videoCodec: 'h264'/'vp8'<br>
+  videoCodec: 'h264'/'vp8'/'vp9'. This property specifies preferred video codec.<br>
   }
   <br><b>Remarks:</b><br>
   Video resolution choice is only valid for subscribing {@link Woogeen.RemoteMixedStream Woogeen.RemoteMixedStream} when multistreaming output is enabled.　See {@link N.API.createRoom N.API.createRoom()} for detailed description of multistreaming.<br>
@@ -1061,8 +1063,9 @@
               </ul>
           <li>frameRate should be an array as [min_frame_rate, max_frame_rate], in which each element should be a proper number, e.g., [20, 30].</li>
           <li>maxVideoBW: xxx</li>
-          <li>videoCodec: 'h264'/'vp8'</li>
+          <li>videoCodec: 'h264'/'vp8'/'vp9'</li>
         </ul>
+        Each codec has its own supported bitrate range. Setting incorrect maxAudioBW/maxVideoBW value may lead to connection failure.<br/>
         <br/>
      * @param {function} onSuccess(stream) (optional) Success callback.
      * @param {function} onFailure(err) (optional) Failure callback. See details about error definition in {@link Woogeen.LocalStream#create LocalStream.create}.
@@ -1557,7 +1560,7 @@
       This method also depends on whether client side support dynamically video stream bitrate change, now only Chrome browser is verified to be workable.
          <br><b>options:</b><br>
       {<br>
-        id: 'the participant id'<br>
+        id: 'target stream id'<br>
         bitrate: an integer value with the unit in kbps, e.g., 300<br>
       }
          * @memberOf Woogeen.ConferenceClient
@@ -1568,8 +1571,8 @@
       <script type="text/JavaScript">
       var conference = Woogeen.ConferenceClient.create();
       // ......
-      conference.setVideoBitrate({id: 'participantId', bitrate: 300}, function (resp) {
-          L.Logger.info('setVideoBitrate succeeds for participantId: ', resp);
+      conference.setVideoBitrate({id: 'stream ID', bitrate: 300}, function (resp) {
+          L.Logger.info('setVideoBitrate succeeds for stream ID: ', resp);
         }, function (err) {
           L.Logger.error('setVideoBitrate failed:', err);
         }

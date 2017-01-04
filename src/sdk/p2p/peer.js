@@ -4,49 +4,43 @@
 var Woogeen = Woogeen || {}; /*jshint ignore:line*/ //Woogeen is defined.
 /**
  * @class Woogeen.PeerClient
- * @classDesc Sets up one-to-one video chat for two clients. It provides methods to initialize or stop a video call or to join a P2P chat room. This object can start a chat when another client joins the same chat room.
-    <br><b>Remarks:</b><br>
-The following list briefly describes the URIs:<br>
-@htmlonly
-<table class="doxtable">
-    <tr>
-        <th>bandWidth</th>
-        <td>(Optional) Defines the bandwidth in kbps for any video streams sent by this peer client. Currently only maxVideoBW option is supported, to limit maximum bandwidth of any outgoing video stream.</td>
-    </tr>
-    <tr>
-        <th>iceServers</th>
-        <td>Each ICE server instance has three properties: URIs, username (optional), credential (optional).</td>
-    </tr>
-<tbody>
-    <tr>
-        <th>URIs</th>
-        <td>Could be an array of STUN/TURN server URIs which shared the same username and credential, or a string of STUN/TURN for a server's URI.</td>
-    </tr>
-    <tr>
-        <th>stun</th>
-        <td>This URI is defined at http://tools.ietf.org/html/draft-nandakumar-rtcweb-stun-uri-08.</td>
-    </tr>
-    <tr>
-        <th>turn</th>
-        <td>This URI is defined at http://tools.ietf.org/html/rfc5766</td>
-    </tr>
-</tbody>
-</table>
-@endhtmlonly
-*/
+ * @classDesc Sets up a P2P WebRTC session.
+ */
 /**
  * @function PeerClient
  * @desc Constructor of PeerClient
  * @memberOf Woogeen.PeerClient
- * @param {json} config (Optional)Specifies the configurations for the peer client object. This parameter is the property of config: iceServers.
+ * @param {json} config (Optional)Specifies the configurations for the PeerClient object created. Following properties are supported:<br>
+@htmlonly
+<table class="doxtable">
+    <tr>
+        <th>bandWidth</th>
+        <td>Defines the maximum bandwidth in kbps for each tracks sent by this client. It should have a property - maxVideoBW which limits maximum bandwidth of each outgoing video tracks. Bandwidth limitation for audio track is not supported yet.</td>
+    </tr>
+    <tr>
+        <th>iceServers</th>
+        <td>Each ICE server instance has three properties: URIs, username (optional), credential (optional). URIs Could be an array of STUN/TURN server URIs which shared the same username and credential. STUN is described at http://tools.ietf.org/html/draft-nandakumar-rtcweb-stun-uri-08, and TURN is described at http://tools.ietf.org/html/rfc5766.</td>
+    </tr>
+    <tr>
+        <th>audioCodec</th>
+        <td>Specify preferred audio codec. Available values are "opus", "pcma", "pcmu", "isac". If specified codec is not supported by browser, it will be silently ignored. If this value is undefined, codec preference will be determined by browser.</td>
+    </tr>
+    <tr>
+        <th>videoCodec</th>
+        <td>Specify preferred video codec. Available values are "vp8", "vp9", "h264". If specified codec is not supported by browser, it will be silently ignored. If this value is undefined, codec preference will be determined by browser.</td>
+    </tr>
+</tbody>
+</table>
+@endhtmlonly
+   Each codec has its own supported bitrate range. Setting incorrect maxAudioBW/maxVideoBW value may lead to connection failure.
  * @return {Woogeen.PeerClient} An instance of Woogeen.PeerClient.
  * @example
 var p2p=new Woogeen.PeerClient({
   bandWidth:{maxVideoBW:300},
   iceServers : [{
-    urls : "stun:61.152.239.60"
+    urls : "stun:example.com"
   }, {
-    urls : ["turn:61.152.239.60:3478?transport=tcp", "turn:61.152.239.60:3478?transport=udp"],
+    urls : ["turn:example.com:3478?transport=tcp", "turn:example.com:3478?transport=udp"],
     credential : "master",
     username : "woogeen"
   }]
@@ -695,11 +689,11 @@ Woogeen.PeerClient = function(pcConfig) {
      * @instance
      * @desc This function establishes a connection to the signaling server.
      * @memberOf Woogeen.PeerClient
-     * @param {string} loginInfo  An objects contains login information. For peer server, this object has two properties: host and token. Please make sure the host is correct.
+     * @param {object} loginInfo  An objects contains login information. For peer server, this object has two properties: host and token. Please make sure the host is correct.
      * @example
   <script type="text/JavaScript">
   var p2p=new Woogeen.PeerClient();
-  p2p.connect({host:'http://61.152.239.56:8095/',token:'user1'});
+  p2p.connect({host:'http://example.com:8095/',token:'user1'});
   </script>
   */
   var connect = function(loginInfo, successCallback, failureCallback) {
@@ -751,7 +745,7 @@ Woogeen.PeerClient = function(pcConfig) {
    * @example
 <script type="text/JavaScript">
 var p2p=new Woogeen.PeerClient();
-p2p.connect({host:'http://61.152.239.56:8095/',token:'user1'});
+p2p.connect({host:'http://example.com:8095/',token:'user1'});
 p2p.disconnect();
 </script>
 */
@@ -783,7 +777,7 @@ p2p.disconnect();
      * @example
   <script type="text/JavaScript">
   var p2p=new Woogeen.PeerClient();
-  p2p.connect({host:'http://61.152.239.56:8095/',token:'user1'});
+  p2p.connect({host:'http://example.com:8095/',token:'user1'});
   p2p.invite('user2');
   </script>
   */
@@ -837,7 +831,7 @@ p2p.disconnect();
      * @example
   <script type="text/JavaScript">
   var p2p=new Woogeen.PeerClient();
-  p2p.connect({host:'http://61.152.239.56:8095/',token:'user1'});
+  p2p.connect({host:'http://example.com:8095/',token:'user1'});
   p2p.inviteWithStream('user2',localStream);
   </script>
   */
@@ -859,7 +853,7 @@ p2p.disconnect();
      * @example
   <script type="text/JavaScript">
   var p2p=new Woogeen.PeerClient();
-  p2p.connect({host:'http://61.152.239.56:8095/',token:'user1'});
+  p2p.connect({host:'http://example.com:8095/',token:'user1'});
   p2p.addEventListener('chat-invited',function(e){
    p2p.accept(e.senderId);
   };
@@ -903,7 +897,7 @@ p2p.disconnect();
      * @example
   <script type="text/JavaScript">
   var p2p=new Woogeen.PeerClient();
-  p2p.connect({host:'http://61.152.239.56:8095/',token:'user1'});
+  p2p.connect({host:'http://example.com:8095/',token:'user1'});
   p2p.addEventListener('chat-invited',function(e){
    p2p.acceptWithStream(e.senderId, localStream);
   };
@@ -1108,7 +1102,7 @@ p2p.disconnect();
      * @example
   <script type="text/JavaScript">
   var p2p=new Woogeen.PeerClient();
-  p2p.connect({host:'http://61.152.239.56:8095/',token:'user1'});
+  p2p.connect({host:'http://example.com:8095/',token:'user1'});
   p2p.invite('user2');
   p2p.publish(localStream,'user1');
   </script>
@@ -1223,7 +1217,7 @@ p2p.disconnect();
      * @example
   <script type="text/JavaScript">
   var p2p=new Woogeen.PeerClient();
-  p2p.connect({host:'http://61.152.239.56:8095/',token:'user1'});
+  p2p.connect({host:'http://example.com:8095/',token:'user1'});
   p2p.invite('user2');
   p2p.publish(localStream,'user1');
   p2p.unpublish(localStream,'user1');
@@ -1313,7 +1307,7 @@ p2p.disconnect();
      * @example
   <script type="text/JavaScript">
   var p2p=new Woogeen.PeerClient();
-  p2p.connect({host:'http://61.152.239.56:8095/',token:'user1'});
+  p2p.connect({host:'http://example.com:8095/',token:'user1'});
   p2p.deny('user2');
   </script>
   */
@@ -1458,7 +1452,7 @@ p2p.disconnect();
   /**
      * @function getAudioLevels
      * @instance
-     * @desc This function returns audio output levels associated with current peer client. More details about [audio levels](@ref audiolevel).
+     * @desc This function returns audio output levels associated with current client. More details about [audio levels](@ref audiolevel).
      * @memberOf Woogeen.PeerClient
      * @param {string} targetId Remote user's ID.
      * @param {function} successCallback callback function to be invoked when audio level information is available.
