@@ -82,6 +82,22 @@
     }
   }
 
+  function sendEvent(socket, type, callback) {
+    if (!socket || !socket.connected) {
+      return callback('socket not ready');
+    }
+    try {
+      socket.emit(type, function(resp, mesg) {
+        if (resp === 'success') {
+          return callback(null, mesg);
+        }
+        return callback(mesg || 'response error');
+      });
+    } catch (err) {
+      callback('socket emit error');
+    }
+  }
+
   function sendMsg(socket, type, message, callback) {
     if (!socket || !socket.connected) {
       return callback('socket not ready');
@@ -940,6 +956,13 @@
       </script>
          */
       this.leave = function() {
+        sendEvent(this.socket, 'logout', function(err) {
+          if (err) {
+            L.Logger.warning(
+              'Server returns error for logout event');
+          }
+        });
+        this.socket.disconnect();
         var evt = new Woogeen.ClientEvent({
           type: 'server-disconnected'
         });
@@ -1870,4 +1893,3 @@ sipClient = Woogeen.SipClient.create({
   }());
 
 }());
-
