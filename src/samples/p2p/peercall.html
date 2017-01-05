@@ -257,7 +257,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
       if (e.stream.isScreen()) {
         $('#screen video').show();
         $('#screen video').get(0).srcObject = e.stream.mediaStream;
-      } else if (e.stream.hasVideo()) {
+      } else if (e.stream.hasVideo() || e.stream.hasAudio()) {
         $('#remote video').show();
         $('#remote video').get(0).srcObject = e.stream.mediaStream;
       }
