@@ -1612,17 +1612,17 @@ p2p.disconnect();
   };
 
   var setAudioCodec = function(sdp) {
-    if (!spec.options || !spec.options.audioCodec) {
+    if (spec.audioCodec) {
       return sdp;
     }
-    return Woogeen.Common.setPreferredCodec(sdp, 'audio', spec.options.audioCodec);
+    return Woogeen.Common.setPreferredCodec(sdp, 'audio', spec.audioCodec);
   };
 
   var setVideoCodec = function(sdp) {
-    if (!spec.options || !spec.options.videoCodec) {
+    if (!spec.videoCodec) {
       return sdp;
     }
-    return Woogeen.Common.setPreferredCodec(sdp, 'video', spec.options.videoCodec);
+    return Woogeen.Common.setPreferredCodec(sdp, 'video', spec.videoCodec);
   };
 
   /**
