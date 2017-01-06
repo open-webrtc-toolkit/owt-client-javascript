@@ -998,7 +998,7 @@
       </script>
          */
       this.mix = function(stream, onSuccess, onFailure) {
-        if (!(stream instanceof Woogeen.LocalStream)) {
+        if (!(stream instanceof Woogeen.LocalStream) && !(stream instanceof Woogeen.ExternalStream)) {
           return safeCall(onFailure, 'invalid stream');
         }
         sendMsg(this.socket, 'addToMixer', stream.id(), function(err) {
@@ -1030,7 +1030,7 @@
       </script>
          */
       this.unmix = function(stream, onSuccess, onFailure) {
-        if (!(stream instanceof Woogeen.LocalStream)) {
+        if (!(stream instanceof Woogeen.LocalStream) && !(stream instanceof Woogeen.ExternalStream)) {
           return safeCall(onFailure, 'invalid stream');
         }
         sendMsg(this.socket, 'removeFromMixer', stream.id(), function(
