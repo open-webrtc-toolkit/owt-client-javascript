@@ -338,6 +338,48 @@ Woogeen.Common = (function() {
     return sdp;
   };
 
+  // Add a b=AS:bitrate line to the m=mediaType section.
+  function preferBitRate(sdp, mediaType, bitrate) {
+    var sdpLines = sdp.split('\r\n');
+
+    // Find m line for the given mediaType.
+    var mLineIndex = findLine(sdpLines, 'm=', mediaType);
+    if (mLineIndex === null) {
+      L.Logger.debug(
+        'Failed to add bandwidth line to sdp, as no m-line found');
+      return sdp;
+    }
+
+    // Find next m-line if any.
+    var nextMLineIndex = findLineInRange(sdpLines, mLineIndex + 1, -1, 'm=');
+    if (nextMLineIndex === null) {
+      nextMLineIndex = sdpLines.length;
+    }
+
+    // Find c-line corresponding to the m-line.
+    var cLineIndex = findLineInRange(sdpLines, mLineIndex + 1,
+      nextMLineIndex, 'c=');
+    if (cLineIndex === null) {
+      L.Logger.debug(
+        'Failed to add bandwidth line to sdp, as no c-line found');
+      return sdp;
+    }
+
+    // Check if bandwidth line already exists between c-line and next m-line.
+    var bLineIndex = findLineInRange(sdpLines, cLineIndex + 1,
+      nextMLineIndex, 'b=AS');
+    if (bLineIndex) {
+      sdpLines.splice(bLineIndex, 1);
+    }
+
+    // Create the b (bandwidth) sdp line.
+    var bwLine = 'b=AS:' + bitrate;
+    // As per RFC 4566, the b line should follow after c-line.
+    sdpLines.splice(cLineIndex + 1, 0, bwLine);
+    sdp = sdpLines.join('\r\n');
+    return sdp;
+  }
+
   /* Above functions are copied from apprtc with modifications */
 
   // Returns system information.
@@ -375,6 +417,7 @@ Woogeen.Common = (function() {
     parseStats: parseStats,
     parseAudioLevel: parseAudioLevel,
     setPreferredCodec: setPreferredCodec,
+    setPreferredBitrate: preferBitRate,
     sysInfo: sysInfo
   };
 }());

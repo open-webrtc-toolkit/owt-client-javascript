@@ -384,8 +384,9 @@ Woogeen.PeerClient = function(pcConfig) {
       case PeerState.CONNECTED:
         L.Logger.debug('About to set remote description. Signaling state: ' +
           peer.connection.signalingState);
-        peer.connection.setRemoteDescription(new RTCSessionDescription(
-          event.message), function() {
+        var sessionDescription = new RTCSessionDescription(event.message);
+        sessionDescription.sdp = setRtpSenderOptions(sessionDescription.sdp);
+        peer.connection.setRemoteDescription(sessionDescription, function() {
           createAndSendAnswer(peer);
           drainIceCandidates(peer);
         }, function(errorMessage) {
@@ -403,7 +404,10 @@ Woogeen.PeerClient = function(pcConfig) {
         PeerState.CONNECTED)) {
       L.Logger.debug('About to set remote description. Signaling state: ' +
         peer.connection.signalingState);
-      peer.connection.setRemoteDescription(new RTCSessionDescription(event.message),
+      var sessionDescription = new RTCSessionDescription(event.message);
+      sessionDescription.sdp = setRtpSenderOptions(sessionDescription.sdp);
+      peer.connection.setRemoteDescription(new RTCSessionDescription(
+          sessionDescription),
         function() {
           L.Logger.debug('Set remote descripiton successfully.');
           drainIceCandidates(peer);
@@ -873,7 +877,7 @@ p2p.disconnect();
       gab.sendChatAccepted(peerId, sysInfo, successCallback, function(
         errCode) {
         peer.state = PeerState.PENDING;
-        if(failureCallback) {
+        if (failureCallback) {
           failureCallback(Woogeen.Error.getErrorByCode(errCode));
         }
       });
@@ -922,7 +926,7 @@ p2p.disconnect();
     drainPendingStreams(peer);
     peer.isNegotiationNeeded = false;
     peer.connection.createOffer(function(desc) {
-      desc.sdp = replaceSdp(desc.sdp);
+      desc.sdp = setRtpReceiverOptions(desc.sdp);
       peer.connection.setLocalDescription(desc, function() {
         L.Logger.debug('Set local descripiton successfully.');
         changeNegotiationState(peer, NegotiationState.READY);
@@ -1018,7 +1022,7 @@ p2p.disconnect();
     drainPendingStreams(peer);
     peer.isNegotiationNeeded = false;
     peer.connection.createAnswer(function(desc) {
-      desc.sdp = replaceSdp(desc.sdp);
+      desc.sdp = setRtpReceiverOptions(desc.sdp);
       peer.connection.setLocalDescription(desc, function() {
         L.Logger.debug("Set local description successfully.");
         if (gab) {
@@ -1581,22 +1585,29 @@ p2p.disconnect();
     }
   };
 
-  //codec preference setting.
-  var replaceSdp = function(sdp) {
-    sdp = setMaxBW(sdp); // set vide band width
-    sdp = setVideoCodec(sdp);
-    sdp = setAudioCodec(sdp);
+  var setAudioMaxBW = function(sdp) {
+    if (!spec.bandWidth || !spec.bandWidth.maxAudioBW) {
+      return sdp;
+    }
+    return Woogeen.Common.setPreferredBitrate(sdp, 'audio', spec.bandWidth.maxAudioBW);
+  };
+
+  var setVideoMaxBW = function(sdp) {
+    if (!spec.bandWidth || !spec.bandWidth.maxVideoBW) {
+      return sdp;
+    }
+    return Woogeen.Common.setPreferredBitrate(sdp, 'video', spec.bandWidth.maxVideoBW);
+  };
+
+  var setRtpSenderOptions = function(sdp) {
+    sdp = setAudioMaxBW(sdp);
+    sdp = setVideoMaxBW(sdp);
     return sdp;
   };
 
-  var setMaxBW = function(sdp) {
-    var mLineReg = /m=video.*\r\n/;
-    var mLineElement = sdp.match(mLineReg);
-    if (mLineElement && mLineElement.length) {
-      var tempString = mLineElement[0] + "b=AS:" + (spec.bandWidth && spec.bandWidth
-        .maxVideoBW ? spec.bandWidth.maxVideoBW : 500) + "\r\n";
-      sdp = sdp.replace(mLineElement[0], tempString);
-    }
+  var setRtpReceiverOptions = function(sdp) {
+    sdp = setAudioCodec(sdp);
+    sdp = setVideoCodec(sdp);
     return sdp;
   };
 
