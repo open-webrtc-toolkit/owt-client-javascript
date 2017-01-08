@@ -393,8 +393,19 @@
         safeCall(onFailure, err || 'connection_error');
       });
 
-      self.socket.on('connection_failed', function() {
-        L.Logger.info("ICE Connection Failed");
+      self.socket.on('connection_failed', function(args) {
+        L.Logger.error("MCU reports connection failed for stream: " + args.streamId);
+        if (self.localStreams[args.streamId] !== undefined) {
+          var stream = self.localStreams[args.streamId];
+          self.unpublish(stream);
+          // It is deleted if MCU ack "success" for unpublish. But I'm not
+          // sure if MCU will ack "success" if the original access agent is
+          // down.
+          delete self.localStreams[args.streamId];
+        } else {
+          self.unsubscribe(self.remoteStreams[args.streamId]);
+        }
+
         if (self.state !== DISCONNECTED) {
           var disconnectEvt = new Woogeen.StreamEvent({
             type: 'stream-failed'
@@ -403,6 +414,7 @@
         }
       });
 
+      // Seems MCU no longer emits this event.
       self.socket.on('stream-publish', function(spec) {
         var myStream = self.localStreams[spec.id];
         if (myStream) {
