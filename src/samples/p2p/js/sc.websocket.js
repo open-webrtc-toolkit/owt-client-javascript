@@ -42,7 +42,7 @@ function SignalingChannel() {
     paramters.push('clientType=' + clientType);
     paramters.push('clientVersion=' + clientVersion);
     if (token)
-      paramters.push('token=' + token);
+      paramters.push('token=' + encodeURIComponent(token));
     if (paramters)
       queryString = paramters.join('&');
     L.Logger.debug('Query string: ' + queryString);
