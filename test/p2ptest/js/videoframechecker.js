@@ -96,8 +96,8 @@ function VideoFrameChecker(videoElement) {
   this.listener_ = this.checkVideoFrame_.bind(this);
   this.videoElement_.addEventListener('play', this.listener_, false);
   //document.body.appendChild(this.canvas_);
- 
-  
+
+
 }
 
 VideoFrameChecker.prototype = {
@@ -141,18 +141,18 @@ VideoFrameChecker.prototype = {
     if (this.isBlackFrame_(imageData.data, imageData.data.length)) {
       this.frameStats.numBlackFrames++;
     }
-   console.log("aaaiiiiiiiithis.frameComparator.calculate(this.previousFrame_, imageData.data)", this.frameComparator.calculate(this.previousFrame_, imageData.data));
-   console.log("bbbbbbbbb this.differenceThreshold is ",this.differenceThreshold);
+   console.log("frameComparator.calculate(this.previousFrame_, imageData.data) ", this.frameComparator.calculate(this.previousFrame_, imageData.data));
+   console.log("differenceThreshold is ",this.differenceThreshold);
     if (this.frameComparator.calculate(this.previousFrame_, imageData.data) >
         this.identicalFrameSsimThreshold) {
       this.frameStats.numFrozenFrames++;
     }else if((this.frameComparator.calculate(this.previousFrame_, imageData.data) ==  this.differenceThreshold) && (this.frameComparator.calculate(this.previousFrame_, imageData.data) != 0 )){
       this.frameStats.numFrozenFrames++;
-    
+
     }
     this.differenceThreshold = this.frameComparator.calculate(this.previousFrame_, imageData.data);
     this.previousFrame_ = imageData.data;
-  
+
     this.frameStats.numFrames++;
     setTimeout(this.checkVideoFrame_.bind(this), 20);
   },
