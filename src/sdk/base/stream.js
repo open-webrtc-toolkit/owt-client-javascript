@@ -510,12 +510,14 @@ L.Logger.info('stream added:', stream.id());
       return !!spec.audio;
     };
     this.toJson = function() {
-      var videoOpt ;
-      if(spec.video === true){
-        videoOpt = {device: 'camera'};
-      }else if(spec.video === false){
+      var videoOpt;
+      if (spec.video === true) {
+        videoOpt = {
+          device: 'camera'
+        };
+      } else if (spec.video === false) {
         videoOpt = spec.video;
-      }else if(typeof spec.video === 'object'){
+      } else if (typeof spec.video === 'object') {
         videoOpt = spec.video;
         videoOpt.device = spec.video.device || 'camera';
       }
@@ -660,13 +662,17 @@ L.Logger.info('stream added:', stream.id());
             option.video.resolution] || supportedVideoList.unspecified));
         }
 
-        if (!isLegacyIE()) {
-          if (!isLegacyChrome() && option.video.frameRate instanceof Array &&
-            option.video.frameRate.length >= 2) {
+        if (!isLegacyIE() && !isLegacyChrome()) {
+          if (option.video.frameRate instanceof Array && option.video.frameRate
+            .length >= 2) {
             mediaOption.video.frameRate = {
               min: option.video.frameRate[0],
               max: option.video.frameRate[1]
             };
+          } else if (typeof option.video.frameRate === 'number') {
+            mediaOption.video.frameRate = option.video.frameRate;
+          } else {
+            L.Logger.warning('Invalid frame rate value, ignored.');
           }
         }
       }
@@ -832,10 +838,22 @@ L.Logger.info('stream added:', stream.id());
             delete mediaOption.video.width;
           }
           if (mediaOption.video.frameRate) {
-            mediaOption.video.mandatory.minFrameRate = mediaOption.video.frameRate
-              .min;
-            mediaOption.video.mandatory.maxFrameRate = mediaOption.video.frameRate
-              .max;
+            if (typeof mediaOption.video.frameRate === 'object') {
+              mediaOption.video.mandatory.minFrameRate = mediaOption.video
+                .frameRate
+                .min;
+              mediaOption.video.mandatory.maxFrameRate = mediaOption.video
+                .frameRate
+                .max;
+            } else if (typeof mediaOption.video.frameRate === 'number') {
+              mediaOption.video.mandatory.minFrameRate = mediaOption.video
+                .frameRate;
+              mediaOption.video.mandatory.maxFrameRate = mediaOption.video
+                .frameRate;
+            } else {
+              L.Logger.warning(
+                'Invalid frame rate value for screen sharing.');
+            }
             delete mediaOption.video.frameRate;
           }
           getMedia.apply(navigator, [mediaOption, onSuccess, onFailure]);
@@ -862,18 +880,17 @@ L.Logger.info('stream added:', stream.id());
      * @function create
      * @desc This factory returns a Woogeen.LocalStream instance with user defined options.<br>
   <br><b>Remarks:</b><br>
-  When the video/audio parameters are not supported by the browser, a fallback parameter set will be used; if the fallback also fails, the callback (if specified) is invoked with an error. See details in callback description.
+  Creating LocalStream requires secure connection(HTTPS). When one or more parameters cannot be satisfied, or end user denied to grant mic/camera permission, failure callback will be triggered.
   <br><b>options:</b>
   <ul>
-      <li>audio: true/false.</li>
-      <li>video: boolean or object. If the value is a boolean, it indicates whether video is enabled or not. If the value is an object, it may have following properties: device, resolution, frameRate, extensionId.</li>
+      <li>audio: true/false. Default is false.</li>
+      <li>video: boolean or object. Default is false. If the value is a boolean, it indicates whether video is enabled or not. If the value is an object, it may have following properties: device, resolution, frameRate, extensionId.</li>
           <ul>
               <li>Valid device list:</li>
                   <ul>
                       <li>'camera' for stream from camera;</li>
-                      <li>'screen' for stream from screen;<br>
-                      Screen stream creating can be done only when your web-app is in HTTPS/SSL environment.
-                      </li>
+                      <li>'screen' for stream from screen;</br>
+                      Video quality may not good if screen sharing stream is published with H.264.</li>
                   </ul>
               <li>Valid resolution list:</li>
                   <ul>
@@ -883,23 +900,21 @@ L.Logger.info('stream added:', stream.id());
                       <li>'hd720p'</li>
                       <li>'hd1080p'</li>
                   </ul>
-              <li>frameRate should be an array as [min_frame_rate, max_frame_rate], in which each element should be a proper number, e.g., [20, 30].</li>
+              <li>frameRate is a number indicating frames per second. Actual frame rate on browser may not be exactly the same as specified here.</li>
               <li>extensionId is id of Chrome Extension for screen sharing. </li>
-              <li><b>Note</b>: Firefox currently does not support runtime resolution or frameRate.
-  setting till version 43. Please config them statically through media.navigator.video.* parameters in about:config.</li>
           </ul>
   </ul>
   <br><b>callback:</b>
   <br>Upon success, err is null, and localStream is an instance of Woogeen.LocalStream; upon failure localStream is undefined and err is one of the following:<br>
   <ul>
-    <li><b>{code: 1100, msg: xxx}</b> - general stream creation error, e.g., no WebRTC support in browser, uncategorized error, etc.</li>
-    <li><b>{code: 1101, msg: 'PERMISSION_DENIED'}</b> – access media (camera, microphone, etc) denied.</li>
-    <li><b>{code: 1102, msg: 'DEVICES_NOT_FOUND'}</b> – no camera or microphone available.</li>
-    <li><b>{code: 1103, msg: xxx}</b> - error in accessing screen sharing plugin: not supported, not installed or disabled.</li>
-    <li><b>{code: 1104, msg: 'MEDIA_OPTION_INVALID'}</b> – video/audio parameters are invalid on browser and fallback fails.</li>
-    <li><b>{code: 1105, msg: 'NOT_SUPPORTED'}</b> - media option not supported by the browser.</li>
-    <li><b>{code: 1106, msg: 'CONSTRAINT_NOT_SATISFIED'}</b> – one of the mandatory constraints could not be satisfied.</li>
-    <li><b>{code: 1107, msg: 'USER_INPUT_INVALID'}</b> – user input media option is invalid.</li>
+    <li><b>code: 1100</b> - general stream creation error, e.g., no WebRTC support in browser, uncategorized error, etc.</li>
+    <li><b>code: 1101</b> – access media (camera, microphone, etc) denied.</li>
+    <li><b>code: 1102</b> – no camera or microphone available.</li>
+    <li><b>code: 1103</b> - error in accessing screen sharing plugin: not supported, not installed or disabled.</li>
+    <li><b>code: 1104</b> – video/audio parameters are invalid on browser and fallback fails.</li>
+    <li><b>code: 1105</b> - media option not supported by the browser.</li>
+    <li><b>code: 1106</b> – one of the mandatory constraints could not be satisfied.</li>
+    <li><b>code: 1107</b> – user input media option is invalid.</li>
   </ul>
      * @memberOf Woogeen.LocalStream
      * @static
@@ -942,8 +957,8 @@ L.Logger.info('stream added:', stream.id());
       }
       return;
     }
-    if(!option.audio && !option.video){
-      if(typeof callback === 'function'){
+    if (!option.audio && !option.video) {
+      if (typeof callback === 'function') {
         callback({
           code: 1107,
           msg: 'External stream must have video or audio'
