@@ -620,9 +620,18 @@ L.Logger.info('stream added:', stream.id());
     var mediaOption = {};
 
     if (option !== null && typeof option === 'object') {
+      if (!option.audio && !option.video) {
+        if (typeof callback === 'function') {
+          callback({
+            code: 1107,
+            msg: 'At least one of audio and video must be requested.'
+          });
+        }
+        return;
+      }
+
       if (option.video) {
-        if (typeof option.video === undefined || (typeof option.video !==
-            'object' && !!option.video)) {
+        if (typeof option.video !== 'object' && !!option.video) {
           option.video = Object.create({});
         }
         if (typeof option.video.device !== 'string') {
