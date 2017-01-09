@@ -1266,6 +1266,7 @@
         Retrieve resolution information of a mixed stream: <code>stream.resolutions()</code>.
        (optional)</li>
      </ul>
+     Adding external output for audio only or video only stream is not supported yet.
      * @param {function} onSuccess() (optional) Success callback.
      * @param {function} onFailure(err) (optional) Failure callback.
      * @example
