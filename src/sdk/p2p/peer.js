@@ -492,8 +492,8 @@ Woogeen.PeerClient = function(pcConfig) {
     if (peer) {
       L.Logger.debug('Ice connection state changed. State: ' + peer.connection
         .iceConnectionState);
-      if (peer.connection.iceConnectionState === 'closed' && peer.state ===
-        PeerState.CONNECTED) {
+      if ((peer.connection.iceConnectionState === 'closed' || peer.connection
+          .iceConnectionState === 'failed') && peer.state === PeerState.CONNECTED) {
         stopChatLocally(peer, peer.id);
         if (gab) {
           gab.sendChatStopped(peer.id);
