@@ -1649,7 +1649,7 @@
       /**
          * @function getConnectionStats
          * @instance
-         * @desc This function gets statistic information about the given stream and its associated connection.
+         * @desc This function gets statistic information about the given stream and its associated connection. Unsupported statistics in firefox return -1 or "".
          * @memberOf Woogeen.ConferenceClient
          * @param {WoogeenStream} stream Stream instance.
          * @param {function} onSuccess(stats) (optional) Success callback.

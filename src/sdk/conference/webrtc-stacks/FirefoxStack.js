@@ -253,8 +253,9 @@ Erizo.FirefoxStack = function(spec) {
   };
 
   that.getConnectionStats = function(onSuccess, onFailure) {
-    // FireFox supports getStats, but SDK cannot parse it.
-    onFailure('getConnectionStats is not supported on FireFox.');
+    that.peerConnection.getStats(null, function(stats) {
+      onSuccess(Woogeen.Common.parseStats(stats));
+    }, onFailure);
   };
 
   return that;

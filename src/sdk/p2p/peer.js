@@ -1410,7 +1410,7 @@ p2p.disconnect();
   /**
      * @function getConnectionStats
      * @instance
-     * @desc This function returns connection statistics to a remote client. More details about [connection status](@ref status).
+     * @desc This function returns connection statistics to a remote client. Unsupported statistics in firefox return -1 or "". More details about [connection status](@ref status).
      * @memberOf Woogeen.PeerClient
      * @param {string} targetId Remote user's ID.
      * @param {function} successCallback callback function to be invoked when statistics is available
