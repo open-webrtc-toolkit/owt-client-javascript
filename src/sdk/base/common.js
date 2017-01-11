@@ -442,7 +442,7 @@ Woogeen.Common = (function() {
     } else if (result = linuxRegex.exec(userAgent)) {
       info.os = {
         name: 'Linux',
-        versoin: 'Unknown'
+        version: 'Unknown'
       };
     } else if (result = androidRegex.exec(userAgent)) {
       info.os = {
