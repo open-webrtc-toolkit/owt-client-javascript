@@ -250,42 +250,6 @@
       return safeCall(onFailure, 'connection state invalid');
     }
 
-    self.on('server-disconnected', function() { // onConnectionClose handler
-      self.state = DISCONNECTED;
-      self.myId = null;
-      var i, stream;
-      // remove all remote streams
-      for (i in self.remoteStreams) {
-        if (self.remoteStreams.hasOwnProperty(i)) {
-          stream = self.remoteStreams[i];
-          stream.close();
-          delete self.remoteStreams[i];
-          var evt = new Woogeen.StreamEvent({
-            type: 'stream-removed',
-            stream: stream
-          });
-          self.dispatchEvent(evt);
-        }
-      }
-
-      // close all channel
-      for (i in self.localStreams) {
-        if (self.localStreams.hasOwnProperty(i)) {
-          stream = self.localStreams[i];
-          if (stream.channel && typeof stream.channel.close ===
-            'function') {
-            stream.channel.close();
-          }
-          delete self.localStreams[i];
-        }
-      }
-
-      // close socket.io
-      try {
-        self.socket.disconnect();
-      } catch (err) {}
-    });
-
     self.state = CONNECTING;
 
     if (self.socket !== undefined) { // whether reconnect
@@ -376,13 +340,51 @@
       });
 
       self.socket.on('disconnect', function() {
+        var triggerEvent = false;
         if (self.state !== DISCONNECTED) {
-          var evt = new Woogeen.ClientEvent({
+          triggerEvent = true;
+        }
+        self.state = DISCONNECTED;
+        self.myId = null;
+        var i, stream;
+        // remove all remote streams
+        for (i in self.remoteStreams) {
+          if (self.remoteStreams.hasOwnProperty(i)) {
+            stream = self.remoteStreams[i];
+            stream.close();
+            delete self.remoteStreams[i];
+            var evt = new Woogeen.StreamEvent({
+              type: 'stream-removed',
+              stream: stream
+            });
+            self.dispatchEvent(evt);
+          }
+        }
+
+        // close all channel
+        for (i in self.localStreams) {
+          if (self.localStreams.hasOwnProperty(i)) {
+            stream = self.localStreams[i];
+            if (stream.channel && typeof stream.channel.close ===
+              'function') {
+              stream.channel.close();
+            }
+            delete self.localStreams[i];
+          }
+        }
+
+        // close socket.io
+        try {
+          self.socket.disconnect();
+        } catch (err) {}
+        if (triggerEvent) {
+          var evtDisconnect = new Woogeen.ClientEvent({
             type: 'server-disconnected'
           });
-          self.dispatchEvent(evt);
+          self.dispatchEvent(evtDisconnect);
         }
       });
+
 
       self.socket.on('user_join', function(spec) {
         var evt = new Woogeen.ClientEvent({
@@ -969,10 +971,6 @@
           }
         });
         this.socket.disconnect();
-        var evt = new Woogeen.ClientEvent({
-          type: 'server-disconnected'
-        });
-        this.dispatchEvent(evt);
       };
 
       /**
