@@ -118,14 +118,14 @@ Direct call chat refers to the discovery of another client by chatting with that
 ~~~~~~{.js}
 <script type="text/javascript">
 var isVideo=1;
-var serverAddress='http://61.152.239.56:8095/';  // Please change it to signaling server's address.
+var serverAddress='http://example.com:8095/';  // Please change it to signaling server's address.
 var p2p=new Woogeen.PeerClient({
   iceServers : [ {
-    urls : "stun:61.152.239.60"
+    urls : "stun:example.com"
   }, {
-    urls : ["turn:61.152.239.60:4478?transport=udp","turn:61.152.239.60:443?transport=udp","turn:61.152.239.60:4478?transport=tcp","turn:61.152.239.60:443?transport=tcp"],
-    credential : "master",
-    username : "woogeen"
+    urls : ["turn:example.com:4478?transport=udp","turn:example.com:443?transport=udp","turn:example.com:4478?transport=tcp","turn:example.com:443?transport=tcp"],
+    credential : "password",
+    username : "username"
   } ]
 });  // Initialize a Peer object
 var localStream;
@@ -149,7 +149,7 @@ $(document).ready(function(){
       video:{
         device:"screen",
         resolution:"hd1080p",
-        frameRate: [10,10]
+        frameRate: 10
       }
     }, function(err, stream){
       if (err) {
@@ -274,7 +274,7 @@ The following sample code shows how to create a room and generate tokens so that
 ~~~~~~
 var Woogeen = require('nuve');
 Woogeen.API.init(SERVICEID, SERVICEKEY, SERVICEHOST);
-var room = {name: 'Demo Room'}; // set p2p = true for p2p room
+var room = {name: 'Demo Room'};
 Woogeen.API.createRoom (room.name, function (resp) {
   console.log (resp);
   var myRoom = resp;
@@ -382,11 +382,11 @@ The following table describes the key objects provided in the JavaScript SDK.
     </thead>
         <tr>
             <td>PeerClient</td>
-            <td>Sets up one-to-one video chat for two clients. It provides methods to initialize or stop a video call or to join a P2P chat room. This object can start a chat when another client joins the same chat room.</td>
+            <td>Sets up one-to-one WebRTC session for two clients. It provides methods to initialize or stop a audio/video call and P2P data transmission.</td>
         </tr>
          <tr>
             <td>ConferenceClient</td>
-            <td>Provides connection, local stream publication, and remote stream subscription for a video conference. The conference client is created by the server side API. The conference client is retrieved by the client API with the access token for the connection.</td>
+            <td>Provides connection, local stream publication, and remote stream subscription for a audio/video conference. The conference client is created by the server side API. The conference client is retrieved by the client API with the access token for the connection.</td>
         </tr>
          <tr>
             <td>SipClient</td>
@@ -404,9 +404,9 @@ The following table describes the key objects provided in the JavaScript SDK.
 <script type="text/JavaScript">
   var peer = new Woogeen.PeerClient({
     iceServers : [{
-      urls : "stun: 61.152.239.60"
+      urls : "stun: example.com"
      } , {
-      urls : ["turn:61.152.239.60:4478?transport=udp", "turn:61.152.239.60:443?transport=tcp"],
+      urls : ["turn:example.com:4478?transport=udp", "turn:example.com:443?transport=tcp"],
       username : "woogeen",
       credential : "master"
      }

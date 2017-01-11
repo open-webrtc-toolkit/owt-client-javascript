@@ -497,7 +497,7 @@
         <li>transport: 'udp'/'tcp'. RTSP connection transport type, default 'udp'; only for RTSP input.</li>
         <li>bufferSize: integer number in bytes. UDP receiving buffer size, default 2 MB. Only for RTSP input (UDP transport).</li>
       </ul>
-      Each codec has its own supported bitrate range. Setting incorrect maxAudioBW/maxVideoBW value may lead to connection failure.
+      Each codec has its own supported bitrate range. Setting incorrect maxAudioBW/maxVideoBW value may lead to connection failure. Bandwidth settings don't work on FireFox.
      * @param {function} onSuccess(stream) (optional) Success callback.
      * @param {function} onFailure(err) (optional) Failure callback.
      * @example
@@ -1099,7 +1099,7 @@
       <br><b>Remarks:</b><br>
       This API is not supported on Edge browser currently.
      * @memberOf Woogeen.ConferenceClient
-     * @param {string} options (optional) : extensionId, resolution, frameRate, maxVideoBW, videoCodec<br/>
+     * @param {string} options (optional) : extensionId, resolution, frameRate, maxVideoBW, videoCodec.<br/>
         <ul>
           <li>extensionId is id of Chrome Extension for screen sharing.</li>
           <li>Valid resolution list:</li>
@@ -1110,19 +1110,18 @@
                   <li>'hd1080p'</li>
                   <li>If not provided, the resolution is decided by the screen size.</li>
               </ul>
-          <li>frameRate should be an array as [min_frame_rate, max_frame_rate], in which each element should be a proper number, e.g., [20, 30].</li>
+          <li>frameRate is a number indicating frames per second. Actual frame rate on browser may not be exactly the same as specified here.</li>
           <li>maxVideoBW: xxx</li>
           <li>videoCodec: 'h264'/'vp8'/'vp9'</li>
         </ul>
-        Each codec has its own supported bitrate range. Setting incorrect maxAudioBW/maxVideoBW value may lead to connection failure.<br/>
-        <br/>
+        Each codec has its own supported bitrate range. Setting incorrect maxAudioBW/maxVideoBW value may lead to connection failure. Bandwidth settings don't work on FireFox.<br/>
      * @param {function} onSuccess(stream) (optional) Success callback.
      * @param {function} onFailure(err) (optional) Failure callback. See details about error definition in {@link Woogeen.LocalStream#create LocalStream.create}.
      * @example
   <script type="text/JavaScript">
   var conference = Woogeen.ConferenceClient.create();
   // ……
-  conference.shareScreen({ extensionId:'pndohhifhheefbpeljcmnhnkphepimhe', resolution: 'hd1080p', frameRate:[10,10], maxVideoBW:2000, videoCodec:'vp8'}, function (st) {
+  conference.shareScreen({ extensionId:'pndohhifhheefbpeljcmnhnkphepimhe', resolution: 'hd1080p', frameRate:10, maxVideoBW:2000, videoCodec:'vp8'}, function (st) {
       L.Logger.info('screen shared:', st.id());
     }, function (err) {
       L.Logger.error('sharing failed:', err);

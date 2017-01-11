@@ -32,7 +32,7 @@ var Woogeen = Woogeen || {}; /*jshint ignore:line*/ //Woogeen is defined.
 </tbody>
 </table>
 @endhtmlonly
-   Each codec has its own supported bitrate range. Setting incorrect maxAudioBW/maxVideoBW value may lead to connection failure.
+   Each codec has its own supported bitrate range. Setting incorrect maxAudioBW/maxVideoBW value may lead to connection failure. Bandwidth settings don't work on FireFox.
  * @return {Woogeen.PeerClient} An instance of Woogeen.PeerClient.
  * @example
 var p2p=new Woogeen.PeerClient({
