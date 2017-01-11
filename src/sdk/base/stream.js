@@ -170,7 +170,7 @@
      * @function disableAudio
      * @desc This function disables underlying audio track in the stream if it has audio capacity; otherwise it does nothing.
   <br><b>Remarks:</b><br>
-  For remote stream, it stops decoding audio; for local stream, it also stops capturing audio.
+  For remote stream, it stops decoding audio; for local stream, it also stops capturing audio. But capturing cannot be stopped currently in Edge by this API.
      * @memberOf Woogeen.Stream
      * @instance
      * @return {boolean} true The stream has audio and the audio track is enabled previously; <br> otherwise false.
@@ -243,7 +243,7 @@
      * @function disableVideo
      * @desc This function disables underlying video track in the stream if it has video capacity; otherwise it does nothing.
   <br><b>Remarks:</b><br>
-  For remote stream, it stops decoding video; for local stream, it also stops capturing video.
+  For remote stream, it stops decoding video; for local stream, it also stops capturing video. But capturing cannot be stopped currently in Edge by this API.
      * @memberOf Woogeen.Stream
      * @instance
      * @return {boolean} true The stream has video and the video track is enabled previously; <br> otherwise false.

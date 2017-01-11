@@ -489,8 +489,8 @@
      * @param {stream} stream Stream to publish.
      * @param {json} options Publish options. Following properties are supported:<br>
       <ul>
-        <li>maxAudioBW: xxx.</li>
-        <li>maxVideoBW: xxx.</li>
+        <li>maxAudioBW: xxx. It does not work on Edge.</li>
+        <li>maxVideoBW: xxx. It does not work on Edge.</li>
         <li>unmix: false/true. If true, this stream would not be included in mixed stream.</li>
         <li>audioCodec: 'opus'/'pcmu'/'pcma'. Preferred audio codec.</li>
         <li>videoCodec: 'h264'/'vp8'/'vp9'. Preferred video codec.</li>
@@ -1096,6 +1096,8 @@
      * @function shareScreen
      * @instance
      * @desc This function creates a LocalStream from screen and publishes it to the　server.
+      <br><b>Remarks:</b><br>
+      This API is not supported on Edge browser currently.
      * @memberOf Woogeen.ConferenceClient
      * @param {string} options (optional) : extensionId, resolution, frameRate, maxVideoBW, videoCodec<br/>
         <ul>
@@ -1649,7 +1651,9 @@
       /**
          * @function getConnectionStats
          * @instance
-         * @desc This function gets statistic information about the given stream and its associated connection. Unsupported statistics in firefox return -1 or "".
+         * @desc This function gets statistic information about the given stream and its associated connection.
+      <br><b>Remarks:</b><br>
+      Unsupported statistics in firefox return -1 or "". This API is not supported on Edge browser.
          * @memberOf Woogeen.ConferenceClient
          * @param {WoogeenStream} stream Stream instance.
          * @param {function} onSuccess(stats) (optional) Success callback.
