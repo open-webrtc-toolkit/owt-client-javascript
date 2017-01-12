@@ -1619,6 +1619,9 @@ p2p.disconnect();
   };
 
   var setVideoCodec = function(sdp) {
+    if (navigator.mozGetUserMedia) {
+      spec.videoCodec = 'vp8';
+    }
     if (!spec.videoCodec) {
       return sdp;
     }
