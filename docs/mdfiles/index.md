@@ -56,12 +56,12 @@ The Intel CS for WebRTC Client SDK for JavaScript has been tested on the followi
             <td><b>Ubuntu*</b></td>
         </tr>
         <tr width="12pt">
-            <td>Chrome* 53</td>
+            <td>Chrome* 55</td>
             <td>&radic;</td>
             <td>&radic;</td>
         </tr>
         <tr>
-            <td>Firefox* 49</td>
+            <td>Firefox* 50</td>
             <td>&radic;</td>
             <td>&radic;</td>
         </tr>
@@ -76,12 +76,12 @@ The Intel CS for WebRTC Client SDK for JavaScript has been tested on the followi
             <td><b>Ubuntu</b></td>
         </tr>
         <tr>
-            <td>Chrome* 53</td>
+            <td>Chrome* 55</td>
             <td>&radic;</td>
             <td>&radic;</td>
         </tr>
         <tr>
-            <td>FireFox* 49</td>
+            <td>FireFox* 50</td>
             <td>&radic;</td>
             <td>&radic;</td>
         </tr>
