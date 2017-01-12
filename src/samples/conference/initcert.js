@@ -15,7 +15,7 @@ var allComps = ['sample'];
 console.log('Will generate passphrase store for basic server.');
 
 cipher.unlock(cipher.k, keystore, function cb(err, obj) {
-  if (err) {
+  if (err || typeof collection !== 'object') {
     collection = {};
   } else {
     collection = obj;
