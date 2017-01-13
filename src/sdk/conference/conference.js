@@ -310,7 +310,7 @@
           stream = self.localStreams[arg.streamId];
         }
 
-        if (stream) {
+        if (stream && stream.channel) {
           stream.channel.processSignalingMessage(arg.mess);
         }
       });
