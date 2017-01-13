@@ -979,8 +979,8 @@ L.Logger.info('stream added:', stream.id());
   <br><b>options:</b>
   <ul>
       <li>url: RTSP stream URL</li>
-      <li>video: boolean or object. If the value is a boolean, it indicates whether video is enabled or not. If the value is an object, it may have device property ,e.g.,{device: 'camera'} indicates the stream is from camera.</li>
-      <li>audio: true/false</li>
+      <li>video: boolean or object. Default is false. If the value is a boolean, it indicates whether video is enabled or not. If the value is an object, it may have device property ,e.g.,{device: 'camera'} indicates the stream is from camera.</li>
+      <li>audio: true/false. Default is false.</li>
       <li><b>Note:</b>if both video and audio are false or undefined, it will fail to publish an ExternalStream.</li>
   </ul>
   <br><b>callback:</b>
