@@ -46,8 +46,8 @@ Woogeen.EventDispatcher = function(spec) {
               <td>Indicates one existed stream has been removed. </td>
           </tr>
           <tr valign="top">
-              <td>recorder-added</td>
-              <td>Indicates there is a new recorder added by server.</td>
+              <td>stream-failed</td>
+              <td>Indicates the connection to specific stream is broken.</td>
           </tr>
           <tr valign="top">
               <td>recorder-removed</td>
