@@ -49,6 +49,8 @@ var showInfo = null;
 var showLevel = null;
 var scaleLevel = 3/4;
 
+var currentRegions = null;
+
 function login() {
   setTimeout(function() {
     var inputName = $('#login-input').val();
@@ -295,7 +297,7 @@ function initWoogeen() {
     bandWidth = 500;
     videoSize = "vga";
   } else if ($('#login-720').hasClass('selected')) {
-    bandWidth = 1500;
+    bandWidth = 1000;
     videoSize = "hd720p";
   }
 
@@ -417,6 +419,12 @@ function initWoogeen() {
         } else if (stream.isScreen() && isLocalScreenSharing) {
           return;
         }
+        if (stream instanceof Woogeen.RemoteMixedStream) {
+          stream.on('VideoLayoutChanged', function(regions) {
+            L.Logger.info('stream', stream.id(), 'VideoLayoutChanged');
+            currentRegions = regions;
+          });
+        }
         L.Logger.info('subscribing:', stream.id());
         var videoOption = stream.isScreen() ? true : !isAudioOnly;
         room.subscribe(stream, {
@@ -439,59 +447,7 @@ function initWoogeen() {
                 console.log("error", err);
             });
           }, 2000);
-          var bad = 0, lost = 0, rcvd = 0, lostRate = 0, bits = 0, bitRate = 0;
-          var current = 0, level = 0;
-          showInfo = setInterval(function() {
-            room.getConnectionStats(stream, function(stats) {
-              var packetsLost = 0;
-              var packetsRcvd = 0;
-              var bitsRcvd = 0;
-              for (let i in stats) {
-                if (stats[i].type == "ssrc_video_recv") {
-                  packetsLost = parseInt(stats[i].stats.packets_lost);
-                  packetsRcvd = parseInt(stats[i].stats.packets_rcvd);
-                  bitsRcvd = parseInt(stats[i].stats.bytes_rcvd);
-                  bitRate = ((bitsRcvd-bits)*8/1000/1000).toFixed(3);
-                  $('#rcvd').html(packetsRcvd);
-                  $('#lost').html(packetsLost);
-                  $('#bitRate').html(bitRate);
-                  $('#codec').html(stats[i].stats.codec_name);
-                  lostRate = (packetsLost-lost) / (packetsRcvd-rcvd);
-                  lost = packetsLost;
-                  rcvd = packetsRcvd;
-                  bits = bitsRcvd;
-                  level = parseInt(bitRate/0.3);
-                }
-                if (stats[i].type == "VideoBWE") {
-                  $('#bandwidth').html((parseInt(stats[i].stats.available_receive_bandwidth)/1024/1024).toFixed(3));
-                }
-              }
-            }, function(err){
-              console.log("error", err);
-            });
-          }, 1000);
-          showLevel = setInterval(function() {
-            level = level > 4 ? 4 : level;
-            if (current < level) {
-              current++;
-              $('#wifi'+current).css('display', 'block').siblings().css('display', 'none');
-            } else if (current > level) {
-              current--;
-              $('#wifi'+current).css('display', 'block').siblings().css('display', 'none');
-            }
-            if ((lostRate >= 0.12 || level < 2) && !isPauseVideo) {
-              if(bad < 8){
-                bad++;
-              }
-            } else if (bad > 0) {
-                bad--;
-            }
-            if (bad >= 8 && $('#promt').css('opacity') == '0') {
-              $('#promt').css('opacity', '1');
-            } else if(bad == 0 && $('#promt').css('opacity') == '1') {
-              $('#promt').css('opacity', '0');
-            }
-          }, 1000);
+          monitor(stream);
         }, function(err) {
           L.Logger.error(stream.id(), 'subscribe failed1:', err);
         });
@@ -501,6 +457,67 @@ function initWoogeen() {
       L.Logger.error('server connection failed:', err);
     });
   });
+}
+
+function monitor(stream) {
+  var bad = 0, lost = 0, rcvd = 0, lostRate = 0, bits = 0, bitRate = 0;
+  var current = 0, level = 0;
+  showInfo = setInterval(function() {
+    room.getConnectionStats(stream, function(stats) {
+      var packetsLost = 0;
+      var packetsRcvd = 0;
+      var bitsRcvd = 0;
+      for (let i in stats) {
+        if (stats[i].type == "ssrc_video_recv") {
+          packetsLost = parseInt(stats[i].stats.packets_lost);
+          packetsRcvd = parseInt(stats[i].stats.packets_rcvd);
+          bitsRcvd = parseInt(stats[i].stats.bytes_rcvd);
+          bitRate = ((bitsRcvd-bits)*8/1000/1000).toFixed(3);
+          $('#rcvd').html(packetsRcvd);
+          $('#lost').html(packetsLost);
+          $('#bitRate').html(bitRate);
+          $('#codec').html(stats[i].stats.codec_name);
+          lostRate = (packetsLost-lost) / (packetsRcvd-rcvd);
+          lost = packetsLost;
+          rcvd = packetsRcvd;
+          bits = bitsRcvd;
+          level = parseInt(bitRate/0.2);
+        }
+        if (stats[i].type == "VideoBWE") {
+          $('#bandwidth').html((parseInt(stats[i].stats.available_receive_bandwidth)/1024/1024).toFixed(3));
+        }
+      }
+    }, function(err){
+      console.log("error", err);
+    });
+  }, 1000);
+  showLevel = setInterval(function() {
+    level = level > 4 ? 4 : level;
+    if (current < level) {
+      current++;
+      $('#wifi'+current).css('display', 'block').siblings().css('display', 'none');
+    } else if (current > level) {
+      current--;
+      $('#wifi'+current).css('display', 'block').siblings().css('display', 'none');
+    }
+    if ((lostRate >= 0.12 || level < 2) && !isPauseVideo) {
+      if(bad < 8){
+        bad++;
+      }
+    } else if (bad > 0) {
+        bad--;
+    }
+    if (bad >= 8 && $('#promt').css('opacity') == '0') {
+      $('#promt').css('opacity', '1');
+    } else if(bad == 0 && $('#promt').css('opacity') == '1') {
+      $('#promt').css('opacity', '0');
+    }
+  }, 1000);
+}
+
+function stopMonitor() {
+  clearInterval(showInfo);
+  clearInterval(showLevel);
 }
 
 function loadUserList() {
@@ -872,7 +889,7 @@ function addVideo(stream, isLocal) {
     // append new video to video panel
     var size = getNextSize();
     $('#video-panel').append('<div class="' + size + ' clt-' + htmlClass +
-      ' client pulse" ' + 'id="client-' + id + '"></div>');
+      ' client pulse" ' + 'id="client-' + id + '"></div>') ;
     if (isLocal) {
       var opt = {
         muted: 'muted'
@@ -910,7 +927,48 @@ function addVideo(stream, isLocal) {
 
     if (stream.isMixed && stream.isMixed()) {
       name = "MIX Stream";
+      stream.hide = null;
       $("#client-" + id).attr("isMix", "true");
+      document.getElementById("player-" + id).ondblclick = null;
+      $("#client-" + id).find("video").attr("stream", "mix");
+      $("#client-" + id).find("video").dblclick(function(e){
+        if($('#video-' + id).attr("stream") === "mix"){
+          var width = $('#video-' + id).width();
+          var height = width*scaleLevel;
+          var offset = ($('#video-' + id).height()-height)/2;
+          var left = (e.offsetX/width).toFixed(3);
+          var top = ((e.offsetY-offset)/height).toFixed(3);
+          var streamId = getStreamId(left, top);
+          if (streamId && streamObj[streamId]) {
+            room.subscribe(streamObj[streamId], function() {
+              L.Logger.info('subscribed:', streamId);
+              $('#video-' + id).attr("src", streamObj[streamId].createObjectURL());
+              $('#video-' + id).attr("stream", streamId);
+              stopMonitor();
+              monitor(streamObj[streamId]);
+            }, function(err) {
+              L.Logger.error(streamId, 'subscribe failed:', err);
+            });
+            stream.signalOnPauseAudio();
+            stream.signalOnPauseVideo();
+          }
+        } else {
+          var forward = streamObj[$('#video-' + id).attr("stream")];
+          if (forward) {
+            stream.signalOnPlayVideo();
+            stream.signalOnPlayAudio();
+            $('#video-' + id).attr("src", stream.createObjectURL());
+            $('#video-' + id).attr("stream", "mix");
+            stopMonitor();
+            monitor(stream);
+            room.unsubscribe(forward, function(et) {
+              L.Logger.info(forward.id(), 'unsubscribe stream');
+            }, function(err) {
+              L.Logger.error(stream.id(), 'unsubscribe failed:', err);
+            });
+          }
+        }
+      });
       muteBtn = '<a href="#" class="ctrl-btn unmute"></a>';
       player.append('<div id="pause-' + id +
         '" class="pause" style="display: none; width: 100%; height: auto; position: absolute; text-align: center; font: bold 30px Arial;">Paused</canvas>'
@@ -979,6 +1037,15 @@ function addVideo(stream, isLocal) {
   setTimeout(function() {
     $('#client-' + id).removeClass('pulse');
   }, 800);
+}
+
+function getStreamId(left, top) {
+  for(var i in currentRegions) {
+    if(left > currentRegions[i].left && left < (currentRegions[i].left + currentRegions[i].relativeSize) && top > currentRegions[i].top && top < (currentRegions[i].top + currentRegions[i].relativeSize)) {
+      return currentRegions[i].streamID;
+    }
+  }
+  return null;
 }
 
 function toggleIm(isToShow) {
