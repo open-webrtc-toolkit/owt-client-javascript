@@ -27,7 +27,7 @@ var Woogeen = Woogeen || {}; /*jshint ignore:line*/ //Woogeen is defined.
     </tr>
     <tr>
         <th>videoCodec</th>
-        <td>Specify preferred video codec. Available values are "vp8", "vp9", "h264". If specified codec is not supported by browser, it will be silently ignored. If this value is undefined, codec preference will be determined by browser.</td>
+        <td>Specify preferred video codec. Available values are "vp8", "vp9", "h264". If specified codec is not supported by browser, it will be silently ignored. If this value is undefined, codec preference will be determined by browser. Note for Firefox, vp8 will be preferred even if you specify vp9/h264 as preferred.</td>
     </tr>
 </tbody>
 </table>

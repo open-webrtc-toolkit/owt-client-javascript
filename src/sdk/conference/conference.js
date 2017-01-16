@@ -498,7 +498,7 @@
         <li>maxVideoBW: xxx. It does not work on Edge.</li>
         <li>unmix: false/true. If true, this stream would not be included in mixed stream.</li>
         <li>audioCodec: 'opus'/'pcmu'/'pcma'. Preferred audio codec.</li>
-        <li>videoCodec: 'h264'/'vp8'/'vp9'. Preferred video codec.</li>
+        <li>videoCodec: 'h264'/'vp8'/'vp9'. Preferred video codec. Note for Firefox vp9 is not stable, so please do not specify vp9 for Firefox.</li>
         <li>transport: 'udp'/'tcp'. RTSP connection transport type, default 'udp'; only for RTSP input.</li>
         <li>bufferSize: integer number in bytes. UDP receiving buffer size, default 2 MB. Only for RTSP input (UDP transport).</li>
       </ul>
@@ -708,7 +708,7 @@
   {<br>
   video: true/false, {resolution: {width:xxx, height:xxx}, qualityLevel:'xxx'},<br>
   audio: true/false,<br>
-  videoCodec: 'h264'/'vp8'/'vp9'. This property specifies preferred video codec.<br>
+  videoCodec: 'h264'/'vp8'/'vp9'. This property specifies preferred video codec. Note for Firefox vp9 is not stable, so please do not sepcify vp9 for Firefox.<br>
   }
   <br><b>Remarks:</b><br>
   Video resolution choice is only valid for subscribing {@link Woogeen.RemoteMixedStream Woogeen.RemoteMixedStream} when multistreaming output is enabled.　See {@link N.API.createRoom N.API.createRoom()} for detailed description of multistreaming.<br>
@@ -1113,7 +1113,7 @@
               </ul>
           <li>frameRate is a number indicating frames per second. Actual frame rate on browser may not be exactly the same as specified here.</li>
           <li>maxVideoBW: xxx</li>
-          <li>videoCodec: 'h264'/'vp8'/'vp9'</li>
+          <li>videoCodec: 'h264'/'vp8'/'vp9'. Note for Firefox vp9 is not stable, so please do not specify vp9 for Firefox.</li>
         </ul>
         Each codec has its own supported bitrate range. Setting incorrect maxAudioBW/maxVideoBW value may lead to connection failure. Bandwidth settings don't work on FireFox.<br/>
      * @param {function} onSuccess(stream) (optional) Success callback.
