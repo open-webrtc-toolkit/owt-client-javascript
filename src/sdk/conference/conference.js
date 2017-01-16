@@ -474,9 +474,19 @@
               return self.remoteStreams[st.id];
             });
           }
+          var me;
+          if (resp.users !== undefined) {
+            for (var i = 0; i < resp.users.length; i++) {
+              if (resp.users[i].id === resp.clientId) {
+                me = resp.users[i];
+                break;
+              }
+            }
+          }
           return safeCall(onSuccess, {
             streams: streams,
-            users: resp.users
+            users: resp.users,
+            self: me
           });
         }
         return safeCall(onFailure, resp || 'response error');
