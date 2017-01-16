@@ -343,6 +343,9 @@
         var triggerEvent = false;
         if (self.state !== DISCONNECTED) {
           triggerEvent = true;
+          L.Logger.info('Will trigger server-disconnect');
+        } else {
+          L.Logger.info('Will not trigger server-disconnect');
         }
         self.state = DISCONNECTED;
         self.myId = null;
@@ -1740,8 +1743,7 @@
         token.host = this.spec.host;
         token.secure = this.spec.secure;
         // WoogeenConferenceBase.join requires base 64 encoded token. So encode it first.
-        // ConferenceClient's token retrieve from nuve is base 64 encoded, but SipClient's token is an object. It might be a problem.
-        token = L.Base64.encodeBase64(token);
+        token = L.Base64.encodeBase64(JSON.stringify(token));
         WoogeenConferenceBase.prototype.join.call(this, token,
           onSuccess, onFailure);
       };
