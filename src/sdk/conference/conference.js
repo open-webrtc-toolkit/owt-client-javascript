@@ -356,11 +356,6 @@
             stream = self.remoteStreams[i];
             stream.close();
             delete self.remoteStreams[i];
-            var evt = new Woogeen.StreamEvent({
-              type: 'stream-removed',
-              stream: stream
-            });
-            self.dispatchEvent(evt);
           }
         }
 
