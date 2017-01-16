@@ -182,6 +182,7 @@ Woogeen.PeerClient = function(pcConfig) {
       peer.remoteSideSupportsRemoveStream = false;
       peer.remoteSideSupportsPlanB = false;
       peer.remoteSideSupportsUnifiedPlan = true;
+      peer.preferredVideoCodec = 'vp8';
     } else { // Remote side is iOS/Android/C++ which uses Chrome stack.
       peer.remoteSideSupportsRemoveStream = true;
       peer.remoteSideSupportsPlanB = true;
@@ -926,7 +927,7 @@ p2p.disconnect();
     drainPendingStreams(peer);
     peer.isNegotiationNeeded = false;
     peer.connection.createOffer(function(desc) {
-      desc.sdp = setRtpReceiverOptions(desc.sdp);
+      desc.sdp = setRtpReceiverOptions(desc.sdp, peer);
       peer.connection.setLocalDescription(desc, function() {
         L.Logger.debug('Set local descripiton successfully.');
         changeNegotiationState(peer, NegotiationState.READY);
@@ -1022,7 +1023,7 @@ p2p.disconnect();
     drainPendingStreams(peer);
     peer.isNegotiationNeeded = false;
     peer.connection.createAnswer(function(desc) {
-      desc.sdp = setRtpReceiverOptions(desc.sdp);
+      desc.sdp = setRtpReceiverOptions(desc.sdp, peer);
       peer.connection.setLocalDescription(desc, function() {
         L.Logger.debug("Set local description successfully.");
         if (gab) {
@@ -1605,9 +1606,9 @@ p2p.disconnect();
     return sdp;
   };
 
-  var setRtpReceiverOptions = function(sdp) {
+  var setRtpReceiverOptions = function(sdp, peer) {
     sdp = setAudioCodec(sdp);
-    sdp = setVideoCodec(sdp);
+    sdp = setVideoCodec(sdp, peer);
     return sdp;
   };
 
@@ -1618,14 +1619,18 @@ p2p.disconnect();
     return Woogeen.Common.setPreferredCodec(sdp, 'audio', spec.audioCodec);
   };
 
-  var setVideoCodec = function(sdp) {
+  var setVideoCodec = function(sdp, peer) {
+    var codec;
     if (navigator.mozGetUserMedia) {
-      spec.videoCodec = 'vp8';
-    }
-    if (!spec.videoCodec) {
+      codec = 'vp8';
+    } else if (peer && peer.preferredVideoCodec) {
+      codec = peer.preferredVideoCodec;
+    } else if (spec.videoCodec) {
+      codec = spec.videoCodec;
+    } else {
       return sdp;
     }
-    return Woogeen.Common.setPreferredCodec(sdp, 'video', spec.videoCodec);
+    return Woogeen.Common.setPreferredCodec(sdp, 'video', codec);
   };
 
   /**
