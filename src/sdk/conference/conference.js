@@ -1181,7 +1181,8 @@
          * @function playAudio
          * @desc This function tells server to continue sending/receiving audio data of the RemoteStream/LocalStream.
       <br><b>Remarks:</b><br>
-      The audio track of the stream should be enabled to be played correctly. For RemoteStream, it should be subscribed; for LocalStream, it should be published. playAudio with video only stream will succeed without any action.
+      The audio track of the stream should be enabled to be played correctly. For RemoteStream, it should be subscribed; for LocalStream, it should be published. playAudio with video only stream will succeed without any action.<br>
+      External Stream does not support this function.
          * @memberOf Woogeen.ConferenceClient
          * @param {WoogeenStream} stream instance.
          * @param {function} onSuccess() (optional) Success callback.
@@ -1202,7 +1203,8 @@
          * @function pauseAudio
          * @desc This function tells server to stop sending/receiving audio data of the subscribed RemoteStream/LocalStream.
       <br><b>Remarks:</b><br>
-      Upon success, the audio of the stream would be hold, and you can call disableAudio() method to disable the audio track locally to stop playing. For RemoteStream, it should be subscribed; for LocalStream, it should be published. puaseAudio with video only stream will succeed without any action.
+      Upon success, the audio of the stream would be hold, and you can call disableAudio() method to disable the audio track locally to stop playing. For RemoteStream, it should be subscribed; for LocalStream, it should be published. puaseAudio with video only stream will succeed without any action.<br>
+      External Stream does not support this function.
          * @memberOf Woogeen.ConferenceClient
          * @param {WoogeenStream} stream instance.
          * @param {function} onSuccess() (optional) Success callback.
@@ -1223,7 +1225,8 @@
          * @function playVideo
          * @desc This function tells server to continue sending/receiving video data of the subscribed RemoteStream/LocalStream.
       <br><b>Remarks:</b><br>
-      The video track of the stream should be enabled to be played correctly. For RemoteStream, it should be subscribed; for LocalStream, it should be published. playVideo with audio only stream will succeed without any action.
+      The video track of the stream should be enabled to be played correctly. For RemoteStream, it should be subscribed; for LocalStream, it should be published. playVideo with audio only stream will succeed without any action.<br>
+      External Stream does not support this function.
          * @memberOf Woogeen.ConferenceClient
          * @param {WoogeenStream} stream instance.
          * @param {function} onSuccess() (optional) Success callback.
@@ -1244,7 +1247,8 @@
          * @function pauseVideo
          * @desc This function tells server to stop sending/receiving video data of the subscribed RemoteStream/LocalStream.
       <br><b>Remarks:</b><br>
-      Upon success, the video of the stream would be hold, and you can call disableVideo() method to disable the video track locally to stop playing. For RemoteStream, it should be subscribed; for LocalStream, it should be published. pauseVideo with audio only stream will succeed without any action.
+      Upon success, the video of the stream would be hold, and you can call disableVideo() method to disable the video track locally to stop playing. For RemoteStream, it should be subscribed; for LocalStream, it should be published. pauseVideo with audio only stream will succeed without any action.<br>
+      External Stream does not support this function.
          * @memberOf Woogeen.ConferenceClient
          * @param {WoogeenStream} stream instance.
          * @param {function} onSuccess() (optional) Success callback.
