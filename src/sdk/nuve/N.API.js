@@ -140,7 +140,7 @@ N.API = (function(N) {
           </tr>
           <tr>
               <td>r720x720</td>
-              <td>{width: 720, height: 720}</td>
+              <td>{width: 720, height: 720}, {width: 480, height: 480}, {width: 360, height: 360}</td>
           </tr>
       </tbody>
   </table>
