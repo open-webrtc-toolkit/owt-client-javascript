@@ -33,7 +33,7 @@ The following table lists the basic JavaScript objects provided in the JavaScrip
 
 Refer to the SDK release notes for the latest information on the SDK release package, including features, supported browsers, bug fixes, and known issues.
 
-Please include adaper.js before woogeen.sdk.js in HTML files.
+Please include adaper.js before woogeen.sdk.js in HTML files. adapter.js is an open source project hosted on [Github](https://github.com/webrtc/adapter). The revision we depend on is d6e8b1a45add33f382fed872f32908ea225a1996.
 
 If you want to use conference SDK, please also include socket.io.js before woogeen.sdk.js.
 
@@ -108,6 +108,7 @@ Intel CS for WebRTC Client SDK for JavaScript fully supports NAT and firewall tr
 To enable P2P chat, copy and paste the following code into the head section of your HTML document:
 ~~~~~~{.js}
 <script type="text/JavaScript" src="sc.websocket.js"></script>
+<script type="text/JavaScript" src="adapter.js"></script>
 <script type="text/JavaScript" src="woogeen.sdk.js"></script>
 ~~~~~~
 The SDK supports Web sockets signaling channel in P2P mode; You need to include `sc.websocket.js` and `socket.io.js` in your HTML files. Please include `socket.io.js` after `woogeen.sdk.js`.
@@ -292,6 +293,7 @@ Woogeen.API.createRoom (room.name, function (resp) {
 To initialize your HTML code, copy and paste the following code into the head section of your HTML document:
 ~~~~~~{.js}
 <script type="text/javascript" src="socket.io.js"></script>
+<script type="text/javascript" src="adapter.js"></script>
 <script type="text/javascript" src="woogeen.sdk.js"></script>
 <script type="text/javascript" src="woogeen.sdk.ui.js"></script>
 ~~~~~~
