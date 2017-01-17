@@ -25,7 +25,7 @@ The following table lists the basic JavaScript objects provided in the JavaScrip
         </tr>
          <tr>
             <td>woogeen.sdk.js</td>
-            <td>Intel CS for WebRTC cliet SDK for JavaScript.</td>
+            <td>Intel CS for WebRTC client SDK for JavaScript.</td>
         </tr>
     </tbody>
 </table>
