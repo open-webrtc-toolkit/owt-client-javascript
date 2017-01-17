@@ -943,6 +943,7 @@
       {<br>
        streams:, an array of remote streams that have been published in the conference.<br>
        users:, an array of users that have joined in the conference.<br>
+       self:, an object for current user's infomation.<br>
       }
          * @memberOf Woogeen.ConferenceClient
          * @param {string} token Token used to join conference room.
