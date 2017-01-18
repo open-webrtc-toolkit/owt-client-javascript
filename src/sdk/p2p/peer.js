@@ -1457,7 +1457,7 @@ p2p.disconnect();
   /**
      * @function getAudioLevels
      * @instance
-     * @desc This function returns audio output levels associated with current client. More details about [audio levels](@ref audiolevel).
+     * @desc This function returns audio output levels associated with current client. It is not supported on Firefox. More details about [audio levels](@ref audiolevel).
      * @memberOf Woogeen.PeerClient
      * @param {string} targetId Remote user's ID.
      * @param {function} successCallback callback function to be invoked when audio level information is available.
