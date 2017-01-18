@@ -420,14 +420,14 @@ N.API = (function(N) {
      * @desc This function gets a user's information from a specified room.
      * @memberOf N.API
      * @param {string} room Room ID
-     * @param {string} user User's name
+     * @param {string} user User ID
      * @param {function} callback(user) Callback function on success
      * @param {function} callbackError(err) Callback function on error
      * @example
   var roomID = '51c10d86909ad1f939000001';
-  var name = 'john';
-  N.API.getUser(roomID, name, function(user) {
-    console.log('User:', name, 'Role:', user.role);
+  var userID = 'JdlUI29yjfVY6O4yAAAB';
+  N.API.getUser(roomID, userID, function(user) {
+    console.log('User:', userID, 'Role:', user.role);
   }, errorCallback);
      */
   getUser = function(room, user, callback, callbackError, params) {
@@ -440,14 +440,14 @@ N.API = (function(N) {
      * @desc This function deletes a user from a room.
      * @memberOf N.API
      * @param {string} room Room ID
-     * @param {string} user User's name
+     * @param {string} user User ID
      * @param {function} callback(result) Callback function on success
      * @param {function} callbackError(err) Callback function on error
      * @example
   var roomID = '51c10d86909ad1f939000001';
-  var name = 'john';
-  N.API.deleteUser(roomID, name, function(res) {
-    console.log('User', name, 'in room', roomID, 'deleted');
+  var userID = 'JdlUI29yjfVY6O4yAAAB';
+  N.API.deleteUser(roomID, userID, function(res) {
+    console.log('User', userID, 'in room', roomID, 'deleted');
   }, errorCallback);
      */
   deleteUser = function(room, user, callback, callbackError, params) {
