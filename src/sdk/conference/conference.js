@@ -685,9 +685,9 @@
       return safeCall(onFailure, 'invalid stream');
     }
     sendMsg(self.socket, 'unpublish', stream.id(), function(err) {
-      if (err) {
-        return safeCall(onFailure, err);
-      }
+      /* TODO(jianlin): for now we close corresponding channel as long as we request unpublishing.
+         futher we need to parse the err from mcu to decide if channel needs to
+         be closed*/
       if (stream.channel && typeof stream.channel.close === 'function') {
         stream.channel.close();
         stream.channel = null;
@@ -701,6 +701,9 @@
       stream.signalOnPlayVideo = undefined;
       stream.signalOnPauseVideo = undefined;
       delete stream.unpublish;
+      if (err) {
+        return safeCall(onFailure, err);
+      }
       safeCall(onSuccess, null);
     });
   };
