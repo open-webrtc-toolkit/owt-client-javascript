@@ -81,7 +81,7 @@ The Intel CS for WebRTC Client SDK for JavaScript has been tested on the followi
             <td>&radic;</td>
         </tr>
         <tr>
-            <td>FireFox* 50</td>
+            <td>Firefox* 50</td>
             <td>&radic;</td>
             <td>&radic;</td>
         </tr>
@@ -90,11 +90,11 @@ The Intel CS for WebRTC Client SDK for JavaScript has been tested on the followi
 @endhtmlonly
 
 Different browsers may have different supported codec list.
-Currently, Edge browser only supports H.264 and OPUS. What's more, H.264 support in Edge now is experimental. To enble it, go to "about:flags" in Edge browser, find "Enable experimental H.264/AVC support" option under WebRTC section, and then select the checkbox. Since the current H.264 support is experimental, there is some codec capability limitation such as no FIR support in Edge.
+Currently, Edge browser only supports H.264 and OPUS. At the time of this writing, H.264 support in Edge is experimental. To enable it, go to "about:flags" in Edge browser, find "Enable experimental H.264/AVC support" option under WebRTC section, and then select the checkbox. Since the current H.264 support is experimental, there is some codec capability limitation such as no FIR support in Edge.
 
-> **Note:** Microsoft Edge* 38.14393 is now only available in latest Windows 10 official release, which is Windows 10 Anniversary Update (Version 1607, OS Build 14393.321). Currently SSL certificate can't be managed through Microsoft Edge*, so if please consider take use of Internet Explorer 11 or other proper browsers instead.
+> **Note:** Microsoft Edge* 38.14393 is now only available in latest Windows 10 official release, which is Windows 10 Anniversary Update (Version 1607, OS Build 14393.321).
 
-In P2P mode, only one stream per direction can be published between FireFox and other clients. Also, "unpublish" is not available when one side is FireFox.
+In P2P mode, only one stream per direction can be published between Firefox and other clients. Also, "unpublish" is not available when one side is Firefox.
 
 # 3 Screen sharing extension {#section3}
 We provide source code of a Chrome screen sharing extension sample. Developers should edit manifest.json and publish it to Chrome App Store to make it work for their products. After your extension is published, you will get an extension ID. This ID will be used when create screen sharing stream.
@@ -107,11 +107,12 @@ Intel CS for WebRTC Client SDK for JavaScript fully supports NAT and firewall tr
 # 5 Peer-to-peer (P2P) mode{#section5}
 To enable P2P chat, copy and paste the following code into the head section of your HTML document:
 ~~~~~~{.js}
+<script type="text/JavaScript" src="socket.io.js"></script>
 <script type="text/JavaScript" src="sc.websocket.js"></script>
 <script type="text/JavaScript" src="adapter.js"></script>
 <script type="text/JavaScript" src="woogeen.sdk.js"></script>
 ~~~~~~
-The SDK supports Web sockets signaling channel in P2P mode; You need to include `sc.websocket.js` and `socket.io.js` in your HTML files. Please include `socket.io.js` after `woogeen.sdk.js`.
+If you're using customized signling channel, please replace `socket.io.js` and `sc.websocket.js` with your own signaling channel implementation.
 
 ## 5.1 P2P direct call chat {#section5_1}
 
@@ -368,7 +369,7 @@ createToken(roomId, 'user', 'presenter', function (response) {
 </script>
 ~~~~~~
 # 7 JavaScript API quick start guide {#section7}
-This discussion describes how to quickly grasp the API usages of Intel CS for WebRTC Client SDK for JavaScript. Unless mentioned elsewhere, all APIs are under namespace `Woogeen`.
+This section provides detailed examples for using the APIs provided in the SDK. Unless mentioned elsewhere, all APIs are under namespace `Woogeen`.
 
 ## 7.1 Objects {#section7_1}
 The following table describes the key objects provided in the JavaScript SDK.
@@ -378,7 +379,7 @@ The following table describes the key objects provided in the JavaScript SDK.
     <tbody>
     <thead>
         <tr>
-            <th><b>JavaScript  object</b></th>
+            <th><b>JavaScript object</b></th>
             <th><b>Description</b></th>
         </tr>
     </thead>
