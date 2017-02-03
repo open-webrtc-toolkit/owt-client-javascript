@@ -990,8 +990,8 @@
      * @instance
      * @desc This function send message to conference room. The receiver should be a valid clientId, which is carried by 'user-joined' event; or default 0, which means send to all participants in the conference (broadcast) except himself.
      * @memberOf Woogeen.ConferenceClient
-     * @param {string/function} data text message to send.
-     * @param {string/function} receiver Receiver, optional, with default value 0.
+     * @param {string} data text message to send.
+     * @param {string} receiver Receiver, optional. Sending message to all participants if receiver is undefined.
      * @param {function} onSuccess() (optional) Success callback.
      * @param {function} onFailure(err) (optional) Failure callback.
      * @example
