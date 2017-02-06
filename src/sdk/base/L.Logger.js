@@ -10,107 +10,61 @@ L.Logger = (function() {
     INFO = 2,
     WARNING = 3,
     ERROR = 4,
-    NONE = 5,
-    logLevel = DEBUG,
-    setLogLevel, log, debug, trace, info, warning, error;
+    NONE = 5;
 
-  // It sets the new log level. We can set it to NONE if we do not want to print logs
-  setLogLevel = function(level) {
-    if (level > NONE) {
-      level = NONE;
-    } else if (level < DEBUG) {
-      level = DEBUG;
-    }
-    logLevel = level;
-  };
+  var noOp = function() {};
 
-  // Generic function to print logs for a given level: [DEBUG, TRACE, INFO, WARNING, ERROR]
-  log = function() {
-    var level = arguments[0];
-    var args = arguments;
-    if (level < logLevel) {
-      return;
-    }
-    switch (level) {
-      case DEBUG:
-        args[0] = 'DEBUG:';
-        break;
-      case TRACE:
-        args[0] = 'TRACE:';
-        break;
-      case INFO:
-        args[0] = 'INFO:';
-        break;
-      case WARNING:
-        args[0] = 'WARNING:';
-        break;
-      case ERROR:
-        args[0] = 'ERROR:';
-        break;
-      default:
-        return;
-    }
-    console.log.apply(console, args);
-  };
-
-  // It prints debug logs
-  debug = function() {
-    var args = [DEBUG];
-    for (var i = 0; i < arguments.length; i++) {
-      args.push(arguments[i]);
-    }
-    log.apply(this, args);
-  };
-
-  // It prints trace logs
-  trace = function() {
-    var args = [TRACE];
-    for (var i = 0; i < arguments.length; i++) {
-      args.push(arguments[i]);
-    }
-    log.apply(this, args);
-  };
-
-  // It prints info logs
-  info = function() {
-    var args = [INFO];
-    for (var i = 0; i < arguments.length; i++) {
-      args.push(arguments[i]);
-    }
-    log.apply(this, args);
-  };
-
-  // It prints warning logs
-  warning = function() {
-    var args = [WARNING];
-    for (var i = 0; i < arguments.length; i++) {
-      args.push(arguments[i]);
-    }
-    log.apply(this, args);
-  };
-
-  // It prints error logs
-  error = function() {
-    var args = [ERROR];
-    for (var i = 0; i < arguments.length; i++) {
-      args.push(arguments[i]);
-    }
-    log.apply(this, args);
-  };
-
-  return {
+  // |that| is the object to be returned.
+  var that = {
     DEBUG: DEBUG,
     TRACE: TRACE,
     INFO: INFO,
     WARNING: WARNING,
     ERROR: ERROR,
-    NONE: NONE,
-    setLogLevel: setLogLevel,
-    log: log,
-    debug: debug,
-    trace: trace,
-    info: info,
-    warning: warning,
-    error: error
+    NONE: NONE
   };
+
+  that.log = window.console.log.bind(window.console);
+
+  var bindType = function(type) {
+    if (typeof window.console[type] === 'function') {
+      return window.console[type].bind(window.console);
+    } else {
+      return window.console.log.bind(window.console);
+    }
+  };
+
+  var setLogLevel = function(level) {
+    if (level <= DEBUG) {
+      that.debug = bindType('debug');
+    } else {
+      that.debug = noOp;
+    }
+    if (level <= TRACE) {
+      that.trace = bindType('trace');
+    } else {
+      that.trace = noOp;
+    }
+    if (level <= INFO) {
+      that.info = bindType('info');
+    } else {
+      that.info = noOp;
+    }
+    if (level <= WARNING) {
+      that.warning = bindType('warn');
+    } else {
+      that.warning = noOp;
+    }
+    if (level <= ERROR) {
+      that.error = bindType('error');
+    } else {
+      that.error = noOp;
+    }
+  };
+
+  setLogLevel(DEBUG); // Default level is debug.
+
+  that.setLogLevel = setLogLevel;
+
+  return that;
 }());
