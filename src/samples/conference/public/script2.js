@@ -218,8 +218,13 @@ var runSocketIOSample = function() {
     var myRoom = getParameterByName('room');
     var isHttps = (location.protocol === 'https:');
     var mediaUrl = getParameterByName('url');
+    var transport = getParameterByName('transport') || 'tcp';
     var isPublish = getParameterByName('publish');
+    var hasAudio = getParameterByName('audio');
+    var hasVideo = getParameterByName('video');
 
+    hasAudio = hasAudio === "true"?true:false;
+    hasVideo = hasVideo === "false"?false:true;
     if (isHttps) {
       var shareButton = document.getElementById('shareScreen');
       if (shareButton) {
@@ -277,14 +282,16 @@ var runSocketIOSample = function() {
       conference.join(token, function(resp) {
         if (typeof mediaUrl === 'string' && mediaUrl !== '') {
           Woogeen.ExternalStream.create({
-            url: mediaUrl
+            url: mediaUrl,
+            video: hasVideo,
+            audio: hasAudio
           }, function(err, stream) {
             if (err) {
               return L.Logger.error(
                 'create ExternalStream failed:', err);
             }
             localStream = stream;
-            conference.publish(localStream, {}, function(st) {
+            conference.publish(localStream, {transport: transport}, function(st) {
               L.Logger.info('stream published:', st.id());
             }, function(err) {
               L.Logger.error('publish failed:', err);
