@@ -96,10 +96,22 @@ Currently, Edge browser only supports H.264 and OPUS. At the time of this writin
 
 In P2P mode, only one stream per direction can be published between Firefox and other clients. Also, "unpublish" is not available when one side is Firefox.
 
-# 3 Screen sharing extension {#section3}
+# 3 Screen sharing {#section3}
+
+## 3.1 Chrome
 We provide source code of a Chrome screen sharing extension sample. Developers should edit manifest.json and publish it to Chrome App Store to make it work for their products. After your extension is published, you will get an extension ID. This ID will be used when create screen sharing stream.
 
 > **Note:** End users need to install your extension and visit your site with https if they want to use screen sharing.
+
+## 3.2 Firefox
+Screen sharing on Firefox requires following in `about:config`.
+
+- `media.getusermedia.screensharing.enabled` is `true`.
+- `media.getusermedia.screensharing.allowed_domains` includes your domain name.
+
+Developers can help end users to make these changes by Firefox extension.
+
+> **note:** End users need to visit your site with https if they want to use screen sharing.
 
 # 4 NAT and firewall traversal {#section4}
 Intel CS for WebRTC Client SDK for JavaScript fully supports NAT and firewall traversal with STUN / TURN / ICE. The Coturn TURN server from https://github.com/coturn/coturn can be one choice.
