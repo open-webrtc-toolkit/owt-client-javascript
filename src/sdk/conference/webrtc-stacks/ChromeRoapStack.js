@@ -385,6 +385,10 @@ Erizo.ChromeRoapStack = function(spec) {
       'getConnectionStats is not supported on Chrome with Roap stack.');
   };
 
+  that.iceRestart = function() {
+    L.Logger.error("ICE restart on Chrome Roap is not supported.");
+  };
+
   // Variables that are part of the public interface of PeerConnection
   // in the 28 January 2012 version of the webrtc specification.
   that.onaddstream = null;

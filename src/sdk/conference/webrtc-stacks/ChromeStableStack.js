@@ -161,7 +161,7 @@ Erizo.ChromeStableStack = function(spec) {
       sdp: sessionDescription.sdp
     });
     localDesc = sessionDescription;
-    //that.peerConnection.setLocalDescription(sessionDescription);
+    that.peerConnection.setLocalDescription(sessionDescription);
   };
 
   var setLocalDescp2p = function(sessionDescription) {
@@ -210,6 +210,15 @@ Erizo.ChromeStableStack = function(spec) {
 
   };
 
+  that.iceRestart = function(){
+    var offerOptions = {
+      offerToReceiveAudio: spec.audio,
+      offerToReceiveVideo: spec.video,
+      iceRestart: true
+    };
+    that.peerConnection.createOffer(setLocalDesc, errorCallback,offerOptions);
+  };
+
   that.addStream = function(stream) {
     that.peerConnection.addStream(stream);
   };
@@ -243,7 +252,7 @@ Erizo.ChromeStableStack = function(spec) {
       msg.sdp = setMaxBW(msg.sdp);
 
       remoteDesc = msg;
-      that.peerConnection.setLocalDescription(localDesc, function() {
+      //that.peerConnection.setLocalDescription(localDesc, function() {
         that.peerConnection.setRemoteDescription(new RTCSessionDescription(
           msg), function() {
           spec.remoteDescriptionSet = true;
@@ -264,7 +273,7 @@ Erizo.ChromeStableStack = function(spec) {
             });
           }
         });
-      });
+      //});
 
     } else if (msg.type === 'candidate') {
       try {

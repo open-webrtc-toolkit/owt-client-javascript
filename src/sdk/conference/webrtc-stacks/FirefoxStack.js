@@ -170,6 +170,15 @@ Erizo.FirefoxStack = function(spec) {
     }
   };
 
+  that.iceRestart = function(){
+    var offerOptions = {
+      offerToReceiveAudio: spec.audio,
+      offerToReceiveVideo: spec.video,
+      iceRestart: true
+    };
+    that.peerConnection.createOffer(setLocalDesc, errorCallback,offerOptions);
+  };
+
   that.processSignalingMessage = function(msg) {
 
     //      L.Logger.debug("Process Signaling Message", msg);

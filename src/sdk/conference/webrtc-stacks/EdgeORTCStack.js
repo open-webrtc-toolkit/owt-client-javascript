@@ -1787,5 +1787,9 @@ Erizo.EdgeORTCStack = function(spec) {
     onFailure('getConnectionStats is not supported on Edge.');
   };
 
+  that.iceRestart = function() {
+    L.Logger.error("ICE restart on Edge is not supported yet.");
+  };
+
   return that;
 };
