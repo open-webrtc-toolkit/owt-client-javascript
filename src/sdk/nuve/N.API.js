@@ -309,6 +309,12 @@ N.API = (function(N) {
      */
   createToken = function(room, username, role, callback, callbackError,
     params) {
+    if (typeof room !== 'string' || typeof username !== 'string' ||
+      typeof role !== 'string') {
+      if (typeof callbackError === 'function')
+        callbackError(400, 'Invalid argument.');
+      return;
+    }
     var type = (params && params.type) || 'socketio';
     send(callback, callbackError, 'POST', undefined, 'rooms/' + room +
       '/tokens/' + type, params, username, role);
