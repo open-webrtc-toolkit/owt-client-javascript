@@ -662,6 +662,10 @@ L.Logger.info('stream added:', stream.id());
             option.video.resolution] || supportedVideoList.unspecified));
         }
 
+        if (typeof option.video.deviceId === 'string') {
+          mediaOption.video.deviceId = option.video.deviceId;
+        }
+
         if (!isLegacyIE() && !isLegacyChrome()) {
           if (option.video.frameRate instanceof Array && option.video.frameRate
             .length >= 2) {
@@ -676,7 +680,10 @@ L.Logger.info('stream added:', stream.id());
           }
         }
       }
-      if (option.audio) {
+
+      if (typeof option.audio === 'object') {
+        mediaOption.audio = option.audio;
+      } else if (option.audio === true) {
         mediaOption.audio = true;
       }
     } else {
@@ -809,7 +816,6 @@ L.Logger.info('stream added:', stream.id());
       }
       var extensionId = option.video.extensionId ||
         'pndohhifhheefbpeljcmnhnkphepimhe';
-      mediaOption.audio = false;
       try {
         chrome.runtime.sendMessage(extensionId, {
           getStream: true
@@ -884,7 +890,7 @@ L.Logger.info('stream added:', stream.id());
   <br><b>options:</b>
   <ul>
       <li>audio: true/false. Default is false.</li>
-      <li>video: boolean or object. Default is false. If the value is a boolean, it indicates whether video is enabled or not. If the value is an object, it may have following properties: device, resolution, frameRate, extensionId.</li>
+      <li>video: boolean or object. Default is false. If the value is a boolean, it indicates whether video is enabled or not. If the value is an object, it may have following properties: device, resolution, frameRate, extensionId, deviceId.</li>
           <ul>
               <li>Valid device list:</li>
                   <ul>
@@ -902,6 +908,7 @@ L.Logger.info('stream added:', stream.id());
                   </ul>
               <li>frameRate is a number indicating frames per second. Actual frame rate on browser may not be exactly the same as specified here.</li>
               <li>extensionId is id of Chrome Extension for screen sharing. </li>
+              <li>deviceId is an identifier for the source of the MediaStreamTrack. It only works when input source is mic or camera. You can use <code>MediaDevices.enumerateDevices()</code> to get the list of available devices.</li>
           </ul>
   </ul>
   <br><b>callback:</b>
