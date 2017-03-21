@@ -591,6 +591,7 @@ L.Logger.info('stream added:', stream.id());
   }, function () {});
   */
   function createLocalStream(option, callback) {
+    option = JSON.parse(JSON.stringify(option));
     if (typeof option === 'object' && option !== null && option.url !==
       undefined) {
       var warnMessage =
