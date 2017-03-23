@@ -119,8 +119,8 @@
     this.toJson = function() {
       return {
         id: this.id(),
-        audio: spec.audio,
-        video: spec.video,
+        audio: this.hasAudio() ? spec.audio : false,
+        video: this.hasVideo() ? spec.video : false,
         attributes: spec.attributes
       };
     };
@@ -326,6 +326,21 @@
 
   function WoogeenLocalStream(spec) {
     WoogeenStream.call(this, spec);
+    this.hasAudio = function() {
+      if (this.mediaStream) {
+        return !!this.mediaStream.getAudioTracks().length;
+      } else {
+        return !!spec.hasAudio;
+      }
+    };
+
+    this.hasVideo = function() {
+      if (this.mediaStream) {
+        return !!this.mediaStream.getVideoTracks().length;
+      } else {
+        return !!spec.hasVideo;
+      }
+    };
   }
 
   function WoogeenRemoteStream(spec) {
@@ -702,18 +717,22 @@ L.Logger.info('stream added:', stream.id());
     }
 
     var onSuccess = function(mediaStream) {
-      // Check whether the media stream has audio/video track as requested.
-      if ((option.audio && mediaStream.getAudioTracks().length === 0) || (
-          option.video && mediaStream.getVideoTracks().length === 0)) {
-        for (var i = 0; i < mediaStream.getTracks().length; i++) {
-          mediaStream.getTracks()[i].stop();
+      if (!(typeof option.video === 'object' && option.video.device ===
+          'screen')) {
+        // Check whether the media stream has audio/video track as requested.
+        if ((option.audio && mediaStream.getAudioTracks().length === 0) ||
+          (
+            option.video && mediaStream.getVideoTracks().length === 0)) {
+          for (var i = 0; i < mediaStream.getTracks().length; i++) {
+            mediaStream.getTracks()[i].stop();
+          }
+          var err = {
+            code: 1104,
+            msg: 'Not all device requests are satisfied.'
+          };
+          callback(err);
+          return;
         }
-        var err = {
-          code: 1104,
-          msg: 'Not all device requests are satisfied.'
-        };
-        callback(err);
-        return;
       }
 
       option.mediaStream = mediaStream;
@@ -821,9 +840,13 @@ L.Logger.info('stream added:', stream.id());
       }
       var extensionId = option.video.extensionId ||
         'pndohhifhheefbpeljcmnhnkphepimhe';
+      var desktopCaptureSources = ['screen', 'window', 'tab'];
+      if (option.audio) {
+        desktopCaptureSources.push('audio');
+      }
       try {
         chrome.runtime.sendMessage(extensionId, {
-          getStream: true
+          getStream: desktopCaptureSources
         }, function(response) {
           if (response === undefined) {
             if (typeof callback === 'function') {
@@ -834,6 +857,12 @@ L.Logger.info('stream added:', stream.id());
             }
             return;
           }
+          mediaOption.audio = {
+            mandatory: {
+              chromeMediaSource: 'desktop',
+              chromeMediaSourceId: response.streamId
+            }
+          };
           mediaOption.video.mandatory = mediaOption.video.mandatory || {};
           mediaOption.video.mandatory.chromeMediaSource = 'desktop';
           mediaOption.video.mandatory.chromeMediaSourceId = response.streamId;
@@ -894,7 +923,7 @@ L.Logger.info('stream added:', stream.id());
   Creating LocalStream requires secure connection(HTTPS). When one or more parameters cannot be satisfied, or end user denied to grant mic/camera permission, failure callback will be triggered.
   <br><b>options:</b>
   <ul>
-      <li>audio: true/false. Default is false.</li>
+      <li>audio: true/false. Default is false. If video source is desktop sharing, setting audio to true allows end user to share desktop with selected app/tab/system's audio. Desktop sharing with audio only works on Chrome.</li>
       <li>video: boolean or object. Default is false. If the value is a boolean, it indicates whether video is enabled or not. If the value is an object, it may have following properties: device, resolution, frameRate, extensionId, deviceId.</li>
           <ul>
               <li>Valid device list:</li>

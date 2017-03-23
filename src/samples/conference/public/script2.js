@@ -218,26 +218,29 @@ var runSocketIOSample = function() {
     var myRoom = getParameterByName('room');
     var isHttps = (location.protocol === 'https:');
     var mediaUrl = getParameterByName('url');
-    var transport = getParameterByName('transport') || 'tcp';
     var isPublish = getParameterByName('publish');
-    var hasAudio = getParameterByName('audio');
-    var hasVideo = getParameterByName('video');
 
-    hasAudio = hasAudio === "true"?true:false;
-    hasVideo = hasVideo === "false"?false:true;
     if (isHttps) {
       var shareButton = document.getElementById('shareScreen');
       if (shareButton) {
         shareButton.setAttribute('style', 'display:block');
         shareButton.onclick = (function() {
-          conference.shareScreen({
-            resolution: myResolution
-          }, function(stream) {
+          Woogeen.LocalStream.create({
+            video: {
+              device: 'screen',
+              resolution: myResolution,
+              extensionId: 'pndohhifhheefbpeljcmnhnkphepimhe'
+            },
+            audio: true
+          }, function(err, stream) {
             document.getElementById('myScreen').setAttribute(
               'style', 'width:320px; height: 240px;');
             stream.show('myScreen');
-          }, function(err) {
-            L.Logger.error('share screen failed:', err);
+            conference.publish(stream, {}, function(st) {
+              L.Logger.info('stream published:', st.id());
+            }, function(err) {
+              L.Logger.error('publish failed:', err);
+            });
           });
         });
       }
@@ -283,15 +286,15 @@ var runSocketIOSample = function() {
         if (typeof mediaUrl === 'string' && mediaUrl !== '') {
           Woogeen.ExternalStream.create({
             url: mediaUrl,
-            video: hasVideo,
-            audio: hasAudio
+            audio: false,
+            video: true
           }, function(err, stream) {
             if (err) {
               return L.Logger.error(
                 'create ExternalStream failed:', err);
             }
             localStream = stream;
-            conference.publish(localStream, {transport: transport}, function(st) {
+            conference.publish(localStream, {}, function(st) {
               L.Logger.info('stream published:', st.id());
             }, function(err) {
               L.Logger.error('publish failed:', err);
@@ -321,14 +324,22 @@ var runSocketIOSample = function() {
             });
           }
         } else if (isHttps) {
-          conference.shareScreen({
-            resolution: myResolution
-          }, function(stream) {
+          Woogeen.LocalStream.create({
+            video: {
+              device: 'screen',
+              resolution: myResolution,
+              extensionId: 'pndohhifhheefbpeljcmnhnkphepimhe'
+            },
+            audio: true
+          }, function(err, stream) {
             document.getElementById('myScreen').setAttribute(
               'style', 'width:320px; height: 240px;');
             stream.show('myScreen');
-          }, function(err) {
-            L.Logger.error('share screen failed:', err);
+            conference.publish(stream, {}, function(st) {
+              L.Logger.info('stream published:', st.id());
+            }, function(err) {
+              L.Logger.error('publish failed:', err);
+            });
           });
         } else {
           L.Logger.error(
