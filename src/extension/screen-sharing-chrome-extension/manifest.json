@@ -5,7 +5,7 @@
    "permissions": [ "desktopCapture" ],
    "short_name": "Desktop sharing for Intel CS for WebRTC",
    "update_url": "https://clients2.google.com/service/update2/crx",
-   "version": "1.1",
+   "version": "1.2",
 
    "background": {
      "persistent": true,

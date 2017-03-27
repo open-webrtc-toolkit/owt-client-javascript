@@ -9,8 +9,11 @@ chrome.runtime.onMessageExternal.addListener(
       return false; // Dispose of sendResponse
     } else if (request.getStream) {
       // Gets chrome media stream token and returns it in the response.
-      chrome.desktopCapture.chooseDesktopMedia(
-        ["screen", "window", "tab", "audio"], sender.tab,
+      var sources = ["screen", "window", "tab", "audio"];
+      if (Array.isArray(request.getStream)) {
+        sources = request.getStream;
+      }
+      chrome.desktopCapture.chooseDesktopMedia(sources, sender.tab,
         function(streamId) {
           sendResponse({
             streamId: streamId
