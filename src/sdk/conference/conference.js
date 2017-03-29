@@ -496,7 +496,7 @@
      * @instance
      * @desc This function publishes the local stream to the server. The stream should be a valid LocalStream instance. 'stream-added' event would be triggered when the stream is published successfully.
      * @memberOf Woogeen.ConferenceClient&Woogeen.SipClient
-     * @param {stream} stream Stream to publish.
+     * @param {LocalStream or ExternalStream} stream Stream to publish.
      * @param {json} options Publish options. Following properties are supported:<br>
       <ul>
         <li>maxAudioBW: xxx. It does not work on Edge.</li>
@@ -661,7 +661,7 @@
      * @instance
      * @desc This function unpublishes the local stream. 'stream-removed' event would be triggered when the stream is removed from server.
      * @memberOf Woogeen.ConferenceClient&Woogeen.SipClient
-     * @param {stream} stream Stream to un-publish.
+     * @param {LocalStream or ExternalStream} stream Stream to un-publish.
      * @param {function} onSuccess() (optional) Success callback.
      * @param {function} onFailure(err) (optional) Failure callback.
      * @example
