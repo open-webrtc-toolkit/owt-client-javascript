@@ -159,7 +159,7 @@
 
   /**
      * @function setIceServers
-     * @desc This function establishes a connection to server and joins a certain conference.
+     * @desc This function sets ICE servers for PeerConnections.
   <br><b>Remarks:</b><br>
   This method accepts array (multiple ones) type of ice server item as argument. Typical description of each valid value should be as below:<br>
   <ul>
