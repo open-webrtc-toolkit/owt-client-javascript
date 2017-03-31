@@ -478,6 +478,10 @@
     this.isMixed = function() {
       return true;
     };
+
+    this.viewport = function() {
+      return spec.viewport;
+    };
   }
 
   function WoogeenExternalStream(spec) {

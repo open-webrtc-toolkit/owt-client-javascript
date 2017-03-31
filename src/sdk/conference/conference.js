@@ -271,7 +271,8 @@
           audio: spec.audio,
           id: spec.id,
           from: spec.from,
-          attributes: spec.attributes
+          attributes: spec.attributes,
+          viewport: spec.view
         });
         var evt = new Woogeen.StreamEvent({
           type: 'stream-added',
@@ -465,6 +466,7 @@
           self.conferenceId = resp.id;
           if (resp.streams !== undefined) {
             streams = resp.streams.map(function(st) {
+              st.viewport = st.view;
               self.remoteStreams[st.id] = createRemoteStream(st);
               return self.remoteStreams[st.id];
             });
