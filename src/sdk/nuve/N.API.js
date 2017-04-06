@@ -223,6 +223,10 @@ N.API = (function(N) {
   }, errorCallback);
      */
   getRoom = function(room, callback, callbackError, params) {
+    if (typeof room !== 'string') {
+      callbackError('Invalid room ID.');
+      return;
+    }
     if (room.trim() === '') {
       callbackError('Empty room ID');
       return;
