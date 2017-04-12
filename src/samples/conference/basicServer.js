@@ -169,12 +169,13 @@ app.post('/tokens/:type', function(req, res) {
   if (type !== 'socketio' && type !== 'rest') {
     return res.status(404).send('Invalid token type');
   }
-  N.API.createToken(room, username, role, function(token) {
+
+  //FIXME: The actual *ISP* and *region* info should be retrieved from the *req* object and filled in the following 'preference' data.
+  var preference = {isp: 'isp', region: 'region'};
+  N.API.createToken(room, username, role, type, preference, function(token) {
     res.send(token);
   }, function(err) {
     res.send(err);
-  }, {
-    type: type
   });
 });
 

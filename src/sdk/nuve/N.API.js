@@ -299,28 +299,28 @@ N.API = (function(N) {
      * @param {string} room Room ID
      * @param {string} username Participant's name
      * @param {string} role Participant's role
+     * @param {string} type Token type, can be either 'socketio' or 'rest'
+     * @param {object} preference Preference of this token would be used to connect through
      * @param {function} callback(token) Callback function on success
      * @param {function} callbackError(err) Callback function on error
-     * @param {object} params Additional parameters to the creation
      * @example
   var roomID = '51c10d86909ad1f939000001';
   var name = 'john';
   var role = 'guest';
-  var params = {type: 'rest'};
-  N.API.createToken(type, roomID, name, role, function(token) {
+  var type = 'socketio';
+  var preference = {isp: 'isp', region: 'region'};
+  N.API.createToken(roomID, name, role, type, preference, function(token) {
     console.log ('Token created:' token);
-  }, errorCallback, params);
+  }, errorCallback);
      */
-  createToken = function(room, username, role, callback, callbackError,
-    params) {
+  createToken = function(room, username, role, type, preference, callback, callbackError, params) {
     if (typeof room !== 'string' || typeof username !== 'string' ||
       typeof role !== 'string') {
       if (typeof callbackError === 'function')
         callbackError(400, 'Invalid argument.');
       return;
     }
-    var type = (params && params.type) || 'socketio';
-    send(callback, callbackError, 'POST', undefined, 'rooms/' + room +
+    send(callback, callbackError, 'POST', {preference: preference}, 'rooms/' + room +
       '/tokens/' + type, params, username, role);
   };
 
