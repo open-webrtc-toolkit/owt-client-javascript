@@ -93,7 +93,9 @@ app.post('/createToken/', function(req, res) {
   var room = req.body.room || myRoom,
     username = req.body.username,
     role = req.body.role;
-  N.API.createToken(room, username, role, function(token) {
+  //FIXME: The actual *ISP* and *region* info should be retrieved from the *req* object and filled in the following 'preference' data.
+  var preference = {isp: 'isp', region: 'region'};
+  N.API.createToken(room, username, role, 'socketio', preference, function(token) {
     res.send(token);
   }, function(err) {
     res.send(err);
