@@ -1715,7 +1715,7 @@
       </script>
        */
       this.getConnectionStats = function(stream, onSuccess, onFailure) {
-        if (stream.channel && typeof stream.channel.getConnectionStats ===
+        if (stream && stream.channel && typeof stream.channel.getConnectionStats ===
           'function') {
           stream.channel.getConnectionStats(function(stats) {
             safeCall(onSuccess, stats);
