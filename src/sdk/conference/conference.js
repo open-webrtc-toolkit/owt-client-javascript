@@ -143,6 +143,33 @@
     });
   }
 
+  function mixOrUnmix(verb, socket, stream, targetStreams, onSuccess,
+    onFailure) {
+    if (!(stream instanceof Woogeen.Stream)) {
+      return safeCall(onFailure, 'Invalid stream');
+    }
+    if (!Array.isArray(targetStreams)) {
+      return safeCall(onFailure, 'Target streams is not a list');
+    }
+    var targetStreamIds = [];
+    targetStreams.forEach(function(targetStream) {
+      if (!(targetStream instanceof Woogeen.RemoteMixedStream)) {
+        return safeCall(onFailure,
+          'Invalid stream found in targetStreams.');
+      }
+      targetStreamIds.push(targetStream.id());
+    });
+    sendMsg(socket, verb, {
+      streamId: stream.id(),
+      mixStreams: targetStreamIds
+    }, function(err) {
+      if (err) {
+        return safeCall(onFailure, err);
+      }
+      safeCall(onSuccess, null);
+    });
+  }
+
   var DISCONNECTED = 0,
     CONNECTING = 1,
     CONNECTED = 2;
@@ -418,7 +445,8 @@
       });
 
       self.socket.on('connection_failed', function(args) {
-        L.Logger.error("MCU reports connection failed for stream: " + args.streamId);
+        L.Logger.error("MCU reports connection failed for stream: " +
+          args.streamId);
         if (self.localStreams[args.streamId] !== undefined) {
           var stream = self.localStreams[args.streamId];
           self.unpublish(stream);
@@ -763,9 +791,10 @@
     }
 
     if (!stream.isMixed() && typeof options.video === 'object' && (options.video
-      .resolution || options.video.qualityLevel)) {
+        .resolution || options.video.qualityLevel)) {
       return safeCall(onFailure,
-        'Resolution and quality level settings are not available for non-mixed stream.');
+        'Resolution and quality level settings are not available for non-mixed stream.'
+      );
     }
 
     if (typeof options.video === 'object' && options.video.qualityLevel) {
@@ -1043,7 +1072,8 @@
          * @instance
          * @desc This function tells server to add published LocalStream to mix stream.
          * @memberOf Woogeen.ConferenceClient
-         * @param {LocalStream} stream LocalStream instance; it should be published before this call.
+         * @param {LocalStream or ExternalStream} stream LocalStream or ExternalStream instance; it should be published before this call.
+         * @param {an array of RemoteMixedStreams} targetStream The mixed streams that |stream| will be mixed to.
          * @param {function} onSuccess() (optional) Success callback.
          * @param {function} onFailure(err) (optional) Failure callback.
          * @example
@@ -1058,16 +1088,9 @@
       );
       </script>
          */
-      this.mix = function(stream, onSuccess, onFailure) {
-        if (!(stream instanceof Woogeen.LocalStream) && !(stream instanceof Woogeen.ExternalStream)) {
-          return safeCall(onFailure, 'invalid stream');
-        }
-        sendMsg(this.socket, 'addToMixer', stream.id(), function(err) {
-          if (err) {
-            return safeCall(onFailure, err);
-          }
-          safeCall(onSuccess, null);
-        });
+      this.mix = function(stream, targetStreams, onSuccess, onFailure) {
+        return mixOrUnmix('mix', this.socket, stream, targetStreams,
+          onSuccess, onFailure);
       };
 
       /**
@@ -1076,6 +1099,7 @@
          * @desc This function tells server to remove published LocalStream from mix stream.
          * @memberOf Woogeen.ConferenceClient
          * @param {stream} stream LocalStream instance; it should be published before this call.
+         * @param {an array of RemoteMixedStreams} targetStream The mixed streams that |stream| will be unmixed from.
          * @param {function} onSuccess() (optional) Success callback.
          * @param {function} onFailure(err) (optional) Failure callback.
          * @example
@@ -1090,19 +1114,10 @@
       );
       </script>
          */
-      this.unmix = function(stream, onSuccess, onFailure) {
-        if (!(stream instanceof Woogeen.LocalStream) && !(stream instanceof Woogeen.ExternalStream)) {
-          return safeCall(onFailure, 'invalid stream');
-        }
-        sendMsg(this.socket, 'removeFromMixer', stream.id(), function(
-          err) {
-          if (err) {
-            return safeCall(onFailure, err);
-          }
-          safeCall(onSuccess, null);
-        });
+      this.unmix = function(stream, targetStreams, onSuccess, onFailure) {
+        return mixOrUnmix('unmix', this.socket, stream, targetStreams,
+          onSuccess, onFailure);
       };
-
 
       /**
      * @function shareScreen (deprecated)
