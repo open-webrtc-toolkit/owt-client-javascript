@@ -1088,7 +1088,6 @@
       );
       </script>
          */
-      this.mix = function(stream, targetStreams, onSuccess, onFailure) {
         return mixOrUnmix('mix', this.socket, stream, targetStreams,
           onSuccess, onFailure);
       };
@@ -1726,6 +1725,84 @@
         } else {
           safeCall(onFailure, 'invalid stream.');
         }
+      };
+
+      /**
+       * @function mute
+       * @instance
+       * @desc Mute a stream in the conference.
+       * @param {WoogeenStream} stream Stream to be muted.
+       * @param {string} trackKind Specify which kind of tracks to be muted. Valid values are "audio", "video" and <code>undefined</code>.<code>undefined</code> will mute all tracks.
+       * @param {function} onSuccess (optional) Success callback.
+       * @param {function} onFailure (optional) Failure callback.
+       * @example
+      var conference = Woogeen.ConferenceClient.create();
+      // ......
+      conference.mute(stream, 'video', function () {
+          console.log('Muting stream success');
+        }, function (err) {
+          console.log('Muting stream failed:', err);
+        }
+      );
+      </script>
+       */
+      this.mute = function(stream, trackKind, onSuccess, onFailure) {
+        if (!(stream instanceof Woogeen.Stream)) {
+          safeCall(onFailure, 'Invalid stream');
+        }
+        if (trackKind !== undefined && trackKind !== 'audio' && trackKind !==
+          'video') {
+          safeCall(onFailure, 'Invalid track kind.');
+        }
+        var track = trackKind || 'av';
+        sendMsg(this.socket, 'mute', {
+          streamId: stream.id(),
+          track: track
+        }, function(err) {
+          if (err) {
+            return safeCall(onFailure, err);
+          }
+          safeCall(onSuccess);
+        });
+      };
+
+      /**
+       * @function unmute
+       * @instance
+       * @desc Unmute a stream in the conference.
+       * @param {WoogeenStream} stream Stream to be unmuted.
+       * @param {string} trackKind Specify which kind of tracks to be unmuted. Valid values are "audio", "video" and <code>undefined</code>.<code>undefined</code> will unmute all tracks.
+       * @param {function} onSuccess (optional) Success callback.
+       * @param {function} onFailure (optional) Failure callback.
+       * @example
+      var conference = Woogeen.ConferenceClient.create();
+      // ......
+      conference.unmute(stream, 'audio', function () {
+          console.log('Unmuting stream success');
+        }, function (err) {
+          console.log('Unmuting stream failed:', err);
+        }
+      );
+      </script>
+       */
+      this.unmute = function(stream, trackKind, onSuccess, onFailure) {
+        if (!(stream instanceof Woogeen.Stream)) {
+          safeCall(onFailure, 'Invalid stream');
+        }
+        if (trackKind !== undefined && trackKind !== 'audio' && trackKind !==
+          'video') {
+          safeCall(onFailure, 'Invalid track kind.');
+        }
+        var track = trackKind || 'av';
+        sendMsg(this.socket, 'unmute', {
+          streamId: stream.id(),
+          track: track
+        }, function(err) {
+          if (err) {
+            return safeCall(onFailure, err);
+          }
+          safeCall(onSuccess);
+        });
       };
     };
 
