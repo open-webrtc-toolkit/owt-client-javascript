@@ -56,13 +56,14 @@ N.API.getRooms(function(roomlist) {
     }
   }
   var tryCreate = function(room, callback) {
-    N.API.createRoom(room.name, function(roomID) {
+    var options = {};
+    N.API.createRoom(room.name, options, function(roomID) {
       console.log('Created room:', roomID._id);
       callback(roomID._id);
     }, function(status, err) {
       console.log('Error in creating room:', err, '[Retry]');
       setTimeout(function() {
-        tryCreate(room, callback);
+        tryCreate(room, options, callback);
       }, 100);
     }, room);
   };
