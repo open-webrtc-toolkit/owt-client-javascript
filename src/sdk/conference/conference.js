@@ -1543,14 +1543,18 @@
         id: 'the stream id'<br>
       }
          * @memberOf Woogeen.ConferenceClient
-         * @param {json} options getRegion options.
+         * @param {json} options An object has following properties:<br>
+            <ul>
+              <li>id: a stream ID specifies which stream's region is needed.<li>
+              <li>mixedStreamId: a mixed stream ID.
+            </ul>
          * @param {function} onSuccess(resp) (optional) Success callback.
          * @param {function} onFailure(error) (optional) Failure callback.
          * @example
       <script type="text/JavaScript">
       var conference = Woogeen.ConferenceClient.create();
       // ......
-      conference.getRegion({id: 'streamId'}, function (resp) {
+      conference.getRegion({id: 'streamId', mixedStreamId: 'mixed stream ID'}, function (resp) {
           L.Logger.info('Region for streamId: ', resp.region);
         }, function (err) {
           L.Logger.error('getRegion failed:', err);
@@ -1565,9 +1569,13 @@
           return safeCall(onFailure, 'invalid options');
         }
 
-        sendMsg(self.socket, 'getRegion', {
-          id: options.id
-        }, function(err, resp) {
+        var optionsMessage = {
+          id: options.id,
+          mixStreamId: options.mixedStreamId
+        };
+
+        sendMsg(self.socket, 'getRegion', optionsMessage, function(
+          err, resp) {
           if (err) {
             return safeCall(onFailure, err);
           }
@@ -1579,20 +1587,20 @@
          * @function setRegion
          * @instance
          * @desc This function sets the region for the given stream in the mixed stream with the given region id.
-         <br><b>options:</b><br>
-      {<br>
-        id: 'the stream id'<br>
-        region: 'the region id'<br>
-      }
          * @memberOf Woogeen.ConferenceClient
-         * @param {json} options setRegion options.
+         * @param {json} options An object has following properties:<br>
+            <ul>
+              <li>id: a stream ID specifies which stream's region is going to be set.</li>
+              <li>region: a region ID specifies the target region.</li>
+              <li>mixedStreamId: a mixed stream ID sepcifies the target mixed stream.</li>
+            </ul>
          * @param {function} onSuccess() (optional) Success callback.
          * @param {function} onFailure(error) (optional) Failure callback.
          * @example
       <script type="text/JavaScript">
       var conference = Woogeen.ConferenceClient.create();
       // ......
-      conference.setRegion({id: 'streamId', region: 'regionId'}, function () {
+      conference.setRegion({id: 'streamId', region: 'regionId', mixedStreamId: 'mixedStreamID'}, function () {
           L.Logger.info('setRegion succeeded');
         }, function (err) {
           L.Logger.error('setRegion failed:', err);
@@ -1609,10 +1617,14 @@
           return safeCall(onFailure, 'invalid options');
         }
 
-        sendMsg(self.socket, 'setRegion', {
+        var optionsMessage = {
           id: options.id,
-          region: options.region
-        }, function(err, resp) {
+          region: options.region,
+          mixStreamId: options.mixedStreamId
+        };
+
+        sendMsg(self.socket, 'setRegion', optionsMessage, function(
+          err, resp) {
           if (err) {
             return safeCall(onFailure, err);
           }
