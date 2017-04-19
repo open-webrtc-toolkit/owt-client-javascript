@@ -1105,9 +1105,9 @@
 
 
       /**
-     * @function shareScreen
+     * @function shareScreen (deprecated)
      * @instance
-     * @desc This function creates a LocalStream from screen and publishes it to the　server.
+     * @desc This function creates a LocalStream from screen and publishes it to the server.
       <br><b>Remarks:</b><br>
       This API is not supported on Edge browser currently.
      * @memberOf Woogeen.ConferenceClient
@@ -1142,6 +1142,9 @@
   </script>
      */
       this.shareScreen = function(option, onSuccess, onFailure) {
+        L.Logger.warning(
+          'shareScreen is deprecated, please create a LocalStream and publish it to specific conference.'
+        );
         var self = this;
         if (typeof option === 'function') {
           onFailure = onSuccess;
