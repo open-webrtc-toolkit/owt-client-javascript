@@ -646,6 +646,7 @@ Woogeen.PeerClient = function(pcConfig) {
   // Do renegotiate when remote client allowed
   var doRenegotiate = function(peer) {
     L.Logger.debug('Do renegotiation.');
+    changeNegotiationState(peer, NegotiationState.NEGOTIATING);
     createAndSendOffer(peer);
   };
 
