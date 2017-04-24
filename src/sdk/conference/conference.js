@@ -1088,6 +1088,7 @@
       );
       </script>
          */
+      this.mix = function(stream, targetStreams, onSuccess, onFailure) {
         return mixOrUnmix('mix', this.socket, stream, targetStreams,
           onSuccess, onFailure);
       };
@@ -1750,7 +1751,8 @@
         if (!(stream instanceof Woogeen.Stream)) {
           safeCall(onFailure, 'Invalid stream');
         }
-        if (trackKind !== undefined && trackKind !== 'audio' && trackKind !==
+        if (trackKind !== undefined && trackKind !== 'audio' &&
+          trackKind !==
           'video') {
           safeCall(onFailure, 'Invalid track kind.');
         }
@@ -1789,7 +1791,8 @@
         if (!(stream instanceof Woogeen.Stream)) {
           safeCall(onFailure, 'Invalid stream');
         }
-        if (trackKind !== undefined && trackKind !== 'audio' && trackKind !==
+        if (trackKind !== undefined && trackKind !== 'audio' &&
+          trackKind !==
           'video') {
           safeCall(onFailure, 'Invalid track kind.');
         }
