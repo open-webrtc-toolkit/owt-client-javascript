@@ -152,13 +152,16 @@
       return safeCall(onFailure, 'Target streams is not a list');
     }
     var targetStreamIds = [];
-    targetStreams.forEach(function(targetStream) {
+    var i, targetStream;
+    for (i = 0; i < targetStreams.length; i++) {
+      targetStream = targetStreams[i];
       if (!(targetStream instanceof Woogeen.RemoteMixedStream)) {
         return safeCall(onFailure,
           'Invalid stream found in targetStreams.');
       }
       targetStreamIds.push(targetStream.id());
-    });
+    }
+
     sendMsg(socket, verb, {
       streamId: stream.id(),
       mixStreams: targetStreamIds
