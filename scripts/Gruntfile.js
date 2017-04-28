@@ -52,6 +52,12 @@ window.Woogeen = Woogeen;\n\
 window.L = L;\n\
 }(window));\n\n\n'
     },
+    eslint: {
+      options: {
+        configFile: '../src/.eslintrc.json'
+      },
+      src: srcFiles
+    },
     concat: {
       dist: {
         src: srcFiles,
@@ -247,8 +253,9 @@ window.L = L;\n\
   grunt.loadNpmTasks('grunt-contrib-copy');
   grunt.loadNpmTasks('grunt-string-replace');
   grunt.loadNpmTasks('grunt-contrib-compress');
+  grunt.loadNpmTasks('grunt-eslint');
 
-  grunt.registerTask('build', ['concat:dist', 'concat:ui_dist', 'concat:nuve','jshint:dist', 'concat:merge', 'uglify:dist','copy:dist','string-replace','compress:dist']);
+  grunt.registerTask('build', ['eslint:src', 'concat:dist', 'concat:ui_dist', 'concat:nuve','jshint:dist', 'concat:merge', 'uglify:dist','copy:dist','string-replace','compress:dist']);
 
   // Default task is an alias for 'build'.
   grunt.registerTask('default', ['build']);
