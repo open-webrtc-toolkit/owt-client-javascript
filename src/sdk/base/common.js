@@ -5,7 +5,7 @@
  */
 Woogeen.Common = (function() {
 
-  var sdkVersion = '3.3';
+  var sdkVersion = '3.4';
 
   // Convert W3C defined statistic data to SDK format.
   var parseStats = function(stats) {
