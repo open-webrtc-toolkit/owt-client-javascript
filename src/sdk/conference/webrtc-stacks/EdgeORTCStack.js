@@ -631,20 +631,20 @@ Erizo.EdgeORTCStack = function(spec) {
 
   window.RTCPeerConnection.prototype.getSenders = function() {
     return this.transceivers.filter(function(transceiver) {
-        return !!transceiver.rtpSender;
-      })
-      .map(function(transceiver) {
-        return transceiver.rtpSender;
-      });
+      return !!transceiver.rtpSender;
+    })
+    .map(function(transceiver) {
+      return transceiver.rtpSender;
+    });
   };
 
   window.RTCPeerConnection.prototype.getReceivers = function() {
     return this.transceivers.filter(function(transceiver) {
-        return !!transceiver.rtpReceiver;
-      })
-      .map(function(transceiver) {
-        return transceiver.rtpReceiver;
-      });
+      return !!transceiver.rtpReceiver;
+    })
+    .map(function(transceiver) {
+      return transceiver.rtpReceiver;
+    });
   };
 
   window.RTCPeerConnection.prototype._emitBufferedCandidates =

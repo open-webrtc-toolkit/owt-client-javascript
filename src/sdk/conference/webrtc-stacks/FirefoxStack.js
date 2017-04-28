@@ -170,7 +170,7 @@ Erizo.FirefoxStack = function(spec) {
     }
   };
 
-  that.iceRestart = function(){
+  that.iceRestart = function() {
     var offerOptions = {
       offerToReceiveAudio: spec.audio,
       offerToReceiveVideo: spec.video,

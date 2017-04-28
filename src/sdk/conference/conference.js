@@ -1156,15 +1156,14 @@
             return safeCall(onFailure, err);
           }
           self.publish(stream, {
-              maxVideoBW: option.maxVideoBW,
-              videoCodec: option.videoCodec
-            },
-            function(st) {
-              safeCall(onSuccess, st);
-            },
-            function(err) {
-              safeCall(onFailure, err);
-            });
+            maxVideoBW: option.maxVideoBW,
+            videoCodec: option.videoCodec
+          },function(st) {
+            safeCall(onSuccess, st);
+          },
+          function(err) {
+            safeCall(onFailure, err);
+          });
         });
       };
 
@@ -2008,3 +2007,4 @@ sipClient = Woogeen.SipClient.create({
   }());
 
 }());
+

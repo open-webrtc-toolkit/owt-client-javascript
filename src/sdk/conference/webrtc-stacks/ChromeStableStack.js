@@ -210,7 +210,7 @@ Erizo.ChromeStableStack = function(spec) {
 
   };
 
-  that.iceRestart = function(){
+  that.iceRestart = function() {
     var offerOptions = {
       offerToReceiveAudio: spec.audio,
       offerToReceiveVideo: spec.video,
@@ -253,26 +253,26 @@ Erizo.ChromeStableStack = function(spec) {
 
       remoteDesc = msg;
       //that.peerConnection.setLocalDescription(localDesc, function() {
-        that.peerConnection.setRemoteDescription(new RTCSessionDescription(
-          msg), function() {
-          spec.remoteDescriptionSet = true;
-          console.log("Candidates to be added: ", spec.remoteCandidates
-            .length, spec.remoteCandidates);
-          while (spec.remoteCandidates.length > 0) {
-            // IMPORTANT: preserve ordering of candidates
-            that.peerConnection.addIceCandidate(spec.remoteCandidates
-              .shift());
-          }
-          console.log("Local candidates to send:", spec.localCandidates
-            .length);
-          while (spec.localCandidates.length > 0) {
-            // IMPORTANT: preserve ordering of candidates
-            spec.callback({
-              type: 'candidate',
-              candidate: spec.localCandidates.shift()
-            });
-          }
-        });
+      that.peerConnection.setRemoteDescription(new RTCSessionDescription(
+        msg), function() {
+        spec.remoteDescriptionSet = true;
+        console.log("Candidates to be added: ", spec.remoteCandidates
+          .length, spec.remoteCandidates);
+        while (spec.remoteCandidates.length > 0) {
+          // IMPORTANT: preserve ordering of candidates
+          that.peerConnection.addIceCandidate(spec.remoteCandidates
+            .shift());
+        }
+        console.log("Local candidates to send:", spec.localCandidates
+          .length);
+        while (spec.localCandidates.length > 0) {
+          // IMPORTANT: preserve ordering of candidates
+          spec.callback({
+            type: 'candidate',
+            candidate: spec.localCandidates.shift()
+          });
+        }
+      });
       //});
 
     } else if (msg.type === 'candidate') {
