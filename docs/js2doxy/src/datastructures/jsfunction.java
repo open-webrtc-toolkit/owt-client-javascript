@@ -100,10 +100,10 @@ public class jsfunction implements transBlock {
     }
 
     public String[] resoveParamStr(String paramstr) {
-        int split1 = paramstr.indexOf(" ");
-        int split2 = paramstr.indexOf(" ", split1 + 1);
         int leftbrac = paramstr.indexOf("{");
         int rightbrac = paramstr.indexOf("}");
+        int split1 = paramstr.indexOf(" ", rightbrac + 1);
+        int split2 = paramstr.indexOf(" ", split1 + 1);
         try {
             String type = paramstr.substring(leftbrac + 1, rightbrac);
             String name = paramstr.substring(split1 + 1, split2);

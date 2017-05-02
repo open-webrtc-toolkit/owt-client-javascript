@@ -1124,42 +1124,11 @@
       };
 
       /**
-     * @function shareScreen (deprecated)
-     * @instance
-     * @desc This function creates a LocalStream from screen and publishes it to the server.
-      <br><b>Remarks:</b><br>
-      This API is not supported on Edge browser currently.
-     * @memberOf Woogeen.ConferenceClient
-     * @param {string} options (optional) : extensionId, resolution, frameRate, maxVideoBW, videoCodec.<br/>
-        <ul>
-          <li>extensionId is id of Chrome Extension for screen sharing.</li>
-          <li>Valid resolution list:</li>
-              <ul>
-                  <li>'sif'</li>
-                  <li>'vga'</li>
-                  <li>'hd720p'</li>
-                  <li>'hd1080p'</li>
-                  <li>If not provided, the resolution is decided by the screen size.</li>
-              </ul>
-          <li>frameRate is a number indicating frames per second. Actual frame rate on browser may not be exactly the same as specified here.</li>
-          <li>maxVideoBW: xxx</li>
-          <li>videoCodec: 'h264'/'vp8'/'vp9'. Note for Firefox vp9 is not stable, so please do not specify vp9 for Firefox.</li>
-        </ul>
-        Each codec has its own supported bitrate range. Setting incorrect maxAudioBW/maxVideoBW value may lead to connection failure. Bandwidth settings don't work on FireFox.<br/>
-     * @param {function} onSuccess(stream) (optional) Success callback.
-     * @param {function} onFailure(err) (optional) Failure callback. See details about error definition in {@link Woogeen.LocalStream#create LocalStream.create}.
-     * @example
-  <script type="text/JavaScript">
-  var conference = Woogeen.ConferenceClient.create();
-  // ……
-  conference.shareScreen({ extensionId:'pndohhifhheefbpeljcmnhnkphepimhe', resolution: 'hd1080p', frameRate:10, maxVideoBW:2000, videoCodec:'vp8'}, function (st) {
-      L.Logger.info('screen shared:', st.id());
-    }, function (err) {
-      L.Logger.error('sharing failed:', err);
-    }
-  );
-  </script>
-     */
+       * @function shareScreen
+       * @instance
+       * @desc This function is deprecated.
+       * @memberOf Woogeen.ConferenceClient
+       */
       this.shareScreen = function(option, onSuccess, onFailure) {
         L.Logger.warning(
           'shareScreen is deprecated, please create a LocalStream and publish it to specific conference.'
@@ -1558,14 +1527,16 @@
          * @instance
          * @desc This function gets the region ID of the given stream in the mixed stream.
          <br><b>options:</b><br>
-      {<br>
-        id: 'the stream id'<br>
-      }
+
+      <code>{<br>
+        id: 'the stream id',<br>
+        mixedStreamId: 'the mixed stream id'<br>
+      }</code>
          * @memberOf Woogeen.ConferenceClient
          * @param {json} options An object has following properties:<br>
             <ul>
-              <li>id: a stream ID specifies which stream's region is needed.<li>
-              <li>mixedStreamId: a mixed stream ID.
+              <li>id: a stream ID specifies which stream's region is needed.</li>
+              <li>mixedStreamId: a mixed stream ID.</li>
             </ul>
          * @param {function} onSuccess(resp) (optional) Success callback.
          * @param {function} onFailure(error) (optional) Failure callback.
@@ -1736,6 +1707,7 @@
        * @function mute
        * @instance
        * @desc Mute a stream in the conference.
+       * @memberOf Woogeen.ConferenceClient
        * @param {WoogeenStream} stream Stream to be muted.
        * @param {string} trackKind Specify which kind of tracks to be muted. Valid values are "audio", "video" and <code>undefined</code>.<code>undefined</code> will mute all tracks.
        * @param {function} onSuccess (optional) Success callback.
@@ -1776,6 +1748,7 @@
        * @function unmute
        * @instance
        * @desc Unmute a stream in the conference.
+       * @memberOf Woogeen.ConferenceClient
        * @param {WoogeenStream} stream Stream to be unmuted.
        * @param {string} trackKind Specify which kind of tracks to be unmuted. Valid values are "audio", "video" and <code>undefined</code>.<code>undefined</code> will unmute all tracks.
        * @param {function} onSuccess (optional) Success callback.
