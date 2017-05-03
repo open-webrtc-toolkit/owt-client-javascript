@@ -145,7 +145,8 @@
 
   function mixOrUnmix(verb, socket, stream, targetStreams, onSuccess,
     onFailure) {
-    if (!(stream instanceof Woogeen.Stream)) {
+    if (!(stream instanceof Woogeen.Stream) &&
+      !(stream instanceof Woogeen.ExternalStream)) {
       return safeCall(onFailure, 'Invalid stream');
     }
     if (!Array.isArray(targetStreams)) {
@@ -1075,7 +1076,7 @@
          * @instance
          * @desc This function tells server to add published LocalStream to mix stream.
          * @memberOf Woogeen.ConferenceClient
-         * @param {LocalStream or ExternalStream} stream LocalStream or ExternalStream instance; it should be published before this call.
+         * @param {WoogeenStream or ExternalStream} stream WoogeenStream or ExternalStream instance; it should be published before this call.
          * @param {an array of RemoteMixedStreams} targetStream The mixed streams that |stream| will be mixed to.
          * @param {function} onSuccess() (optional) Success callback.
          * @param {function} onFailure(err) (optional) Failure callback.
@@ -1101,7 +1102,7 @@
          * @instance
          * @desc This function tells server to remove published LocalStream from mix stream.
          * @memberOf Woogeen.ConferenceClient
-         * @param {stream} stream LocalStream instance; it should be published before this call.
+         * @param {WoogeenStream or ExternalStream} stream WoogeenStream or ExternalStream instance; it should be published before this call.
          * @param {an array of RemoteMixedStreams} targetStream The mixed streams that |stream| will be unmixed from.
          * @param {function} onSuccess() (optional) Success callback.
          * @param {function} onFailure(err) (optional) Failure callback.
