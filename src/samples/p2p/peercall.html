@@ -245,14 +245,6 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     });
 
     p2p.on('stream-added', function(e) { // A remote stream is available.
-      var div = document.createElement("div");
-      div.id = e.stream.id();
-      var video = document.createElement("video");
-      video.setAttribute("width", "320px");
-      video.setAttribute("height", "240px");
-      video.setAttribute("autoplay", "autoplay");
-      video.id = e.stream.id();
-
       if (e.stream.isScreen()) {
         $('#screen video').show();
         $('#screen video').get(0).srcObject = e.stream.mediaStream;
