@@ -528,7 +528,7 @@
   /**
      * @function publish
      * @instance
-     * @desc This function publishes the local stream to the server. The stream should be a valid LocalStream instance. 'stream-added' event would be triggered when the stream is published successfully.
+     * @desc This function publishes the local stream to the server. The stream should be a valid LocalStream instance. 'stream-added' event would be triggered when the stream is published successfully. 'stream-failed' event may be triggered if there is internal error happend in MCU after publishing or connection is broken.
      * @memberOf Woogeen.ConferenceClient&Woogeen.SipClient
      * @param {LocalStream or ExternalStream} stream Stream to publish.
      * @param {json} options Publish options. Following properties are supported:<br>
@@ -745,7 +745,7 @@
   /**
      * @function subscribe
      * @instance
-     * @desc This function subscribes to a remote stream. The stream should be a RemoteStream instance.
+     * @desc This function subscribes to a remote stream. The stream should be a RemoteStream instance. 'stream-failed' event may be triggered if there is internal error happend in MCU after publishing or connection is broken.
      <br><b>options:</b><br>
   {<br>
   video: true/false, {resolution: {width:xxx, height:xxx}, qualityLevel:'xxx'},<br>
