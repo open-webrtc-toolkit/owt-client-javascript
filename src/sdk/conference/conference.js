@@ -1084,8 +1084,8 @@
          * @example
       <script type="text/JavaScript">
       var conference = Woogeen.ConferenceClient.create();
-      // ……
-      conference.mix(localStream, function () {
+      // ...
+      conference.mix(localStream, [mixedStream], function () {
           L.Logger.info('success');
         }, function (err) {
           L.Logger.error('failed:', err);
@@ -1110,8 +1110,8 @@
          * @example
       <script type="text/JavaScript">
       var conference = Woogeen.ConferenceClient.create();
-      // ……
-      conference.unmix(localStream, function () {
+      // ...
+      conference.unmix(localStream, [mixedStream], function () {
           L.Logger.info('success');
         }, function (err) {
           L.Logger.error('failed:', err);
