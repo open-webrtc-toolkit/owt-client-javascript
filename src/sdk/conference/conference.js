@@ -564,9 +564,8 @@
     if (typeof options === 'function') {
       onFailure = onSuccess;
       onSuccess = options;
-      options = stream.bitRate;
     } else if (typeof options !== 'object' || options === null) {
-      options = stream.bitRate;
+      options = {};
     }
     if (!(stream instanceof Woogeen.LocalStream || stream instanceof Woogeen
         .ExternalStream) ||
