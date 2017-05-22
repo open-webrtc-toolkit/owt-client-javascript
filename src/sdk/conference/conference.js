@@ -537,7 +537,7 @@
         <li>maxVideoBW: xxx. It does not work on Edge.</li>
         <li>unmix: false/true. If true, this stream would not be included in mixed stream.</li>
         <li>audioCodec: 'opus'/'pcmu'/'pcma'. Preferred audio codec.</li>
-        <li>videoCodec: 'h264'/'vp8'/'vp9'. Preferred video codec. Note for Firefox vp9 is not stable, so please do not specify vp9 for Firefox.</li>
+        <li>videoCodec: 'h264'/'vp8'/'vp9'. Preferred video codec. H.264 is the default preferred codec. Note for Firefox vp9 is not stable, so please do not specify vp9 for Firefox.</li>
         <li>transport: 'udp'/'tcp'. RTSP connection transport type, default 'udp'; only for RTSP input.</li>
         <li>bufferSize: integer number in bytes. UDP receiving buffer size, default 2 MB. Only for RTSP input (UDP transport).</li>
       </ul>
@@ -575,6 +575,7 @@
         stream.url() === undefined)) {
       return safeCall(onFailure, 'invalid stream');
     }
+    options.videoCodec = options.videoCodec || 'h264';
 
     if (self.localStreams[stream.id()] === undefined) { // not pulished
       var opt = stream.toJson();
@@ -683,7 +684,7 @@
         };
 
         stream.channel.addStream(stream.mediaStream);
-        stream.channel.createOffer();
+        stream.channel.createOffer(false);
       });
     } else {
       return safeCall(onFailure, 'already published');
@@ -750,7 +751,7 @@
   {<br>
   video: true/false, {resolution: {width:xxx, height:xxx}, qualityLevel:'xxx'},<br>
   audio: true/false,<br>
-  videoCodec: 'h264'/'vp8'/'vp9'. This property specifies preferred video codec. Note for Firefox vp9 is not stable, so please do not sepcify vp9 for Firefox.<br>
+  videoCodec: 'h264'/'vp8'/'vp9'. H.264 is the default preferred codec. This property specifies preferred video codec. Note for Firefox vp9 is not stable, so please do not sepcify vp9 for Firefox.<br>
   }
   <br><b>Remarks:</b><br>
   Video resolution choice is only valid for subscribing {@link Woogeen.RemoteMixedStream Woogeen.RemoteMixedStream} when multistreaming output is enabled.　See {@link N.API.createRoom N.API.createRoom()} for detailed description of multistreaming.<br>
@@ -793,6 +794,7 @@
     if (options.audio === false && options.video === false) {
       return safeCall(onFailure, 'no audio or video to subscribe.');
     }
+    options.videoCodec = options.videoCodec || 'h264';
 
     if (!stream.isMixed() && typeof options.video === 'object' && (options.video
         .resolution || options.video.qualityLevel)) {
