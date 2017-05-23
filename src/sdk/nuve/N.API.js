@@ -55,6 +55,17 @@ N.API = (function(N) {
     N.API.params.url = url;
   };
 
+  // Convert a viewports object to views which is defined in MCU.
+  function viewportsToViews(viewports) {
+    var view = {};
+    viewports.forEach(function(viewport) {
+      view[viewport.name] = {
+        mediaMixing: viewport.mediaMixing
+      };
+    });
+    return view;
+  }
+
   /**
      * @function createRoom
      * @desc This function creates a room.
@@ -66,38 +77,42 @@ N.API = (function(N) {
       <li><b>publishLimit:</b>limiting number of publishers in the room. Value should be equal to or greater than -1. -1 for unlimited.</li>
       <li><b>userLimit:</b>limiting number of users in the room. Value should be equal to or greater than -1. -1 for unlimited.</li>
       <li><b>enableMixing:</b>control whether to enable media mixing in the room, with value choices 0 or 1.</li>
-      <li><b>mediaMixing:</b>media setting for mixed stream in the room if mixing is enabled. Value should be a JSON object contains two entries: "video" and "audio". Audio entry is currently not used and should be null.</li>
+      <li><b>viewports:</b>viewport setting for mixed stream in the room if mixing is enabled. A corresponding mixed stream will be created for each viewport. Values should be an array. Each item has two properties listed as follow</li>
       <ul>
-          <li>audio: null</li>
-          <li>video: maxInput, resolution, multistreaming, bitrate , bkColor, layout, avCoordinate, crop</li>
-          <ul>
-              <li>maxInput is for maximum number of slots in the mix stream</li>
-              <li>resolution denotes the resolution of the video size of mix stream.Valid resolution list:</li>
-                  <ul>
-                      <li>'sif'</li>
-                      <li>'vga'</li>
-                      <li>'svga'</li>
-                      <li>'xga'</li>
-                      <li>'hd720p'</li>
-                      <li>'hd1080p'</li>
-                      <li>'uhd_4k'</li>
-                      <li>'r720x720'</li>
-                  </ul>
-              <li>multistreaming(0 or 1) indicates whether the MCU mix stream outputs multiple resolutions for different devices. The additional stream's resolutions are determined by MCU according to the base resolution user specified, no customizations is allowed yet. Please see the following table for detailed mapping.</li>
-              <li>bitrate indicates video bitrate of the mix stream, in Kbit unit. Default value 0, meaning that MCU could use its own calculated default value.</li>
-              <li>bkColor sets the background color, supporting RGB color format: {"r":red-value, "g":green-value, "b":blue-value}.</li>
-              <li>layout describes video layout in mix stream</li>
-                  <ul>
-                      <li>"base" is the base template (choose from "void", "fluid", "lecture")</li>
-                      <li>If base layout is set to 'void', user must input customized layout for the room, otherwise the video layout would be treated as invalid. </li>
-                      <li>"custom" is user-defined customized video layout. Here we give out an example to show you the details of a valid customized video layout.A valid customized video layout should be a JSON string which represents an array of video layout definition. More details see [customized video layout](@ref layout) . </li>
-                      <li>MCU would try to combine the two entries for mixing video if user sets both.</li>
-                  </ul>
-              <li>avCoordinated (0 or 1) is for disabling/enabling VAD(Voice activity detection). When VAD is applied, main pane(layout id=1) will be filled with the user stream which is the most active in voice currently.</li>
-              <li>crop (0 or 1) is for disabling/enabling video cropping to fit in the region assigned to it in the mixed video.</li>
-          </ul>
+        <li><b>name:</b>the name for this viewport.</li>
+        <li><b>mediaMixing:</b>media setting for mixed stream in the room if mixing is enabled. Value should be a JSON object contains two entries: "video" and "audio". Audio entry is currently not used and should be null.</li>
+        <ul>
+            <li>audio: null</li>
+            <li>video: maxInput, resolution, multistreaming, bitrate , bkColor, layout, avCoordinate, crop</li>
+            <ul>
+                <li>maxInput is for maximum number of slots in the mix stream</li>
+                <li>resolution denotes the resolution of the video size of mix stream.Valid resolution list:</li>
+                    <ul>
+                        <li>'sif'</li>
+                        <li>'vga'</li>
+                        <li>'svga'</li>
+                        <li>'xga'</li>
+                        <li>'hd720p'</li>
+                        <li>'hd1080p'</li>
+                        <li>'uhd_4k'</li>
+                        <li>'r720x720'</li>
+                    </ul>
+                <li>multistreaming(0 or 1) indicates whether the MCU mix stream outputs multiple resolutions for different devices. The additional stream's resolutions are determined by MCU according to the base resolution user specified, no customizations is allowed yet. Please see the following table for detailed mapping.</li>
+                <li>bitrate indicates video bitrate of the mix stream, in Kbit unit. Default value 0, meaning that MCU could use its own calculated default value.</li>
+                <li>bkColor sets the background color, supporting RGB color format: {"r":red-value, "g":green-value, "b":blue-value}.</li>
+                <li>layout describes video layout in mix stream</li>
+                    <ul>
+                        <li>"base" is the base template (choose from "void", "fluid", "lecture")</li>
+                        <li>If base layout is set to 'void', user must input customized layout for the room, otherwise the video layout would be treated as invalid. </li>
+                        <li>"custom" is user-defined customized video layout. Here we give out an example to show you the details of a valid customized video layout.A valid customized video layout should be a JSON string which represents an array of video layout definition. More details see [customized video layout](@ref layout) . </li>
+                        <li>MCU would try to combine the two entries for mixing video if user sets both.</li>
+                    </ul>
+                <li>avCoordinated (0 or 1) is for disabling/enabling VAD(Voice activity detection). When VAD is applied, main pane(layout id=1) will be filled with the user stream which is the most active in voice currently.</li>
+                <li>crop (0 or 1) is for disabling/enabling video cropping to fit in the region assigned to it in the mixed video.</li>
+            </ul>
+        </ul>
       </ul>
-  </ul>
+    </ul>
   Omitted entries are set with default values.
   All supported resolutions are list in the following table.
   @htmlonly
@@ -155,21 +170,42 @@ N.API = (function(N) {
     mode: 'hybrid',
     publishLimit: -1,
     userLimit: 30,
-    mediaMixing: {
-      video: {
-        maxInput: 15,
-        resolution: 'hd720p',
-        multistreaming: 1,
-        bitrate: 0,
-        bkColor: {"r":1, "g":2, "b":255},
-        layout: {
-          base: 'fluid'
+    viewports: {
+      "common": {
+        mediaMixing: {
+          video: {
+            maxInput: 15,
+            resolution: 'hd720p',
+            multistreaming: 1,
+            bitrate: 0,
+            bkColor: {"r":1, "g":2, "b":255},
+            layout: {
+              base: 'lecture',
+            },
+            avCoordinated: 1,
+            crop: 1
+          },
+          audio: null
         },
-        avCoordinated: 1,
-        crop: 1
       },
-      audio: null
-    },
+      "another": {
+        mediaMixing: {
+          video: {
+            maxInput: 15,
+            resolution: 'hd1080p',
+            multistreaming: 1,
+            bitrate: 0,
+            bkColor: {"r":1, "g":2, "b":255},
+            layout: {
+              base: 'lecture',
+            },
+            avCoordinated: 1,
+            crop: 1
+          },
+          audio: null
+        },
+      }
+    }
   }, function (res) {
     console.log ('Room', res.name, 'created with id:', res._id);
   }, function (err) {
@@ -181,6 +217,12 @@ N.API = (function(N) {
     if (!options) {
       options = {};
     }
+
+    if (options.viewports) {
+      options.view = viewportsToViews(options.viewports);
+      delete options.viewports;
+    }
+
 
     send(function(roomRtn) {
       var room = JSON.parse(roomRtn);
@@ -265,21 +307,42 @@ N.API = (function(N) {
     publishLimit: -1,
     userLimit: -1,
     enableMixing: 1,
-    mediaMixing: {
-      video: {
-        maxInput: 15,
-        resolution: 'hd720p',
-        multistreaming: 1,
-        bitrate: 0,
-        bkColor: {"r":1, "g":2, "b":255},
-        layout: {
-          base: 'lecture',
+    viewports: {
+      "common": {
+        mediaMixing: {
+          video: {
+            maxInput: 15,
+            resolution: 'hd720p',
+            multistreaming: 1,
+            bitrate: 0,
+            bkColor: {"r":1, "g":2, "b":255},
+            layout: {
+              base: 'lecture',
+            },
+            avCoordinated: 1,
+            crop: 1
+          },
+          audio: null
         },
-        avCoordinated: 1,
-        crop: 1
       },
-      audio: null
-    },
+      "another": {
+        mediaMixing: {
+          video: {
+            maxInput: 15,
+            resolution: 'hd1080p',
+            multistreaming: 1,
+            bitrate: 0,
+            bkColor: {"r":1, "g":2, "b":255},
+            layout: {
+              base: 'lecture',
+            },
+            avCoordinated: 1,
+            crop: 1
+          },
+          audio: null
+        },
+      }
+    }
   }, function (res) {
     console.log ('Room', res._id, 'updated');
   }, function (err) {
@@ -287,6 +350,10 @@ N.API = (function(N) {
   });
      */
   updateRoom = function(roomId, options, callback, callbackError, params) {
+    if (options && options.viewports) {
+      options.view = viewportsToViews(options.viewports);
+      delete options.viewports;
+    }
     send(callback, callbackError, 'PUT', (options || {}), 'rooms/' +
       roomId, params);
   };
