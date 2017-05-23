@@ -588,7 +588,7 @@
         sendSdp(self.socket, 'publish', opt, stream.url(), function(answer,
           id) {
           if (answer !== 'success') {
-            return safeCall(onFailure, answer);
+            return safeCall(onFailure, (answer === 'error' ? id : answer));
           }
           stream.id = function() {
             return id;
