@@ -12,10 +12,7 @@ var express = require('express'),
 var app = express();
 
 // app.configure ya no existe
-app.use(errorhandler({
-  dumpExceptions: true,
-  showStack: true
-}));
+app.use(errorhandler());
 app.use(morgan('dev'));
 app.use(express.static(__dirname + '/public'));
 app.use(bodyParser.json());
