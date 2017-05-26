@@ -1085,6 +1085,7 @@
       <script type="text/JavaScript">
       var conference = Woogeen.ConferenceClient.create();
       // ...
+      // If [mixedStream] is empty, success callback will be triggered.
       conference.mix(localStream, [mixedStream], function () {
           L.Logger.info('success');
         }, function (err) {
@@ -1111,6 +1112,7 @@
       <script type="text/JavaScript">
       var conference = Woogeen.ConferenceClient.create();
       // ...
+      // If [mixedStream] is empty, success callback will be triggered.
       conference.unmix(localStream, [mixedStream], function () {
           L.Logger.info('success');
         }, function (err) {
