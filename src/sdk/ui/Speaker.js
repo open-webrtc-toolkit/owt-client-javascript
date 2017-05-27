@@ -114,12 +114,16 @@ Erizo.Speaker = function(spec) {
 
   } else if (that.stream instanceof Woogeen.LocalStream) {
     mute = function() {
+      if (that.stream.mediaStream.getAudioTracks().length == 0)
+        return;
       that.media.muted = true;
       that.icon.setAttribute('src', Woogeen.Images.mute48);
       that.stream.mediaStream.getAudioTracks()[0].enabled = false;
     };
 
     unmute = function() {
+      if (that.stream.mediaStream.getAudioTracks().length == 0)
+        return;
       that.media.muted = false;
       that.icon.setAttribute('src', Woogeen.Images.sound48);
       that.stream.mediaStream.getAudioTracks()[0].enabled = true;
