@@ -537,7 +537,7 @@
         <li>maxVideoBW: xxx. It does not work on Edge.</li>
         <li>unmix: false/true. If true, this stream would not be included in mixed stream.</li>
         <li>audioCodec: 'opus'/'pcmu'/'pcma'. Preferred audio codec.</li>
-        <li>videoCodec: 'h264'/'vp8'/'vp9'. Preferred video codec. H.264 is the default preferred codec. Note for Firefox vp9 is not stable, so please do not specify vp9 for Firefox.</li>
+        <li>videoCodec: 'h264'/'vp8'/'vp9'. Preferred video codec. H.264 is the default preferred codec. Note for Firefox VP9 is not stable, so please do not specify VP9 for Firefox.</li>
         <li>transport: 'udp'/'tcp'. RTSP connection transport type, default 'udp'; only for RTSP input.</li>
         <li>bufferSize: integer number in bytes. UDP receiving buffer size, default 2 MB. Only for RTSP input (UDP transport).</li>
       </ul>

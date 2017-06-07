@@ -94,7 +94,7 @@ Currently, Edge browser only supports H.264 and OPUS. At the time of this writin
 
 > **Note:** Microsoft Edge* 38.14393 is now only available in latest Windows 10 official release, which is Windows 10 Anniversary Update (Version 1607, OS Build 14393.321).
 
-In P2P mode, only one stream per direction can be published between Firefox and other clients. Also, "unpublish" is not available when one side is Firefox.
+In P2P mode, only one stream per direction can be published between Firefox and other clients. Also, <code>unpublish</code> is not available when one side is Firefox.
 
 # 3 Screen sharing {#section3}
 
@@ -107,7 +107,7 @@ We provide source code of a Chrome screen sharing extension sample. Developers s
 Screen sharing on Firefox requires following in `about:config`.
 
 - `media.getusermedia.screensharing.enabled` is `true`.
-- `media.getusermedia.screensharing.allowed_domains` includes your domain name.
+- `media.getusermedia.screensharing.allowed_domains` includes your domain name. (only needed before Firefox 52)
 
 Developers can help end users to make these changes by Firefox extension.
 
@@ -289,7 +289,8 @@ The following sample code shows how to create a room and generate tokens so that
 var Woogeen = require('nuve');
 Woogeen.API.init(SERVICEID, SERVICEKEY, SERVICEHOST);
 var room = {name: 'Demo Room'};
-Woogeen.API.createRoom (room.name, function (resp) {
+var options = {};
+Woogeen.API.createRoom (room.name, options, function (resp) {
   console.log (resp);
   var myRoom = resp;
   setTimeout (function () {

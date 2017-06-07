@@ -27,12 +27,12 @@ var Woogeen = Woogeen || {}; /*jshint ignore:line*/ //Woogeen is defined.
     </tr>
     <tr>
         <th>videoCodec</th>
-        <td>Specify preferred video codec. Available values are "vp8", "vp9", "h264". If specified codec is not supported by browser, it will be silently ignored. If this value is undefined, H.264 will be the preferred codec. Note for Firefox, vp8 will be preferred even if you specify vp9/h264 as preferred.</td>
+        <td>Specify preferred video codec. Available values are "vp8", "vp9", "h264". If specified codec is not supported by browser, it will be silently ignored. If this value is undefined, H.264 will be the preferred codec. Note for Firefox, VP8 will be preferred even if you specify VP9/H.264 as preferred.</td>
     </tr>
 </tbody>
 </table>
 @endhtmlonly
-   Each codec has its own supported bitrate range. Setting incorrect maxAudioBW/maxVideoBW value may lead to connection failure. Bandwidth settings don't work on FireFox.
+   Each codec has its own supported bitrate range. Setting incorrect maxAudioBW/maxVideoBW value may lead to connection failure. Bandwidth settings don't work on Firefox.
  * @return {Woogeen.PeerClient} An instance of Woogeen.PeerClient.
  * @example
 var p2p=new Woogeen.PeerClient({
@@ -276,7 +276,7 @@ Woogeen.PeerClient = function(pcConfig) {
       handleRemoteCapability(peer, ua);
       createPeerConnection(peer);
       peer.state = PeerState.CONNECTING;
-      createDataChannel(peer.id); // PeerConnection without streams and data channel is not allowed by FireFox.
+      createDataChannel(peer.id); // PeerConnection without streams and data channel is not allowed by Firefox.
       that.dispatchEvent(new Woogeen.ChatEvent({
         type: 'chat-accepted',
         senderId: senderId
@@ -893,7 +893,7 @@ p2p.disconnect();
   /**
      * @function acceptWithStream
      * @instance
-     * @desc This function accepts a remote client to establish a connection for chatting. The stream will be published as soon as the connection is established.<br><b>Remarks:</b><br> This API is aimed to compatable with ealier version of FireFox which doesn't support renegotiation. It may be removed once FireFox supports renegotiation well.
+     * @desc This function accepts a remote client to establish a connection for chatting. The stream will be published as soon as the connection is established.<br><b>Remarks:</b><br> This API is aimed to compatable with ealier version of Firefox which doesn't support renegotiation. It may be removed once Firefox supports renegotiation well.
      * @memberOf Woogeen.PeerClient
      * @private
      * @param {string} peerId Remote user's ID.
@@ -967,7 +967,7 @@ p2p.disconnect();
         'Peer connection is ready for draining pending streams.');
       for (var i = 0; i < peer.pendingStreams.length; i++) {
         var stream = peer.pendingStreams[i];
-        // OnNegotiationNeeded event will be triggered immediately after adding stream to PeerConnection in FireFox.
+        // OnNegotiationNeeded event will be triggered immediately after adding stream to PeerConnection in Firefox.
         // And OnNegotiationNeeded handler will execute drainPendingStreams. To avoid add the same stream multiple times,
         // shift it from pending stream list before adding it to PeerConnection.
         peer.pendingStreams.shift();
@@ -1257,7 +1257,7 @@ p2p.disconnect();
     }
     var peer = peers[peerId];
     if (navigator.mozGetUserMedia || !peer.remoteSideSupportsRemoveStream) {
-      L.Logger.error('Unpublish is not supported on FireFox.');
+      L.Logger.error('Unpublish is not supported on Firefox.');
       if (failureCallback) {
         failureCallback(Woogeen.Error.P2P_CLIENT_UNSUPPORTED_METHOD);
       }
@@ -1481,7 +1481,7 @@ p2p.disconnect();
       failureCallback("Invalid peer connection status.");
     }
     if (navigator.mozGetUserMedia) {
-      L.Logger.error('GetAudioLevels is not supported on FireFox.');
+      L.Logger.error('GetAudioLevels is not supported on Firefox.');
       if (failureCallback) {
         failureCallback(Woogeen.Error.P2P_CLIENT_UNSUPPORTED_METHOD);
       }
