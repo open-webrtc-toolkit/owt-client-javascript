@@ -56,17 +56,17 @@ The Intel CS for WebRTC Client SDK for JavaScript has been tested on the followi
             <td><b>Ubuntu*</b></td>
         </tr>
         <tr width="12pt">
-            <td>Chrome* 55</td>
+            <td>Chrome* 59</td>
             <td>&radic;</td>
             <td>&radic;</td>
         </tr>
         <tr>
-            <td>Firefox* 50</td>
+            <td>Firefox* 53</td>
             <td>&radic;</td>
             <td>&radic;</td>
         </tr>
         <tr>
-            <td>Microsoft Edge* 38.14393</td>
+            <td>Microsoft Edge* 40.15063.0.0</td>
             <td>&radic;</td>
             <td></td>
         </tr>
@@ -76,12 +76,12 @@ The Intel CS for WebRTC Client SDK for JavaScript has been tested on the followi
             <td><b>Ubuntu</b></td>
         </tr>
         <tr>
-            <td>Chrome* 55</td>
+            <td>Chrome* 59</td>
             <td>&radic;</td>
             <td>&radic;</td>
         </tr>
         <tr>
-            <td>Firefox* 50</td>
+            <td>Firefox* 53</td>
             <td>&radic;</td>
             <td>&radic;</td>
         </tr>
@@ -92,14 +92,12 @@ The Intel CS for WebRTC Client SDK for JavaScript has been tested on the followi
 Different browsers may have different supported codec list.
 Currently, Edge browser only supports H.264 and OPUS. At the time of this writing, H.264 support in Edge is experimental. To enable it, go to "about:flags" in Edge browser, find "Enable experimental H.264/AVC support" option under WebRTC section, and then select the checkbox. Since the current H.264 support is experimental, there is some codec capability limitation such as no FIR support in Edge.
 
-> **Note:** Microsoft Edge* 38.14393 is now only available in latest Windows 10 official release, which is Windows 10 Anniversary Update (Version 1607, OS Build 14393.321).
-
 In P2P mode, only one stream per direction can be published between Firefox and other clients. Also, <code>unpublish</code> is not available when one side is Firefox.
 
 # 3 Screen sharing {#section3}
 
 ## 3.1 Chrome
-We provide source code of a Chrome screen sharing extension sample. Developers should edit manifest.json and publish it to Chrome App Store to make it work for their products. After your extension is published, you will get an extension ID. This ID will be used when create screen sharing stream.
+We provide source code of a Chrome screen sharing extension sample. Developers should edit manifest.json and publish it to Chrome App Store to make it work for their products. After your extension is published, you will get an extension ID. This ID will be used when creating screen sharing stream.
 
 > **Note:** End users need to install your extension and visit your site with https if they want to use screen sharing.
 
@@ -468,7 +466,7 @@ The following table describes the key objects provided in the JavaScript SDK.
 
 The JavaScript objects (described earlier in this section) throw events using EventDispatchers, inlucluding {@link Woogeen.PeerClient PeerClient}, {@link Woogeen.ConferenceClient ConferenceClient}, {@link Woogeen.SipClient SipClient}, {@link Woogeen.RemoteStream RemoteStream}, etc.
 
-Detailed events please refer to the specific class description page.
+For more detailed events, please refer to the specific class description page.
 
 ## 8.1 Example for conference:{#section8_1}
 
