@@ -163,15 +163,12 @@ describe('P2P JS SDK', function() {
         videoDetection('local');
       })
       .waitsFor(function() {
-        return media.client.request["createLocal_success"] == 1;
-      }, 'create localStream success event', 6000)
-      .waitsFor(function() {
-        return detection == true;
-      }, 'detect video is playing', 6000)
+        return media.client.request["createLocal_failed"] == 1;
+      }, 'create localStream failed event', 6000)
       .runs(function() {
         debug("create max fps video media client request:", media.client.request);
-        expect(media.client.request["createLocal_success"]).toEqual(1);
-        expect(media.client.request["createLocal_failed"]).toEqual(0);
+        expect(media.client.request["createLocal_success"]).toEqual(0);
+        expect(media.client.request["createLocal_failed"]).toEqual(1);
         done();
       });
     });

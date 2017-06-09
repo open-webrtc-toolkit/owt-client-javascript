@@ -496,12 +496,12 @@ TestClient.prototype = {
 
                 if(!(exceptvalue.frame_width ===undefined)){
                   if(status_string[i].stats.send_frame_width != exceptvalue.send_frame_width){
-                      that.debug("real send_frame_width is "+status_string[i].stats.send_frame_width  +" but exceptsend_frame_width is "+ exceptvalue.send_frame_width);
+                      that.debug("real send_frame_width is "+status_string[i].stats.send_frame_width  +" but except send_frame_width is "+ exceptvalue.send_frame_width);
                       result = false
                   }
                 }
                 if(!(exceptvalue.frame_height === undefined)){
-                  if(status_string[i].stats.send_rame_height != exceptvalue.send_frame_height){
+                  if(status_string[i].stats.send_frame_height != exceptvalue.send_frame_height){
                       that.debug("real frame_height is "+status_string[i].stats.send_rame_height  +" but exceptsend_frame_height is "+ exceptvalue.send_fame_height);
                       result = false
                   }
