@@ -70,7 +70,7 @@ Woogeen.Stream.prototype.hide = function() {
  */
 Woogeen.UI = Woogeen.UI || Object.create({});
 
-Woogeen.UI.attachMediaStream = function() {
-  // When attachMediaStream is removed from adapter.js, we should implement by ourself.
-  adapter.browserShim.attachMediaStream.apply(this, arguments);
+Woogeen.UI.attachMediaStream = function(video, mediaStream) {
+  if(video)
+    video.srcObject = mediaStream;
 };
