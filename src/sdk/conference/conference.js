@@ -1625,52 +1625,6 @@
       };
 
       /**
-         * @function setVideoBitrate
-         * @instance
-         * @desc This function sets the video bitrate (kbps) for the given participant. Currently it works only if the participant's video stream is being mixed in the conference.
-      <br><b>Remarks:</b><br>
-      This method also depends on whether client side support dynamically video stream bitrate change, now only Chrome browser is verified to be workable.
-         <br><b>options:</b><br>
-      {<br>
-        id: 'target stream id'<br>
-        bitrate: an integer value with the unit in kbps, e.g., 300<br>
-      }
-         * @memberOf Woogeen.ConferenceClient
-         * @param {json} options setVideoBitrate options.
-         * @param {function} onSuccess(resp) (optional) Success callback.
-         * @param {function} onFailure(error) (optional) Failure callback.
-         * @example
-      <script type="text/JavaScript">
-      var conference = Woogeen.ConferenceClient.create();
-      // ......
-      conference.setVideoBitrate({id: 'stream ID', bitrate: 300}, function (resp) {
-          L.Logger.info('setVideoBitrate succeeds for stream ID: ', resp);
-        }, function (err) {
-          L.Logger.error('setVideoBitrate failed:', err);
-        }
-      );
-      </script>
-       */
-      this.setVideoBitrate = function(options, onSuccess, onFailure) {
-        var self = this;
-        if (typeof options === 'function') {
-          onFailure = onSuccess;
-          onSuccess = options;
-          options = {};
-        } else if (typeof options !== 'object' || options === null) {
-          options = {};
-        }
-
-        sendMsg(self.socket, 'setVideoBitrate', options, function(err,
-          resp) {
-          if (err) {
-            return safeCall(onFailure, err);
-          }
-          safeCall(onSuccess, resp);
-        });
-      };
-
-      /**
          * @function getConnectionStats
          * @instance
          * @desc This function gets statistic information about the given stream and its associated connection.
