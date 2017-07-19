@@ -180,84 +180,21 @@
 
   var WoogeenConferenceBase = function WoogeenConferenceBase(spec) {
     this.internalDispatcher = Woogeen.EventDispatcher({});
-    this.spec = spec || {};
+    this.spec = {};
     this.remoteStreams = {};
     this.localStreams = {};
     this.state = DISCONNECTED;
+
+    if (spec.iceServers) {
+      this.spec.userSetIceServers = spec.iceServers;
+    }
   };
 
   WoogeenConferenceBase.prototype = Woogeen.EventDispatcher({}); // make WoogeenConferenceBase a eventDispatcher
 
-  /**
-     * @function setIceServers
-     * @desc This function sets ICE servers for PeerConnections.
-  <br><b>Remarks:</b><br>
-  This method accepts array (multiple ones) type of ice server item as argument. Typical description of each valid value should be as below:<br>
-  <ul>
-  <li>For turn: {urls: array or single "url", username: "username", credential: "password"}.</li>
-  <li>For stun: {urls: array or single "url"}.</li>
-  </ul>
-  Each time this method is called, previous saved value would be discarded. Specifically, if parameter servers is not provided, the result would be an empty array, meaning any predefined servers are discarded.
-     * @instance
-     * @memberOf Woogeen.ConferenceClient&Woogeen.SipClient
-     * @param {string/object/array} servers turn or stun server configuration.
-     * @return {array} Result of the user-set of ice servers.
-     * @example
-  <script type="text/JavaScript">
-  ...
-  client.setIceServers([{
-      urls: "stun:x.x.x.x:3478"
-    }, {
-      urls: ["turn:x.x.x.x:443?transport=udp", "turn:x.x.x.x:443?transport=tcp"],
-      username: "abc",
-      credential: "xyz"
-    }]);
-  </script>
-     */
-
-  WoogeenConferenceBase.prototype.setIceServers = function() {
-    var that = this.spec;
-    that.userSetIceServers = [];
-    Array.prototype.slice.call(arguments, 0).map(function(arg) {
-      if (arg instanceof Array) {
-        arg.map(function(server) {
-          if (typeof server === 'object' && server !== null) {
-            if (typeof server.urls === 'string' && server.urls !==
-              '' || server.urls instanceof Array) {
-              that.userSetIceServers.push(server);
-            } else if (typeof server.url === 'string' && server.url !==
-              '') {
-              server.urls = server.url;
-              delete server.url;
-              that.userSetIceServers.push(server);
-            }
-          } else if (typeof server === 'string' && server !== '') {
-            that.userSetIceServers.push({
-              urls: server
-            });
-          }
-        });
-      } else if (typeof arg === 'object' && arg !== null) {
-        if (typeof arg.urls === 'string' && arg.urls !== '' || arg.urls instanceof Array) {
-          that.userSetIceServers.push(arg);
-        } else if (typeof arg.url === 'string' && arg.url !== '') {
-          arg.urls = arg.url;
-          delete arg.url;
-          that.userSetIceServers.push(arg);
-        }
-      } else if (typeof arg === 'string' && arg !== '') {
-        that.userSetIceServers.push({
-          urls: arg
-        });
-      }
-    });
-    return that.userSetIceServers;
-  };
-
   WoogeenConferenceBase.prototype.getIceServers = function() {
     return this.spec.userSetIceServers;
   };
-
 
   WoogeenConferenceBase.prototype.join = function(tokenString, onSuccess,
     onFailure) {
@@ -1743,10 +1680,26 @@
        * @desc This factory returns a Woogeen.ConferenceClient instance.
        * @memberOf Woogeen.ConferenceClient
        * @static
+       * @param {object} spec (Optional)Specifies the configurations for the ConferenceClient object created. Following properties are supported:<br>
+@htmlonly
+<table class="doxtable">
+    <tr>
+        <th>iceServers</th>
+        <td>Each ICE server instance has three properties: URIs, username (optional for STUN), credential (optional for STUN). URIs Could be an array of STUN/TURN server URIs which shared the same username and credential. STUN is described at http://tools.ietf.org/html/draft-nandakumar-rtcweb-stun-uri-08, and TURN is described at http://tools.ietf.org/html/rfc5766.</td>
+    </tr>
+</tbody>
+</table>
+@endhtmlonly
        * @return {Woogeen.ConferenceClient} An instance of Woogeen.ConferenceClient.
        * @example
     <script type="text/JavaScript">
-    var conference = Woogeen.ConferenceClient.create();
+    var conference = Woogeen.ConferenceClient.create({iceServers : [{
+      urls : "stun:example.com"
+    }, {
+      urls : ["turn:example.com:3478?transport=tcp", "turn:example.com:3478?transport=udp"],
+      credential : "password",
+      username : "example"
+    }]});
     </script>
        */
     WoogeenConference.create = function factory(spec) { // factory, not in prototype
