@@ -593,9 +593,6 @@
           stream.id = function() {
             return id;
           };
-          stream.unpublish = function(onSuccess, onFailure) {
-            self.unpublish(stream, onSuccess, onFailure);
-          };
           self.localStreams[id] = stream;
           safeCall(onSuccess, stream);
         });
@@ -648,9 +645,6 @@
           stream.signalOnPauseVideo = function(onSuccess, onFailure) {
             sendCtrlPayload(self.socket, 'video-out-off', id,
               onSuccess, onFailure);
-          };
-          stream.unpublish = function(onSuccess, onFailure) {
-            self.unpublish(stream, onSuccess, onFailure);
           };
           safeCall(onSuccess, stream);
           onFailure = function() {};
@@ -734,7 +728,6 @@
       stream.signalOnPauseAudio = undefined;
       stream.signalOnPlayVideo = undefined;
       stream.signalOnPauseVideo = undefined;
-      delete stream.unpublish;
       if (err) {
         return safeCall(onFailure, err);
       }

@@ -948,15 +948,10 @@ p2p.disconnect();
         // And OnNegotiationNeeded handler will execute drainPendingStreams. To avoid add the same stream multiple times,
         // shift it from pending stream list before adding it to PeerConnection.
         peer.pendingStreams.shift();
-        if (!stream.mediaStream) { // The stream has been closed. Skip it.
+        if (!stream.mediaStream || !stream.mediaStream.active) { // The stream has been closed. Skip it.
           continue;
         }
         bindStreamAndPeer(stream, peer);
-        if (!stream.onClose) {
-          stream.onClose = function() {  /*jshint ignore:line*/ //Function within a loop.
-            onLocalStreamEnded(stream);
-          };
-        }
         peer.connection.addStream(stream.mediaStream);
         L.Logger.debug('Added stream to peer connection.');
         sendStreamType(stream, peer);
@@ -1091,8 +1086,8 @@ p2p.disconnect();
   </script>
   */
   var publish = function(stream, targetId, successCallback, failureCallback) {
-    if (!(stream instanceof Woogeen.LocalStream && stream.mediaStream) || !
-      targetId) {
+    if (!(stream instanceof Woogeen.LocalStream && stream.mediaStream && stream
+        .mediaStream.active) || !targetId) {
       if (failureCallback) {
         failureCallback(Woogeen.Error.P2P_CLIENT_ILLEGAL_ARGUMENT);
       }
@@ -1549,15 +1544,6 @@ p2p.disconnect();
 
   var onDataChannelClose = function(peerId) {
     L.Logger.debug('Data Channel for ' + peerId + ' is closed.');
-  };
-
-  var onLocalStreamEnded = function(stream) {
-    var peerIds = streamPeers[stream.getID()];
-    if (peerIds) {
-      for (var i = 0; i < peerIds.length; i++) {
-        unpublish(stream, peerIds[i]);
-      }
-    }
   };
 
   var setAudioMaxBW = function(sdp) {

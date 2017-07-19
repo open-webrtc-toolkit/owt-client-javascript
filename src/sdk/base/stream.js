@@ -129,34 +129,22 @@
      * @function close
      * @desc This function closes the stream.
   <br><b>Remarks:</b><br>
-  If the stream has audio and/or video, it also stops capturing camera/microphone. If the stream is published to a conference, the function also un-publishes it. If the stream is published to a P2P session, the function does NOT un-publish it. If the stream is showing in an HTML element, the stream would be hidden. Once a LocalStream is closed, it is no longer usable.
+  If the stream has audio and/or video, it also stops capturing camera/microphone. Once a LocalStream is closed, it is no longer usable. This function does not unpublish certain stream and it does not deal with UI logical either.
      * @memberOf Woogeen.Stream
      * @instance
      * @example
   <script type="text/JavaScript">
-  var stream = Woogeen.Stream({audio:true, video:true, data: false, attributes:
-  {name:'WoogeenStream'}});
+  var stream = Woogeen.Stream({audio:true, video:true, attributes: {name:'WoogeenStream'}});
   stream.close();
   </script>
      */
   WoogeenStream.prototype.close = function() {
-    if (typeof this.hide === 'function') {
-      this.hide();
-    }
     if (this.mediaStream) {
       this.mediaStream.getTracks().map(function(track) {
         if (typeof track.stop === 'function') {
           track.stop();
         }
       });
-    }
-    this.mediaStream = null;
-    if (typeof this.unpublish === 'function') {
-      this.unpublish();
-    }
-    // close peer connection if necessary
-    if (this.channel && typeof this.channel.close === 'function') {
-      this.channel.close();
     }
   };
 
