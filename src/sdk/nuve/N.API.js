@@ -447,8 +447,8 @@ N.API = (function(N) {
   }, errorCallback);
      */
   getService = function(service, callback, callbackError, params) {
-    if (service.trim() === '') {
-      callbackError(401, 'Empty service ID');
+    if (typeof service !== 'string' || service.trim() === '') {
+      callbackError(400, 'Invalid service ID.');
       return;
     }
     send(callback, callbackError, 'GET', undefined, 'services/' + service,
