@@ -50,6 +50,10 @@ N.API = (function(N) {
   N.API.init('5188b9af6e53c84ffd600413', '21989', 'http://61.129.90.140:3000/')
      */
   init = function(service, key, url) {
+    if (typeof service !== 'string' || typeof key !== 'string' || typeof url !==
+      'string') {
+      throw new TypeError('Invalid service ID, or service key, or URL.');
+    }
     N.API.params.service = service;
     N.API.params.key = key;
     N.API.params.url = url;
