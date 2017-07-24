@@ -241,18 +241,7 @@ var runRestSample = function() {
     div.setAttribute('id', 'test' + streamId);
     div.setAttribute('title', 'Stream#' + streamId);
     document.body.appendChild(div);
-    if (window.navigator.appVersion.indexOf('Trident') < 0) {
-      stream.show('test' + streamId);
-    } else {
-      L.Logger.info('displayStream:', stream.id());
-      var canvas = document.createElement('canvas');
-      canvas.width = resolution.width;
-      canvas.height = resolution.height;
-      canvas.setAttribute('autoplay', 'autoplay::autoplay');
-      div.appendChild(canvas);
-      var ieStream = new Woogeen.ieplugin.ieMediaStream(stream.mediaStream.label);
-      attachRemoteMediaStream(canvas, ieStream, stream.pcid);
-    }
+    stream.show('test' + streamId);
   }
 
   function trySubscribeStream(stream) {
@@ -422,21 +411,7 @@ var runRestSample = function() {
                   'create LocalStream failed:', err);
               }
               localStream = stream;
-              if (window.navigator.appVersion.indexOf('Trident') <
-                0) {
-                localStream.show('myVideo');
-              }
-              if (window.navigator.appVersion.indexOf('Trident') >
-                -1) {
-                var canvas = document.createElement('canvas');
-                canvas.width = 320;
-                canvas.height = 240;
-                canvas.setAttribute('autoplay',
-                  'autoplay::autoplay');
-                document.getElementById('myVideo').appendChild(
-                  canvas);
-                attachMediaStream(canvas, localStream.mediaStream);
-              }
+              localStream.show('myVideo');
               publish(participant_id, 'webrtc', {
                 audio: true,
                 video: {

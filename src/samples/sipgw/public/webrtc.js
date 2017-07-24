@@ -88,17 +88,7 @@ function openLocalStream(video, audio) {
       allStreams['local'] = localStream;
       setWidth();
       $('#localVideo').show();
-      if (window.navigator.appVersion.indexOf('Trident') < 0) {
-        localStream.show('localVideo');
-      }
-      if (window.navigator.appVersion.indexOf('Trident') > -1) {
-        var canvas = document.createElement('canvas');
-        canvas.width = 320;
-        canvas.height = 240;
-        canvas.setAttribute('autoplay', 'autoplay::autoplay');
-        document.getElementById('localVideo').appendChild(canvas);
-        attachMediaStream(canvas, localStream.mediaStream);
-      }
+      localStream.show('localVideo');
     });
 }
 

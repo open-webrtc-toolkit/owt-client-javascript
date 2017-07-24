@@ -726,19 +726,6 @@ Woogeen.PeerClient = function(pcConfig) {
     gab.onAuthenticated = authenticatedHandler;
     gab.onForceDisconnect = forceDisconnectHandler;
     gab.connect(loginInfo, successCallback, failureCallback);
-    /* After we merge p2p and conf sdk, this creation should be removed
-        if(window.navigator.appVersion.indexOf("Trident") > -1){
-          var plugin = document.getElementById("WebRTC.ActiveX");
-          if(!plugin){
-            plugin = document.createElement("OBJECT");
-            plugin.setAttribute("ID", "WebRTC.ActiveX");
-            plugin.setAttribute("height", "0");
-            plugin.setAttribute("width", "0");
-            plugin.setAttribute("CLASSID", "CLSID:1D117433-FD6F-48D2-BF76-26E2DC5390FC");
-            document.body.appendChild(plugin);
-          }
-        }
-    */
   };
 
   /**
@@ -1443,11 +1430,7 @@ p2p.disconnect();
       return;
     }
     peer.connection.getStats(null, function(stats) {
-      if (window.navigator.appVersion.indexOf("Trident") > -1) {
-        successCallback(stats);
-      } else {
-        successCallback(Woogeen.Common.parseStats(stats));
-      }
+      successCallback(Woogeen.Common.parseStats(stats));
     }, function(err) {
       if (failureCallback) {
         failureCallback(err);

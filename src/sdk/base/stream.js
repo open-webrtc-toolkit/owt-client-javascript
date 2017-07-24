@@ -564,10 +564,6 @@ L.Logger.info('stream added:', stream.id());
       window.navigator.appVersion.match(/Chrome\/([\w\W]*?)\./)[1] <= 35;
   }
 
-  function isLegacyIE() {
-    return window.navigator.appVersion.indexOf('Trident') > -1;
-  }
-
   function isFirefox() {
     return window.navigator.userAgent.match("Firefox") !== null;
   }
@@ -626,7 +622,7 @@ L.Logger.info('stream added:', stream.id());
       }
       return;
     }
-    if (typeof getMedia !== 'function' && !isLegacyIE()) {
+    if (typeof getMedia !== 'function') {
       if (typeof callback === 'function') {
         callback({
           code: 1100,
@@ -686,7 +682,7 @@ L.Logger.info('stream added:', stream.id());
           mediaOption.video.deviceId = option.video.deviceId;
         }
 
-        if (!isLegacyIE() && !isLegacyChrome()) {
+        if (!isLegacyChrome()) {
           if (option.video.frameRate instanceof Array && option.video.frameRate
             .length >= 2) {
             mediaOption.video.frameRate = {
@@ -910,11 +906,7 @@ L.Logger.info('stream added:', stream.id());
       return;
     }
 
-    if (!isLegacyIE()) {
-      getMedia.apply(navigator, [mediaOption, onSuccess, onFailure]);
-    } else {
-      navigator.getUserMedia(mediaOption, onSuccess, onFailure);
-    }
+    navigator.getUserMedia(mediaOption, onSuccess, onFailure);
   }
   /**
      * @function create
