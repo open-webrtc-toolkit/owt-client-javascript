@@ -2,6 +2,7 @@
 'use strict';
 
 var express = require('express'),
+  spdy = require('spdy'),
   bodyParser = require('body-parser'),
   errorhandler = require('errorhandler'),
   morgan = require('morgan'),
@@ -180,20 +181,29 @@ app.post('/tokens/:type', function(req, res) {
   });
 });
 
-
-app.listen(3001);
+spdy.createServer({
+  spdy: {
+    plain: true
+  }
+}, app).listen(3001, (err) => {
+  if (err) {
+    console.log('Failed to setup plain server, ', err);
+    return process.exit(1);
+  }
+});
 
 var cipher = require('./cipher');
 cipher.unlock(cipher.k, 'cert/.woogeen.keystore', function cb(err, obj) {
   if (!err) {
-    try {
-      https.createServer({
-        pfx: fs.readFileSync('cert/certificate.pfx'),
-        passphrase: obj.sample
-      }, app).listen(3004);
-    } catch (e) {
-      err = e;
-    }
+    spdy.createServer({
+      pfx: fs.readFileSync('cert/certificate.pfx'),
+      passphrase: obj.sample
+    }, app).listen(3004, (error) => {
+      if (error) {
+        console.log('Failed to setup secured server: ', error);
+        return process.exit(1);
+      }
+    });
   }
   if (err) {
     console.error('Failed to setup secured server:', err);
