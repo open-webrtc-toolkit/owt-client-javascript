@@ -374,8 +374,8 @@ Woogeen.PeerClient = function(pcConfig) {
       case PeerState.CONNECTED:
         L.Logger.debug('About to set remote description. Signaling state: ' +
           peer.connection.signalingState);
+        event.message.sdp = setRtpSenderOptions(event.message.sdp);
         var sessionDescription = new RTCSessionDescription(event.message);
-        sessionDescription.sdp = setRtpSenderOptions(sessionDescription.sdp);
         peer.connection.setRemoteDescription(sessionDescription).then(() => {
           createAndSendAnswer(peer);
           drainIceCandidates(peer);
@@ -394,8 +394,8 @@ Woogeen.PeerClient = function(pcConfig) {
         PeerState.CONNECTED)) {
       L.Logger.debug('About to set remote description. Signaling state: ' +
         peer.connection.signalingState);
+      event.message.sdp = setRtpSenderOptions(event.message.sdp);
       var sessionDescription = new RTCSessionDescription(event.message);
-      sessionDescription.sdp = setRtpSenderOptions(sessionDescription.sdp);
       peer.connection.setRemoteDescription(new RTCSessionDescription(
         sessionDescription)).then(() => {
           L.Logger.debug('Set remote descripiton successfully.');
