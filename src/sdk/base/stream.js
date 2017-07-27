@@ -590,10 +590,6 @@ L.Logger.info('stream added:', stream.id());
     'hd1080p': getReso(1920, 1080)
   };
 
-  var getMedia = (navigator.getUserMedia || navigator.webkitGetUserMedia ||
-    navigator.mozGetUserMedia || navigator.msGetUserMedia);
-
-
   /*
   createLocalStream({
     video: {
@@ -622,11 +618,12 @@ L.Logger.info('stream added:', stream.id());
       }
       return;
     }
-    if (typeof getMedia !== 'function') {
+    if (!navigator.mediaDevices || typeof navigator.mediaDevices.getUserMedia !==
+      'function') {
       if (typeof callback === 'function') {
         callback({
           code: 1100,
-          msg: 'webrtc support not available'
+          msg: 'Media capturing support is not available.'
         });
       }
       return;
@@ -831,8 +828,15 @@ L.Logger.info('stream added:', stream.id());
             mediaSource: 'window' || 'screen'
           };
         }
-        getMedia.apply(navigator, [mediaOption, onSuccess, onFailure]);
-        return;
+        return navigator.mediaDevices.getUserMedia(mediaOption).then(
+          mediaStream => {
+            onSuccess(mediaStream);
+          }).catch(err => {
+            onFailure(err);
+          });
+      }
+      if (!option.video.extensionId) {
+        L.Logger.warning('Please provide extension ID for desktop sharing.');
       }
       var extensionId = option.video.extensionId ||
         'pndohhifhheefbpeljcmnhnkphepimhe';
@@ -892,7 +896,12 @@ L.Logger.info('stream added:', stream.id());
             }
             delete mediaOption.video.frameRate;
           }
-          getMedia.apply(navigator, [mediaOption, onSuccess, onFailure]);
+          return navigator.mediaDevices.getUserMedia(mediaOption).then(
+            mediaStream => {
+              onSuccess(mediaStream);
+            }).catch(err => {
+              onFailure(err);
+            });
         });
       } catch (err) {
         if (typeof callback === 'function') {
@@ -906,7 +915,12 @@ L.Logger.info('stream added:', stream.id());
       return;
     }
 
-    navigator.getUserMedia(mediaOption, onSuccess, onFailure);
+    navigator.mediaDevices.getUserMedia(mediaOption).then(
+      mediaStream => {
+        onSuccess(mediaStream);
+      }).catch(err => {
+        onFailure(err);
+      });
   }
   /**
      * @function create
