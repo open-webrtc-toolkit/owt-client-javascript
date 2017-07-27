@@ -1,4 +1,7 @@
 {
+  "parserOptions": {
+    "ecmaVersion": 2015
+  },
   "rules": {
     "no-trailing-spaces": "error",
     "no-mixed-spaces-and-tabs": "error",

@@ -105,19 +105,8 @@ Woogeen.PeerClient = function(pcConfig) {
   var roomStreams = {};
   var isConnectedToSignalingChannel = false;
   var streamPeers = {}; // Key is stream id, value is an array of peer id.
-
-  var pcConstraints = {
-    'optional': [{
-      'DtlsSrtpKeyAgreement': 'true'
-    }]
-  };
-  //var pcConstraints=null;
-  //var dataConstraints = {'ordered': true,
-  //                     'maxRetransmitTime': 3000,  // in milliseconds
-  //                     'protocol': 'SCTP'
-  //                    };
   var dataConstraints = null;
-  var sdpConstraints = {
+  var offerOptions = {
     'offerToReceiveAudio': true,
     'offerToReceiveVideo': true
   };
@@ -387,7 +376,7 @@ Woogeen.PeerClient = function(pcConfig) {
           peer.connection.signalingState);
         var sessionDescription = new RTCSessionDescription(event.message);
         sessionDescription.sdp = setRtpSenderOptions(sessionDescription.sdp);
-        peer.connection.setRemoteDescription(sessionDescription, function() {
+        peer.connection.setRemoteDescription(sessionDescription).then(() => {
           createAndSendAnswer(peer);
           drainIceCandidates(peer);
         }, function(errorMessage) {
@@ -408,8 +397,7 @@ Woogeen.PeerClient = function(pcConfig) {
       var sessionDescription = new RTCSessionDescription(event.message);
       sessionDescription.sdp = setRtpSenderOptions(sessionDescription.sdp);
       peer.connection.setRemoteDescription(new RTCSessionDescription(
-          sessionDescription),
-        function() {
+        sessionDescription)).then(() => {
           L.Logger.debug('Set remote descripiton successfully.');
           drainIceCandidates(peer);
           drainPendingMessages(peer);
@@ -561,7 +549,7 @@ Woogeen.PeerClient = function(pcConfig) {
       return true;
     }
     try {
-      peer.connection = new RTCPeerConnection(config, pcConstraints); /*jshint ignore:line*/
+      peer.connection = new RTCPeerConnection(config);
       peer.connection.onicecandidate = function(event) {
         onLocalIceCandidate(peer, event);
       };
@@ -914,9 +902,9 @@ p2p.disconnect();
     }
     drainPendingStreams(peer);
     peer.isNegotiationNeeded = false;
-    peer.connection.createOffer(function(desc) {
+    peer.connection.createOffer(offerOptions).then(desc => {
       desc.sdp = setRtpReceiverOptions(desc.sdp, peer);
-      peer.connection.setLocalDescription(desc, function() {
+      peer.connection.setLocalDescription(desc).then(() => {
         L.Logger.debug('Set local descripiton successfully.');
         changeNegotiationState(peer, NegotiationState.READY);
         if (gab) {
@@ -929,7 +917,7 @@ p2p.disconnect();
     }, function(error) {
       L.Logger.debug('Create offer failed. Error info: ' + JSON.stringify(
         error));
-    }, sdpConstraints);
+    });
   };
 
   var drainIceCandidates = function(peer) {
@@ -1008,9 +996,9 @@ p2p.disconnect();
     }
     drainPendingStreams(peer);
     peer.isNegotiationNeeded = false;
-    peer.connection.createAnswer(function(desc) {
+    peer.connection.createAnswer().then(desc => {
       desc.sdp = setRtpReceiverOptions(desc.sdp, peer);
-      peer.connection.setLocalDescription(desc, function() {
+      peer.connection.setLocalDescription(desc).then(() => {
         L.Logger.debug("Set local description successfully.");
         if (gab) {
           gab.sendSignalMessage(peer.id, desc);
