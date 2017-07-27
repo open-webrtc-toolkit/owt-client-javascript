@@ -1,4 +1,4 @@
-/* global Gab,RTCIceCandidate,RTCSessionDescription,remoteIceCandidates*/
+/* global RTCIceCandidate,RTCSessionDescription */
 /* Depend on woogeen.js, gab-websocket.js, WooGeen.Error.js*/
 
 var Woogeen = Woogeen || {}; /*jshint ignore:line*/ //Woogeen is defined.
@@ -936,10 +936,8 @@ p2p.disconnect();
     if (peer && peer.connection && peer.remoteIceCandidates && peer.remoteIceCandidates
       .length !== 0) {
       for (var i = 0; i < peer.remoteIceCandidates.length; i++) {
-        L.Logger.debug("remoteIce, length:" + remoteIceCandidates.length +
-          ", current:" + i);
         if (peer.state === PeerState.CONNECTED || peer.state === PeerState.CONNECTING) {
-          peer.connection.addIceCandidate(remoteIceCandidates[i],
+          peer.connection.addIceCandidate(peer.remoteIceCandidates[i],
             onAddIceCandidateSuccess, onAddIceCandidateFailure);
         }
       }
@@ -963,9 +961,9 @@ p2p.disconnect();
         }
         bindStreamAndPeer(stream, peer);
         if (!stream.onClose) {
-          stream.onClose = function() {
+          stream.onClose = function() {  /*jshint ignore:line*/ //Function within a loop.
             onLocalStreamEnded(stream);
-          }; /*jshint ignore:line*/ //Function within a loop.
+          };
         }
         peer.connection.addStream(stream.mediaStream);
         L.Logger.debug('Added stream to peer connection.');

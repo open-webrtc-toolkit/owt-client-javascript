@@ -131,11 +131,12 @@ window.L = L;\n\
       dist: '../dist/sdk/<%= pkg.name %>.js',
       ui_dist: '../dist/sdk/<%= pkg.name %>.ui.js',
       options: {
+        esversion: 6,
         browser: true,
         curly: true,
         eqeqeq: true,
         immed: true,
-        latedef: true,
+        latedef: false,
         newcap: false,
         noarg: true,
         sub: true,
