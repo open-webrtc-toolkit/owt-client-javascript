@@ -550,6 +550,10 @@ Woogeen.PeerClient = function(pcConfig) {
     }
     try {
       peer.connection = new RTCPeerConnection(config);
+      if (typeof peer.connection.addTransceiver === 'function') {
+        peer.connection.addTransceiver('audio');
+        peer.connection.addTransceiver('video');
+      }
       peer.connection.onicecandidate = function(event) {
         onLocalIceCandidate(peer, event);
       };
