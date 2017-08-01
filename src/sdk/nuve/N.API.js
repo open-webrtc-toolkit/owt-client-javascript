@@ -174,8 +174,9 @@ N.API = (function(N) {
     mode: 'hybrid',
     publishLimit: -1,
     userLimit: 30,
-    viewports: {
-      "common": {
+    viewports: [
+      {
+        name: "common",
         mediaMixing: {
           video: {
             maxInput: 15,
@@ -192,7 +193,8 @@ N.API = (function(N) {
           audio: null
         },
       },
-      "another": {
+      {
+        name: "another",
         mediaMixing: {
           video: {
             maxInput: 15,
@@ -209,7 +211,7 @@ N.API = (function(N) {
           audio: null
         },
       }
-    }
+    ]
   }, function (res) {
     console.log ('Room', res.name, 'created with id:', res._id);
   }, function (err) {
@@ -223,7 +225,7 @@ N.API = (function(N) {
     }
 
     if (options.viewports) {
-      options.view = viewportsToViews(options.viewports);
+      options.views = viewportsToViews(options.viewports);
       delete options.viewports;
     }
 
