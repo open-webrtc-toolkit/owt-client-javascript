@@ -179,6 +179,7 @@
     CONNECTED = 2;
 
   var WoogeenConferenceBase = function WoogeenConferenceBase(spec) {
+    spec = spec || {};
     this.internalDispatcher = Woogeen.EventDispatcher({});
     this.spec = {};
     this.remoteStreams = {};
