@@ -105,15 +105,15 @@ Erizo.ChromeStableStack = function(spec) {
   that.peerConnection.onicecandidate = function(event) {
     if (event.candidate) {
 
-      if (!event.candidate.candidate.match(/a=/)) {
-        event.candidate.candidate = "a=" + event.candidate.candidate;
-      }
-
       var candidateObject = {
         sdpMLineIndex: event.candidate.sdpMLineIndex,
         sdpMid: event.candidate.sdpMid,
         candidate: event.candidate.candidate
       };
+
+      if (!candidateObject.candidate.match(/a=/)) {
+        candidateObject.candidate = "a=" + candidateObject.candidate;
+      }
 
       if (spec.remoteDescriptionSet) {
         spec.callback({
@@ -203,12 +203,21 @@ Erizo.ChromeStableStack = function(spec) {
 
   that.createOffer = function(isSubscribe) {
     if (isSubscribe === true) {
+      if (typeof that.peerConnection.addTransceiver === 'function') {
+        that.peerConnection.addTransceiver('audio');
+        that.peerConnection.addTransceiver('video');
+      }
       that.peerConnection.createOffer(setLocalDesc, errorCallback, that.mediaConstraints);
     } else {
-      that.peerConnection.createOffer(setLocalDesc, errorCallback);
+      var offerOptions = {
+        offerToReceiveAudio: false,
+        offerToReceiveVideo: false
+      };
+      that.peerConnection.createOffer(setLocalDesc, errorCallback,
+        offerOptions);
     }
-
   };
+
 
   that.iceRestart = function() {
     var offerOptions = {
@@ -272,8 +281,9 @@ Erizo.ChromeStableStack = function(spec) {
             candidate: spec.localCandidates.shift()
           });
         }
+      }, function(err) {
+        console.error('Failed to set remote description, ' + err);
       });
-      //});
 
     } else if (msg.type === 'candidate') {
       try {

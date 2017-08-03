@@ -28,9 +28,9 @@
         browser = "chrome-stable";
       }
     } else if (window.navigator.userAgent.match("Safari") !== null) {
-      browser = "bowser";
+      browser = "chrome-stable";
     } else if (window.navigator.userAgent.match("WebKit") !== null) {
-      browser = "bowser";
+      browser = "chrome-stable";
     }
 
     return browser;
