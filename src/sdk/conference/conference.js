@@ -862,7 +862,9 @@
       if (err) {
         return safeCall(onFailure, err);
       }
-      stream.close();
+      if (stream.channel) {
+        stream.channel.close();
+      }
       stream.signalOnPlayAudio = undefined;
       stream.signalOnPauseAudio = undefined;
       stream.signalOnPlayVideo = undefined;
