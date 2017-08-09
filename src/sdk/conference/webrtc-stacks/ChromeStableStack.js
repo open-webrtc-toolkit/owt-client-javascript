@@ -310,8 +310,8 @@ Erizo.ChromeStableStack = function(spec) {
   };
 
   that.getConnectionStats = function(onSuccess, onFailure) {
-    that.peerConnection.getStats(null, function(stats) {
-      onSuccess(Woogeen.Common.parseStats(stats));
+    that.peerConnection.getStats(function(stats) {
+      onSuccess(Woogeen.Common.parseStats(stats.result()));
     }, onFailure);
   };
 
