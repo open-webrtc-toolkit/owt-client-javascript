@@ -845,12 +845,14 @@ L.Logger.info('stream added:', stream.id());
             }
             return;
           }
-          mediaOption.audio = {
-            mandatory: {
-              chromeMediaSource: 'desktop',
-              chromeMediaSourceId: response.streamId
-            }
-          };
+          if (option.audio) {
+            mediaOption.audio = {
+              mandatory: {
+                chromeMediaSource: 'desktop',
+                chromeMediaSourceId: response.streamId
+              }
+            };
+          }
           mediaOption.video.mandatory = mediaOption.video.mandatory || {};
           mediaOption.video.mandatory.chromeMediaSource = 'desktop';
           mediaOption.video.mandatory.chromeMediaSourceId = response.streamId;
