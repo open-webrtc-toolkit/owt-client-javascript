@@ -1,6 +1,7 @@
 var runSocketIOSample = function() {
   'use strict';
   var localStream;
+  let showedRemoteStreams = [];
 
   function getParameterByName(name) {
     name = name.replace(/[\[]/, '\\\[').replace(/[\]]/, '\\\]');
@@ -52,7 +53,7 @@ var runSocketIOSample = function() {
       };
     }
     var div = document.getElementById('test' + streamId);
-    if(!div){
+    if (!div) {
       div = document.createElement('div');
       div.setAttribute('id', 'test' + streamId);
       div.setAttribute('title', 'Stream#' + streamId);
@@ -61,6 +62,14 @@ var runSocketIOSample = function() {
     div.setAttribute('style', 'width: ' + resolution.width + 'px; height: ' +
       resolution.height + 'px;');
     stream.show('test' + streamId);
+    showedRemoteStreams.push(stream);
+  }
+
+  function removeStreamFromShowedStreams(stream) {
+    let index = showedRemoteStreams.indexOf(stream);
+    if (index >= 0) {
+      showedRemoteStreams.slice(index, 1);
+    }
   }
 
   function trySubscribeStream(stream) {
@@ -119,6 +128,8 @@ var runSocketIOSample = function() {
         if (subscribeMix === 'true') {
           conference.unsubscribe(stream, function(et) {
             L.Logger.info(stream.id(), 'unsubscribe stream');
+            stream.hide();
+            removeStreamFromShowedStreams(stream);
             conference.subscribe(stream, {
               video: {
                 resolution: resolution
@@ -154,6 +165,10 @@ var runSocketIOSample = function() {
   });
 
   conference.on('server-disconnected', function() {
+    showedRemoteStreams.forEach((stream) => {
+      stream.hide();
+      removeStreamFromShowedStreams(stream);
+    });
     L.Logger.info('Server disconnected');
   });
 
@@ -189,6 +204,12 @@ var runSocketIOSample = function() {
         document.body.removeChild(element);
       }
     }
+  });
+
+  conference.on('stream-failed', function(event) {
+    L.Logger.info('Error occurred for stream ', event.stream.id());
+    event.stream.hide();
+    removeStreamFromShowedStreams(stream);
   });
 
   conference.on('user-joined', function(event) {
