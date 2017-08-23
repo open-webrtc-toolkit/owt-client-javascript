@@ -389,8 +389,8 @@
       self.socket.on('connection_failed', function(args) {
         L.Logger.error("MCU reports connection failed for stream: " +
           args.streamId);
-        if (self.localStreams[args.streamId] !== undefined) {
-          var stream = self.localStreams[args.streamId];
+        var stream = self.localStreams[args.streamId];
+        if (stream !== undefined) {
           self.unpublish(stream);
           // It is deleted if MCU ack "success" for unpublish. But I'm not
           // sure if MCU will ack "success" if the original access agent is
@@ -402,7 +402,8 @@
 
         if (self.state !== DISCONNECTED) {
           var disconnectEvt = new Woogeen.StreamEvent({
-            type: 'stream-failed'
+            type: 'stream-failed',
+            stream: stream
           });
           self.dispatchEvent(disconnectEvt);
         }
