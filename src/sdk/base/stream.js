@@ -582,8 +582,8 @@ L.Logger.info('stream added:', stream.id());
   createLocalStream({
     video: {
       device: 'camera',
-      resolution: '720p',
-      frameRate: [200, 500]
+      resolution: {width: 1280, height: 720},
+      frameRate: 24
     },
     audio: true,
     attribtues: null
@@ -659,6 +659,7 @@ L.Logger.info('stream added:', stream.id());
           mediaOption.video = JSON.parse(JSON.stringify(getReso(option.video.resolution
             .width, option.video.resolution.height)));
         } else {
+          L.Logger.warning('Expressing an resolution in string is deprecated, please use an object like {width: 1280, height: 720} instead.');
           mediaOption.video = JSON.parse(JSON.stringify(supportedVideoList[
             option.video.resolution] || supportedVideoList.unspecified));
         }
@@ -928,16 +929,9 @@ L.Logger.info('stream added:', stream.id());
                       <li>'screen' for stream from screen;</br>
                       Video quality may not good if screen sharing stream is published with H.264.</li>
                   </ul>
-              <li>Valid resolution list:</li>
-                  <ul>
-                      <li>'unspecified'</li>
-                      <li>'sif'</li>
-                      <li>'vga'</li>
-                      <li>'hd720p'</li>
-                      <li>'hd1080p'</li>
-                  </ul>
+              <li>resolution is an object has two properties: width and height. Both of them are numbers.</li>
               <li>frameRate is a number indicating frames per second. Actual frame rate on browser may not be exactly the same as specified here.</li>
-              <li>extensionId is id of Chrome Extension for screen sharing. </li>
+              <li>extensionId is the ID of Chrome Extension for screen sharing. </li>
               <li>deviceId is an identifier for the source of the MediaStreamTrack. It only works when input source is mic or camera. You can use <code>MediaDevices.enumerateDevices()</code> to get the list of available devices.</li>
           </ul>
   </ul>
@@ -964,7 +958,7 @@ L.Logger.info('stream added:', stream.id());
   Woogeen.LocalStream.create({
     video: {
       device: 'camera',
-      resolution: 'vga',
+      resolution: {width: 1280, height: 720},
     },
     audio: true
   }, function (err, stream) {

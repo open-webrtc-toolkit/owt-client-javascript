@@ -185,8 +185,8 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
           Woogeen.LocalStream.create({
             video: {
               device: "camera",
-              resolution: "hd720p",
-              frameRate: [30, 30]
+              resolution: {width: 1280, height: 720},
+              frameRate: 24
             },
             audio: true
           }, function(err, stream) {

@@ -234,7 +234,7 @@ var runSocketIOSample = function() {
 
   window.onload = function() {
     L.Logger.setLogLevel(L.Logger.INFO);
-    var myResolution = getParameterByName('resolution') || 'vga';
+    var myResolution = getParameterByName('resolution') || {width: 1280, height: 720};
     var shareScreen = getParameterByName('screen') || false;
     var myRoom = getParameterByName('room');
     var isHttps = (location.protocol === 'https:');
