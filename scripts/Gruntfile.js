@@ -8,6 +8,7 @@ module.exports = function(grunt) {
     '../src/sdk/base/L.Base64.js',
     '../src/sdk/base/L.Logger.js',
     '../src/sdk/base/stream.js',
+    '../src/sdk/conference/conferencesignaling.js',
     '../src/sdk/conference/conference.js',
     '../src/sdk/conference/webrtc-stacks/ChromeStableStack.js',
     '../src/sdk/conference/webrtc-stacks/FirefoxStack.js',

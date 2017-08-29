@@ -1,6 +1,8 @@
 /* global io */
 (function() {
 
+  const protocolVersion = '1.0';
+
   function safeCall() {
     var callback = arguments[0];
     if (typeof callback === 'function') {
@@ -8,8 +10,6 @@
       callback.apply(null, args);
     }
   }
-
-  Woogeen.sessionId = 103;
 
   var getBrowser = function() {
     var browser = "none";
@@ -70,31 +70,11 @@
     return that;
   }
 
-  function createRemoteStream(spec) {
-    if (!spec.video) {
-      return new Woogeen.RemoteStream(spec);
-    }
-    switch (spec.video.device) {
-      case 'mcu':
-        return new Woogeen.RemoteMixedStream(spec);
-      default:
-        return new Woogeen.RemoteStream(spec);
-    }
-  }
-
-  function sendEvent(socket, type, callback) {
-    if (!socket || !socket.connected) {
-      return callback('socket not ready');
-    }
-    try {
-      socket.emit(type, function(resp, mesg) {
-        if (resp === 'success') {
-          return callback(null, mesg);
-        }
-        return callback(mesg || 'response error');
-      });
-    } catch (err) {
-      callback('socket emit error');
+  function createRemoteStream(streamInfo) {
+    if (streamInfo.type === 'mixed') {
+      return new Woogeen.RemoteMixedStream(streamInfo);
+    } else {
+      return new Woogeen.RemoteStream(streamInfo);
     }
   }
 
@@ -114,65 +94,72 @@
     }
   }
 
-  function sendSdp(socket, type, option, sdp, callback) {
-    if (!socket || !socket.connected) {
-      return callback('error', 'socket not ready');
-    }
-    try {
-      socket.emit(type, option, sdp, function(status, resp) {
-        callback(status, resp);
-      });
-    } catch (err) {
-      callback('error', 'socket emit error');
-    }
-  }
-
-  function sendCtrlPayload(socket, action, streamId, onSuccess, onFailure) {
-    var payload = {
-      type: 'control',
-      payload: {
-        action: action,
-        streamId: streamId
-      }
-    };
-    sendMsg(socket, 'customMessage', payload, function(err, resp) {
-      if (err) {
-        return safeCall(onFailure, err);
-      }
-      safeCall(onSuccess, resp);
-    });
-  }
-
-  function mixOrUnmix(verb, socket, stream, targetStreams, onSuccess,
+  function mixOrUnmix(verb, signaling, stream, targetStreams, onSuccess,
     onFailure) {
-    if (!(stream instanceof Woogeen.Stream) &&
-      !(stream instanceof Woogeen.ExternalStream)) {
+    if (!(stream instanceof Woogeen.Stream) && !(stream instanceof Woogeen.ExternalStream)) {
       return safeCall(onFailure, 'Invalid stream');
     }
     if (!Array.isArray(targetStreams)) {
       return safeCall(onFailure, 'Target streams is not a list');
     }
-    var targetStreamIds = [];
+    var operationPromises = [];
     var i, targetStream;
     for (i = 0; i < targetStreams.length; i++) {
       targetStream = targetStreams[i];
       if (!(targetStream instanceof Woogeen.RemoteMixedStream)) {
-        return safeCall(onFailure,
-          'Invalid stream found in targetStreams.');
+        return safeCall(onFailure, 'Invalid stream found in targetStreams.');
       }
-      targetStreamIds.push(targetStream.id());
+      operationPromises.push(signaling.sendMessage('stream-control', {
+        id: stream.id(),
+        operation: verb,
+        data: targetStream.viewport()
+      }));
     }
-
-    sendMsg(socket, verb, {
-      streamId: stream.id(),
-      mixStreams: targetStreamIds
-    }, function(err) {
-      if (err) {
-        return safeCall(onFailure, err);
-      }
-      safeCall(onSuccess, null);
+    Promise.all(operationPromises).then(() => {
+      return safeCall(onSuccess, null);
+    }, (err) => {
+      return safeCall(onFailure, err);
     });
   }
+
+  function playOrPause(verb, signaling, stream, trackKind, onSuccess, onFailure) {
+    if (!(stream instanceof Woogeen.Stream)) {
+      safeCall(onFailure, 'Invalid stream');
+    }
+    if (trackKind !== undefined && trackKind !== 'audio' && trackKind !==
+      'video') {
+      safeCall(onFailure, 'Invalid track kind.');
+    }
+    var track = trackKind || 'av';
+    signaling.sendMessage('stream-control', {
+      id: stream.id(),
+      operation: verb,
+      data: track
+    }).then(() => {
+      safeCall(onSuccess);
+    }, (err) => {
+      safeCall(onFailure, err);
+    });
+  }
+
+  const resolutionName2Value = {
+    'cif': {width: 352, height: 288},
+    'vga': {width: 640, height: 480},
+    'svga': {width: 800, height: 600},
+    'xga': {width: 1024, height: 768},
+    'r640x360': {width: 640, height: 360},
+    'hd720p': {width: 1280, height: 720},
+    'sif': {width: 320, height: 240},
+    'hvga': {width: 480, height: 320},
+    'r480x360': {width: 480, height: 360},
+    'qcif': {width: 176, height: 144},
+    'r192x144': {width: 192, height: 144},
+    'hd1080p': {width: 1920, height: 1080},
+    'uhd_4k': {width: 3840, height: 2160},
+    'r360x360': {width: 360, height: 360},
+    'r480x480': {width: 480, height: 480},
+    'r720x720': {width: 720, height: 720}
+  };
 
   var DISCONNECTED = 0,
     CONNECTING = 1,
@@ -184,7 +171,14 @@
     this.spec = {};
     this.remoteStreams = {};
     this.localStreams = {};
+    this.subscriptionToStream = {};  // Maps from subscription ID to stream.
+    this.streamIdToSubscriptionId = {};
     this.state = DISCONNECTED;
+    // For backward compatible. Mix published stream to this viewport.
+    this.commonMixedStream = null;
+    this.participants = [];
+    this.externalUrlToSubscriptionId = {};
+    this.recorderCallbacks = {};  // Key is subscription ID, value is an object with onSuccess and onFailure function.
 
     if (spec.iceServers) {
       this.spec.userSetIceServers = spec.iceServers;
@@ -221,247 +215,177 @@
 
     self.state = CONNECTING;
 
-    if (self.socket !== undefined) { // whether reconnect
-      self.socket.connect();
-    } else {
-      self.socket = io.connect(host, {
-        reconnect: false,
-        secure: isSecured,
-        'force new connection': true
-      });
-
-      self.socket.on('add_stream', function(spec) {
-        if (self.remoteStreams[spec.id] !== undefined) {
-          L.Logger.warning('stream already added:', spec.id);
-          return;
-        }
-        var stream = createRemoteStream({
-          video: spec.video,
-          audio: spec.audio,
-          id: spec.id,
-          from: spec.from,
-          attributes: spec.attributes,
-          viewport: spec.view
+    const loginInfo = {
+      token: tokenString,
+      userAgent: Woogeen.Common.sysInfo(),
+      protocol: protocolVersion
+    };
+    self.signaling = Woogeen.ConferenceSioSignaling.create();
+    self.signaling.connect(host, isSecured, loginInfo).then((resp) => {
+      self.state = CONNECTED;
+      self.myId = resp.user;
+      self.participantId = resp.id;
+      let room = resp.room;
+      let streams = [];
+      if (room.streams !== undefined) {
+        streams = room.streams.map(function(st) {
+          if (st.type === 'mixed') {
+            st.viewport = st.info.label;
+          }
+          self.remoteStreams[st.id] = createRemoteStream(st);
+          if (st.viewport === 'common') {
+            self.commonMixedStream = self.remoteStreams[st.id];
+          }
+          return self.remoteStreams[st.id];
         });
-        var evt = new Woogeen.StreamEvent({
-          type: 'stream-added',
-          stream: stream
-        });
-        self.remoteStreams[spec.id] = stream;
-        self.dispatchEvent(evt);
-      });
-
-      self.socket.on('update_stream', function(spec) {
-        // Handle: 'VideoEnabled', 'VideoDisabled', 'AudioEnabled', 'AudioDisabled', 'VideoLayoutChanged', [etc]
-        var stream = self.remoteStreams[spec.id];
-        if (stream) {
-          stream.emit(spec.event, spec.data);
-        }
-      });
-
-      self.socket.on('remove_stream', function(spec) {
-        var stream = self.remoteStreams[spec.id];
-        if (stream) {
-          stream.close(); // >removeStream<
-          delete self.remoteStreams[spec.id];
-          var evt = new Woogeen.StreamEvent({
-            type: 'stream-removed',
-            stream: stream
-          });
-          self.dispatchEvent(evt);
-        }
-      });
-
-      self.socket.on('signaling_message_erizo', function(arg) {
-        var stream;
-        if (arg.peerId) {
-          stream = self.remoteStreams[arg.peerId];
-        } else {
-          stream = self.localStreams[arg.streamId];
-        }
-
-        if (stream && stream.channel) {
-          stream.channel.processSignalingMessage(arg.mess);
-        }
-      });
-
-      self.socket.on('add_recorder', function(spec) {
-        var evt = new Woogeen.RecorderEvent({
-          type: 'recorder-added',
-          id: spec.id
-        });
-        self.dispatchEvent(evt);
-      });
-
-      self.socket.on('reuse_recorder', function(spec) {
-        var evt = new Woogeen.RecorderEvent({
-          type: 'recorder-continued',
-          id: spec.id
-        });
-        self.dispatchEvent(evt);
-      });
-
-      self.socket.on('remove_recorder', function(spec) {
-        var evt = new Woogeen.RecorderEvent({
-          type: 'recorder-removed',
-          id: spec.id
-        });
-        self.dispatchEvent(evt);
-      });
-
-      self.socket.on('disconnect', function() {
-        var triggerEvent = false;
-        if (self.state !== DISCONNECTED) {
-          triggerEvent = true;
-          L.Logger.info('Will trigger server-disconnect');
-        } else {
-          L.Logger.info('Will not trigger server-disconnect');
-        }
-        self.state = DISCONNECTED;
-        self.myId = null;
-        var i, stream;
-        // remove all remote streams
-        for (i in self.remoteStreams) {
-          if (self.remoteStreams.hasOwnProperty(i)) {
-            stream = self.remoteStreams[i];
-            stream.close();
-            delete self.remoteStreams[i];
+      }
+      var me;
+      if (resp.users !== undefined) {
+        for (var i = 0; i < resp.users.length; i++) {
+          if (resp.users[i].id === resp.clientId) {
+            me = resp.users[i];
+            break;
           }
         }
-
-        // close all channel
-        for (i in self.localStreams) {
-          if (self.localStreams.hasOwnProperty(i)) {
-            stream = self.localStreams[i];
-            if (stream.channel && typeof stream.channel.close ===
-              'function') {
-              stream.channel.close();
+      }
+      self.signaling.on('stream', function(data) {
+        data = data.msg;
+        let stream;
+        let evt;
+        switch (data.status) {
+          case 'add':
+            const streamInfo = data.data;
+            if (self.remoteStreams[streamInfo.id] !== undefined) {
+              L.Logger.warning('Stream was already added:', streamInfo.id);
+              return;
             }
-            delete self.localStreams[i];
-          }
+            stream = createRemoteStream(streamInfo);
+            evt = new Woogeen.StreamEvent({
+              type: 'stream-added',
+              stream: stream
+            });
+            self.remoteStreams[streamInfo.id] = stream;
+            self.dispatchEvent(evt);
+            break;
+          case 'remove':
+            stream = self.remoteStreams[data.id];
+            if (stream) {
+              stream.close(); // >removeStream<
+              delete self.remoteStreams[data.id];
+              evt = new Woogeen.StreamEvent({
+                type: 'stream-removed',
+                stream: stream
+              });
+              self.dispatchEvent(evt);
+            }
+            break;
+          case 'update':
+            stream = self.remoteStreams[data.id];
+            if (!stream) {
+              L.Logger.warning('Invalid stream ID.');
+              return;
+            }
+            switch (data.data.field) {
+              case 'video.layout':
+                stream.emit('VideoLayoutChanged', data.data.value);
+                break;
+              case 'audio.status':
+                if (data.data.value === 'active') {
+                  stream.emit('AudioEnabled');
+                } else if (data.data.value === 'inactive') {
+                  stream.emit('AudioDisabled');
+                } else {
+                  L.Logger.warning('Invalid stream event.');
+                }
+                break;
+              case 'video.status':
+                if (data.data.value === 'active') {
+                  stream.emit('VideoEnabled');
+                } else if (data.data.value === 'inactive') {
+                  stream.emit('VideoDisabled');
+                } else {
+                  L.Logger.warning('Invalid stream event.');
+                }
+                break;
+              default:
+                L.Logger.warning('Unknown message from MCU.');
+                break;
+            }
+            break;
+          default:
+            L.Logger.warning('Received unknown stream notification.');
+            break;
         }
-
-        // close socket.io
-        try {
-          self.socket.disconnect();
-        } catch (err) {}
-        if (triggerEvent) {
-          var evtDisconnect = new Woogeen.ClientEvent({
-            type: 'server-disconnected'
+      });
+      self.signaling.on('progress', function(arg) {
+        arg = arg.msg;
+        let stream = self.subscriptionToStream[arg.id];
+        if (!stream) {
+          stream = self.localStreams[arg.id];
+        }
+        if (arg.status === 'soac' && stream && stream.channel) {
+          stream.channel.processSignalingMessage(arg.data);
+        } else if (arg.status === 'ready' && self.recorderCallbacks[arg.id]) {
+          safeCall(self.recorderCallbacks[arg.id].onSuccess, {
+            recorderId: arg.id,
+            host: arg.data.host,
+            path: arg.data.file
           });
-          self.dispatchEvent(evtDisconnect);
+          delete self.recorderCallbacks[arg.id];
+        } else if (arg.status === 'error' && self.recorderCallbacks[arg.id]) {
+          safeCall(self.recorderCallbacks[arg.id].onFailure, arg.data);
+          delete self.recorderCallbacks[arg.id];
         }
       });
-
-
-      self.socket.on('user_join', function(spec) {
-        var evt = new Woogeen.ClientEvent({
-          type: 'user-joined',
-          user: spec.user
-        });
-        self.dispatchEvent(evt);
-      });
-
-      self.socket.on('user_leave', function(spec) {
-        var evt = new Woogeen.ClientEvent({
-          type: 'user-left',
-          user: spec.user
-        });
-        self.dispatchEvent(evt);
-      });
-
-      self.socket.on('custom_message', function(spec) {
+      self.signaling.on('text', function(data) {
         var evt = new Woogeen.MessageEvent({
           type: 'message-received',
-          msg: spec
+          msg: data.message
         });
         self.dispatchEvent(evt);
       });
-
-      self.socket.on('connect_failed', function(err) {
-        safeCall(onFailure, err || 'connection_failed');
-      });
-
-      self.socket.on('error', function(err) {
-        safeCall(onFailure, err || 'connection_error');
-      });
-
-      self.socket.on('connection_failed', function(args) {
-        L.Logger.error("MCU reports connection failed for stream: " +
-          args.streamId);
-        var stream = self.localStreams[args.streamId];
-        if (stream !== undefined) {
-          self.unpublish(stream);
-          // It is deleted if MCU ack "success" for unpublish. But I'm not
-          // sure if MCU will ack "success" if the original access agent is
-          // down.
-          delete self.localStreams[args.streamId];
-        } else {
-          self.unsubscribe(self.remoteStreams[args.streamId]);
-        }
-
-        if (self.state !== DISCONNECTED) {
-          var disconnectEvt = new Woogeen.StreamEvent({
-            type: 'stream-failed',
-            stream: stream
-          });
-          self.dispatchEvent(disconnectEvt);
-        }
-      });
-
-      // Seems MCU no longer emits this event.
-      self.socket.on('stream-publish', function(spec) {
-        var myStream = self.localStreams[spec.id];
-        if (myStream) {
-          console.log('Stream published');
-          self.dispatchEvent(new Woogeen.StreamEvent({
-            type: 'stream-published',
-            stream: myStream
-          }));
-        }
-      });
-
-    }
-
-    try {
-      var loginInfo = {
-        token: tokenString,
-        userAgent: Woogeen.Common.sysInfo()
-      };
-      self.socket.emit('login', loginInfo, function(status, resp) {
-        if (status === 'success') {
-          self.myId = resp.clientId;
-          self.conferenceId = resp.id;
-          self.state = CONNECTED;
-          var streams = [];
-          self.conferenceId = resp.id;
-          if (resp.streams !== undefined) {
-            streams = resp.streams.map(function(st) {
-              st.viewport = st.view;
-              self.remoteStreams[st.id] = createRemoteStream(st);
-              return self.remoteStreams[st.id];
+      self.signaling.on('participant', (data)=>{
+        data = data.msg;
+        let participant;
+        let evt;
+        switch (data.action) {
+          case 'join':
+            participant = {
+              id: data.data.id,
+              role: data.data.role,
+              name: data.data.user
+            };
+            self.participants[participant.id] = participant;
+            evt = new Woogeen.ClientEvent({
+              type: 'user-joined',
+              user: participant
             });
-          }
-          var me;
-          if (resp.users !== undefined) {
-            for (var i = 0; i < resp.users.length; i++) {
-              if (resp.users[i].id === resp.clientId) {
-                me = resp.users[i];
-                break;
-              }
+            self.dispatchEvent(evt);
+            break;
+          case 'leave':
+            participant = self.participants[data.data.id];
+            if (!participant) {
+              return;
             }
-          }
-          return safeCall(onSuccess, {
-            streams: streams,
-            users: resp.users,
-            self: me
-          });
+            evt = new Woogeen.ClientEvent({
+              type: 'user-left',
+              user: participant
+            });
+            delete self.participants[data.data.id];
+            self.dispatchEvent(evt);
+            break;
+          default:
+            L.Logger.warning('Received unknown message.');
         }
-        return safeCall(onFailure, resp || 'response error');
       });
-    } catch (e) {
-      safeCall(onFailure, 'socket emit error');
-    }
+      return safeCall(onSuccess, {
+        streams: streams,
+        users: resp.users,
+        self: me
+      });
+    }, (e) => {
+      return safeCall(onFailure, e || 'response error');
+    });
   };
 
   /**
@@ -474,7 +398,6 @@
       <ul>
         <li>maxAudioBW: xxx. It does not work on Edge.</li>
         <li>maxVideoBW: xxx. It does not work on Edge.</li>
-        <li>unmix: false/true. If true, this stream would not be included in mixed stream.</li>
         <li>audioCodec: 'opus'/'pcmu'/'pcma'. Preferred audio codec.</li>
         <li>videoCodec: 'h264'/'vp8'/'vp9'. Preferred video codec. H.264 is the default preferred codec. Note for Firefox VP9 is not stable, so please do not specify VP9 for Firefox.</li>
         <li>transport: 'udp'/'tcp'. RTSP connection transport type, default 'udp'; only for RTSP input.</li>
@@ -515,49 +438,76 @@
     }
     options.videoCodec = options.videoCodec || 'h264';
 
-    if (self.localStreams[stream.id()] === undefined) { // not pulished
-      var opt = stream.toJson();
+    if (self.localStreams[stream.id()] === undefined) { // not published
+      var streamOpt = stream.toJson();
       if (options.unmix === true) {
-        opt.unmix = true;
+        streamOpt.unmix = true;
       }
       if (stream.url() !== undefined) {
-        opt.state = 'url';
-        opt.transport = options.transport;
-        opt.bufferSize = options.bufferSize;
-        sendSdp(self.socket, 'publish', opt, stream.url(), function(answer,
-          id) {
-          if (answer !== 'success') {
-            return safeCall(onFailure, (answer === 'error' ? id : answer));
-          }
+        let connectionOpt = {};
+        connectionOpt.url = stream.url();
+        connectionOpt.transport = options.transport;
+        connectionOpt.bufferSize = options.bufferSize;
+
+        let streamingInMediaOptions = {audio: 'auto', video: 'auto'};
+
+        self.signaling.send('publish', {
+          type: 'streaming',
+          connection: connectionOpt,
+          media: streamingInMediaOptions,
+          attributes: stream.attributes()
+        }).then((data) => {
+          const id = data.id;
           stream.id = function() {
             return id;
           };
           self.localStreams[id] = stream;
-          safeCall(onSuccess, stream);
+          safeCall(onSuccess);
+        }, (err)=>{
+          safeCall(onFailure, err);
         });
         return;
       }
 
-      opt.state = 'erizo';
-      sendSdp(self.socket, 'publish', opt, undefined, function(answer, id) {
-        if (answer === 'error') {
-          return safeCall(onFailure, id);
+      let mediaOptions = {};
+      if (stream.hasAudio()) {
+        mediaOptions.audio = {};
+        if (typeof streamOpt.audio === 'object') {
+          mediaOptions.audio.source = streamOpt.audio.source;
+        } else {
+          mediaOptions.audio.source = 'mic';
         }
-        if (answer === 'timeout') {
-          return safeCall(onFailure, answer);
+      } else {
+        mediaOptions.audio = false;
+      }
+      if (stream.hasVideo()) {
+        mediaOptions.video = {};
+        if (stream.isScreen()) {
+          mediaOptions.video.source = 'screen-cast';
+        } else {
+          mediaOptions.video.source = 'camera';
         }
+      } else {
+        mediaOptions.video = false;
+      }
+      self.signaling.sendMessage('publish', {
+        type: 'webrtc',
+        connection: undefined,
+        media: mediaOptions,
+        attributes: stream.attributes()
+      }).then((data) => {
+        const id = data.id;
         stream.id = function() {
           return id;
         };
         self.localStreams[id] = stream;
-
         stream.channel = createChannel({
           callback: function(message) {
             console.log("Sending message", message);
-            sendSdp(self.socket, 'signaling_message', {
-              streamId: id,
-              msg: message
-            }, undefined, function() {});
+            self.signaling.sendMessage('soac', {
+              id: id,
+              signaling: message
+            });
           },
           video: stream.hasVideo(),
           audio: stream.hasAudio(),
@@ -567,31 +517,32 @@
           audioCodec: options.audioCodec,
           videoCodec: options.videoCodec
         });
-
         var onChannelReady = function() {
           stream.signalOnPlayAudio = function(onSuccess, onFailure) {
-            sendCtrlPayload(self.socket, 'audio-out-on', id,
+            playOrPause('play', self.signaling, stream, 'audio',
               onSuccess, onFailure);
           };
           stream.signalOnPauseAudio = function(onSuccess, onFailure) {
-            sendCtrlPayload(self.socket, 'audio-out-off', id,
+            playOrPause('pause', self.signaling, stream, 'audio',
               onSuccess, onFailure);
           };
           stream.signalOnPlayVideo = function(onSuccess, onFailure) {
-            sendCtrlPayload(self.socket, 'video-out-on', id,
+            playOrPause('play', self.signaling, stream, 'video',
               onSuccess, onFailure);
           };
           stream.signalOnPauseVideo = function(onSuccess, onFailure) {
-            sendCtrlPayload(self.socket, 'video-out-off', id,
+            playOrPause('pause', self.signaling, stream, 'video',
               onSuccess, onFailure);
           };
+          if (self.commonMixedStream) {
+            self.mix(stream, [self.commonMixedStream]);
+          }
           safeCall(onSuccess, stream);
           onFailure = function() {};
           onChannelReady = function() {};
         };
         var onChannelFailed = function() {
-          sendMsg(self.socket, 'unpublish', id, function() {},
-            function() {}); // FIXME: still need this?
+          self.signaling.sendMessage('unpublish', {id: id});  // FIXME: still need this?
           stream.channel.close();
           stream.channel = undefined;
           safeCall(onFailure, 'peer connection failed');
@@ -614,7 +565,6 @@
               L.Logger.warning('unknown ice connection state:', state);
           }
         };
-
         stream.channel.addStream(stream.mediaStream);
         stream.channel.createOffer(false);
       });
@@ -622,7 +572,6 @@
       return safeCall(onFailure, 'already published');
     }
   };
-
   /**
      * @function unpublish
      * @instance
@@ -647,11 +596,16 @@
   WoogeenConferenceBase.prototype.unpublish = function(stream, onSuccess,
     onFailure) {
     var self = this;
-    if (!(stream instanceof Woogeen.LocalStream || stream instanceof Woogeen
-        .ExternalStream)) {
+    if (!(stream instanceof Woogeen.LocalStream || stream instanceof Woogeen.ExternalStream)) {
       return safeCall(onFailure, 'invalid stream');
     }
-    sendMsg(self.socket, 'unpublish', stream.id(), function(err) {
+    self.signaling.sendMessage('unpublish', {
+      id: stream.id()
+    }).then(() => {
+      safeCall(onSuccess);
+    }, (err) => {
+      safeCall(onFailure, err);
+    }).then(() => {
       /* TODO(jianlin): for now we close corresponding channel as long as we request unpublishing.
          futher we need to parse the err from mcu to decide if channel needs to
          be closed*/
@@ -667,10 +621,6 @@
       stream.signalOnPauseAudio = undefined;
       stream.signalOnPlayVideo = undefined;
       stream.signalOnPauseVideo = undefined;
-      if (err) {
-        return safeCall(onFailure, err);
-      }
-      safeCall(onSuccess, null);
     });
   };
 
@@ -740,30 +690,38 @@
       delete options.video.qualityLevel;
     }
 
-    sendSdp(self.socket, 'subscribe', {
-      streamId: stream.id(),
-      audio: stream.hasAudio() && (options.audio !== false),
-      video: stream.hasVideo() && options.video,
-      browser: getBrowser()
-    }, undefined, function(answer, errText) {
-      if (answer === 'error' || answer === 'timeout') {
-        return safeCall(onFailure, errText || answer);
+    // TODO: Making default audio/video to false in 4.0.
+    let audioOptions = (stream.hasAudio() && options.audio !== false) ? {
+      from: stream.id()
+    } : false;
+    let videoOptions = (stream.hasVideo() && options.video !== false) ? {
+      from: stream.id()
+    } : false;
+    if (options.video && options.video.resolution) {
+      videoOptions.resolution = options.video.resolution;
+    }
+    self.signaling.sendMessage('subscribe', {
+      type: 'webrtc',
+      connection: undefined,
+      media: {
+        audio: audioOptions,
+        video: videoOptions
       }
-
+    }).then((data) => {
+      self.subscriptionToStream[data.id] = stream;
+      self.streamIdToSubscriptionId[stream.id()] = data.id;
       stream.channel = createChannel({
         callback: function(message) {
-          sendSdp(self.socket, 'signaling_message', {
-            streamId: stream.id(),
-            msg: message,
-            browser: stream.channel.browser
-          }, undefined, function() {});
+          self.signaling.sendMessage('soac', {
+            id: data.id,  // Subscription ID.
+            signaling: message
+          });
         },
         audio: stream.hasAudio() && (options.audio !== false),
         video: stream.hasVideo() && (options.video !== false),
         iceServers: self.getIceServers(),
         videoCodec: options.videoCodec
       });
-
       stream.channel.onaddstream = function(evt) {
         stream.mediaStream = evt.stream;
         if (channelIsReady && (mediaStreamIsReady === false)) {
@@ -775,20 +733,20 @@
       };
       var onChannelReady = function() {
         stream.signalOnPlayAudio = function(onSuccess, onFailure) {
-          sendCtrlPayload(self.socket, 'audio-in-on', stream.id(),
-            onSuccess, onFailure);
+          playOrPause('play', self.signaling, stream, 'audio', onSuccess,
+            onFailure);
         };
         stream.signalOnPauseAudio = function(onSuccess, onFailure) {
-          sendCtrlPayload(self.socket, 'audio-in-off', stream.id(),
-            onSuccess, onFailure);
+          playOrPause('pause', self.signaling, stream, 'audio', onSuccess,
+            onFailure);
         };
         stream.signalOnPlayVideo = function(onSuccess, onFailure) {
-          sendCtrlPayload(self.socket, 'video-in-on', stream.id(),
-            onSuccess, onFailure);
+          playOrPause('play', self.signaling, stream, 'video', onSuccess,
+            onFailure);
         };
         stream.signalOnPauseVideo = function(onSuccess, onFailure) {
-          sendCtrlPayload(self.socket, 'video-in-off', stream.id(),
-            onSuccess, onFailure);
+          playOrPause('pause', self.signaling, stream, 'video', onSuccess,
+            onFailure);
         };
         if (mediaStreamIsReady && (channelIsReady === false)) {
           channelIsReady = true;
@@ -800,8 +758,7 @@
         onChannelReady = function() {};
       };
       var onChannelFailed = function() {
-        sendMsg(self.socket, 'unsubscribe', stream.id(), function() {},
-          function() {});
+        self.signaling.sendMessage('unsubscribe', {id: data.id});
         stream.close();
         stream.signalOnPlayAudio = undefined;
         stream.signalOnPauseAudio = undefined;
@@ -828,6 +785,8 @@
         }
       };
       stream.channel.createOffer(true);
+    }, (err) => {
+      return safeCall(onFailure, err);
     });
   };
 
@@ -858,19 +817,25 @@
     if (!(stream instanceof Woogeen.RemoteStream)) {
       return safeCall(onFailure, 'invalid stream');
     }
-    sendMsg(self.socket, 'unsubscribe', stream.id(), function(err, resp) {
-      if (err) {
-        return safeCall(onFailure, err);
-      }
-      if (stream.channel) {
-        stream.channel.close();
-      }
+    self.signaling.sendMessage('unsubscribe', {
+      id: self.streamIdToSubscriptionId[stream.id()]
+    }).then(() => {
+      stream.close();
       stream.signalOnPlayAudio = undefined;
       stream.signalOnPauseAudio = undefined;
       stream.signalOnPlayVideo = undefined;
       stream.signalOnPauseVideo = undefined;
-      safeCall(onSuccess, resp);
+      if (stream.channel && typeof stream.channel.close === 'function') {
+        stream.channel.close();
+      }
+    }).then(() => {
+      safeCall(onSuccess);
+    }, (err) => {
+      safeCall(onFailure, err);
     });
+    self.subscriptionToStream[self.streamIdToSubscriptionId[stream.id()]] =
+      undefined;
+    self.streamIdToSubscriptionId[stream.id()] = undefined;
   };
 
   /**
@@ -946,13 +911,7 @@
       </script>
          */
       this.leave = function() {
-        sendEvent(this.socket, 'logout', function(err) {
-          if (err) {
-            L.Logger.warning(
-              'Server returns error for logout event');
-          }
-        });
-        this.socket.disconnect();
+        this.signaling.disconnect();
       };
 
       /**
@@ -977,6 +936,7 @@
   </script>
      */
       this.send = function(data, receiver, onSuccess, onFailure) {
+        const self = this;
         if (data === undefined || data === null || typeof data ===
           'function') {
           return safeCall(onFailure, 'nothing to send');
@@ -993,15 +953,13 @@
         } else {
           return safeCall(onFailure, 'invalid receiver');
         }
-        sendMsg(this.socket, 'customMessage', {
-          type: 'data',
-          data: data,
-          receiver: receiver
-        }, function(err, resp) {
-          if (err) {
-            return safeCall(onFailure, err);
-          }
-          safeCall(onSuccess, resp);
+        self.signaling.sendMessage('text', {
+          to: receiver,
+          message: data
+        }).then(() => {
+          safeCall(onSuccess);
+        }, (err) => {
+          safeCall(onFailure, err);
         });
       };
 
@@ -1029,7 +987,7 @@
       </script>
          */
       this.mix = function(stream, targetStreams, onSuccess, onFailure) {
-        return mixOrUnmix('mix', this.socket, stream, targetStreams,
+        return mixOrUnmix('mix', this.signaling, stream, targetStreams,
           onSuccess, onFailure);
       };
 
@@ -1056,7 +1014,7 @@
       </script>
          */
       this.unmix = function(stream, targetStreams, onSuccess, onFailure) {
-        return mixOrUnmix('unmix', this.socket, stream, targetStreams,
+        return mixOrUnmix('unmix', this.signaling, stream, targetStreams,
           onSuccess, onFailure);
       };
 
@@ -1225,8 +1183,7 @@
   });
   </script>
      */
-      this.addExternalOutput = function(url, options, onSuccess,
-        onFailure) {
+      this.addExternalOutput = function(url, options, onSuccess, onFailure) {
         var self = this;
         if (typeof options === 'function') {
           onFailure = onSuccess;
@@ -1236,18 +1193,41 @@
           options = {};
         }
         options.url = url;
-
         // See http://shilv018.sh.intel.com/bugzilla_WebRTC/show_bug.cgi?id=976#c8 .
         if (options.video && options.video.resolution) {
           options.resolution = options.video.resolution;
         }
-
-        sendMsg(self.socket, 'addExternalOutput', options, function(
-          err) {
-          if (err) {
-            return safeCall(onFailure, err);
+        let streamId = options.streamId || self.commonMixedStream.id();
+        if (!streamId) {
+          return safeCall(onFailure, 'Stream ID is not specified.');
+        }
+        let mediaOptions = {
+          audio: {
+            from: streamId
+          },
+          video: {
+            from: streamId,
+            format: {}
           }
+        };
+        if (options.resolution) {
+          if (typeof options.resolution === 'string') {
+            mediaOptions.video.format.resolution = resolutionName2Value[options.resolution];
+          } else {
+            mediaOptions.video.format.resolution = options.resolution;
+          }
+        }
+        self.signaling.sendMessage('subscribe', {
+          type: 'streaming',
+          connection: {
+            url: url
+          },
+          media: mediaOptions
+        }).then((data) => {
+          self.externalUrlToSubscriptionId[url] = data.id;
           safeCall(onSuccess);
+        }, (err) => {
+          safeCall(onFailure, err);
         });
       };
 
@@ -1282,8 +1262,7 @@
   });
   </script>
      */
-      this.updateExternalOutput = function(url, options, onSuccess,
-        onFailure) {
+      this.updateExternalOutput = function(url, options, onSuccess, onFailure) {
         var self = this;
         if (typeof options === 'function') {
           onFailure = onSuccess;
@@ -1292,22 +1271,41 @@
         } else if (typeof options !== 'object' || options === null) {
           options = {};
         }
-        options.url = url;
-
-        // See http://shilv018.sh.intel.com/bugzilla_WebRTC/show_bug.cgi?id=976#c8 .
-        if (options.video && options.video.resolution) {
-          options.resolution = options.video.resolution;
+        if (typeof url !== 'string' || !self.externalUrlToSubscriptionId[url]) {
+          safeCall(onFailure, 'Invalid URL.');
+          return;
         }
-
-        sendMsg(self.socket, 'updateExternalOutput', options,
-          function(err) {
-            if (err) {
-              return safeCall(onFailure, err);
-            }
-            safeCall(onSuccess);
-          });
+        let streamId = options.streamId || self.commonMixedStream.id();
+        if (!streamId) {
+          return safeCall(onFailure, 'Stream ID is not specified.');
+        }
+        let subscriptionUpdateOptions = {
+          audio: {
+            from: streamId
+          },
+          video: {
+            from: streamId,
+            format: {}
+          }
+        };
+        if (options.resolution) {
+          if (typeof options.resolution === 'string') {
+            subscriptionUpdateOptions.format.video.resolution =
+              resolutionName2Value[options.resolution];
+          } else {
+            subscriptionUpdateOptions.format.video.resolution = options.resolution;
+          }
+        }
+        self.signaling.sendMessage('subscription-control', {
+          id: self.externalUrlToSubscriptionId[url],
+          operation: 'update',
+          data: subscriptionUpdateOptions
+        }).then(() => {
+          safeCall(onSuccess);
+        }, (err) => {
+          safeCall(onFailure, err);
+        });
       };
-
       /**
      * @function removeExternalOutput
      * @instance
@@ -1333,17 +1331,16 @@
    */
       this.removeExternalOutput = function(url, onSuccess, onFailure) {
         var self = this;
-        if (typeof url !== 'string') {
-          safeCall(onFailure, 'URL should be string.');
+        if (typeof url !== 'string' || !self.externalUrlToSubscriptionId[url]) {
+          safeCall(onFailure, 'Invalid URL.');
           return;
         }
-        sendMsg(self.socket, 'removeExternalOutput', {
-          url: url
-        }, function(err) {
-          if (err) {
-            return safeCall(onFailure, err);
-          }
+        self.signaling.sendMessage('unsubscribe', {
+          id: self.externalUrlToSubscriptionId[url]
+        }).then(() => {
           safeCall(onSuccess);
+        }, (err) => {
+          safeCall(onFailure, err);
         });
       };
 
@@ -1401,14 +1398,77 @@
         } else if (typeof options !== 'object' || options === null) {
           options = {};
         }
-
-        sendMsg(self.socket, 'startRecorder', options, function(err,
-          resp) {
-          if (err) {
-            return safeCall(onFailure, err);
+        let mediaSubOptions = {};
+        if (!options.audioStreamId && !options.videoStreamId) {
+          mediaSubOptions.audio = {
+            from: self.commonMixedStream.id()
+          };
+          mediaSubOptions.video = {
+            from: self.commonMixedStream.id()
+          };
+        } else if (typeof options.audioStreamId === 'string' && !options.videoStreamId) {
+          mediaSubOptions.audio = {
+            from: options.audioStreamId
+          };
+          mediaSubOptions.video = false;
+        } else if (typeof options.videoStreamId === 'string' && !options.audioStreamId) {
+          mediaSubOptions.audio = false;
+          mediaSubOptions.video = {
+            from: options.videoStreamId
+          };
+        } else if (typeof options.audioStreamId === 'string' && typeof options
+          .videoStreamId === 'string') {
+          mediaSubOptions.audio = {
+            from: options.audioStreamId
+          };
+          mediaSubOptions.video = {
+            from: options.videoStreamId
+          };
+        }
+        if (options.audioCodec && mediaSubOptions.audio) {
+          mediaSubOptions.audio.format = {
+            codec: options.audioCodec
+          };
+        }
+        if (options.videoCodec && mediaSubOptions.video) {
+          mediaSubOptions.video.format = {
+            codec: options.videoCodec
+          };
+        }
+        // TODO: implement parameters.
+        if (!options.recorderId) { // Add a new recorder.
+          self.signaling.sendMessage('subscribe', {
+            type: 'recording',
+            connection: {
+              container: undefined
+            },
+            media: mediaSubOptions
+          }).then((data) => {
+            self.recorderCallbacks[data.id] = {
+              onSuccess: onSuccess,
+              onFailure: onFailure
+            };
+          }, (err) => {
+            safeCall(onFailure, err);
+          });
+        } else { // Update recorder.
+          // Update |mediaSubOptions| for updating.
+          if (mediaSubOptions.audio && mediaSubOptions.audio.format) {
+            delete mediaSubOptions.audio.format;
           }
-          safeCall(onSuccess, resp);
-        });
+          if (mediaSubOptions.video && mediaSubOptions.video.format) {
+            delete mediaSubOptions.video.format;
+          }
+          self.signaling.sendMessage('subscription-control', {
+            id: options.recorderId,
+            operation: 'update',
+            data: mediaSubOptions
+          }).then(() => {
+            safeCall(onSuccess, options.recorderId);
+          }, (err) => {
+            safeCall(onFailure, err);
+          });
+        }
       };
 
       /**
@@ -1448,13 +1508,16 @@
         } else if (typeof options !== 'object' || options === null) {
           options = {};
         }
+        if (typeof options.recorderId !== 'string') {
+          safeCall("Invalid recorder ID.");
+        }
 
-        sendMsg(self.socket, 'stopRecorder', options, function(err,
-          resp) {
-          if (err) {
-            return safeCall(onFailure, err);
-          }
-          safeCall(onSuccess, resp);
+        self.signaling.sendMessage('unsubscribe', {
+          id: options.recorderId
+        }).then(() => {
+          safeCall(onSuccess);
+        }, (err) => {
+          safeCall(onFailure, err);
         });
       };
 
@@ -1490,22 +1553,29 @@
        */
       this.getRegion = function(options, onSuccess, onFailure) {
         var self = this;
-        if (typeof options !== 'object' || options === null ||
-          typeof options.id !== 'string' || options.id === '') {
-          return safeCall(onFailure, 'invalid options');
+        if (typeof options !== 'object' || options === null || typeof options.id !==
+          'string' || options.id === '') {
+          return safeCall(onFailure, 'Invalid options.');
+        }
+
+        if (!options.mixedStreamId && self.commonMixedStream) {
+          options.mixedStreamId = self.commonMixedStream.id();
+        }
+        if (typeof options.mixedStreamId !== 'string' || !(self.remoteStreams[
+            options.mixedStreamId] instanceof Woogeen.RemoteMixedStream)) {
+          return safeCall(onFailure, 'Invalid mixed stream ID.');
         }
 
         var optionsMessage = {
           id: options.id,
-          mixStreamId: options.mixedStreamId
+          operation: 'get-region',
+          data: self.remoteStreams[options.mixedStreamId].viewport()
         };
 
-        sendMsg(self.socket, 'getRegion', optionsMessage, function(
-          err, resp) {
-          if (err) {
-            return safeCall(onFailure, err);
-          }
-          safeCall(onSuccess, resp);
+        self.signaling.sendMessage('stream-control', optionsMessage).then((regionId)=>{
+          safeCall(onSuccess, {region: regionId});
+        }, (err)=>{
+          safeCall(onFailure, err);
         });
       };
 
@@ -1536,25 +1606,33 @@
        */
       this.setRegion = function(options, onSuccess, onFailure) {
         var self = this;
-        if (typeof options !== 'object' || options === null ||
-          typeof options.id !== 'string' || options.id === '' ||
-          typeof options.region !== 'string' || options.region === ''
-        ) {
-          return safeCall(onFailure, 'invalid options');
+        if (typeof options !== 'object' || options === null || typeof options.id !==
+          'string' || options.id === '' || typeof options.region !== 'string' ||
+          options.region === '') {
+          return safeCall(onFailure, 'Invalid options.');
+        }
+
+        if (!options.mixedStreamId && self.commonMixedStream) {
+          options.mixedStreamId = self.commonMixedStream.id();
+        }
+        if (typeof options.mixedStreamId !== 'string' || !(self.remoteStreams[
+            options.mixedStreamId] instanceof Woogeen.RemoteMixedStream)) {
+          return safeCall(onFailure, 'Invalid mixed stream ID.');
         }
 
         var optionsMessage = {
           id: options.id,
-          region: options.region,
-          mixStreamId: options.mixedStreamId
+          operation: 'set-region',
+          data: {
+            region: options.region,
+            view: self.remoteStreams[options.mixedStreamId].viewport()
+          }
         };
 
-        sendMsg(self.socket, 'setRegion', optionsMessage, function(
-          err, resp) {
-          if (err) {
-            return safeCall(onFailure, err);
-          }
-          safeCall(onSuccess, resp);
+        self.signaling.sendMessage('stream-control', optionsMessage).then(()=>{
+          safeCall(onSuccess);
+        }, (err)=>{
+          safeCall(onFailure, err);
         });
       };
 
@@ -1614,26 +1692,9 @@
       </script>
        */
       this.mute = function(stream, trackKind, onSuccess, onFailure) {
-        if (!(stream instanceof Woogeen.Stream)) {
-          safeCall(onFailure, 'Invalid stream');
-        }
-        if (trackKind !== undefined && trackKind !== 'audio' &&
-          trackKind !==
-          'video') {
-          safeCall(onFailure, 'Invalid track kind.');
-        }
-        var track = trackKind || 'av';
-        sendMsg(this.socket, 'mute', {
-          streamId: stream.id(),
-          track: track
-        }, function(err) {
-          if (err) {
-            return safeCall(onFailure, err);
-          }
-          safeCall(onSuccess);
-        });
+        playOrPause('pause', this.signaling, stream, trackKind, onSuccess,
+          onFailure);
       };
-
       /**
        * @function unmute
        * @instance
@@ -1655,24 +1716,8 @@
       </script>
        */
       this.unmute = function(stream, trackKind, onSuccess, onFailure) {
-        if (!(stream instanceof Woogeen.Stream)) {
-          safeCall(onFailure, 'Invalid stream');
-        }
-        if (trackKind !== undefined && trackKind !== 'audio' &&
-          trackKind !==
-          'video') {
-          safeCall(onFailure, 'Invalid track kind.');
-        }
-        var track = trackKind || 'av';
-        sendMsg(this.socket, 'unmute', {
-          streamId: stream.id(),
-          track: track
-        }, function(err) {
-          if (err) {
-            return safeCall(onFailure, err);
-          }
-          safeCall(onSuccess);
-        });
+        playOrPause('play', this.signaling, stream, trackKind, onSuccess,
+          onFailure);
       };
     };
 

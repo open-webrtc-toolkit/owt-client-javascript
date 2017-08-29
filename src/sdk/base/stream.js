@@ -9,15 +9,15 @@
    * @class Woogeen.Stream
    * @classDesc Handles the WebRTC (audio, video) stream, identifies the stream, and identifies the location where the stream should be displayed. There are two stream classes: LocalStream and RemoteStream.
    */
-  function WoogeenStream(spec) {
+  function WoogeenStream(streamInfo) {
     // if (!(this instanceof WoogeenStream)) {
     //   return new WoogeenStream();
     // }
-    this.mediaStream = spec.mediaStream;
-    spec.attributes = spec.attributes || {};
+    this.mediaStream = streamInfo.mediaStream;
+    streamInfo.attributes = streamInfo.attributes || {};
     this.url = function() {
-      if (typeof spec.url === 'string' && spec.url !== '') {
-        return spec.url;
+      if (typeof streamInfo.url === 'string' && streamInfo.url !== '') {
+        return streamInfo.url;
       }
       return undefined;
     };
@@ -33,7 +33,7 @@
     </script>
        */
     this.hasVideo = function() {
-      return !!spec.video;
+      return !!streamInfo.video;
     };
     /**
        * @function hasAudio
@@ -47,7 +47,7 @@
     </script>
        */
     this.hasAudio = function() {
-      return !!spec.audio;
+      return !!streamInfo.audio;
     };
     /**
        * @function attributes
@@ -61,7 +61,7 @@
     </script>
        */
     this.attributes = function() {
-      return spec.attributes;
+      return streamInfo.attributes;
     };
     /**
        * @function attr
@@ -78,9 +78,9 @@
        */
     this.attr = function(key, value) {
       if (arguments.length > 1) {
-        spec.attributes[key] = value;
+        streamInfo.attributes[key] = value;
       }
-      return spec.attributes[key];
+      return streamInfo.attributes[key];
     };
     /**
        * @function id
@@ -96,7 +96,7 @@
     </script>
        */
     this.id = function() {
-      return spec.id || null;
+      return streamInfo.id || null;
     };
     /**
        * @function isScreen
@@ -110,7 +110,7 @@
     </script>
        */
     this.isScreen = function() {
-      return (!!spec.video) && (spec.video.device === 'screen'); // device: 'camera', 'screen'
+      return (!!streamInfo.video) && (streamInfo.video.device === 'screen'); // device: 'camera', 'screen'
     };
     this.bitRate = {
       maxVideoBW: undefined,
@@ -119,9 +119,9 @@
     this.toJson = function() {
       return {
         id: this.id(),
-        audio: this.hasAudio() ? spec.audio : false,
-        video: this.hasVideo() ? spec.video : false,
-        attributes: spec.attributes
+        audio: this.hasAudio() ? streamInfo.audio : false,
+        video: this.hasVideo() ? streamInfo.video : false,
+        attributes: streamInfo.attributes
       };
     };
   }
@@ -331,8 +331,8 @@
     };
   }
 
-  function WoogeenRemoteStream(spec) {
-    WoogeenStream.call(this, spec);
+  function WoogeenRemoteStream(streamInfo) {
+    WoogeenStream.call(this, streamInfo);
     /**
        * @function isMixed
        * @desc This function returns true when stream's video track is mixed by server otherwise false.
@@ -350,7 +350,19 @@
       return false;
     };
 
-    this.from = spec.from;
+    this.hasAudio = function() {
+      return streamInfo.media.audio;
+    };
+
+    this.hasVideo = function() {
+      return streamInfo.media.video;
+    };
+
+    if (streamInfo.type === 'forward') {
+      this.from = streamInfo.info.owner;
+    } else if (streamInfo.type === 'mixed') {
+      this.from = 'mcu';
+    }
     var listeners = {};
     var self = this;
     Object.defineProperties(this, {
@@ -460,8 +472,8 @@
     });
   }
 
-  function WoogeenRemoteMixedStream(spec) {
-    WoogeenRemoteStream.call(this, spec);
+  function WoogeenRemoteMixedStream(streamInfo) {
+    WoogeenRemoteStream.call(this, streamInfo);
     /**
      * @function resolutions
      * @desc This function returns an array of supported resolutions for mixed stream.
@@ -470,12 +482,21 @@
      * @return {Array}
      */
     this.resolutions = function() {
-      if (spec.video.resolutions instanceof Array) {
-        return spec.video.resolutions.map(function(resolution) {
-          return resolution;
-        });
+      let resolutions = [];
+      if (!streamInfo.media.video || !streamInfo.media.video.parameters) {
+        return resolutions;
       }
-      return [];
+      // Base resolution.
+      if (streamInfo.media.video.parameters.resolution) {
+        resolutions.push(streamInfo.media.video.parameters.resolution);
+      }
+      // Optional resolution.
+      if (streamInfo.media.video.optional && streamInfo.media.video.optional.parameters &&
+        streamInfo.media.video.optional.parameters.resolution) {
+        resolutions = resolutions.concat(streamInfo.media.video.optional.parameters
+          .resolution);
+      }
+      return resolutions;
     };
 
     this.isMixed = function() {
@@ -483,7 +504,7 @@
     };
 
     this.viewport = function() {
-      return spec.viewport;
+      return streamInfo.info.label;
     };
   }
 
@@ -520,7 +541,8 @@ L.Logger.info('stream added:', stream.id());
       var videoOpt;
       if (spec.video === true) {
         videoOpt = {
-          device: 'camera'
+          device: 'camera',  // Keep it for backward compatible.
+          source: 'camera'
         };
       } else if (spec.video === false) {
         videoOpt = spec.video;
