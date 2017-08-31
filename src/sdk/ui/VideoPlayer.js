@@ -74,8 +74,6 @@ Erizo.VideoPlayer = function(spec) {
       document.getElementById(key).value = unescape(value);
   });*/
 
-  that.stream_url = (window.URL || webkitURL).createObjectURL(that.stream);
-
   // Container
   that.div = document.createElement('div');
   that.div.setAttribute('id', 'player_' + that.id);
@@ -170,7 +168,7 @@ Erizo.VideoPlayer = function(spec) {
   that.div.onmouseover = onmouseover;
   that.div.onmouseout = onmouseout;
 
-  that.video.src = that.stream_url;
+  that.video.srcObject = that.stream;;
 
   return that;
 };
