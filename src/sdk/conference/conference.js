@@ -659,7 +659,10 @@
      * @param {stream} stream Stream to subscribe.
      * @param {json} options (optional) Subscribe options. Options could be a boolean value or an object. If it is an boolean value, it indicates whether video is enabled or not. If it is an object, video will be enabled and this object is video options. The object may have following properties:</br>
        resolution: An object has width and height. Both width and height are number.</br>
-       qualityLevel: A string which is one of these values "BestQuality", "BetterQuality", "Standard", "BetterSpeed", "BestSpeed". It does not change resolution, but better quality leads to higher bitrate.
+       qualityLevel: A string which is one of these values "BestQuality", "BetterQuality", "Standard", "BetterSpeed", "BestSpeed". It does not change resolution, but better quality leads to higher bitrate.</br>
+       bitrate: A number for expected bitrate in kbps. If <code>bitrate</code> is defined, <code>qualityLevel</code> will be ignored.</br>
+       frameRate: A number for expected frame rate.</br>
+       keyFrameInterval: A number for expected interval of key frames. Unit: second.
      * @param {function} onSuccess(stream) (optional) Success callback.
      * @param {function} onFailure(err) (optional) Failure callback.
      * @example
@@ -701,12 +704,6 @@
       );
     }
 
-    if (typeof options.video === 'object' && options.video.qualityLevel) {
-      // Socket.IO message is "quality_level" while SDK style is "qualityLevel".
-      options.video.quality_level = options.video.qualityLevel;
-      delete options.video.qualityLevel;
-    }
-
     // TODO: Making default audio/video to false in 4.0.
     let audioOptions = (stream.hasAudio() && options.audio !== false) ? {
       from: stream.id()
@@ -716,6 +713,48 @@
     } : false;
     if (options.video && options.video.resolution) {
       videoOptions.resolution = options.video.resolution;
+    }
+
+    if (typeof options.video === 'object') {
+      if (options.video.qualityLevel) {
+        // Socket.IO message is "quality_level" while SDK style is "qualityLevel".
+        switch (options.video.qualityLevel) {
+          case 'BestQuality':
+            {
+              videoOptions.bitrate = '1.4x';
+              break;
+            }
+          case 'BetterQuality':
+            {
+              videoOptions.bitrate = '1.2x';
+              break;
+            }
+          case 'Standard':
+            {
+              videoOptions.bitrate = '1.0x';
+              break;
+            }
+          case 'BetterSpeed':
+            {
+              videoOptions.bitrate = '0.8x';
+              break;
+            }
+          case 'BestSpeed':
+            {
+              videoOptions.bitrate = '0.6x';
+              break;
+            }
+          default:
+            L.Logger.warning('Invalid quality level.');
+        }
+        delete options.video.qualityLevel;
+      }
+      if (options.video.frameRate) {
+        videoOptions.framerate = options.video.frameRate;
+      }
+      if (options.video.keyFrameInterval) {
+        videoOptions.keyFrameInterval = options.video.keyFrameInterval;
+      }
     }
     self.signaling.sendMessage('subscribe', {
       type: 'webrtc',
