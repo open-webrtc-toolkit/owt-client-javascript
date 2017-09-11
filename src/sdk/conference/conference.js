@@ -179,6 +179,8 @@
     this.participants = [];
     this.externalUrlToSubscriptionId = {};
     this.recorderCallbacks = {};  // Key is subscription ID, value is an object with onSuccess and onFailure function.
+    this.publicationCallbacks = {}; // Key is publication ID, value is an object {connection: boolean, ack: boolean}.
+    this.subscriptionCallbacks = {}; // Key is subscription ID, value is an object {stream: boolean, connection: ack, ack: boolean}.
 
     if (spec.iceServers) {
       this.spec.userSetIceServers = spec.iceServers;
@@ -323,18 +325,41 @@
         if (!stream) {
           stream = self.localStreams[arg.id];
         }
+        if (!stream && !self.recorderCallbacks[arg.id]) {
+          L.Logger.warning('Cannot find associated stream.');
+          return;
+        }
         if (arg.status === 'soac' && stream && stream.channel) {
           stream.channel.processSignalingMessage(arg.data);
-        } else if (arg.status === 'ready' && self.recorderCallbacks[arg.id]) {
-          safeCall(self.recorderCallbacks[arg.id].onSuccess, {
-            recorderId: arg.id,
-            host: arg.data.host,
-            path: arg.data.file
-          });
-          delete self.recorderCallbacks[arg.id];
-        } else if (arg.status === 'error' && self.recorderCallbacks[arg.id]) {
-          safeCall(self.recorderCallbacks[arg.id].onFailure, arg.data);
-          delete self.recorderCallbacks[arg.id];
+        } else if (arg.status === 'ready') {
+          if (self.recorderCallbacks[arg.id]) { // Recording.
+            safeCall(self.recorderCallbacks[arg.id].onSuccess, {
+              recorderId: arg.id,
+              host: arg.data.host,
+              path: arg.data.file
+            });
+            delete self.recorderCallbacks[arg.id];
+          } else if (self.publicationCallbacks[arg.id]) {
+            if (self.commonMixedStream) {
+              self.mix(stream, [self.commonMixedStream]);
+            }
+            safeCall(self.publicationCallbacks[arg.id].onSuccess, stream);
+            delete self.publicationCallbacks[arg.id];
+          } else if (self.subscriptionCallbacks[arg.id]) {
+            safeCall(self.subscriptionCallbacks[arg.id].onSuccess, stream);
+            delete self.subscriptionCallbacks[arg.id];
+          }
+        } else if (arg.status === 'error') {
+          if (self.recorderCallbacks[arg.id]) {
+            safeCall(self.recorderCallbacks[arg.id].onFailure, arg.data);
+            delete self.recorderCallbacks[arg.id];
+          } else if (self.publicationCallbacks[arg.id]) {
+            safeCall(self.publicationCallbacks[arg.id].onFailure, arg.data);
+            delete self.publicationCallbacks[arg.id];
+          } else if (self.subscriptionCallbacks[arg.id]) {
+            safeCall(self.subscriptionCallbacks[arg.id].onFailure, arg.data);
+            delete self.subscriptionCallbacks[arg.id];
+          }
         }
       });
       self.signaling.on('text', function(data) {
@@ -500,6 +525,10 @@
         stream.id = function() {
           return id;
         };
+        self.publicationCallbacks[id] = {
+          onSuccess: onSuccess,
+          onFailure: onFailure
+        };
         self.localStreams[id] = stream;
         stream.channel = createChannel({
           callback: function(message) {
@@ -534,20 +563,10 @@
             playOrPause('pause', self.signaling, stream, 'video',
               onSuccess, onFailure);
           };
-          if (self.commonMixedStream) {
-            self.mix(stream, [self.commonMixedStream]);
-          }
-          safeCall(onSuccess, stream);
-          onFailure = function() {};
-          onChannelReady = function() {};
         };
         var onChannelFailed = function() {
-          self.signaling.sendMessage('unpublish', {id: id});  // FIXME: still need this?
           stream.channel.close();
           stream.channel = undefined;
-          safeCall(onFailure, 'peer connection failed');
-          onChannelReady = function() {};
-          onChannelFailed = function() {};
         };
         stream.channel.oniceconnectionstatechange = function(state) {
           switch (state) {
@@ -659,8 +678,6 @@
   WoogeenConferenceBase.prototype.subscribe = function(stream, options,
     onSuccess, onFailure) {
     var self = this;
-    var mediaStreamIsReady = false;
-    var channelIsReady = false;
     if (typeof options === 'function') {
       onFailure = onSuccess;
       onSuccess = options;
@@ -710,6 +727,10 @@
     }).then((data) => {
       self.subscriptionToStream[data.id] = stream;
       self.streamIdToSubscriptionId[stream.id()] = data.id;
+      self.subscriptionCallbacks[data.id] = {
+        onSuccess: onSuccess,
+        onFailure: onFailure
+      };
       stream.channel = createChannel({
         callback: function(message) {
           self.signaling.sendMessage('soac', {
@@ -724,12 +745,7 @@
       });
       stream.channel.onaddstream = function(evt) {
         stream.mediaStream = evt.stream;
-        if (channelIsReady && (mediaStreamIsReady === false)) {
-          mediaStreamIsReady = true;
-          safeCall(onSuccess, stream);
-        } else {
-          mediaStreamIsReady = true;
-        }
+        L.Logger.info('Subscription ' + data.id + '\'s MediaStream is ready.');
       };
       var onChannelReady = function() {
         stream.signalOnPlayAudio = function(onSuccess, onFailure) {
@@ -748,25 +764,16 @@
           playOrPause('pause', self.signaling, stream, 'video', onSuccess,
             onFailure);
         };
-        if (mediaStreamIsReady && (channelIsReady === false)) {
-          channelIsReady = true;
-          safeCall(onSuccess, stream);
-        } else {
-          channelIsReady = true;
-        }
-        onFailure = function() {};
-        onChannelReady = function() {};
       };
       var onChannelFailed = function() {
-        self.signaling.sendMessage('unsubscribe', {id: data.id});
+        if (stream.channel) {
+          stream.channel.close();
+        }
         stream.close();
         stream.signalOnPlayAudio = undefined;
         stream.signalOnPauseAudio = undefined;
         stream.signalOnPlayVideo = undefined;
         stream.signalOnPauseVideo = undefined;
-        safeCall(onFailure, 'peer connection failed');
-        onChannelReady = function() {};
-        onChannelFailed = function() {};
       };
       stream.channel.oniceconnectionstatechange = function(state) {
         switch (state) {
