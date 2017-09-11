@@ -14,9 +14,10 @@ chrome.runtime.onMessageExternal.addListener(
         sources = request.getStream;
       }
       chrome.desktopCapture.chooseDesktopMedia(sources, sender.tab,
-        function(streamId) {
+        function(streamId, options) {
           sendResponse({
-            streamId: streamId
+            streamId: streamId,
+            options: options
           });
         });
       return true; // Preserve sendResponse for future use

@@ -5,7 +5,7 @@
    "permissions": [ "desktopCapture" ],
    "short_name": "Desktop sharing for Intel CS for WebRTC",
    "update_url": "https://clients2.google.com/service/update2/crx",
-   "version": "1.2",
+   "version": "1.3",
 
    "background": {
      "persistent": true,
@@ -13,7 +13,7 @@
    },
    "description": "Extension to allow desktop sharing in Intel CS for WebRTC applications.",
    "externally_connectable": {
-      "matches": ["*://*.sh.intel.com/*", "*://180.153.223.233/*", "*://180.153.223.234/*", "*://180.153.223.235/*"]
+      "matches": ["*://*.sh.intel.com/*", "*://localhost/*"]
    },
    "icons": {
       "128": "woogeen_icon_128.png",

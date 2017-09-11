@@ -868,13 +868,21 @@ L.Logger.info('stream added:', stream.id());
             }
             return;
           }
-          if (option.audio) {
+          if (option.audio && typeof response.options !== 'object') {
+            L.Logger.warning(
+              'Desktop sharing with audio requires the latest Chrome extension. Your audio options will be ignored.'
+            );
+          }
+          if (option.audio && (typeof response.options === 'object' && response
+              .options.canRequestAudioTrack)) {
             mediaOption.audio = {
               mandatory: {
                 chromeMediaSource: 'desktop',
                 chromeMediaSourceId: response.streamId
               }
             };
+          } else {
+            delete mediaOption.audio;
           }
           mediaOption.video.mandatory = mediaOption.video.mandatory || {};
           mediaOption.video.mandatory.chromeMediaSource = 'desktop';
