@@ -537,6 +537,9 @@ L.Logger.info('stream added:', stream.id());
     this.hasAudio = function() {
       return !!spec.audio;
     };
+    this.attributes = function() {
+      return spec.attributes;
+    };
     this.toJson = function() {
       var videoOpt;
       if (spec.video === true) {

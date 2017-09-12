@@ -476,7 +476,7 @@
 
         let streamingInMediaOptions = {audio: 'auto', video: 'auto'};
 
-        self.signaling.send('publish', {
+        self.signaling.sendMessage('publish', {
           type: 'streaming',
           connection: connectionOpt,
           media: streamingInMediaOptions,
@@ -487,7 +487,7 @@
             return id;
           };
           self.localStreams[id] = stream;
-          safeCall(onSuccess);
+          safeCall(onSuccess, stream);
         }, (err)=>{
           safeCall(onFailure, err);
         });
