@@ -787,6 +787,7 @@ p2p.disconnect();
       L.Logger.debug('Send invitation to ' + peerId);
       peer.state = PeerState.OFFERED;
       gab.sendChatInvitation(peerId, sysInfo, function() {
+        peer.isCaller = true;
         if (successCallback) {
           successCallback();
         }
@@ -852,10 +853,14 @@ p2p.disconnect();
       createPeer(peerId);
     }
     var peer = peers[peerId];
-    peer.isCaller = false;
     if (peer.state === PeerState.PENDING) {
       peer.state = PeerState.MATCHED;
-      gab.sendChatAccepted(peerId, sysInfo, successCallback, function(
+      gab.sendChatAccepted(peerId, sysInfo, function() {
+        peer.isCaller = false;
+        if(successCallback) {
+          successCallback();
+        }
+      }, function(
         errCode) {
         peer.state = PeerState.PENDING;
         if (failureCallback) {
