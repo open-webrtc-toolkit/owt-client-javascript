@@ -1207,7 +1207,9 @@
           },
           video: {
             from: streamId,
-            format: {}
+            format: {
+              codec: 'h264'
+            }
           }
         };
         if (options.resolution) {
@@ -1285,7 +1287,9 @@
           },
           video: {
             from: streamId,
-            format: {}
+            format: {
+              codec: 'h264'
+            }
           }
         };
         if (options.resolution) {
