@@ -357,6 +357,88 @@
     this.hasVideo = function() {
       return streamInfo.media.video;
     };
+    /**
+       * @function mediaInfo
+       * @desc This function returns the media information of specific stream.
+       * @memberOf Woogeen.RemoteStream
+       * @instance
+       * @return {object} An object defined as follow:
+       object(MediaInfo)::
+        {
+         audio: object(AudioInfo) | undefined,
+         video: object(VideoInfo) | undefined
+        }
+
+        object(AudioInfo)::
+          {
+           source: "mic" | "screen-cast" | "raw-file" | "encoded-file" | undefined,
+           format: object(AudioFormat),
+           transcoding:
+            {
+             format: [object(AudioFormat)] | undefined
+            }
+            | undefined
+          }
+
+          object(AudioFormat)::
+            {
+             codec: "pcmu" | "pcma" | "opus" | "g722" | "iSAC" | "iLBC" | "aac" | "ac3" | "nellymoser",
+             sampleRate: number(SampleRate) | undefined,
+             channelNum: number(ChannelNumber) | undefined
+            }
+
+        object(VideoInfo)::
+          {
+           source: "camera" | "screen-cast" | "raw-file" | "encoded-file" | undefined,
+           format: object(VideoFormat),
+           parameters: object(VideoParameters) | undefined,
+           transcoding:
+             {
+              format: [object(VideoFormat)] | undefined,
+              parameters:
+                {
+                 resolution:[object(Resolution)] | undefined,
+                 framerate: [number(FramerateFPS)] | undefined,
+                 bitrate: [number(BitrateKbps)] | [string(BitrateMultiple)] |undefined,
+                 keyFrameInterval: [number(KeyFrameIntervalSecond)] | undefined
+                }
+                | undefined
+             }
+             | undefined
+          }
+
+          object(VideoFormat)::
+            {
+             codec: "h264" | "h265" | "vp8" | "vp9",
+             profile: "baseline" | "constrained-baseline" | "main" | "high" //If codec equals "h264".
+                   | undefined //If codec does NOT equal "h264"
+            }
+
+          object(VideoParameters)::
+            {
+             resolution: object(Resolution) | undefined,
+             framerate: number(FramerateFPS) | undefined,
+             bitrate: number(BitrateKbps) | undefined,
+             keyFrameInterval: number(KeyFrameIntervalSecond) | undefined
+            }
+
+            object(Resolution)::
+              {
+               width: number(WidthPX),
+               height: number(HeightPX)
+              }
+       */
+    this.mediaInfo = function() {
+      if (streamInfo.media.audio && streamInfo.media.audio.optional) {
+        streamInfo.media.audio.transcoding = streamInfo.media.audio.optional;
+        delete streamInfo.media.audio.optional;
+      }
+      if (streamInfo.media.video && streamInfo.media.video.optional) {
+        streamInfo.media.video.transcoding = streamInfo.media.video.optional;
+        delete streamInfo.media.video.optional;
+      }
+      return streamInfo.media;
+    };
 
     if (streamInfo.type === 'forward') {
       this.from = streamInfo.info.owner;
