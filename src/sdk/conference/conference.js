@@ -697,13 +697,6 @@
     }
     options.videoCodec = options.videoCodec || 'h264';
 
-    if (!stream.isMixed() && typeof options.video === 'object' && (options.video
-        .resolution || options.video.qualityLevel)) {
-      return safeCall(onFailure,
-        'Resolution and quality level settings are not available for non-mixed stream.'
-      );
-    }
-
     // TODO: Making default audio/video to false in 4.0.
     let audioOptions = (stream.hasAudio() && options.audio !== false) ? {
       from: stream.id()
