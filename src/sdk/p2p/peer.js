@@ -1578,7 +1578,7 @@ p2p.disconnect();
   };
 
   var setAudioCodec = function(sdp) {
-    if (spec.audioCodec) {
+    if (!spec.audioCodec) {
       return sdp;
     }
     return Woogeen.Common.setPreferredCodec(sdp, 'audio', spec.audioCodec);
