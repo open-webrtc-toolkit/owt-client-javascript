@@ -1479,6 +1479,30 @@
           mediaSubOptions.audio.format = {
             codec: options.audioCodec
           };
+          if (!self.remoteStreams[options.audioStreamId]) {
+            safeCall(onFailure, 'Invalid audio stream ID.');
+            return;
+          }
+          let stream = self.remoteStreams[options.audioStreamId];
+          if (!stream.mediaInfo().audio) {
+            safeCall(onFailure, 'Target stream does not have audio.');
+            return;
+          }
+          let audioFormats = [];
+          if (stream.mediaInfo().audio.format) {
+            audioFormats.push(stream.mediaInfo().audio.format);
+          }
+          if (stream.mediaInfo().audio.transcoding) {
+            audioFormats = audioFormats.concat(stream.mediaInfo().audio.transcoding
+              .format);
+          }
+          audioFormats.some((format) => {
+            if (format.codec === options.audioCodec) {
+              mediaSubOptions.audio.format.sampleRate = format.sampleRate;
+              mediaSubOptions.audio.format.channelNum = format.channelNum;
+            }
+            return format.codec === options.audioCodec;
+          });
         }
         if (options.videoCodec && mediaSubOptions.video) {
           mediaSubOptions.video.format = {
