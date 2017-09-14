@@ -705,36 +705,38 @@
       from: stream.id()
     } : false;
     if (options.video && options.video.resolution) {
-      videoOptions.resolution = options.video.resolution;
+      videoOptions.parameters = {};
+      videoOptions.parameters.resolution = options.video.resolution;
     }
 
     if (typeof options.video === 'object') {
       if (options.video.qualityLevel) {
+        videoOptions.parameters = videoOptions.parameters || {};
         // Socket.IO message is "quality_level" while SDK style is "qualityLevel".
         switch (options.video.qualityLevel) {
           case 'BestQuality':
             {
-              videoOptions.bitrate = '1.4x';
+              videoOptions.parameters.bitrate = '1.4x';
               break;
             }
           case 'BetterQuality':
             {
-              videoOptions.bitrate = '1.2x';
+              videoOptions.parameters.bitrate = '1.2x';
               break;
             }
           case 'Standard':
             {
-              videoOptions.bitrate = '1.0x';
+              videoOptions.parameters.bitrate = '1.0x';
               break;
             }
           case 'BetterSpeed':
             {
-              videoOptions.bitrate = '0.8x';
+              videoOptions.parameters.bitrate = '0.8x';
               break;
             }
           case 'BestSpeed':
             {
-              videoOptions.bitrate = '0.6x';
+              videoOptions.parameters.bitrate = '0.6x';
               break;
             }
           default:
@@ -743,10 +745,12 @@
         delete options.video.qualityLevel;
       }
       if (options.video.frameRate) {
-        videoOptions.framerate = options.video.frameRate;
+        videoOptions.parameters = videoOptions.parameters || {};
+        videoOptions.parameters.framerate = options.video.frameRate;
       }
       if (options.video.keyFrameInterval) {
-        videoOptions.keyFrameInterval = options.video.keyFrameInterval;
+        videoOptions.parameters = videoOptions.parameters || {};
+        videoOptions.parameters.keyFrameInterval = options.video.keyFrameInterval;
       }
     }
     self.signaling.sendMessage('subscribe', {
