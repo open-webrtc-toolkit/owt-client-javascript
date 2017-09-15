@@ -419,11 +419,11 @@ Woogeen.PeerClient = function(pcConfig) {
       };
       if (type === 'screen') {
         streamSpec.media.video = {
-          device: 'screen'
+          source: 'screen-cast'
         };
       } else {
         streamSpec.media.video = mediaStream.getVideoTracks().length > 0 ? {
-          device: 'camera'
+          source: 'camera'
         } : false;
         streamSpec.media.audio = mediaStream.getAudioTracks().length > 0;
       }
