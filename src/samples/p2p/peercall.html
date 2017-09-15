@@ -1,5 +1,5 @@
 <!--
-Copyright © 2014 - 2015 Intel Corporation. All Rights Reserved.
+Copyright © 2014 - 2017 Intel Corporation. All Rights Reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are met:
@@ -110,15 +110,15 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
   <div id="videocontainer">
     <div id="local">
       <h2>LocalView</h2>
-      <video width="320px" height="240px" id="localVideo" muted="muted" autoplay="autoplay"></video>
+      <video width="320px" height="240px" id="localVideo" playsinline muted autoplay></video>
     </div>
     <div id="remote">
       <h2>RemoteView</h2>
-      <video width="320px" height="240px" id="remoteVideo" autoplay="autoplay"></video>
+      <video width="320px" height="240px" id="remoteVideo" playsinline autoplay></video>
     </div>
     <div id="screen">
       <h2>ScreenView</h2>
-      <video width="640px" height="480px" id="screenVideo" autoplay="autoplay"></video>
+      <video width="640px" height="480px" id="screenVideo" playsinline autoplay></video>
     </div>
   </div>
 
@@ -156,8 +156,10 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
       $('#target-screen').click(function() {
         Woogeen.LocalStream.create({
+          audio: true,
           video: {
-            device: "screen"
+            device: "screen",
+            extensionId: "pndohhifhheefbpeljcmnhnkphepimhe"
           }
         }, function(err, stream) {
           if (err) {
@@ -248,9 +250,11 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
       if (e.stream.isScreen()) {
         $('#screen video').show();
         $('#screen video').get(0).srcObject = e.stream.mediaStream;
+        $('#screen video').get(0).play();
       } else if (e.stream.hasVideo() || e.stream.hasAudio()) {
         $('#remote video').show();
         $('#remote video').get(0).srcObject = e.stream.mediaStream;
+        $('#remote video').get(0).play();
       }
       isVideo++;
     });
