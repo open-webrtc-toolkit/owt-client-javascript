@@ -330,6 +330,11 @@
         return !!spec.hasVideo;
       }
     };
+
+    // TODO: Make it align with remote streams.
+    this.isScreen = function() {
+      return (!!spec.video && spec.video.device === 'screen');
+    };
   }
 
   function WoogeenRemoteStream(streamInfo) {
