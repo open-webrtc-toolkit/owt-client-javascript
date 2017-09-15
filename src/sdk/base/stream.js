@@ -110,7 +110,8 @@
     </script>
        */
     this.isScreen = function() {
-      return (!!streamInfo.video) && (streamInfo.video.device === 'screen'); // device: 'camera', 'screen'
+      return (!!streamInfo.media) && (!!streamInfo.media.video) && (
+        streamInfo.media.video.source === 'screen-cast');
     };
     this.bitRate = {
       maxVideoBW: undefined,

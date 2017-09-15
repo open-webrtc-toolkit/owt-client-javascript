@@ -414,16 +414,18 @@ Woogeen.PeerClient = function(pcConfig) {
     if (!type) {
       return null;
     } else {
-      var streamSpec = {};
+      var streamSpec = {
+        media: {}
+      };
       if (type === 'screen') {
-        streamSpec.video = {
+        streamSpec.media.video = {
           device: 'screen'
         };
       } else {
-        streamSpec.video = mediaStream.getVideoTracks().length > 0 ? {
+        streamSpec.media.video = mediaStream.getVideoTracks().length > 0 ? {
           device: 'camera'
         } : false;
-        streamSpec.audio = mediaStream.getAudioTracks().length > 0;
+        streamSpec.media.audio = mediaStream.getAudioTracks().length > 0;
       }
       var stream = new Woogeen.RemoteStream(streamSpec);
       stream.mediaStream = mediaStream;
