@@ -435,15 +435,16 @@
               }
        */
     this.mediaInfo = function() {
-      if (streamInfo.media.audio && streamInfo.media.audio.optional) {
-        streamInfo.media.audio.transcoding = streamInfo.media.audio.optional;
-        delete streamInfo.media.audio.optional;
+      let mediaInfo = JSON.parse(JSON.stringify(streamInfo.media));
+      if (mediaInfo.audio && mediaInfo.audio.optional) {
+        mediaInfo.audio.transcoding = mediaInfo.audio.optional;
+        delete mediaInfo.audio.optional;
       }
-      if (streamInfo.media.video && streamInfo.media.video.optional) {
-        streamInfo.media.video.transcoding = streamInfo.media.video.optional;
-        delete streamInfo.media.video.optional;
+      if (mediaInfo.video && mediaInfo.video.optional) {
+        mediaInfo.video.transcoding = mediaInfo.video.optional;
+        delete mediaInfo.video.optional;
       }
-      return streamInfo.media;
+      return mediaInfo;
     };
 
     if (streamInfo.type === 'forward') {
