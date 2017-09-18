@@ -333,6 +333,9 @@
           stream.channel.processSignalingMessage(arg.data);
         } else if (arg.status === 'ready') {
           if (self.recorderCallbacks[arg.id]) { // Recording.
+            if (self.commonMixedStream) {
+              self.mix(self.localStreams[arg.id], [self.commonMixedStream]);
+            }
             safeCall(self.recorderCallbacks[arg.id].onSuccess, {
               recorderId: arg.id,
               host: arg.data.host,
