@@ -719,27 +719,27 @@
         switch (options.video.qualityLevel) {
           case 'BestQuality':
             {
-              videoOptions.parameters.bitrate = '1.4x';
+              videoOptions.parameters.bitrate = 'x1.4';
               break;
             }
           case 'BetterQuality':
             {
-              videoOptions.parameters.bitrate = '1.2x';
+              videoOptions.parameters.bitrate = 'x1.2';
               break;
             }
           case 'Standard':
             {
-              videoOptions.parameters.bitrate = '1.0x';
+              videoOptions.parameters.bitrate = 'x1.0';
               break;
             }
           case 'BetterSpeed':
             {
-              videoOptions.parameters.bitrate = '0.8x';
+              videoOptions.parameters.bitrate = 'x0.8';
               break;
             }
           case 'BestSpeed':
             {
-              videoOptions.parameters.bitrate = '0.6x';
+              videoOptions.parameters.bitrate = 'x0.6';
               break;
             }
           default:
