@@ -1410,10 +1410,10 @@
          * @memberOf Woogeen.ConferenceClient
          * @param {string} options (optional)Media recorder options. If unspecified, the mixed stream will be recorded as default.<br>
           <ul>
-         <li>videoStreamId: video stream id to be recorded. If unspecified and audioStreamId is valid, audio stream will be recorded without video.</li>
          <li>audioStreamId: audio stream id to be recorded. If unspecified and videoStreamId is valid, video stream will be recorded without audio.</li>
-         <li>videoCodec: preferred video codec to be recorded. If unspecified, 'vp8' will be used by default. Currently, there is no video transcoding for forward stream with the consideration of system load.</li>
+         <li>videoStreamId: video stream id to be recorded. If unspecified and audioStreamId is valid, audio stream will be recorded without video.</li>
          <li>audioCodec: preferred audio codec to be recorded. If unspecified, 'opus' will be used by default.</li>
+         <li>videoCodec: preferred video codec to be recorded. If unspecified, 'h264' will be used by default.</li>
          <li>recorderId: recorder id to be reused. Id can only be alphanumeric. If the id is not set, server will generate one.</li>
          </ul>
          Important Note: In the case of continuous media recording among different streams, the recorderId is the key to make sure each switched stream go to the same recording url. Do not stop the recorder when you want the continuous media recording functionality, unless all the required media content has been recorded successfully.<br>
