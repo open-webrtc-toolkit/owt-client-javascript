@@ -963,6 +963,7 @@
          */
       this.leave = function() {
         this.signaling.disconnect();
+        this.state = DISCONNECTED;
       };
 
       /**
