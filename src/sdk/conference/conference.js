@@ -1459,6 +1459,10 @@
           options = {};
         }
         let mediaSubOptions = {};
+        if (options.audioStreamId === null || options.videoStreamId === null) {
+          safeCall(onFailure, 'Invalid audio and video stream ID.');
+          return;
+        }
         if (!options.audioStreamId && !options.videoStreamId) {
           mediaSubOptions.audio = {
             from: self.commonMixedStream.id()
