@@ -171,7 +171,6 @@ Woogeen.PeerClient = function(pcConfig) {
       peer.remoteSideSupportsRemoveStream = false;
       peer.remoteSideSupportsPlanB = false;
       peer.remoteSideSupportsUnifiedPlan = true;
-      peer.preferredVideoCodec = 'vp8';
     } else { // Remote side is iOS/Android/C++ which uses Chrome stack.
       peer.remoteSideSupportsRemoveStream = true;
       peer.remoteSideSupportsPlanB = true;
@@ -1588,9 +1587,7 @@ p2p.disconnect();
 
   var setVideoCodec = function(sdp, peer) {
     var codec;
-    if (navigator.mozGetUserMedia) {
-      codec = 'vp8';
-    } else if (peer && peer.preferredVideoCodec) {
+    if (peer && peer.preferredVideoCodec) {
       codec = peer.preferredVideoCodec;
     } else if (spec.videoCodec) {
       codec = spec.videoCodec;
