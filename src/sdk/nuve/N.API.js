@@ -167,8 +167,8 @@ N.API = (function(N) {
      * @memberOf N.API
      * @param {string} name Room name.
      * @param {json} options Room configuration.
-     * @param {function} callback(room) Callback function on success.
-     * @param {function} callbackError(status,err) Callback function on error.
+     * @param {function} callback Callback function on success.
+     * @param {function} callbackError Callback function on error.
      * @example
   N.API.createRoom('myRoom', {
     mode: 'hybrid',
@@ -243,14 +243,17 @@ N.API = (function(N) {
      * @function getRooms
      * @desc This function lists the rooms in your service.
      * @memberOf N.API
-     * @param {function} callback(rooms) Callback function on success
-     * @param {function} callbackError(status,err) Callback function on error
+     * @param {function} callback Callback function on success
+     * @param {function} callbackError Callback function on error
      * @example
   N.API.getRooms(function(rooms) {
     for(var i in rooms) {
       console.log('Room', i, ':', rooms[i].name);
     }
-  }, errorCallback);
+  }, function(status, error) {
+    // HTTP status and error
+    console.log(status, error);
+  });
      */
   getRooms = function(callback, callbackError, params) {
     send(callback, callbackError, 'GET', undefined, 'rooms', params);
@@ -261,13 +264,16 @@ N.API = (function(N) {
      * @desc This function returns information on the specified room.
      * @memberOf N.API
      * @param {string} room Room ID
-     * @param {function} callback(room) Callback function on success
-     * @param {function} callbackError(status,err) Callback function on error
+     * @param {function} callback Callback function on success
+     * @param {function} callbackError Callback function on error
      * @example
   var roomID = '51c10d86909ad1f939000001';
   N.API.getRoom(roomID, function(room) {
     console.log('Room name:', room.name);
-  }, errorCallback);
+  }, function(status, error) {
+    // HTTP status and error
+    console.log(status, error);
+  });
      */
   getRoom = function(room, callback, callbackError, params) {
     if (typeof room !== 'string') {
@@ -287,13 +293,16 @@ N.API = (function(N) {
      * @desc This function deletes the specified room.
      * @memberOf N.API
      * @param {string} room Room ID to be deleted
-     * @param {function} callback(result) Callback function on success
-     * @param {function} callbackError(status,err) Callback function on error
+     * @param {function} callback Callback function on success
+     * @param {function} callbackError Callback function on error
      * @example
   var room = '51c10d86909ad1f939000001';
   N.API.deleteRoom(room, function(result) {
     console.log ('Result:' result);
-  }, errorCallback);
+  }, function(status, error) {
+    // HTTP status and error
+    console.log(status, error);
+  });
      */
   deleteRoom = function(room, callback, callbackError, params) {
     send(callback, callbackError, 'DELETE', undefined, 'rooms/' + room,
@@ -306,8 +315,8 @@ N.API = (function(N) {
      * @memberOf N.API
      * @param {string} roomId room ID.
      * @param {json} options Room configuration. See details about options in {@link N.API#createRoom createRoom(name, callback, callbackError, options)}.
-     * @param {function} callback(room) Callback function on success
-     * @param {function} callbackError(status,err) Callback function on error
+     * @param {function} callback Callback function on success
+     * @param {function} callbackError Callback function on error
      * @example
   N.API.updateRoom(XXXXXXXXXX, {
     publishLimit: -1,
@@ -373,8 +382,8 @@ N.API = (function(N) {
      * @param {string} role Participant's role
      * @param {string} type Token type, can be either 'socketio' or 'rest'
      * @param {object} preference Preference of this token would be used to connect through
-     * @param {function} callback(token) Callback function on success
-     * @param {function} callbackError(status,err) Callback function on error
+     * @param {function} callback Callback function on success
+     * @param {function} callbackError Callback function on error
      * @example
   var roomID = '51c10d86909ad1f939000001';
   var name = 'john';
@@ -383,7 +392,10 @@ N.API = (function(N) {
   var preference = {isp: 'isp', region: 'region'};
   N.API.createToken(roomID, name, role, type, preference, function(token) {
     console.log ('Token created:' token);
-  }, errorCallback);
+  }, function(status, error) {
+    // HTTP status and error
+    console.log(status, error);
+  });
      */
   createToken = function(room, username, role, type, preference, callback, callbackError, params) {
     if (typeof room !== 'string' || typeof username !== 'string' ||
@@ -402,14 +414,17 @@ N.API = (function(N) {
      * @memberOf N.API
      * @param {string} name Service name
      * @param {string} key Service key
-     * @param {function} callback(service) Callback function on success
-     * @param {function} callbackError(status,err) Callback function on error
+     * @param {function} callback Callback function on success
+     * @param {function} callbackError Callback function on error
      * @example
   var name = 'service1';
   var key = '66510cd6989cd1f9565371';
   N.API.createService(name, key, function(service) {
     console.log ('Service created:', service);
-  }, errorCallback);
+  }, function(status, error) {
+    // HTTP status and error
+    console.log(status, error);
+  });
      */
   createService = function(name, key, callback, callbackError, params) {
     send(callback, callbackError, 'POST', {
@@ -422,14 +437,17 @@ N.API = (function(N) {
      * @function getServices
      * @desc This function lists the services in your server.
      * @memberOf N.API
-     * @param {function} callback(services) Callback function on success
-     * @param {function} callbackError(status,err) Callback function on error
+     * @param {function} callback Callback function on success
+     * @param {function} callbackError Callback function on error
      * @example
   N.API.getServices(function(services) {
     for(var i in services) {
       console.log('Service ', i, ':', services[i].name);
     }
-  }, errorCallback);
+  }, function(status, error) {
+    // HTTP status and error
+    console.log(status, error);
+  });
      */
   getServices = function(callback, callbackError, params) {
     send(callback, callbackError, 'GET', undefined, 'services/', params);
@@ -440,13 +458,16 @@ N.API = (function(N) {
      * @desc This function returns information on the specified service.
      * @memberOf N.API
      * @param {string} service service ID, service information
-     * @param {function} callback(service) Callback function on success
-     * @param {function} callbackError(status,err) Callback function on error
+     * @param {function} callback Callback function on success
+     * @param {function} callbackError Callback function on error
      * @example
   var service = '43243cda543efd5436789dd651';
   N.API.getService(service, function(service) {
     console.log('Service name: ', service.name);
-  }, errorCallback);
+  }, function(status, error) {
+    // HTTP status and error
+    console.log(status, error);
+  });
      */
   getService = function(service, callback, callbackError, params) {
     if (typeof service !== 'string' || service.trim() === '') {
@@ -462,13 +483,16 @@ N.API = (function(N) {
      * @desc This function deletes the specified service.
      * @memberOf N.API
      * @param {string} service service to be deleted
-     * @param {function} callback(result) Callback function on success
-     * @param {function} callbackError(status,err) Callback function on error
+     * @param {function} callback Callback function on success
+     * @param {function} callbackError Callback function on error
      * @example
   var service = '51c10d86909ad1f939000001';
   N.API.deleteService(service, function(result) {
     console.log ('Result:' result);
-  }, errorCallback);
+  }, function(status, error) {
+    // HTTP status and error
+    console.log(status, error);
+  });
      */
   deleteService = function(service, callback, callbackError, params) {
     send(callback, callbackError, 'DELETE', undefined, 'services/' +
@@ -480,8 +504,8 @@ N.API = (function(N) {
      * @desc This function lists the users in a specified room.
      * @memberOf N.API
      * @param {string} room Room ID
-     * @param {function} callback(users) Callback function on success
-     * @param {function} callbackError(status,err) Callback function on error
+     * @param {function} callback Callback function on success
+     * @param {function} callbackError Callback function on error
      * @example
   var roomID = '51c10d86909ad1f939000001';
   N.API.getUsers(roomID, function(users) {
@@ -490,7 +514,10 @@ N.API = (function(N) {
     for (var i in userlist) {
       console.log('User ', i, ':', userlist[i].name, userlist[i].role);
     }
-  }, errorCallback);
+  }, function(status, error) {
+    // HTTP status and error
+    console.log(status, error);
+  });
      */
   getUsers = function(room, callback, callbackError, params) {
     send(callback, callbackError, 'GET', undefined, 'rooms/' + room +
@@ -503,14 +530,17 @@ N.API = (function(N) {
      * @memberOf N.API
      * @param {string} room Room ID
      * @param {string} user User ID
-     * @param {function} callback(user) Callback function on success
-     * @param {function} callbackError(status,err) Callback function on error
+     * @param {function} callback Callback function on success
+     * @param {function} callbackError Callback function on error
      * @example
   var roomID = '51c10d86909ad1f939000001';
   var userID = 'JdlUI29yjfVY6O4yAAAB';
   N.API.getUser(roomID, userID, function(user) {
     console.log('User:', userID, 'Role:', user.role);
-  }, errorCallback);
+  }, function(status, error) {
+    // HTTP status and error
+    console.log(status, error);
+  });
      */
   getUser = function(room, user, callback, callbackError, params) {
     send(callback, callbackError, 'GET', undefined, 'rooms/' + room +
@@ -523,14 +553,17 @@ N.API = (function(N) {
      * @memberOf N.API
      * @param {string} room Room ID
      * @param {string} user User ID
-     * @param {function} callback(result) Callback function on success
-     * @param {function} callbackError(status,err) Callback function on error
+     * @param {function} callback Callback function on success
+     * @param {function} callbackError Callback function on error
      * @example
   var roomID = '51c10d86909ad1f939000001';
   var userID = 'JdlUI29yjfVY6O4yAAAB';
   N.API.deleteUser(roomID, userID, function(res) {
     console.log('User', userID, 'in room', roomID, 'deleted');
-  }, errorCallback);
+  }, function(status, error) {
+    // HTTP status and error
+    console.log(status, error);
+  });
      */
   deleteUser = function(room, user, callback, callbackError, params) {
     send(callback, callbackError, 'DELETE', undefined, 'rooms/' + room +
