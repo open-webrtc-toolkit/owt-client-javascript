@@ -125,10 +125,12 @@
   function playOrPause(verb, signaling, stream, trackKind, onSuccess, onFailure) {
     if (!(stream instanceof Woogeen.Stream)) {
       safeCall(onFailure, 'Invalid stream');
+      return;
     }
     if (trackKind !== undefined && trackKind !== 'audio' && trackKind !==
       'video') {
       safeCall(onFailure, 'Invalid track kind.');
+      return;
     }
     var track = trackKind || 'av';
     signaling.sendMessage('stream-control', {
