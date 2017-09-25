@@ -660,12 +660,13 @@
   Video resolution choice is only valid for subscribing {@link Woogeen.RemoteMixedStream Woogeen.RemoteMixedStream} when multistreaming output is enabled.　See {@link N.API.createRoom N.API.createRoom()} for detailed description of multistreaming.<br>
      * @memberOf Woogeen.ConferenceClient&Woogeen.SipClient
      * @param {stream} stream Stream to subscribe.
-     * @param {json} options (optional) Subscribe options. Options could be a boolean value or an object. If it is an boolean value, it indicates whether video is enabled or not. If it is an object, video will be enabled and this object is video options. The object may have following properties:</br>
-       resolution: An object has width and height. Both width and height are number.</br>
-       qualityLevel: A string which is one of these values "BestQuality", "BetterQuality", "Standard", "BetterSpeed", "BestSpeed". It does not change resolution, but better quality leads to higher bitrate.</br>
-       bitrate: A number for expected bitrate in kbps. If <code>bitrate</code> is defined, <code>qualityLevel</code> will be ignored.</br>
-       frameRate: A number for expected frame rate.</br>
-       keyFrameInterval: A number for expected interval of key frames. Unit: second.
+     * @param {json} options (optional) Subscribe options. Options could be a boolean value or an object. If it is an boolean value, it indicates whether video is enabled or not. If it is an object, video will be enabled and this object is video options. The object may have following properties:
+     <ul>
+       <li>resolution: An object has width and height. Both width and height are number.</li>
+       <li>qualityLevel: A string which is one of these values "BestQuality", "BetterQuality", "Standard", "BetterSpeed", "BestSpeed". It does not change resolution, but better quality leads to higher bitrate.</li>
+       <li>bitrateMultipiler: A number for expected bitrate multiplier. You can find valid bitrate multipliers by calling <code>mediaInfo()</code>. If <code>bitrateMultipiler</code> is specified, <code>qualityLevel</code> will be ignored.</li>
+       <li>frameRate: A number for expected frame rate.</li>
+       <li>keyFrameInterval: A number for expected interval of key frames. Unit: second.</li>
      * @param {function} onSuccess(stream) (optional) Success callback.
      * @param {function} onFailure(err) (optional) Failure callback.
      * @example
@@ -745,7 +746,6 @@
           default:
             L.Logger.warning('Invalid quality level.');
         }
-        delete options.video.qualityLevel;
       }
       if (options.video.frameRate) {
         videoOptions.parameters = videoOptions.parameters || {};
@@ -754,6 +754,11 @@
       if (options.video.keyFrameInterval) {
         videoOptions.parameters = videoOptions.parameters || {};
         videoOptions.parameters.keyFrameInterval = options.video.keyFrameInterval;
+      }
+      if (options.video.bitrateMultipiler) {
+        videoOptions.parameters = videoOptions.parameters || {};
+        videoOptions.parameters.bitrate = 'x' + options.video.bitrateMultipiler
+          .toString();
       }
     }
     self.signaling.sendMessage('subscribe', {

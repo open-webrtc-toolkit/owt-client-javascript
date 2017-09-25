@@ -363,6 +363,15 @@
     this.hasVideo = function() {
       return streamInfo.media.video;
     };
+
+    function extractBitrateMultiplier(input) {
+      if (typeof input !== 'string' || !input.startsWith('x')) {
+        L.Logger.warning('Invalid bitrate multiplier input.');
+        return 0;
+      }
+      return Number.parseFloat(input.replace(/^x/, ''));
+    }
+
     /**
        * @function mediaInfo
        * @desc This function returns the media information of specific stream.
@@ -405,7 +414,7 @@
                 {
                  resolution:[object(Resolution)] | undefined,
                  framerate: [number(FramerateFPS)] | undefined,
-                 bitrate: [number(BitrateKbps)] | [string(BitrateMultiple)] |undefined,
+                 bitrateMultiple: [string(BitrateMultiple)] |undefined,
                  keyFrameInterval: [number(KeyFrameIntervalSecond)] | undefined
                 }
                 | undefined
@@ -443,6 +452,15 @@
       if (mediaInfo.video && mediaInfo.video.optional) {
         mediaInfo.video.transcoding = mediaInfo.video.optional;
         delete mediaInfo.video.optional;
+      }
+      if (mediaInfo.video && mediaInfo.video.transcoding && mediaInfo.video.transcoding
+        .parameters.bitrate) {
+        mediaInfo.video.transcoding.parameters.bitrateMultiple = Array.from(
+          mediaInfo.video.transcoding.parameters.bitrate, bitrate =>
+          extractBitrateMultiplier(bitrate));
+        mediaInfo.video.transcoding.parameters.bitrateMultiple.push(1.0);
+        mediaInfo.video.transcoding.parameters.bitrateMultiple = mediaInfo.video
+          .transcoding.parameters.bitrateMultiple.sort();
       }
       return mediaInfo;
     };
