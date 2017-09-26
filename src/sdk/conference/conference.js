@@ -179,7 +179,7 @@
     // For backward compatible. Mix published stream to this viewport.
     this.commonMixedStream = null;
     this.participants = [];
-    this.externalUrlToSubscriptionId = {};
+    this.externalUrlToSubscriptionId = new Map();
     this.recorderCallbacks = {};  // Key is subscription ID, value is an object with onSuccess and onFailure function.
     this.publicationCallbacks = {}; // Key is publication ID, value is an object {connection: boolean, ack: boolean}.
     this.subscriptionCallbacks = {}; // Key is subscription ID, value is an object {stream: boolean, connection: ack, ack: boolean}.
@@ -973,6 +973,7 @@
          */
       this.leave = function() {
         this.signaling.disconnect();
+        this.externalUrlToSubscriptionId.clear();
         this.state = DISCONNECTED;
       };
 
@@ -1254,6 +1255,11 @@
         } else if (typeof options !== 'object' || options === null) {
           options = {};
         }
+        if (self.externalUrlToSubscriptionId[url]) {
+          safeCall(onFailure,
+            'Cannot add external output to the same URL more than once.');
+          return;
+        }
         options.url = url;
         // See http://shilv018.sh.intel.com/bugzilla_WebRTC/show_bug.cgi?id=976#c8 .
         if (options.video && options.video.resolution) {
@@ -1261,7 +1267,8 @@
         }
         let streamId = options.streamId || self.commonMixedStream.id();
         if (!streamId) {
-          return safeCall(onFailure, 'Stream ID is not specified.');
+          safeCall(onFailure, 'Stream ID is not specified.');
+          return;
         }
         let mediaOptions = {
           audio: {
@@ -1405,6 +1412,7 @@
           id: self.externalUrlToSubscriptionId[url]
         }).then(() => {
           safeCall(onSuccess);
+          self.externalUrlToSubscriptionId.delete(url);
         }, (err) => {
           safeCall(onFailure, err);
         });
