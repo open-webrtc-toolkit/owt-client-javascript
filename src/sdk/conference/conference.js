@@ -333,9 +333,6 @@
           stream.channel.processSignalingMessage(arg.data);
         } else if (arg.status === 'ready') {
           if (self.recorderCallbacks[arg.id]) { // Recording.
-            if (self.commonMixedStream) {
-              self.mix(self.localStreams[arg.id], [self.commonMixedStream]);
-            }
             safeCall(self.recorderCallbacks[arg.id].onSuccess, {
               recorderId: arg.id,
               host: arg.data.host,
@@ -343,7 +340,7 @@
             });
             delete self.recorderCallbacks[arg.id];
           } else if (self.publicationCallbacks[arg.id]) {
-            if (self.commonMixedStream) {
+            if (self.commonMixedStream && !stream.isScreen()) {
               self.mix(stream, [self.commonMixedStream]);
             }
             safeCall(self.publicationCallbacks[arg.id].onSuccess, stream);
