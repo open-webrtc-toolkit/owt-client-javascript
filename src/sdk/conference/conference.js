@@ -1669,7 +1669,7 @@
       this.getRegion = function(options, onSuccess, onFailure) {
         var self = this;
         if (typeof options !== 'object' || options === null || typeof options.id !==
-          'string' || options.id === '') {
+          'string' || options.id === '' || options.mixedStreamId === null) {
           return safeCall(onFailure, 'Invalid options.');
         }
 
@@ -1723,7 +1723,7 @@
         var self = this;
         if (typeof options !== 'object' || options === null || typeof options.id !==
           'string' || options.id === '' || typeof options.region !== 'string' ||
-          options.region === '') {
+          options.region === '' || options.mixedStreamId === null) {
           return safeCall(onFailure, 'Invalid options.');
         }
 
