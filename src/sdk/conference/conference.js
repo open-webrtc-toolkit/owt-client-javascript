@@ -1048,6 +1048,7 @@
         }
       );
       </script>
+      Important Note: Please do not mix two audio streams into one mix stream because one client can only have one active audio in current conference.
          */
       this.mix = function(stream, targetStreams, onSuccess, onFailure) {
         return mixOrUnmix('mix', this.signaling, stream, targetStreams,
