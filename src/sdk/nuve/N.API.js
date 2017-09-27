@@ -229,7 +229,6 @@ N.API = (function(N) {
       delete options.viewports;
     }
 
-
     send(function(roomRtn) {
       var room = JSON.parse(roomRtn);
       callback(room);
@@ -256,7 +255,10 @@ N.API = (function(N) {
   });
      */
   getRooms = function(callback, callbackError, params) {
-    send(callback, callbackError, 'GET', undefined, 'rooms', params);
+    send(function(roomsRtn) {
+      var rooms = JSON.parse(roomsRtn);
+      callback(rooms);
+    }, callbackError, 'GET', undefined, 'rooms', params);
   };
 
   /**
@@ -284,7 +286,10 @@ N.API = (function(N) {
       callbackError(401, 'Empty room ID');
       return;
     }
-    send(callback, callbackError, 'GET', undefined, 'rooms/' + room,
+    send(function(roomRtn) {
+      var room = JSON.parse(roomRtn);
+      callback(room);
+    }, callbackError, 'GET', undefined, 'rooms/' + room,
       params);
   };
 
@@ -305,7 +310,9 @@ N.API = (function(N) {
   });
      */
   deleteRoom = function(room, callback, callbackError, params) {
-    send(callback, callbackError, 'DELETE', undefined, 'rooms/' + room,
+    send(function(room) {
+      callback(room);
+    }, callbackError, 'DELETE', undefined, 'rooms/' + room,
       params);
   };
 
@@ -371,7 +378,10 @@ N.API = (function(N) {
       options.views = viewportsToViews(options.viewports);
       delete options.viewports;
     }
-    send(callback, callbackError, 'PUT', (options || {}), 'rooms/' +
+    send(function(roomRtn) {
+      var room = JSON.parse(roomRtn);
+      callback(room);
+    }, callbackError, 'PUT', (options || {}), 'rooms/' +
       roomId, params);
   };
 
@@ -429,7 +439,10 @@ N.API = (function(N) {
   });
      */
   createService = function(name, key, callback, callbackError, params) {
-    send(callback, callbackError, 'POST', {
+    send(function(serviceRtn) {
+      var serv = JSON.parse(serviceRtn);
+      callback(serv);
+    }, callbackError, 'POST', {
       name: name,
       key: key
     }, 'services/', params);
@@ -452,7 +465,10 @@ N.API = (function(N) {
   });
      */
   getServices = function(callback, callbackError, params) {
-    send(callback, callbackError, 'GET', undefined, 'services/', params);
+    send(function(servicesRtn) {
+      var servs = JSON.parse(servicesRtn);
+      callback(servs);
+    }, callbackError, 'GET', undefined, 'services/', params);
   };
 
   /**
@@ -476,7 +492,10 @@ N.API = (function(N) {
       callbackError(400, 'Invalid service ID.');
       return;
     }
-    send(callback, callbackError, 'GET', undefined, 'services/' + service,
+    send(function(serviceRtn) {
+      var serv = JSON.parse(serviceRtn);
+      callback(serv);
+    }, callbackError, 'GET', undefined, 'services/' + service,
       params);
   };
 
@@ -497,7 +516,9 @@ N.API = (function(N) {
   });
      */
   deleteService = function(service, callback, callbackError, params) {
-    send(callback, callbackError, 'DELETE', undefined, 'services/' +
+    send(function(serv) {
+      callback(serv);
+    }, callbackError, 'DELETE', undefined, 'services/' +
       service, params);
   };
 
@@ -522,7 +543,10 @@ N.API = (function(N) {
   });
      */
   getUsers = function(room, callback, callbackError, params) {
-    send(callback, callbackError, 'GET', undefined, 'rooms/' + room +
+    send(function(usersRtn) {
+      var users = JSON.parse(usersRtn);
+      callback(users);
+    }, callbackError, 'GET', undefined, 'rooms/' + room +
       '/users/', params);
   };
 
@@ -545,7 +569,10 @@ N.API = (function(N) {
   });
      */
   getUser = function(room, user, callback, callbackError, params) {
-    send(callback, callbackError, 'GET', undefined, 'rooms/' + room +
+    send(function(userRtn) {
+      var user = JSON.parse(userRtn);
+      callback(user);
+    }, callbackError, 'GET', undefined, 'rooms/' + room +
       '/users/' + user, params);
   };
 
@@ -568,7 +595,9 @@ N.API = (function(N) {
   });
      */
   deleteUser = function(room, user, callback, callbackError, params) {
-    send(callback, callbackError, 'DELETE', undefined, 'rooms/' + room +
+    send(function(user) {
+      callback(user);
+    }, callbackError, 'DELETE', undefined, 'rooms/' + room +
       '/users/' + user, params);
   };
 

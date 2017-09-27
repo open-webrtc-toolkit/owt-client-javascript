@@ -41,8 +41,7 @@ N.API.init('_auto_generated_ID_', '_auto_generated_KEY_',
 
 var myRoom;
 
-N.API.getRooms(function(roomlist) {
-  var rooms = JSON.parse(roomlist);
+N.API.getRooms(function(rooms) {
   console.log(rooms.length + ' rooms in this service.');
   for (var i = 0; i < rooms.length; i++) {
     if (myRoom === undefined && rooms[i].name === 'myRoom') {
