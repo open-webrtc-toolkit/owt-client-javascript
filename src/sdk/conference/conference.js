@@ -170,9 +170,9 @@
     this.internalDispatcher = Woogeen.EventDispatcher({});
     this.spec = {};
     this.remoteStreams = {};
-    this.localStreams = {};
-    this.subscriptionToStream = {};  // Maps from subscription ID to stream.
-    this.streamIdToSubscriptionId = {};
+    this.localStreams = new Map();
+    this.subscriptionToStream = new Map();  // Maps from subscription ID to stream.
+    this.streamIdToSubscriptionId = new Map();
     this.state = DISCONNECTED;
     // For backward compatible. Mix published stream to this viewport.
     this.commonMixedStream = null;
@@ -321,9 +321,9 @@
       });
       self.signaling.on('progress', function(arg) {
         arg = arg.msg;
-        let stream = self.subscriptionToStream[arg.id];
+        let stream = self.subscriptionToStream.get(arg.id);
         if (!stream) {
-          stream = self.localStreams[arg.id];
+          stream = self.localStreams.get(arg.id);
         }
         if (!stream && !self.recorderCallbacks[arg.id]) {
           L.Logger.warning('Cannot find associated stream.');
@@ -403,6 +403,15 @@
             L.Logger.warning('Received unknown message.');
         }
       });
+      self.signaling.on('disconnect', ()=>{
+        self.state = DISCONNECTED;
+        self.subscriptionToStream.forEach((stream)=>{
+          self.unsubscribe(stream);
+        });
+        self.localStreams.forEach((stream)=>{
+          self.unpublish(stream);
+        });
+      });
       return safeCall(onSuccess, {
         streams: streams,
         users: resp.users,
@@ -463,7 +472,7 @@
     }
     options.videoCodec = options.videoCodec || 'h264';
 
-    if (self.localStreams[stream.id()] === undefined) { // not published
+    if (self.localStreams.get(stream.id()) === undefined) { // not published
       var streamOpt = stream.toJson();
       if (options.unmix === true) {
         streamOpt.unmix = true;
@@ -486,7 +495,7 @@
           stream.id = function() {
             return id;
           };
-          self.localStreams[id] = stream;
+          self.localStreams.set(id, stream);
           safeCall(onSuccess, stream);
         }, (err)=>{
           safeCall(onFailure, err);
@@ -529,7 +538,7 @@
           onSuccess: onSuccess,
           onFailure: onFailure
         };
-        self.localStreams[id] = stream;
+        self.localStreams.set(id, stream);
         stream.channel = createChannel({
           callback: function(message) {
             console.log("Sending message", message);
@@ -616,31 +625,29 @@
     onFailure) {
     var self = this;
     if (!(stream instanceof Woogeen.LocalStream || stream instanceof Woogeen.ExternalStream)) {
-      return safeCall(onFailure, 'invalid stream');
+      safeCall(onFailure, 'invalid stream');
+      return;
     }
+    if (!self.localStreams.has(stream.id())) {
+      safeCall(onFailure, 'The specific stream is not published.');
+      return;
+    }
+    if (stream.channel && typeof stream.channel.close === 'function') {
+      stream.channel.close();
+      stream.channel = null;
+    }
+    self.localStreams.delete(stream.id());
+    stream.id = function() {
+      return null;
+    };
+    stream.signalOnPlayAudio = undefined;
+    stream.signalOnPauseAudio = undefined;
+    stream.signalOnPlayVideo = undefined;
+    stream.signalOnPauseVideo = undefined;
     self.signaling.sendMessage('unpublish', {
       id: stream.id()
-    }).then(() => {
-      safeCall(onSuccess);
-    }, (err) => {
-      safeCall(onFailure, err);
-    }).then(() => {
-      /* TODO(jianlin): for now we close corresponding channel as long as we request unpublishing.
-         futher we need to parse the err from mcu to decide if channel needs to
-         be closed*/
-      if (stream.channel && typeof stream.channel.close === 'function') {
-        stream.channel.close();
-        stream.channel = null;
-      }
-      delete self.localStreams[stream.id()];
-      stream.id = function() {
-        return null;
-      };
-      stream.signalOnPlayAudio = undefined;
-      stream.signalOnPauseAudio = undefined;
-      stream.signalOnPlayVideo = undefined;
-      stream.signalOnPauseVideo = undefined;
     });
+    safeCall(onSuccess);
   };
 
   /**
@@ -766,8 +773,8 @@
         video: videoOptions
       }
     }).then((data) => {
-      self.subscriptionToStream[data.id] = stream;
-      self.streamIdToSubscriptionId[stream.id()] = data.id;
+      self.subscriptionToStream.set(data.id, stream);
+      self.streamIdToSubscriptionId.set(stream.id(), data.id);
       self.subscriptionCallbacks[data.id] = {
         onSuccess: onSuccess,
         onFailure: onFailure
@@ -863,27 +870,27 @@
     onFailure) {
     var self = this;
     if (!(stream instanceof Woogeen.RemoteStream)) {
-      return safeCall(onFailure, 'invalid stream');
+      safeCall(onFailure, 'invalid stream');
+      return;
+    }
+    if (!self.streamIdToSubscriptionId.has(stream.id())) {
+      safeCall(onFailure, 'The specific stream is not subscribed.');
+      return;
+    }
+    stream.close();
+    stream.signalOnPlayAudio = undefined;
+    stream.signalOnPauseAudio = undefined;
+    stream.signalOnPlayVideo = undefined;
+    stream.signalOnPauseVideo = undefined;
+    if (stream.channel && typeof stream.channel.close === 'function') {
+      stream.channel.close();
     }
     self.signaling.sendMessage('unsubscribe', {
-      id: self.streamIdToSubscriptionId[stream.id()]
-    }).then(() => {
-      stream.close();
-      stream.signalOnPlayAudio = undefined;
-      stream.signalOnPauseAudio = undefined;
-      stream.signalOnPlayVideo = undefined;
-      stream.signalOnPauseVideo = undefined;
-      if (stream.channel && typeof stream.channel.close === 'function') {
-        stream.channel.close();
-      }
-    }).then(() => {
-      safeCall(onSuccess);
-    }, (err) => {
-      safeCall(onFailure, err);
+      id: self.streamIdToSubscriptionId.get(stream.id())
     });
-    self.subscriptionToStream[self.streamIdToSubscriptionId[stream.id()]] =
-      undefined;
-    self.streamIdToSubscriptionId[stream.id()] = undefined;
+    self.subscriptionToStream.delete(self.streamIdToSubscriptionId.get(stream.id()));
+    self.streamIdToSubscriptionId.delete(stream.id());
+    safeCall(onSuccess);
   };
 
   /**
