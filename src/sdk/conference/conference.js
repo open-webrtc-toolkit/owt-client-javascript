@@ -183,6 +183,7 @@
     this.recorderCallbacks = {};  // Key is subscription ID, value is an object with onSuccess and onFailure function.
     this.publicationCallbacks = {}; // Key is publication ID, value is an object {connection: boolean, ack: boolean}.
     this.subscriptionCallbacks = {}; // Key is subscription ID, value is an object {stream: boolean, connection: ack, ack: boolean}.
+    this.unmixStreams = new Set();
 
     if (spec.iceServers) {
       this.spec.userSetIceServers = spec.iceServers;
@@ -342,9 +343,11 @@
             });
             delete self.recorderCallbacks[arg.id];
           } else if (self.publicationCallbacks[arg.id]) {
-            if (self.commonMixedStream && !stream.isScreen()) {
+            if (self.commonMixedStream && !stream.isScreen() && !self.unmixStreams
+              .has(arg.id)) {
               self.mix(stream, [self.commonMixedStream]);
             }
+            self.unmixStreams.delete(arg.id);
             safeCall(self.publicationCallbacks[arg.id].onSuccess, stream);
             delete self.publicationCallbacks[arg.id];
           } else if (self.subscriptionCallbacks[arg.id]) {
@@ -434,6 +437,7 @@
       <ul>
         <li>maxAudioBW: xxx. It does not work on Edge.</li>
         <li>maxVideoBW: xxx. It does not work on Edge.</li>
+        <li>unmix: false/true. If true, this stream would not be included in mixed stream.</li>
         <li>audioCodec: 'opus'/'pcmu'/'pcma'. Preferred audio codec.</li>
         <li>videoCodec: 'h264'/'vp8'/'vp9'. Preferred video codec. H.264 is the default preferred codec. Note for Firefox VP9 is not stable, so please do not specify VP9 for Firefox.</li>
         <li>transport: 'udp'/'tcp'. RTSP connection transport type, default 'udp'; only for RTSP input.</li>
@@ -541,6 +545,9 @@
         stream.id = function() {
           return id;
         };
+        if (options.unmix) {
+          self.unmixStreams.add(id);
+        }
         self.publicationCallbacks[id] = {
           onSuccess: onSuccess,
           onFailure: onFailure
