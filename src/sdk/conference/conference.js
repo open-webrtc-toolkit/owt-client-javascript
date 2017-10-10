@@ -1376,10 +1376,10 @@
         };
         if (options.resolution) {
           if (typeof options.resolution === 'string') {
-            subscriptionUpdateOptions.format.video.resolution =
+            subscriptionUpdateOptions.video.format.resolution =
               resolutionName2Value[options.resolution];
           } else {
-            subscriptionUpdateOptions.format.video.resolution = options.resolution;
+            subscriptionUpdateOptions.video.format.resolution = options.resolution;
           }
         }
         self.signaling.sendMessage('subscription-control', {
