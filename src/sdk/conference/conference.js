@@ -639,9 +639,6 @@
       stream.channel = null;
     }
     self.localStreams.delete(stream.id());
-    stream.id = function() {
-      return null;
-    };
     stream.signalOnPlayAudio = undefined;
     stream.signalOnPauseAudio = undefined;
     stream.signalOnPlayVideo = undefined;
@@ -649,6 +646,9 @@
     self.signaling.sendMessage('unpublish', {
       id: stream.id()
     });
+    stream.id = function() {
+      return null;
+    };
     safeCall(onSuccess);
   };
 
