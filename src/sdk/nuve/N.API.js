@@ -366,7 +366,7 @@ N.API = (function(N) {
      */
   updateRoom = function(roomId, options, callback, callbackError, params) {
     if (options && options.viewports) {
-      options.view = viewportsToViews(options.viewports);
+      options.views = viewportsToViews(options.viewports);
       delete options.viewports;
     }
     send(callback, callbackError, 'PUT', (options || {}), 'rooms/' +
