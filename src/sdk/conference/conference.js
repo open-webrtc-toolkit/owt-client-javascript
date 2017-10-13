@@ -482,7 +482,7 @@
       if (stream.url() !== undefined) {
         let connectionOpt = {};
         connectionOpt.url = stream.url();
-        connectionOpt.transport = options.transport;
+        connectionOpt.transportProtocol = options.transport;
         connectionOpt.bufferSize = options.bufferSize;
 
         let streamingInMediaOptions = {audio: 'auto', video: 'auto'};
