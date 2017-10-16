@@ -127,6 +127,26 @@
     };
   }
   /**
+     * @function on
+     * @desc This function registers a listener for a specified event, which would be called when the event occurred.
+      @htmlonly
+      <table class="doxtable">
+      <thead>
+        <tr><th align="center">Event Name</th><th align="center">Description</th></tr>
+      </thead>
+      <tbody>
+        <tr><td align="center"><code>Ended</code></td><td align="center">All tracks of this stream are ended.</td></tr>
+      </tbody>
+      </table>
+      @endhtmlonly
+      <script type="text/JavaScript">
+      stream.on('Ended', function () {
+        conference.unpublish(stream);
+      });
+      </script>
+  */
+  WoogeenStream.prototype =  Woogeen.EventDispatcher({});
+  /**
      * @function close
      * @desc This function closes the stream.
   <br><b>Remarks:</b><br>
@@ -853,6 +873,20 @@ L.Logger.info('stream added:', stream.id());
       option.mediaStream = mediaStream;
       option.id = mediaStream.id;
       var localStream = new Woogeen.LocalStream(option);
+      // Fire 'Ended' when all tracks are ended.
+      mediaStream.getTracks().forEach((track) => {
+        track.onended = function() {
+          if (mediaStream.getTracks().every((track) => {
+            return track.readyState === 'ended';
+          })) {
+            const evt = new Woogeen.StreamEvent({
+              type: 'Ended',
+              stream: localStream
+            });
+            localStream.dispatchEvent(evt);
+          }
+        };
+      });
       if (option.video && option.video.device === 'screen') {
         // when <Stop sharing> button in Browser was pressed, `onended' would
         // be triggered; then we need to close the screen sharing stream.

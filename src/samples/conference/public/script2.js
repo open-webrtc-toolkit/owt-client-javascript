@@ -262,6 +262,10 @@ var runSocketIOSample = function() {
             }, function(err) {
               L.Logger.error('publish failed:', err);
             });
+            stream.on('Ended', () => {
+              stream.hide();
+              conference.unpublish(stream);
+            });
           });
         });
       }
@@ -320,6 +324,10 @@ var runSocketIOSample = function() {
             }, function(err) {
               L.Logger.error('publish failed:', err);
             });
+            stream.on('Ended', () => {
+              stream.hide();
+              conference.unpublish(stream);
+            });
           });
         } else if (shareScreen === false) {
           if (isPublish !== 'false') {
@@ -342,6 +350,10 @@ var runSocketIOSample = function() {
               }, function(err) {
                 L.Logger.error('publish failed:', err);
               });
+              stream.on('Ended', () => {
+                stream.hide();
+                conference.unpublish(stream);
+              });
             });
           }
         } else if (isHttps) {
@@ -360,6 +372,10 @@ var runSocketIOSample = function() {
               L.Logger.info('stream published:', st.id());
             }, function(err) {
               L.Logger.error('publish failed:', err);
+            });
+            stream.on('Ended', () => {
+              stream.hide();
+              conference.unpublish(stream);
             });
           });
         } else {
