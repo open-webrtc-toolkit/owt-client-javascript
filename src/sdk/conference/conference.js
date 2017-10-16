@@ -487,6 +487,11 @@
 
         let streamingInMediaOptions = {audio: 'auto', video: 'auto'};
 
+        if (stream instanceof Woogeen.ExternalStream) {
+          streamingInMediaOptions.audio = stream.hasAudio();
+          streamingInMediaOptions.video = stream.hasVideo();
+        }
+
         self.signaling.sendMessage('publish', {
           type: 'streaming',
           connection: connectionOpt,
