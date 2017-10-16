@@ -1429,7 +1429,7 @@
         videoStreamId: xxxxxx,<br>
         audioStreamId: yyyyyy,<br>
         videoCodec: 'vp8'/'h264',<br>
-        audioCodec: 'pcmu'/'opus',<br>
+        audioCodec: 'pcmu'/'opus'/'aac',<br>
         recorderId: zzzzzz<br>
         }
          * @memberOf Woogeen.ConferenceClient
