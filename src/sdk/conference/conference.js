@@ -474,7 +474,7 @@
     }
     options.videoCodec = options.videoCodec || 'h264';
 
-    if (self.localStreams.get(stream.id()) === undefined) { // not published
+    if (!self.localStreams.has(stream.id())) { // not published
       var streamOpt = stream.toJson();
       if (options.unmix === true) {
         streamOpt.unmix = true;
@@ -700,6 +700,10 @@
     }
     if (!(stream instanceof Woogeen.RemoteStream)) {
       return safeCall(onFailure, 'invalid stream');
+    }
+
+    if (self.streamIdToSubscriptionId.has(stream.id())) {
+      return safeCall(onFailure, 'Already subscribed.');
     }
 
     if (options.audio === false && options.video === false) {
