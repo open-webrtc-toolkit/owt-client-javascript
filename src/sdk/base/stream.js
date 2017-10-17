@@ -414,7 +414,7 @@
                 {
                  resolution:[object(Resolution)] | undefined,
                  framerate: [number(FramerateFPS)] | undefined,
-                 bitrateMultiple: [string(BitrateMultiple)] |undefined,
+                 bitrateMultiple: [number(BitrateMultiple)] |undefined,
                  keyFrameInterval: [number(KeyFrameIntervalSecond)] | undefined
                 }
                 | undefined
@@ -461,6 +461,7 @@
         mediaInfo.video.transcoding.parameters.bitrateMultiple.push(1.0);
         mediaInfo.video.transcoding.parameters.bitrateMultiple = mediaInfo.video
           .transcoding.parameters.bitrateMultiple.sort();
+        delete mediaInfo.video.transcoding.parameters.bitrate;
       }
       return mediaInfo;
     };
