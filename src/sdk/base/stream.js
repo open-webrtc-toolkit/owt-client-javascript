@@ -357,11 +357,11 @@
     };
 
     this.hasAudio = function() {
-      return streamInfo.media.audio;
+      return !!streamInfo.media.audio;
     };
 
     this.hasVideo = function() {
-      return streamInfo.media.video;
+      return !!streamInfo.media.video;
     };
 
     function extractBitrateMultiplier(input) {
