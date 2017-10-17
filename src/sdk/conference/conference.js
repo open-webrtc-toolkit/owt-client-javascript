@@ -423,6 +423,10 @@
         self.localStreams.forEach((stream)=>{
           self.unpublish(stream);
         });
+        const evt = new Woogeen.ClientEvent({
+          type: 'server-disconnected'
+        });
+        self.dispatchEvent(evt);
       });
       return safeCall(onSuccess, {
         streams: streams,
