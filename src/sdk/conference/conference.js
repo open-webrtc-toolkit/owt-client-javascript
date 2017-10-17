@@ -667,15 +667,7 @@
   /**
      * @function subscribe
      * @instance
-     * @desc This function subscribes to a remote stream. The stream should be a RemoteStream instance. 'stream-failed' event may be triggered if there is internal error happend in MCU after publishing or connection is broken.
-     <br><b>options:</b><br>
-  {<br>
-  video: true/false, {resolution: {width:xxx, height:xxx}, qualityLevel:'xxx'},<br>
-  audio: true/false,<br>
-  videoCodec: 'h264'/'vp8'/'vp9'. H.264 is the default preferred codec. This property specifies preferred video codec. Note for Firefox vp9 is not stable, so please do not sepcify vp9 for Firefox.<br>
-  }
-  <br><b>Remarks:</b><br>
-  Video resolution choice is only valid for subscribing {@link Woogeen.RemoteMixedStream Woogeen.RemoteMixedStream} when multistreaming output is enabled.　See {@link N.API.createRoom N.API.createRoom()} for detailed description of multistreaming.<br>
+     * @desc This function subscribes to a remote stream. The stream should be a RemoteStream instance.
      * @memberOf Woogeen.ConferenceClient&Woogeen.SipClient
      * @param {stream} stream Stream to subscribe.
      * @param {json} options (optional) Subscribe options. Options could be a boolean value or an object. If it is an boolean value, it indicates whether video is enabled or not. If it is an object, video will be enabled and this object is video options. The object may have following properties:
