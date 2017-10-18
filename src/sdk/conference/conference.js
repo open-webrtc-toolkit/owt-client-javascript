@@ -1295,10 +1295,11 @@
           }
         };
         if (options.resolution) {
+          mediaOptions.video.parameters = {};
           if (typeof options.resolution === 'string') {
-            mediaOptions.video.format.resolution = resolutionName2Value[options.resolution];
+            mediaOptions.video.parameters.resolution = resolutionName2Value[options.resolution];
           } else {
-            mediaOptions.video.format.resolution = options.resolution;
+            mediaOptions.video.parameters.resolution = options.resolution;
           }
         }
         self.signaling.sendMessage('subscribe', {
