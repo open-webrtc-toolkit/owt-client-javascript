@@ -204,8 +204,12 @@ Erizo.ChromeStableStack = function(spec) {
   that.createOffer = function(isSubscribe) {
     if (isSubscribe === true) {
       if (typeof that.peerConnection.addTransceiver === 'function') {
-        that.peerConnection.addTransceiver('audio');
-        that.peerConnection.addTransceiver('video');
+        if (spec.audio) {
+          that.peerConnection.addTransceiver('audio');
+        }
+        if (spec.video) {
+          that.peerConnection.addTransceiver('video');
+        }
       }
       that.peerConnection.createOffer(setLocalDesc, errorCallback, that.mediaConstraints);
     } else {
