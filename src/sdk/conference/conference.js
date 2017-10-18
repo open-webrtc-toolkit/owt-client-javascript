@@ -183,6 +183,7 @@
     this.recorderCallbacks = {};  // Key is subscription ID, value is an object with onSuccess and onFailure function.
     this.publicationCallbacks = {}; // Key is publication ID, value is an object {connection: boolean, ack: boolean}.
     this.subscriptionCallbacks = {}; // Key is subscription ID, value is an object {stream: boolean, connection: ack, ack: boolean}.
+    this.externalOutputCallbacks = new Map();  // Key is subscription ID, value is an object with onSuccess and onFailure function.
     this.unmixStreams = new Set();
 
     if (spec.iceServers) {
@@ -353,6 +354,9 @@
           } else if (self.subscriptionCallbacks[arg.id]) {
             safeCall(self.subscriptionCallbacks[arg.id].onSuccess, stream);
             delete self.subscriptionCallbacks[arg.id];
+          } else if (self.externalOutputCallbacks.has(arg.id)) {
+            safeCall(self.externalOutputCallbacks.get(arg.id).onSuccess);
+            self.externalOutputCallbacks.delete(arg.id);
           }
         } else if (arg.status === 'error') {
           if (self.recorderCallbacks[arg.id]) {
@@ -364,6 +368,9 @@
           } else if (self.subscriptionCallbacks[arg.id]) {
             safeCall(self.subscriptionCallbacks[arg.id].onFailure, arg.data);
             delete self.subscriptionCallbacks[arg.id];
+          } else if (self.externalOutputCallbacks.has(arg.id)) {
+            safeCall(self.externalOutputCallbacks.get(arg.id).onFailure);
+            self.externalOutputCallbacks.delete(arg.id);
           }
         }
       });
@@ -1302,7 +1309,10 @@
           media: mediaOptions
         }).then((data) => {
           self.externalUrlToSubscriptionId[url] = data.id;
-          safeCall(onSuccess);
+          self.externalOutputCallbacks.set(data.id, {
+            onSuccess: onSuccess,
+            onFailure: onFailure
+          });
         }, (err) => {
           safeCall(onFailure, err);
         });
