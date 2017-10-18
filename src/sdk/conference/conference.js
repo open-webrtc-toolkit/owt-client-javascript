@@ -1486,6 +1486,11 @@
         } else if (typeof options !== 'object' || options === null) {
           options = {};
         }
+        if (options.recorderId && (options.audioCodec || options.videoCodec)) {
+          safeCall(onFailure,
+            'Cannot set codec when updating existing recorder.');
+          return;
+        }
         let mediaSubOptions = {};
         if (options.audioStreamId === null || options.videoStreamId === null) {
           safeCall(onFailure, 'Invalid audio and video stream ID.');
