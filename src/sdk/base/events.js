@@ -23,35 +23,31 @@ Woogeen.EventDispatcher = function(spec) {
           </tr>
           <tr valign="top">
               <td>server-disconnected</td>
-              <td>Indicates the client has been disconnected to the server.</td>
+              <td>Indicates the client has been disconnected to the server. No parameters.</td>
           </tr>
           <tr valign="top">
               <td>user-joined</td>
-              <td>Indicates that there is a new user joined. </td>
+              <td>Indicates that there is a new user joined. Parameter: an object with a property named user, user has following properties: id, name and role.</td>
           </tr>
           <tr valign="top">
               <td>user-left</td>
-              <td>Indicates that a user has left conference.</td>
+              <td>Indicates that a user has left conference. Parameter: an object with a property named user, user has following properties: id, name and role.</td>
           </tr>
           <tr valign="top">
               <td>message-received</td>
-              <td>Indicates there is a new message delivered by server</td>
+              <td>Indicates there is a new message delivered by server. Parameter: an object with following properties: from - the user who sends this message, to - audience of this message, data - text message.</td>
           </tr>
           <tr valign="top">
               <td>stream-added</td>
-              <td>Indicates there is a new stream available.</td>
+              <td>Indicates there is a new stream available. Parameter: an object with a property named stream which is an instance of Woogeen.RemoteStream.</td>
           </tr>
           <tr valign="top">
               <td>stream-removed </td>
-              <td>Indicates one existed stream has been removed. </td>
+              <td>Indicates one existed stream has been removed. Parameter: an object with a property named stream which is an instance of Woogeen.RemoteStream.</td>
           </tr>
           <tr valign="top">
               <td>stream-failed</td>
-              <td>Indicates the connection to specific stream is broken.</td>
-          </tr>
-          <tr valign="top">
-              <td>recorder-removed</td>
-              <td>Indicates the recorder has been removed.</td>
+              <td>Indicates the connection to specific stream is broken. Parameter: an object with a property named stream which is an instance of Woogeen.Stream.</td>
           </tr>
       </thead>
   </table>
