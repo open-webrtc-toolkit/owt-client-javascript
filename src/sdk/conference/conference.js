@@ -359,6 +359,7 @@
             self.externalOutputCallbacks.delete(arg.id);
           }
         } else if (arg.status === 'error') {
+          // If callback is not invoked, invoke failure callback.
           if (self.recorderCallbacks[arg.id]) {
             safeCall(self.recorderCallbacks[arg.id].onFailure, arg.data);
             delete self.recorderCallbacks[arg.id];
@@ -371,6 +372,22 @@
           } else if (self.externalOutputCallbacks.has(arg.id)) {
             safeCall(self.externalOutputCallbacks.get(arg.id).onFailure);
             self.externalOutputCallbacks.delete(arg.id);
+          }
+          // If callback is invoked, fire 'stream-failed' event.
+          if (self.localStreams.has(arg.id)) {
+            const evt = new Woogeen.StreamEvent({
+              type: 'stream-failed',
+              stream: self.localStreams.get(arg.id),
+              msg: arg.data
+            });
+            self.dispatchEvent(evt);
+          } else if (self.subscriptionToStream.has(arg.id)) {
+            const evt = new Woogeen.StreamEvent({
+              type: 'stream-failed',
+              stream: self.subscriptionToStream.get(arg.id),
+              msg: arg.data
+            });
+            self.dispatchEvent(evt);
           }
         }
       });
