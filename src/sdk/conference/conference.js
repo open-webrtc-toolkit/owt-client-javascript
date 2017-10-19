@@ -535,7 +535,10 @@
             return id;
           };
           self.localStreams.set(id, stream);
-          safeCall(onSuccess, stream);
+          self.publicationCallbacks[id] = {
+            onSuccess: onSuccess,
+            onFailure: onFailure
+          };
         }, (err)=>{
           safeCall(onFailure, err);
         });
