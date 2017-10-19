@@ -183,7 +183,7 @@
     this.recorderCallbacks = {};  // Key is subscription ID, value is an object with onSuccess and onFailure function.
     this.publicationCallbacks = {}; // Key is publication ID, value is an object {connection: boolean, ack: boolean}.
     this.subscriptionCallbacks = {}; // Key is subscription ID, value is an object {stream: boolean, connection: ack, ack: boolean}.
-    this.externalOutputCallbacks = new Map();  // Key is subscription ID, value is an object with onSuccess and onFailure function.
+    this.externalOutputCallbacks = new Map();  // Maps from subscription ID to {onSuccess: function, onFailure: function}.
     this.unmixStreams = new Set();
 
     if (spec.iceServers) {
@@ -329,7 +329,8 @@
         if (!stream) {
           stream = self.localStreams.get(arg.id);
         }
-        if (!stream && !self.recorderCallbacks[arg.id]) {
+        if (!stream && !self.recorderCallbacks[arg.id] && !self.externalOutputCallbacks
+          .has(arg.id)) {
           L.Logger.warning('Cannot find associated stream.');
           return;
         }
