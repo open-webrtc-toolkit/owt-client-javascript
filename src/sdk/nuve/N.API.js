@@ -322,8 +322,9 @@ N.API = (function(N) {
     publishLimit: -1,
     userLimit: -1,
     enableMixing: 1,
-    viewports: {
-      "common": {
+    viewports: [
+      {
+        name: "common",
         mediaMixing: {
           video: {
             maxInput: 15,
@@ -340,7 +341,8 @@ N.API = (function(N) {
           audio: null
         },
       },
-      "another": {
+      {
+        name: "another":,
         mediaMixing: {
           video: {
             maxInput: 15,
@@ -357,7 +359,7 @@ N.API = (function(N) {
           audio: null
         },
       }
-    }
+    ]
   }, function (res) {
     console.log ('Room', res._id, 'updated');
   }, function (err) {
