@@ -705,7 +705,7 @@
      <ul>
        <li>resolution: An object has width and height. Both width and height are number.</li>
        <li>qualityLevel: A string which is one of these values "BestQuality", "BetterQuality", "Standard", "BetterSpeed", "BestSpeed". It does not change resolution, but better quality leads to higher bitrate.</li>
-       <li>bitrateMultipiler: A number for expected bitrate multiplier. You can find valid bitrate multipliers by calling <code>mediaInfo()</code>. If <code>bitrateMultipiler</code> is specified, <code>qualityLevel</code> will be ignored.</li>
+       <li>bitrateMultiplier: A number for expected bitrate multiplier. You can find valid bitrate multipliers by calling <code>mediaInfo()</code>. If <code>bitrateMultiplier</code> is specified, <code>qualityLevel</code> will be ignored.</li>
        <li>frameRate: A number for expected frame rate.</li>
        <li>keyFrameInterval: A number for expected interval of key frames. Unit: second.</li>
      * @param {function} onSuccess(stream) (optional) Success callback.
@@ -800,9 +800,9 @@
         videoOptions.parameters = videoOptions.parameters || {};
         videoOptions.parameters.keyFrameInterval = options.video.keyFrameInterval;
       }
-      if (options.video.bitrateMultipiler) {
+      if (options.video.bitrateMultiplier) {
         videoOptions.parameters = videoOptions.parameters || {};
-        videoOptions.parameters.bitrate = 'x' + options.video.bitrateMultipiler
+        videoOptions.parameters.bitrate = 'x' + options.video.bitrateMultiplier
           .toString();
       }
     }
