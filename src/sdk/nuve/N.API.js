@@ -87,7 +87,7 @@ N.API = (function(N) {
         <li><b>mediaMixing:</b>media setting for mixed stream in the room if mixing is enabled. Value should be a JSON object contains two entries: "video" and "audio". Audio entry is currently not used and should be null.</li>
         <ul>
             <li>audio: null</li>
-            <li>video: maxInput, resolution, multistreaming, bitrate , bkColor, layout, avCoordinate, crop</li>
+            <li>video: maxInput, resolution, multistreaming, quality_level, bkColor, layout, avCoordinate, crop</li>
             <ul>
                 <li>maxInput is for maximum number of slots in the mix stream</li>
                 <li>resolution denotes the resolution of the video size of mix stream.Valid resolution list:</li>
@@ -102,7 +102,7 @@ N.API = (function(N) {
                         <li>'r720x720'</li>
                     </ul>
                 <li>multistreaming(0 or 1) indicates whether the MCU mix stream outputs multiple resolutions for different devices. The additional stream's resolutions are determined by MCU according to the base resolution user specified, no customizations is allowed yet. Please see the following table for detailed mapping.</li>
-                <li>bitrate indicates video bitrate of the mix stream, in Kbit unit. Default value 0, meaning that MCU could use its own calculated default value.</li>
+                <li>quality_level indicates the default video quality of the mix stream (choose from "bestSpeed", "betterSpeed", "standard", "betterQuality", "bestQuality").</li>
                 <li>bkColor sets the background color, supporting RGB color format: {"r":red-value, "g":green-value, "b":blue-value}.</li>
                 <li>layout describes video layout in mix stream</li>
                     <ul>
@@ -182,7 +182,7 @@ N.API = (function(N) {
             maxInput: 15,
             resolution: 'hd720p',
             multistreaming: 1,
-            bitrate: 0,
+            quality_level: 'standard',
             bkColor: {"r":1, "g":2, "b":255},
             layout: {
               base: 'lecture',
@@ -200,7 +200,7 @@ N.API = (function(N) {
             maxInput: 15,
             resolution: 'hd1080p',
             multistreaming: 1,
-            bitrate: 0,
+            quality_level: 'standard',
             bkColor: {"r":1, "g":2, "b":255},
             layout: {
               base: 'lecture',
@@ -329,7 +329,7 @@ N.API = (function(N) {
             maxInput: 15,
             resolution: 'hd720p',
             multistreaming: 1,
-            bitrate: 0,
+            quality_level: 'standard',
             bkColor: {"r":1, "g":2, "b":255},
             layout: {
               base: 'lecture',
@@ -346,7 +346,7 @@ N.API = (function(N) {
             maxInput: 15,
             resolution: 'hd1080p',
             multistreaming: 1,
-            bitrate: 0,
+            quality_level: 'standard',
             bkColor: {"r":1, "g":2, "b":255},
             layout: {
               base: 'lecture',
