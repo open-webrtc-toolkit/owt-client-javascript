@@ -22,15 +22,6 @@ Erizo.VideoPlayer = function(spec) {
   // DOM element in which the VideoPlayer will be appended
   that.elementID = spec.elementID;
 
-  // Private functions
-  onmouseover = function() {
-    that.bar.display();
-  };
-
-  onmouseout = function() {
-    that.bar.hide();
-  };
-
   // Public functions
 
   // It will stop the VideoPlayer and remove it from the HTML
@@ -88,6 +79,7 @@ Erizo.VideoPlayer = function(spec) {
     'width: 100%; height: 100%; position: absolute');
   that.video.setAttribute('autoplay', '');
   that.video.setAttribute('playsinline', '');
+  that.video.setAttribute('controls', '');
 
   if (spec.stream instanceof Woogeen.LocalStream) {
     that.video.volume = 0;
@@ -156,15 +148,6 @@ Erizo.VideoPlayer = function(spec) {
   that.div.ondblclick = function() {
     fullscreenHandler(that.video);
   };
-
-  // Bottom Bar
-  that.bar = new Erizo.Bar({
-    elementID: 'player_' + that.id,
-    id: that.id,
-    stream: spec.stream,
-    media: that.video,
-    options: spec.options
-  });
 
   that.div.onmouseover = onmouseover;
   that.div.onmouseout = onmouseout;
