@@ -417,7 +417,7 @@
             self.dispatchEvent(evt);
             break;
           case 'leave':
-            participant = self.participants[data.data.id];
+            participant = self.participants[data.data];
             if (!participant) {
               return;
             }
@@ -425,7 +425,7 @@
               type: 'user-left',
               user: participant
             });
-            delete self.participants[data.data.id];
+            delete self.participants[data.data];
             self.dispatchEvent(evt);
             break;
           default:
