@@ -1324,12 +1324,25 @@
           }
         };
         if (options.resolution) {
-          mediaOptions.video.parameters = {};
+          mediaOptions.video.parameters = mediaOptions.video.parameters || {};
           if (typeof options.resolution === 'string') {
             mediaOptions.video.parameters.resolution = resolutionName2Value[options.resolution];
           } else {
             mediaOptions.video.parameters.resolution = options.resolution;
           }
+        }
+        if (options.frameRate) {
+          mediaOptions.video.parameters = mediaOptions.video.parameters || {};
+          mediaOptions.video.parameters.framerate = options.frameRate;
+        }
+        if (options.keyFrameInterval) {
+          mediaOptions.video.parameters = mediaOptions.video.parameters || {};
+          mediaOptions.video.parameters.keyFrameInterval = options.keyFrameInterval;
+        }
+        if (options.bitrateMultipiler) {
+          mediaOptions.video.parameters = mediaOptions.video.parameters || {};
+          mediaOptions.video.parameters.bitrate = 'x' + options.bitrateMultipiler
+            .toString();
         }
         self.signaling.sendMessage('subscribe', {
           type: 'streaming',
