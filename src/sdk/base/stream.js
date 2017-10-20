@@ -14,7 +14,8 @@
     //   return new WoogeenStream();
     // }
     this.mediaStream = streamInfo.mediaStream;
-    streamInfo.attributes = streamInfo.attributes || {};
+    streamInfo.info = streamInfo.info || {};
+    streamInfo.info.attributes = streamInfo.info.attributes || {};
     this.url = function() {
       if (typeof streamInfo.url === 'string' && streamInfo.url !== '') {
         return streamInfo.url;
@@ -61,7 +62,7 @@
     </script>
        */
     this.attributes = function() {
-      return streamInfo.attributes;
+      return streamInfo.info.attributes;
     };
     /**
        * @function attr
@@ -78,9 +79,9 @@
        */
     this.attr = function(key, value) {
       if (arguments.length > 1) {
-        streamInfo.attributes[key] = value;
+        streamInfo.info.attributes[key] = value;
       }
-      return streamInfo.attributes[key];
+      return streamInfo.info.attributes[key];
     };
     /**
        * @function id
