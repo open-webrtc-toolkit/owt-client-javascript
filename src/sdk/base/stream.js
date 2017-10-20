@@ -150,7 +150,7 @@
      * @function close
      * @desc This function closes the stream.
   <br><b>Remarks:</b><br>
-  If the stream has audio and/or video, it also stops capturing camera/microphone. Once a LocalStream is closed, it is no longer usable. This function does not unpublish certain stream and it does not deal with UI logical either. After a stream is closed, "Ended" event will be fired.
+  If the stream has audio and/or video, it also stops capturing from camera/microphone. Once a LocalStream is closed, it is no longer usable. This function does not unpublish certain stream and it does not deal with UI logical either. After a stream is closed, "Ended" event will be fired.
      * @memberOf Woogeen.Stream
      * @instance
      * @example
