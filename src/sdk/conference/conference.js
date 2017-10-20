@@ -702,24 +702,30 @@
   };
 
   /**
-     * @function subscribe
-     * @instance
-     * @desc This function subscribes to a remote stream. The stream should be a RemoteStream instance.
-     * @memberOf Woogeen.ConferenceClient&Woogeen.SipClient
-     * @param {stream} stream Stream to subscribe.
-     * @param {json} options (optional) Subscribe options. Options could be a boolean value or an object. If it is an boolean value, it indicates whether video is enabled or not. If it is an object, video will be enabled and this object is video options. The object may have following properties:
-     <ul>
-       <li>resolution: An object has width and height. Both width and height are number.</li>
-       <li>qualityLevel: A string which is one of these values "BestQuality", "BetterQuality", "Standard", "BetterSpeed", "BestSpeed". It does not change resolution, but better quality leads to higher bitrate.</li>
-       <li>bitrateMultiplier: A number for expected bitrate multiplier. You can find valid bitrate multipliers by calling <code>mediaInfo()</code>. If <code>bitrateMultiplier</code> is specified, <code>qualityLevel</code> will be ignored.</li>
-       <li>frameRate: A number for expected frame rate.</li>
-       <li>keyFrameInterval: A number for expected interval of key frames. Unit: second.</li>
-     * @param {function} onSuccess(stream) (optional) Success callback.
-     * @param {function} onFailure(err) (optional) Failure callback.
-     * @example
+    * @function subscribe
+    * @instance
+    * @desc This function subscribes to a remote stream. The stream should be a RemoteStream instance.
+     @memberOf Woogeen.ConferenceClient&Woogeen.SipClient
+    * @param {stream} stream Stream to subscribe.
+    * @param {json} options (optional) Subscribe options. An object with following properties:
+    <ul>
+      <li>audio: a boolean indicates whether audio is enabled or not.</li>
+      <li>video: a boolean or an object. If it is a boolean value, it indicates whether video is enabled or not. If it is an object, video will be enabled and this object is video options. The object may have following properties:
+      <ul>
+        <li>resolution: An object has width and height. Both width and height are number.</li>
+        <li>qualityLevel: A string which is one of these values "BestQuality", "BetterQuality", "Standard", "BetterSpeed", "BestSpeed". It does not change resolution, but better quality leads to higher bitrate.</li>
+        <li>bitrateMultiplier: A number for expected bitrate multiplier. You can find valid bitrate multipliers by calling <code>mediaInfo()</code>. If <code>bitrateMultiplier</code> is specified, <code>qualityLevel</code> will be ignored.</li>
+        <li>frameRate: A number for expected frame rate.</li>
+        <li>keyFrameInterval: A number for expected interval of key frames. Unit: second.</li>
+      </ul></li>
+      <li>videoCodec: 'h264' or 'vp8'. H.264 is the default value.<li>
+    </ul>
+    * @param {function} onSuccess(stream) (optional) Success callback.
+    * @param {function} onFailure(err) (optional) Failure callback.
+    * @example
   <script type="text/JavaScript">
   ...
-  // ……
+  // ...
   client.subscribe(remoteStream, function (st) {
       L.Logger.info('stream subscribed:', st.id());
     }, function (err) {
