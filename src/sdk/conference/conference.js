@@ -640,6 +640,8 @@
         };
         stream.channel.addStream(stream.mediaStream);
         stream.channel.createOffer(false);
+      }, (err) => {
+        safeCall(onFailure, err);
       });
     } else {
       return safeCall(onFailure, 'already published');
