@@ -440,6 +440,10 @@
         self.localStreams.forEach((stream)=>{
           self.unpublish(stream);
         });
+        self.signaling.clearEventListener('stream');
+        self.signaling.clearEventListener('progress');
+        self.signaling.clearEventListener('participants');
+        self.signaling.clearEventListener('disconnect');
         const evt = new Woogeen.ClientEvent({
           type: 'server-disconnected'
         });
