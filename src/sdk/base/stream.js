@@ -438,7 +438,7 @@
                 {
                  resolution:[object(Resolution)] | undefined,
                  framerate: [number(FramerateFPS)] | undefined,
-                 bitrateMultiple: [number(BitrateMultiple)] |undefined,
+                 bitrateMultiplier: [number(bitrateMultiplier)] |undefined,
                  keyFrameInterval: [number(KeyFrameIntervalSecond)] | undefined
                 }
                 | undefined
@@ -479,12 +479,12 @@
       }
       if (mediaInfo.video && mediaInfo.video.transcoding && mediaInfo.video.transcoding
         .parameters.bitrate) {
-        mediaInfo.video.transcoding.parameters.bitrateMultiple = Array.from(
+        mediaInfo.video.transcoding.parameters.bitrateMultiplier = Array.from(
           mediaInfo.video.transcoding.parameters.bitrate, bitrate =>
           extractBitrateMultiplier(bitrate));
-        mediaInfo.video.transcoding.parameters.bitrateMultiple.push(1.0);
-        mediaInfo.video.transcoding.parameters.bitrateMultiple = mediaInfo.video
-          .transcoding.parameters.bitrateMultiple.sort();
+        mediaInfo.video.transcoding.parameters.bitrateMultiplier.push(1.0);
+        mediaInfo.video.transcoding.parameters.bitrateMultiplier = mediaInfo.video
+          .transcoding.parameters.bitrateMultiplier.sort();
         delete mediaInfo.video.transcoding.parameters.bitrate;
       }
       return mediaInfo;
