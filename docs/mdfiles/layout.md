@@ -11,9 +11,13 @@ A valid customized video layout should be a JSON string which represents an arra
  "region": [
       {
         "id": "1",  //main pane
-        "left": 0,
-        "top": 0,
-        "relativesize": 1
+        "shape": "rectangle",
+        "area": {
+            "left": 0,
+            "top": 0,
+            "width": 1,
+            "height": 1
+        }
       }
     ]
   },
@@ -22,15 +26,23 @@ A valid customized video layout should be a JSON string which represents an arra
   "region": [
      {
         "id": "1",  //main pane
-        "left": 0,
-        "top": 0.25,
-        "relativesize": 0.5
+        "shape": "rectangle",
+        "area": {
+            "left": 0,
+            "top": 0.25,
+            "width": 0.5,
+            "height": 0.5
+        }
      },
      {
         "id": "2",
-        "left": 0.5,
-        "top": 0.25,
-        "relativesize": 0.5
+        "shape": "rectangle",
+        "area": {
+            "left": 0.5,
+            "top": 0.25,
+            "width": 0.5,
+            "height": 0.5
+        }
      }
    ]
   },
@@ -39,39 +51,63 @@ A valid customized video layout should be a JSON string which represents an arra
  "region": [
       {
         "id": "1",   //main pane
-        "left": 0,
-        "top": 0,
-        "relativesize": 0.667
+        "shape": "rectangle",
+        "area": {
+            "left": 0,
+            "top": 0,
+            "width": 0.667,
+            "height": 0.667
+        }
       },
       {
         "id": "2",
-        "left": 0.667,
-        "top": 0,
-        "relativesize": 0.333
+        "shape": "rectangle",
+        "area": {
+            "left": 0.667,
+            "top": 0,
+            "width": 0.333,
+            "height": 0.333
+        }
       },
       {
         "id": "3",
-        "left": 0.667,
-        "top": 0.333,
-        "relativesize": 0.333
+        "shape": "rectangle",
+        "area": {
+            "left": 0.667,
+            "top": 0.333,
+            "width": 0.333,
+            "height": 0.333
+        }
       },
       {
         "id": "4",
-        "left": 0.667,
-        "top": 0.667,
-        "relativesize": 0.333
+        "shape": "rectangle",
+        "area": {
+            "left": 0.667,
+            "top": 0.667,
+            "width": 0.333,
+            "height": 0.333
+        }
       },
       {
         "id": "5",
-        "left": 0.333,
-        "top": 0.667,
-        "relativesize": 0.333
+        "shape": "rectangle",
+        "area": {
+            "left": 0.333,
+            "top": 0.667,
+            "width": 0.333,
+            "height": 0.333
+        }
       },
       {
         "id": "6",
-        "left": 0,
-        "top": 0.667,
-        "relativesize": 0.333
+        "shape": "rectangle",
+        "area": {
+            "left": 0,
+            "top": 0.667,
+            "width": 0.333,
+            "height": 0.333
+        }
       }
     ]
   }
@@ -91,6 +127,6 @@ Layout 3 defines six vidio panes, a bigger one surrouded by other 5 panes.<br>
 
 > **Note:**
 1. A 'base' layout template will be replaced by your defined customized video layout while there are conflicts.
-2. It will automatically select the most suitable layout as with the changing of participator number. For instance, defining a layout as the above example. When only one user joins, layout 1 will be selected. After another user joins, layout will be replaced by layout 2. If more than 2 users are joining, layout 6 will be the most suitable choice.
+2. It will automatically select the most suitable layout as with the changing of participator number. For instance, defining a layout as the above example with the 'base' set to 'void'. When only one user joins, layout 1 will be selected. After another user joins, layout will be replaced by layout 2. If more than 2 users are joining, layout 6 will be the most suitable choice.
 3. Original definition in RFC5707 maintains a 'priority' option to indicates drawing order of the video spanes. Instead, the order within a layout definition will be considered as the drawing order and no explicit option is needed. And latter drawed panes will cover previous ones if overlaping exists.
 4. One layout has a main pane defining its 'id' to be 1.
