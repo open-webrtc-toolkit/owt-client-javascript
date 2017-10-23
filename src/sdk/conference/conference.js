@@ -705,7 +705,7 @@
     * @function subscribe
     * @instance
     * @desc This function subscribes to a remote stream. The stream should be a RemoteStream instance.
-     @memberOf Woogeen.ConferenceClient&Woogeen.SipClient
+    * @memberOf Woogeen.ConferenceClient&Woogeen.SipClient
     * @param {stream} stream Stream to subscribe.
     * @param {json} options (optional) Subscribe options. An object with following properties:
     <ul>

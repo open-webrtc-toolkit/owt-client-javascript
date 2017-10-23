@@ -140,6 +140,9 @@
       </tbody>
       </table>
       @endhtmlonly
+     * @memberOf Woogeen.Stream
+     * @instance
+     * @example
       <script type="text/JavaScript">
       stream.on('Ended', function () {
         conference.unpublish(stream);
