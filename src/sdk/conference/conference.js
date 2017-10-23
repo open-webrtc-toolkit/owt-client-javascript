@@ -720,6 +720,101 @@
       </ul></li>
       <li>videoCodec: 'h264' or 'vp8'. H.264 is the default value.<li>
     </ul>
+@htmlonly
+<table class="doxtable">
+    <tr>
+        <th>qualityLevel-bitrateMultiplier</th>
+        <td>Width</td>
+        <td>Height</td>
+        <td>BestQuality-x1.4(kbps)</td>
+        <td>BetterQuality-x1.2(kbps)</td>
+        <td>Standard-x1.0(kbps)</td>
+        <td>BetterSpeed-x0.8(kbps)</td>
+        <td>BestSpeed-x0.6(kbps)</td>
+    </tr>
+    <tr>
+        <th>vga</th>
+        <td>640</td>
+        <td>480</td>
+        <td>1120</td>
+        <td>960</td>
+        <td>800</td>
+        <td>640</td>
+        <td>480</td>
+    </tr>
+    <tr>
+        <th>sif</th>
+        <td>320</td>
+        <td>240</td>
+        <td>560</td>
+        <td>480</td>
+        <td>400</td>
+        <td>320</td>
+        <td>240</td>
+    </tr>
+    <tr>
+        <th>xga</th>
+        <td>1024</td>
+        <td>768</td>
+        <td>2430.4</td>
+        <td>2083.2</td>
+        <td>1736</td>
+        <td>1388.8</td>
+        <td>1041.6</td>
+    </tr>
+    <tr>
+        <th>svga</th>
+        <td>800</td>
+        <td>600</td>
+        <td>1591.8</td>
+        <td>1364.4</td>
+        <td>1137</td>
+        <td>909.6</td>
+        <td>682.2</td>
+    </tr>
+    <tr>
+        <th>hd720p</th>
+        <td>1280</td>
+        <td>720</td>
+        <td>2800</td>
+        <td>2400</td>
+        <td>2000</td>
+        <td>1600</td>
+        <td>1200</td>
+    </tr>
+    <tr>
+        <th>hd1080p</th>
+        <td>1920</td>
+        <td>1080</td>
+        <td>5600</td>
+        <td>4800</td>
+        <td>4000</td>
+        <td>3200</td>
+        <td>2400</td>
+    </tr>
+    <tr>
+        <th>uhd_4k</th>
+        <td>3840</td>
+        <td>2160</td>
+        <td>22400</td>
+        <td>19200</td>
+        <td>16000</td>
+        <td>12800</td>
+        <td>9600</td>
+    </tr>
+    <tr>
+        <th>r720x720</th>
+        <td>720</td>
+        <td>720</td>
+        <td>1696.8</td>
+        <td>1454.4</td>
+        <td>1212</td>
+        <td>969.6</td>
+        <td>727.2</td>
+    </tr>
+</tbody>
+</table>
+@endhtmlonly
     * @param {function} onSuccess(stream) (optional) Success callback.
     * @param {function} onFailure(err) (optional) Failure callback.
     * @example
