@@ -1505,9 +1505,10 @@
          <li>videoCodec: preferred video codec to be recorded. If unspecified, 'h264' will be used by default.</li>
          <li>recorderId: recorder id to be reused. Id can only be alphanumeric. If the id is not set, server will generate one.</li>
          </ul>
-         Important Note: In the case of continuous media recording among different streams, the recorderId is the key to make sure each switched stream go to the same recording url. Do not stop the recorder when you want the continuous media recording functionality, unless all the required media content has been recorded successfully.<br>
-      The recommendation is to invoke another startRecorder with new videoStreamId and audioStreamId (default to mixed stream) right after the previous call of startRecorder, but the same recorderId should be kept.
-      Another important thing is that the storage availability of the recording path needs to be guaranteed when using media recording.
+         Note 1: In the case of continuous media recording among different streams, the recorderId is the key to make sure each switched stream go to the same recording url. Do not stop the recorder when you want the continuous media recording functionality, unless all the required media content has been recorded successfully.<br>
+      The recommendation is to invoke another startRecorder with new videoStreamId and audioStreamId (default to mixed stream) right after the previous call of startRecorder, but the same recorderId should be kept.<br>
+         Note 2: storage availability of the recording path needs to be guaranteed when using media recording.<br>
+         Note 3: If audioStreamId or videoStreamId is not specified when updating an recorder, previous audio or video configuration will remain unchanged.
          * @param {function} onSuccess(resp) (optional) Success callback. The following information will be
        returned as well:<br>
           <ul>
@@ -1558,9 +1559,13 @@
           mediaSubOptions.audio = {
             from: options.audioStreamId
           };
-          mediaSubOptions.video = false;
+          if (!options.recorderId) {
+            mediaSubOptions.video = false;
+          }
         } else if (typeof options.videoStreamId === 'string' && !options.audioStreamId) {
-          mediaSubOptions.audio = false;
+          if (!options.recorderId) {
+            mediaSubOptions.audio = false;
+          }
           mediaSubOptions.video = {
             from: options.videoStreamId
           };
