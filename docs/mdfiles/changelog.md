@@ -15,3 +15,4 @@ Change Log
 * VideoLayoutChanged event's argument was changed so region can have different aspect ratio as its associated viewport's resolution. (This argument is not mentioned in doc.)
 * Added more options to ConferenceClient.subscribe.
 * Added a new method mediaInfo() for remote streams.
+* stopRecorder's success callback does not bring any information.

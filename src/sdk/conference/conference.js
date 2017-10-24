@@ -1756,18 +1756,14 @@
       }
          * @memberOf Woogeen.ConferenceClient
          * @param {string} options (required) Media recording options. recorderId: recorder id to be stopped.
-         * @param {function} onSuccess(resp) (optional) Success callback. The following information will be returned as well:
-         <ul>
-         <li>host: Host server address.</li>
-         <li>recorderId: recorder id.</li>
-         </ul>
+         * @param {function} onSuccess() (optional) Success callback.
          * @param {function} onFailure(error) (optional) Failure callback.
          * @example
       <script type="text/JavaScript">
       var conference = Woogeen.ConferenceClient.create();
       // ……
-      conference.stopRecorder({recorderId: recorderIdToStop}, function (file) {
-          L.Logger.info('Stream recorded with recorder ID: ', file.recorderId);
+      conference.stopRecorder({recorderId: recorderIdToStop}, function () {
+          L.Logger.info('Stop recorder success.');
         }, function (err) {
           L.Logger.error('Media recorder cannot stop with failure: ', err);
         }
