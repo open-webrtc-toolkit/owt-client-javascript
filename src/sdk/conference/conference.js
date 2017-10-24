@@ -456,6 +456,7 @@
         self: me
       });
     }, (e) => {
+      self.state = DISCONNECTED;
       return safeCall(onFailure, e || 'response error');
     });
   };
