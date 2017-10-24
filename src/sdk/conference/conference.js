@@ -1518,18 +1518,15 @@
             from: streamId
           },
           video: {
-            from: streamId,
-            format: {
-              codec: 'h264'
-            }
+            from: streamId
           }
         };
         if (options.resolution) {
           if (typeof options.resolution === 'string') {
-            subscriptionUpdateOptions.video.format.resolution =
+            subscriptionUpdateOptions.video.parameters.resolution =
               resolutionName2Value[options.resolution];
           } else {
-            subscriptionUpdateOptions.video.format.resolution = options.resolution;
+            subscriptionUpdateOptions.video.parameters.resolution = options.resolution;
           }
         }
         self.signaling.sendMessage('subscription-control', {
