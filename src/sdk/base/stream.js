@@ -171,6 +171,12 @@
         }
       });
     }
+
+    if (window.navigator.userAgent.match(/Edge\/(\d+).(\d+)$/) !== null &&
+        this.channel && typeof this.channel.close === 'function') {
+      this.channel.close();
+      this.channel = null;
+    }
   };
 
   WoogeenStream.prototype.createObjectURL = function() {
