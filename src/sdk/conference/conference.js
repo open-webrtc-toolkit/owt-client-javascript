@@ -908,7 +908,8 @@
         videoOptions.parameters = videoOptions.parameters || {};
         videoOptions.parameters.keyFrameInterval = options.video.keyFrameInterval;
       }
-      if (options.video.bitrateMultiplier) {
+      if (options.video.bitrateMultiplier && options.video.bitrateMultiplier !==
+        1) {
         videoOptions.parameters = videoOptions.parameters || {};
         videoOptions.parameters.bitrate = 'x' + options.video.bitrateMultiplier
           .toString();
@@ -1441,9 +1442,9 @@
           mediaOptions.video.parameters = mediaOptions.video.parameters || {};
           mediaOptions.video.parameters.keyFrameInterval = options.keyFrameInterval;
         }
-        if (options.bitrateMultipiler) {
+        if (options.bitrateMultiplier && options.bitrateMultiplier !== 1) {
           mediaOptions.video.parameters = mediaOptions.video.parameters || {};
-          mediaOptions.video.parameters.bitrate = 'x' + options.bitrateMultipiler
+          mediaOptions.video.parameters.bitrate = 'x' + options.bitrateMultiplier
             .toString();
         }
         self.signaling.sendMessage('subscribe', {
