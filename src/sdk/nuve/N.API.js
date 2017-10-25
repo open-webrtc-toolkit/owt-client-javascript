@@ -87,7 +87,7 @@ N.API = (function(N) {
         <li><b>mediaMixing:</b>media setting for mixed stream in the room if mixing is enabled. Value should be a JSON object contains two entries: "video" and "audio". Audio entry is currently not used and should be null.</li>
         <ul>
             <li>audio: null</li>
-            <li>video: maxInput, resolution, multistreaming, quality_level, bkColor, layout, avCoordinate, crop</li>
+            <li>video: maxInput, resolution, quality_level, bkColor, layout, avCoordinate, crop</li>
             <ul>
                 <li>maxInput is for maximum number of slots in the mix stream</li>
                 <li>resolution denotes the resolution of the video size of mix stream.Valid resolution list:</li>
@@ -100,8 +100,9 @@ N.API = (function(N) {
                         <li>'hd1080p'</li>
                         <li>'uhd_4k'</li>
                         <li>'r720x720'</li>
+                        <li>'r720x1080'</li>
+                        <li>'r1080x1920'</li>
                     </ul>
-                <li>multistreaming(0 or 1) indicates whether the MCU mix stream outputs multiple resolutions for different devices. The additional stream's resolutions are determined by MCU according to the base resolution user specified, no customizations is allowed yet. Please see the following table for detailed mapping.</li>
                 <li>quality_level indicates the default video quality of the mix stream (choose from "bestSpeed", "betterSpeed", "standard", "betterQuality", "bestQuality").</li>
                 <li>bkColor sets the background color, supporting RGB color format: {"r":red-value, "g":green-value, "b":blue-value}.</li>
                 <li>layout describes video layout in mix stream</li>
@@ -161,6 +162,14 @@ N.API = (function(N) {
               <td>r720x720</td>
               <td>{width: 720, height: 720}, {width: 480, height: 480}, {width: 360, height: 360}</td>
           </tr>
+          <tr>
+              <td>r720x1080</td>
+              <td>{width: 720, height: 1280}, {width: 480, height: 640}, {width: 360, height: 640}</td>
+          </tr>
+          <tr>
+              <td>r1080x1920</td>
+              <td>{width: 1080, height: 1920}, {width: 720, height: 1280}, {width: 600, height: 800}, {width: 480, height: 640}, {width: 360, height: 640}</td>
+          </tr>
       </tbody>
   </table>
   @endhtmlonly
@@ -181,7 +190,6 @@ N.API = (function(N) {
           video: {
             maxInput: 15,
             resolution: 'hd720p',
-            multistreaming: 1,
             quality_level: 'standard',
             bkColor: {"r":1, "g":2, "b":255},
             layout: {
@@ -199,7 +207,6 @@ N.API = (function(N) {
           video: {
             maxInput: 15,
             resolution: 'hd1080p',
-            multistreaming: 1,
             quality_level: 'standard',
             bkColor: {"r":1, "g":2, "b":255},
             layout: {
@@ -321,7 +328,7 @@ N.API = (function(N) {
      * @desc This function updates a room.
      * @memberOf N.API
      * @param {string} roomId room ID.
-     * @param {json} options Room configuration. See details about options in {@link N.API#createRoom createRoom(name, callback, callbackError, options)}.
+     * @param {json} options Room configuration. See details about options in {@link N.API#createRoom createRoom(name, options, callback, callbackError)}.
      * @param {function} callback Callback function on success
      * @param {function} callbackError Callback function on error
      * @example
@@ -336,7 +343,6 @@ N.API = (function(N) {
           video: {
             maxInput: 15,
             resolution: 'hd720p',
-            multistreaming: 1,
             quality_level: 'standard',
             bkColor: {"r":1, "g":2, "b":255},
             layout: {
@@ -354,7 +360,6 @@ N.API = (function(N) {
           video: {
             maxInput: 15,
             resolution: 'hd1080p',
-            multistreaming: 1,
             quality_level: 'standard',
             bkColor: {"r":1, "g":2, "b":255},
             layout: {
@@ -392,7 +397,7 @@ N.API = (function(N) {
      * @param {string} room Room ID
      * @param {string} username Participant's name
      * @param {string} role Participant's role
-     * @param {string} type Token type, can be either 'socketio' or 'rest'
+     * @param {string} type Token type, can be either 'socketio' or 'rest' ('rest' not supported in 3.5)
      * @param {object} preference Preference of this token would be used to connect through
      * @param {function} callback Callback function on success
      * @param {function} callbackError Callback function on error
@@ -401,6 +406,7 @@ N.API = (function(N) {
   var name = 'john';
   var role = 'guest';
   var type = 'socketio';
+  // Only isp and region are supported in preference currently, please see server's document for details.
   var preference = {isp: 'isp', region: 'region'};
   N.API.createToken(roomID, name, role, type, preference, function(token) {
     console.log ('Token created:' token);
@@ -535,7 +541,7 @@ N.API = (function(N) {
     var userlist = JSON.parse(users);
     console.log ('This room has ', userslist.length, 'users');
     for (var i in userlist) {
-      console.log('User ', i, ':', userlist[i].name, userlist[i].role);
+      console.log('User ', i, ':', userlist[i].id, userlist[i].role);
     }
   }, function(status, error) {
     // HTTP status and error

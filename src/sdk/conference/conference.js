@@ -729,7 +729,7 @@
         <li>resolution: An object has width and height. Both width and height are number.</li>
         <li>qualityLevel: A string which is one of these values "BestQuality", "BetterQuality", "Standard", "BetterSpeed", "BestSpeed". It does not change resolution, but better quality leads to higher bitrate.</li>
         <li>bitrateMultiplier: A number for expected bitrate multiplier. You can find valid bitrate multipliers by calling <code>mediaInfo()</code>. If <code>bitrateMultiplier</code> is specified, <code>qualityLevel</code> will be ignored.</li>
-        <li>frameRate: A number for expected frame rate.</li>
+        <li>frameRate: A number for expected frame rate, not work for mixed stream.</li>
         <li>keyFrameInterval: A number for expected interval of key frames. Unit: second.</li>
       </ul></li>
       <li>videoCodec: 'h264' or 'vp8'. H.264 is the default value.<li>
