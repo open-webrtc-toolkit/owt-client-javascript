@@ -1568,8 +1568,10 @@
           safeCall(onFailure, 'Invalid URL.');
           return;
         }
+        const subscriptionId = self.externalUrlToSubscriptionId[url];
+        delete self.externalUrlToSubscriptionId[url];
         self.signaling.sendMessage('unsubscribe', {
-          id: self.externalUrlToSubscriptionId[url]
+          id: subscriptionId
         }).then(() => {
           safeCall(onSuccess);
           self.externalUrlToSubscriptionId.delete(url);
