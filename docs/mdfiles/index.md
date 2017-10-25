@@ -52,37 +52,56 @@ The Intel CS for WebRTC Client SDK for JavaScript has been tested on the followi
     </thead>
         <tr>
             <td><b>Conference Mode</b></td>
-            <td><b>Windows*</b></td>
-            <td><b>Ubuntu*</b></td>
+            <td><b>Windows\*</b></td>
+            <td><b>Ubuntu\*</b></td>
+            <td><b>macOS\*</b></td>
         </tr>
         <tr width="12pt">
-            <td>Chrome* 59</td>
+            <td>Chrome\* 62</td>
             <td>&radic;</td>
-            <td>&radic;</td>
-        </tr>
-        <tr>
-            <td>Firefox* 53</td>
             <td>&radic;</td>
             <td>&radic;</td>
         </tr>
         <tr>
-            <td>Microsoft Edge* 40.15063.674.0</td>
+            <td>Firefox\* 56</td>
             <td>&radic;</td>
+            <td>&radic;</td>
+            <td>&radic;</td>
+        </tr>
+        <tr>
+            <td>Safari\* 11</td>
+            <td></td>
+            <td></td>
+            <td>&radic;</td>
+        </tr>
+        <tr>
+            <td>Microsoft Edge\* 40.15063.0.0</td>
+            <td>&radic;</td>
+            <td></td>
             <td></td>
         </tr>
         <tr>
             <td><b>P2P Mode</b></td>
-            <td><b>Windows</b></td>
-            <td><b>Ubuntu</b></td>
+            <td><b>Windows\*</b></td>
+            <td><b>Ubuntu\*</b></td>
+            <td><b>macOS\*</b></td>
         </tr>
         <tr>
-            <td>Chrome* 59</td>
+            <td>Chrome\* 62</td>
+            <td>&radic;</td>
             <td>&radic;</td>
             <td>&radic;</td>
         </tr>
         <tr>
-            <td>Firefox* 53</td>
+            <td>Firefox\* 56</td>
             <td>&radic;</td>
+            <td>&radic;</td>
+            <td>&radic;</td>
+        </tr>
+        <tr>
+            <td>Safari\* 11</td>
+            <td></td>
+            <td></td>
             <td>&radic;</td>
         </tr>
     </tbody>
@@ -91,6 +110,8 @@ The Intel CS for WebRTC Client SDK for JavaScript has been tested on the followi
 
 Different browsers may have different supported codec list.
 Currently, Edge browser only supports H.264 and OPUS, and there is some video codec capability limitation, such as no FIR support in Edge.
+
+Safari support is limited. Not all functions work in Safari.
 
 In P2P mode, only one stream per direction can be published between Firefox and other clients. Also, <code>unpublish</code> is not available when one side is Firefox.
 
@@ -126,7 +147,7 @@ If you're using customized signling channel, please replace `socket.io.js` and `
 
 ## 5.1 P2P direct call chat {#section5_1}
 
-Direct call chat refers to the discovery of another client by chatting with that user's ID. This is a synchronous call and requires that the two clients be online on the signaling server.
+Direct call chat refers to the discovery of another client by chatting with that user's ID. This is a synchronous call and requires that the two clients should be online on the signaling server.
 ~~~~~~{.js}
 <script type="text/javascript">
 var isVideo=1;
@@ -462,7 +483,7 @@ The following table describes the key objects provided in the JavaScript SDK.
 </script>
 ~~~~~~
 
-# 8 Events {#Events}
+# 8 Events {#section8}
 
 The JavaScript objects (described earlier in this section) throw events using EventDispatchers, inlucluding {@link Woogeen.PeerClient PeerClient}, {@link Woogeen.ConferenceClient ConferenceClient}, {@link Woogeen.SipClient SipClient}, {@link Woogeen.RemoteStream RemoteStream}, etc.
 
