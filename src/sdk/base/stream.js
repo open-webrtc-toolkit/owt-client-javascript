@@ -897,19 +897,6 @@ L.Logger.info('stream added:', stream.id());
           }
         };
       });
-      if (option.video && option.video.device === 'screen') {
-        // when <Stop sharing> button in Browser was pressed, `onended' would
-        // be triggered; then we need to close the screen sharing stream.
-        // `onended' is a EventHandler containing the action
-        // to perform when an ended event is fired on the object,
-        // that is when the streaming is terminating.
-        var videoTracks = mediaStream.getVideoTracks();
-        if (videoTracks.length > 0) {
-          videoTracks[0].onended = function() {
-            localStream.close();
-          };
-        }
-      }
       if (mediaOption.video) {
         // set default bit rate
         switch (mediaOption.video.width) {
