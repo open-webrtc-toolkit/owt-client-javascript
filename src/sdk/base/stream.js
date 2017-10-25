@@ -703,7 +703,7 @@ L.Logger.info('stream added:', stream.id());
   WoogeenLocalStream.prototype = Object.create(WoogeenStream.prototype);
   WoogeenRemoteStream.prototype = Object.create(WoogeenStream.prototype);
   WoogeenRemoteMixedStream.prototype = Object.create(WoogeenRemoteStream.prototype);
-  WoogeenExternalStream.prototype = Object.create({});
+  WoogeenExternalStream.prototype = Woogeen.EventDispatcher({});
   WoogeenLocalStream.prototype.constructor = WoogeenLocalStream;
   WoogeenRemoteStream.prototype.constructor = WoogeenRemoteStream;
   WoogeenRemoteMixedStream.prototype.constructor = WoogeenRemoteMixedStream;
