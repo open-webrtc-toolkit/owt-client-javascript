@@ -563,12 +563,24 @@
         mediaOptions.audio = false;
       }
       if (stream.hasVideo()) {
+        if (stream.mediaStream.getVideoTracks().length < 1) {
+          safeCall(onFailure, 'Invalid video track.');
+          return;
+        }
         mediaOptions.video = {};
         if (stream.isScreen()) {
           mediaOptions.video.source = 'screen-cast';
         } else {
           mediaOptions.video.source = 'camera';
         }
+        const trackSettings = stream.mediaStream.getVideoTracks()[0].getSettings();
+        mediaOptions.video.parameters = {
+          resolution: {
+            width: trackSettings.width,
+            height: trackSettings.height
+          },
+          framerate: trackSettings.frameRate
+        };
       } else {
         mediaOptions.video = false;
       }
