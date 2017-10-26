@@ -246,10 +246,10 @@
         });
       }
       var me;
-      if (resp.users !== undefined) {
-        for (var i = 0; i < resp.users.length; i++) {
-          if (resp.users[i].id === resp.clientId) {
-            me = resp.users[i];
+      if (resp.room && resp.room.participants !== undefined) {
+        for (var i = 0; i < resp.room.participants.length; i++) {
+          if (resp.room.participants[i].id === resp.id) {
+            me = resp.room.participants[i];
             break;
           }
         }
@@ -452,7 +452,7 @@
       });
       return safeCall(onSuccess, {
         streams: streams,
-        users: resp.users,
+        users: resp.room.participants,
         self: me
       });
     }, (e) => {
