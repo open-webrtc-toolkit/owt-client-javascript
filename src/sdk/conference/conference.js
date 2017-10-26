@@ -474,7 +474,7 @@
         <li>unmix: false/true. If true, this stream would not be included in mixed stream.</li>
         <li>audioCodec: 'opus'/'pcmu'/'pcma'. Preferred audio codec.</li>
         <li>videoCodec: 'h264'/'vp8'/'vp9'. Preferred video codec. H.264 is the default preferred codec. Note for Firefox VP9 is not stable, so please do not specify VP9 for Firefox.</li>
-        <li>transport: 'udp'/'tcp'. RTSP connection transport type, default 'udp'; only for RTSP input.</li>
+        <li>transport: 'udp'/'tcp'. RTSP connection transport type, default depends on FFmpeg; only for RTSP input.</li>
         <li>bufferSize: integer number in bytes. UDP receiving buffer size, default 2 MB. Only for RTSP input (UDP transport).</li>
       </ul>
       Each codec has its own supported bitrate range. Setting incorrect maxAudioBW/maxVideoBW value may lead to connection failure. Bandwidth settings don't work on FireFox.
@@ -1137,7 +1137,7 @@
       /**
      * @function send
      * @instance
-     * @desc This function send message to conference room. The receiver should be a valid clientId, which is carried by 'user-joined' event; or default 0, which means send to all participants in the conference (broadcast) except himself.
+     * @desc This function sends message to conference room. The receiver should be a valid clientId, which is carried by 'user-joined' event; or undefined, which means send to all participants in the conference.
      * @memberOf Woogeen.ConferenceClient
      * @param {string} data text message to send.
      * @param {string} receiver Receiver, optional. Sending message to all participants if receiver is undefined.
@@ -1286,9 +1286,8 @@
 
       /**
          * @function playAudio
-         * @desc This function tells server to continue sending/receiving audio data of the RemoteStream/LocalStream.
+         * @desc This function tells server to continue receiving audio data of the stream specified.
       <br><b>Remarks:</b><br>
-      The audio track of the stream should be enabled to be played correctly. For RemoteStream, it should be subscribed; for LocalStream, it should be published. playAudio with video only stream will succeed without any action.<br>
       External Stream does not support this function.
          * @memberOf Woogeen.ConferenceClient
          * @param {WoogeenStream} stream instance.
@@ -1308,9 +1307,9 @@
 
       /**
          * @function pauseAudio
-         * @desc This function tells server to stop sending/receiving audio data of the subscribed RemoteStream/LocalStream.
+         * @desc This function tells server to stop receiving audio data of the stream specified.
       <br><b>Remarks:</b><br>
-      Upon success, the audio of the stream would be hold, and you can call disableAudio() method to disable the audio track locally to stop playing. For RemoteStream, it should be subscribed; for LocalStream, it should be published. puaseAudio with video only stream will succeed without any action.<br>
+      Upon success, the audio of the stream would be hold, and you can call disableAudio() method to disable the audio track locally to stop playing.<br>
       External Stream does not support this function.
          * @memberOf Woogeen.ConferenceClient
          * @param {WoogeenStream} stream instance.
@@ -1330,9 +1329,8 @@
 
       /**
          * @function playVideo
-         * @desc This function tells server to continue sending/receiving video data of the subscribed RemoteStream/LocalStream.
+         * @desc This function tells server to continue receiving video data of the stream specified.
       <br><b>Remarks:</b><br>
-      The video track of the stream should be enabled to be played correctly. For RemoteStream, it should be subscribed; for LocalStream, it should be published. playVideo with audio only stream will succeed without any action.<br>
       External Stream does not support this function.
          * @memberOf Woogeen.ConferenceClient
          * @param {WoogeenStream} stream instance.
@@ -1352,9 +1350,9 @@
 
       /**
          * @function pauseVideo
-         * @desc This function tells server to stop sending/receiving video data of the subscribed RemoteStream/LocalStream.
+         * @desc This function tells server to stop receiving video data of the stream specified.
       <br><b>Remarks:</b><br>
-      Upon success, the video of the stream would be hold, and you can call disableVideo() method to disable the video track locally to stop playing. For RemoteStream, it should be subscribed; for LocalStream, it should be published. pauseVideo with audio only stream will succeed without any action.<br>
+      Upon success, the video of the stream would be hold, and you can call disableVideo() method to disable the video track locally to stop playing.<br>
       External Stream does not support this function.
          * @memberOf Woogeen.ConferenceClient
          * @param {WoogeenStream} stream instance.
@@ -1499,13 +1497,13 @@
      * @example
   <script type="text/JavaScript">
   var conference = Woogeen.ConferenceClient.create();
-  // ……
-  conference.updateExternalOutput(url: 'rtsp://localhost:1935/live', {streamId: xxx
+  // ...
+  conference.updateExternalOutput({url: 'rtsp://localhost:1935/live'}, {streamId: xxx
   }, function () {
-    L.Logger.info('Update external streaming success.');
-  }, function (err) {
-    L.Logger.error('Update external streaming failed:', err);
-  });
+    L.Logger.info('Update external streaming success.');
+  }, function (err) {
+    L.Logger.error('Update external streaming failed:', err);
+  });
   </script>
      */
       this.updateExternalOutput = function(url, options, onSuccess, onFailure) {
@@ -1605,7 +1603,7 @@
          <li>videoStreamId: video stream id to be recorded. If unspecified and audioStreamId is valid, audio stream will be recorded without video.</li>
          <li>audioCodec: preferred audio codec to be recorded. If unspecified, 'opus' will be used by default.</li>
          <li>videoCodec: preferred video codec to be recorded. If unspecified, 'h264' will be used by default.</li>
-         <li>recorderId: recorder id to be reused. Id can only be alphanumeric. If the id is not set, server will generate one.</li>
+         <li>recorderId: recorder id to be reused. Do not specify recorderId unless you are going to update an existing recorder.</li>
          </ul>
          Note 1: In the case of continuous media recording among different streams, the recorderId is the key to make sure each switched stream go to the same recording url. Do not stop the recorder when you want the continuous media recording functionality, unless all the required media content has been recorded successfully.<br>
       The recommendation is to invoke another startRecorder with new videoStreamId and audioStreamId (default to mixed stream) right after the previous call of startRecorder, but the same recorderId should be kept.<br>
@@ -1848,9 +1846,12 @@
           data: self.remoteStreams[options.mixedStreamId].viewport()
         };
 
-        self.signaling.sendMessage('stream-control', optionsMessage).then((regionId)=>{
-          safeCall(onSuccess, {region: regionId});
-        }, (err)=>{
+        self.signaling.sendMessage('stream-control', optionsMessage).then((
+          regionInfo) => {
+          safeCall(onSuccess, {
+            region: regionInfo.region
+          });
+        }, (err) => {
           safeCall(onFailure, err);
         });
       };

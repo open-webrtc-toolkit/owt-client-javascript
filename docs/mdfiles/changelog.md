@@ -16,3 +16,4 @@ Change Log
 * Added more options to ConferenceClient.subscribe.
 * Added a new method mediaInfo() for remote streams.
 * stopRecorder's success callback does not bring any information.
+* play/pause audio/video behavior the same as mute/unmute.
