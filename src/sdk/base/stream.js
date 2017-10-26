@@ -136,11 +136,11 @@
         <tr><th align="center">Event Name</th><th align="center">Description</th></tr>
       </thead>
       <tbody>
-        <tr><td align="center"><code>Ended</code></td><td align="center">All tracks of this stream are ended.</td></tr>
+        <tr><td align="center"><code>Ended</code></td><td align="center">All tracks of this stream are ended. This event only works for local screen sharing stream.</td></tr>
       </tbody>
       </table>
       @endhtmlonly
-     * @memberOf Woogeen.Stream
+     * @memberOf Woogeen.LocalStream
      * @instance
      * @example
       <script type="text/JavaScript">
