@@ -1534,6 +1534,8 @@
           }
         };
         if (options.resolution) {
+          subscriptionUpdateOptions.video.parameters =
+            subscriptionUpdateOptions.video.parameters || {};
           if (typeof options.resolution === 'string') {
             subscriptionUpdateOptions.video.parameters.resolution =
               resolutionName2Value[options.resolution];
