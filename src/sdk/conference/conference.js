@@ -1597,16 +1597,7 @@
       /**
          * @function startRecorder
          * @instance
-         * @desc This function starts the recording of a video stream and an audio stream in the conference room and saves it to a .mkv file, according to the configurable "recording.path" in agent.toml file.<br>
-      Three events are defined for media recording: 'recorder-added' for the creation of media recorder; 'recorder-removed' for the removal of media recorder.
-         <br><b>options:</b><br>
-         {<br>
-        videoStreamId: xxxxxx,<br>
-        audioStreamId: yyyyyy,<br>
-        videoCodec: 'vp8'/'h264',<br>
-        audioCodec: 'pcmu'/'opus'/'aac',<br>
-        recorderId: zzzzzz<br>
-        }
+         * @desc This function starts the recording of a video stream and an audio stream in the conference room and saves it to a .mkv or .mp4 file, according to the configurable "recording.path" in agent.toml file.
          * @memberOf Woogeen.ConferenceClient
          * @param {string} options (optional)Media recorder options. If unspecified, the mixed stream will be recorded as default.<br>
           <ul>
@@ -1619,7 +1610,8 @@
          Note 1: In the case of continuous media recording among different streams, the recorderId is the key to make sure each switched stream go to the same recording url. Do not stop the recorder when you want the continuous media recording functionality, unless all the required media content has been recorded successfully.<br>
       The recommendation is to invoke another startRecorder with new videoStreamId and audioStreamId (default to mixed stream) right after the previous call of startRecorder, but the same recorderId should be kept.<br>
          Note 2: storage availability of the recording path needs to be guaranteed when using media recording.<br>
-         Note 3: If audioStreamId or videoStreamId is not specified when updating an recorder, previous audio or video configuration will remain unchanged.
+         Note 3: If audioStreamId or videoStreamId is not specified when updating an recorder, previous audio or video configuration will remain unchanged.<br>
+         Note 4: Do not specify audioCodec or videoCodec since changing codec when updating recorder is not supported.
          * @param {function} onSuccess(resp) (optional) Success callback. The following information will be
        returned as well:<br>
           <ul>
