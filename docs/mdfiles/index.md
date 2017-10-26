@@ -66,7 +66,7 @@ The Intel CS for WebRTC Client SDK for JavaScript has been tested on the followi
             <td>&radic;</td>
         </tr>
         <tr>
-            <td>Microsoft Edge* 40.15063.0.0</td>
+            <td>Microsoft Edge* 40.15063.674.0</td>
             <td>&radic;</td>
             <td></td>
         </tr>
@@ -90,7 +90,7 @@ The Intel CS for WebRTC Client SDK for JavaScript has been tested on the followi
 @endhtmlonly
 
 Different browsers may have different supported codec list.
-Currently, Edge browser only supports H.264 and OPUS. At the time of this writing, H.264 support in Edge is experimental. To enable it, go to "about:flags" in Edge browser, find "Enable experimental H.264/AVC support" option under WebRTC section, and then select the checkbox. Since the current H.264 support is experimental, there is some codec capability limitation such as no FIR support in Edge.
+Currently, Edge browser only supports H.264 and OPUS, and there is some video codec capability limitation, such as no FIR support in Edge.
 
 In P2P mode, only one stream per direction can be published between Firefox and other clients. Also, <code>unpublish</code> is not available when one side is Firefox.
 
