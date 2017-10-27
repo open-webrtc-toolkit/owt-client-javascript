@@ -345,8 +345,8 @@
             });
             delete self.recorderCallbacks[arg.id];
           } else if (self.publicationCallbacks[arg.id]) {
-            if (stream instanceof Woogeen.ExternalStream || (self.commonMixedStream &&
-                !stream.isScreen() && !self.unmixStreams.has(arg.id))) {
+            if ((stream instanceof Woogeen.ExternalStream || !stream.isScreen()) &&
+              self.commonMixedStream && !self.unmixStreams.has(arg.id)) {
               self.mix(stream, [self.commonMixedStream]);
             }
             self.unmixStreams.delete(arg.id);
