@@ -164,11 +164,11 @@ N.API = (function(N) {
           </tr>
           <tr>
               <td>r720x1080</td>
-              <td>{width: 720, height: 1280}, {width: 480, height: 640}, {width: 360, height: 640}</td>
+              <td>{width: 720, height: 1280}, {width: 540, height: 960}, {width: 480, height: 853}, {width: 360, height: 640}, {width: 240, height: 426}, {width: 180, height: 320}, {width: 640, height: 480}, {width: 352, height: 288}</td>
           </tr>
           <tr>
               <td>r1080x1920</td>
-              <td>{width: 1080, height: 1920}, {width: 720, height: 1280}, {width: 600, height: 800}, {width: 480, height: 640}, {width: 360, height: 640}</td>
+              <td>{width: 1080, height: 1920}, {width: 810, height: 1440}, {width: 720, height: 1280}, {width: 540, height: 960}, {width: 360, height: 640}, {width: 270, height: 480}, {width: 800, height: 600}, {width: 640, height: 480}, {width: 352, height: 288}</td>
           </tr>
       </tbody>
   </table>
