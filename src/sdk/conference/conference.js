@@ -540,6 +540,9 @@
           stream.id = function() {
             return id;
           };
+          if (options.unmix) {
+            self.unmixStreams.add(id);
+          }
           self.localStreams.set(id, stream);
           self.publicationCallbacks[id] = {
             onSuccess: onSuccess,
