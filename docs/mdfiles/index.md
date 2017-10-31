@@ -75,7 +75,7 @@ The Intel CS for WebRTC Client SDK for JavaScript has been tested on the followi
             <td>&radic;</td>
         </tr>
         <tr>
-            <td>Microsoft Edge\* 40.15063.0.0</td>
+            <td>Microsoft Edge\* 40.15063.674.0</td>
             <td>&radic;</td>
             <td></td>
             <td></td>
