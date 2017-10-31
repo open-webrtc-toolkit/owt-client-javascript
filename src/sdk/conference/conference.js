@@ -415,7 +415,7 @@
       self.signaling.on('text', function(data) {
         var evt = new Woogeen.MessageEvent({
           type: 'message-received',
-          msg: data.message
+          msg: data.msg.message
         });
         self.dispatchEvent(evt);
       });
