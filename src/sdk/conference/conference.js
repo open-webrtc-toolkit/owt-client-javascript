@@ -122,7 +122,8 @@
     });
   }
 
-  function playOrPause(verb, signaling, stream, trackKind, onSuccess, onFailure) {
+  function muteOrUnmute(verb, signaling, stream, trackKind, onSuccess,
+    onFailure) {
     if (!(stream instanceof Woogeen.Stream)) {
       safeCall(onFailure, 'Invalid stream');
       return;
@@ -135,6 +136,25 @@
     var track = trackKind || 'av';
     signaling.sendMessage('stream-control', {
       id: stream.id(),
+      operation: verb,
+      data: track
+    }).then(() => {
+      safeCall(onSuccess);
+    }, (err) => {
+      safeCall(onFailure, err);
+    });
+  }
+
+  function playOrPause(verb, signaling, subscriptionId, trackKind, onSuccess,
+    onFailure) {
+    if (trackKind !== undefined && trackKind !== 'audio' && trackKind !==
+      'video') {
+      safeCall(onFailure, 'Invalid track kind.');
+      return;
+    }
+    var track = trackKind || 'av';
+    signaling.sendMessage('subscription-control', {
+      id: subscriptionId,
       operation: verb,
       data: track
     }).then(() => {
@@ -623,19 +643,19 @@
         });
         var onChannelReady = function() {
           stream.signalOnPlayAudio = function(onSuccess, onFailure) {
-            playOrPause('play', self.signaling, stream, 'audio',
+            muteOrUnmute('play', self.signaling, stream, 'audio',
               onSuccess, onFailure);
           };
           stream.signalOnPauseAudio = function(onSuccess, onFailure) {
-            playOrPause('pause', self.signaling, stream, 'audio',
+            muteOrUnmute('pause', self.signaling, stream, 'audio',
               onSuccess, onFailure);
           };
           stream.signalOnPlayVideo = function(onSuccess, onFailure) {
-            playOrPause('play', self.signaling, stream, 'video',
+            muteOrUnmute('play', self.signaling, stream, 'video',
               onSuccess, onFailure);
           };
           stream.signalOnPauseVideo = function(onSuccess, onFailure) {
-            playOrPause('pause', self.signaling, stream, 'video',
+            muteOrUnmute('pause', self.signaling, stream, 'video',
               onSuccess, onFailure);
           };
         };
@@ -963,19 +983,19 @@
       };
       var onChannelReady = function() {
         stream.signalOnPlayAudio = function(onSuccess, onFailure) {
-          playOrPause('play', self.signaling, stream, 'audio', onSuccess,
+          playOrPause('play', self.signaling, data.id, 'audio', onSuccess,
             onFailure);
         };
         stream.signalOnPauseAudio = function(onSuccess, onFailure) {
-          playOrPause('pause', self.signaling, stream, 'audio', onSuccess,
+          playOrPause('pause', self.signaling, data.id, 'audio', onSuccess,
             onFailure);
         };
         stream.signalOnPlayVideo = function(onSuccess, onFailure) {
-          playOrPause('play', self.signaling, stream, 'video', onSuccess,
+          playOrPause('play', self.signaling, data.id, 'video', onSuccess,
             onFailure);
         };
         stream.signalOnPauseVideo = function(onSuccess, onFailure) {
-          playOrPause('pause', self.signaling, stream, 'video', onSuccess,
+          playOrPause('pause', self.signaling, data.id, 'video', onSuccess,
             onFailure);
         };
       };
@@ -1289,8 +1309,9 @@
 
       /**
          * @function playAudio
-         * @desc This function tells server to continue receiving audio data of the stream specified.
+         * @desc This function tells server to continue sending/receiving audio data of the RemoteStream/LocalStream.
       <br><b>Remarks:</b><br>
+      The audio track of the stream should be enabled to be played correctly. For RemoteStream, it should be subscribed; for LocalStream, it should be published. playAudio with video only stream will succeed without any action.<br>
       External Stream does not support this function.
          * @memberOf Woogeen.ConferenceClient
          * @param {WoogeenStream} stream instance.
@@ -1310,9 +1331,9 @@
 
       /**
          * @function pauseAudio
-         * @desc This function tells server to stop receiving audio data of the stream specified.
+         * @desc This function tells server to stop sending/receiving audio data of the subscribed RemoteStream/LocalStream.
       <br><b>Remarks:</b><br>
-      Upon success, the audio of the stream would be hold, and you can call disableAudio() method to disable the audio track locally to stop playing.<br>
+      Upon success, the audio of the stream would be hold, and you can call disableAudio() method to disable the audio track locally to stop playing. For RemoteStream, it should be subscribed; for LocalStream, it should be published. puaseAudio with video only stream will succeed without any action.<br>
       External Stream does not support this function.
          * @memberOf Woogeen.ConferenceClient
          * @param {WoogeenStream} stream instance.
@@ -1332,8 +1353,9 @@
 
       /**
          * @function playVideo
-         * @desc This function tells server to continue receiving video data of the stream specified.
+         * @desc This function tells server to continue sending/receiving video data of the subscribed RemoteStream/LocalStream.
       <br><b>Remarks:</b><br>
+      The video track of the stream should be enabled to be played correctly. For RemoteStream, it should be subscribed; for LocalStream, it should be published. playVideo with audio only stream will succeed without any action.<br>
       External Stream does not support this function.
          * @memberOf Woogeen.ConferenceClient
          * @param {WoogeenStream} stream instance.
@@ -1353,9 +1375,9 @@
 
       /**
          * @function pauseVideo
-         * @desc This function tells server to stop receiving video data of the stream specified.
+         * @desc This function tells server to stop sending/receiving video data of the subscribed RemoteStream/LocalStream.
       <br><b>Remarks:</b><br>
-      Upon success, the video of the stream would be hold, and you can call disableVideo() method to disable the video track locally to stop playing.<br>
+      Upon success, the video of the stream would be hold, and you can call disableVideo() method to disable the video track locally to stop playing. For RemoteStream, it should be subscribed; for LocalStream, it should be published. pauseVideo with audio only stream will succeed without any action.<br>
       External Stream does not support this function.
          * @memberOf Woogeen.ConferenceClient
          * @param {WoogeenStream} stream instance.
@@ -1972,7 +1994,7 @@
       </script>
        */
       this.mute = function(stream, trackKind, onSuccess, onFailure) {
-        playOrPause('pause', this.signaling, stream, trackKind, onSuccess,
+        muteOrUnmute('pause', this.signaling, stream, trackKind, onSuccess,
           onFailure);
       };
       /**
@@ -1996,7 +2018,7 @@
       </script>
        */
       this.unmute = function(stream, trackKind, onSuccess, onFailure) {
-        playOrPause('play', this.signaling, stream, trackKind, onSuccess,
+        muteOrUnmute('play', this.signaling, stream, trackKind, onSuccess,
           onFailure);
       };
     };
