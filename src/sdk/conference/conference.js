@@ -1708,11 +1708,11 @@
           mediaSubOptions.audio.format = {
             codec: options.audioCodec
           };
-          if (!self.remoteStreams[options.audioStreamId]) {
+          if (!self.remoteStreams[mediaSubOptions.audio.from]) {
             safeCall(onFailure, 'Invalid audio stream ID.');
             return;
           }
-          let stream = self.remoteStreams[options.audioStreamId];
+          let stream = self.remoteStreams[mediaSubOptions.audio.from];
           if (!stream.mediaInfo().audio) {
             safeCall(onFailure, 'Target stream does not have audio.');
             return;
