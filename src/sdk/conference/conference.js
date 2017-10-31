@@ -1397,7 +1397,7 @@
   <script type="text/JavaScript">
   var conference = Woogeen.ConferenceClient.create();
   // ……
-  conference.addExternalOutput(url: 'rtsp://localhost:1935/live', {streamId: xxx
+  conference.addExternalOutput('rtsp://localhost:1935/live', {streamId: xxx
   }, function () {
     L.Logger.info('Start external streaming success.');
   }, function (err) {
@@ -1501,7 +1501,7 @@
   <script type="text/JavaScript">
   var conference = Woogeen.ConferenceClient.create();
   // ...
-  conference.updateExternalOutput({url: 'rtsp://localhost:1935/live'}, {streamId: xxx
+  conference.updateExternalOutput('rtsp://localhost:1935/live', {streamId: xxx
   }, function () {
     L.Logger.info('Update external streaming success.');
   }, function (err) {
