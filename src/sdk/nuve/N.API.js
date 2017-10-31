@@ -136,15 +136,15 @@ N.API = (function(N) {
           </tr>
           <tr>
               <td>vga</td>
-              <td>{width: 640, height: 480}, {width: 320, height: 240}</td>
+              <td>{width: 640, height: 480}</td>
           </tr>
           <tr>
               <td>svga</td>
-              <td>{width: 800, height: 600}, {width: 320, height: 240}</td>
+              <td>{width: 800, height: 600}</td>
           </tr>
           <tr>
               <td>xga</td>
-              <td>{width: 1024, height: 768}, {width: 320, height: 240}</td>
+              <td>{width: 1024, height: 768}</td>
           </tr>
           <tr>
               <td>hd720p</td>
