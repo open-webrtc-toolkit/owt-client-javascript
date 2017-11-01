@@ -413,9 +413,12 @@
         }
       });
       self.signaling.on('text', function(data) {
+        const msg = JSON.parse(JSON.stringify(data.msg));
+        msg.data = msg.message;
+        delete msg.message;
         var evt = new Woogeen.MessageEvent({
           type: 'message-received',
-          msg: data.msg.message
+          msg: msg
         });
         self.dispatchEvent(evt);
       });
