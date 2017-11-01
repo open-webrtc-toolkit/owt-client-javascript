@@ -52,54 +52,54 @@ The Intel CS for WebRTC Client SDK for JavaScript has been tested on the followi
     </thead>
         <tr>
             <td><b>Conference Mode</b></td>
-            <td><b>Windows\*</b></td>
-            <td><b>Ubuntu\*</b></td>
-            <td><b>macOS\*</b></td>
+            <td><b>Windows*</b></td>
+            <td><b>Ubuntu*</b></td>
+            <td><b>macOS*</b></td>
         </tr>
         <tr width="12pt">
-            <td>Chrome\* 62</td>
+            <td>Chrome* 62</td>
             <td>&radic;</td>
             <td>&radic;</td>
             <td>&radic;</td>
         </tr>
         <tr>
-            <td>Firefox\* 56</td>
+            <td>Firefox* 56</td>
             <td>&radic;</td>
             <td>&radic;</td>
             <td>&radic;</td>
         </tr>
         <tr>
-            <td>Safari\* 11</td>
+            <td>Safari* 11</td>
             <td></td>
             <td></td>
             <td>&radic;</td>
         </tr>
         <tr>
-            <td>Microsoft Edge\* 40.15063.674.0</td>
+            <td>Microsoft Edge* 40.15063.674.0</td>
             <td>&radic;</td>
             <td></td>
             <td></td>
         </tr>
         <tr>
             <td><b>P2P Mode</b></td>
-            <td><b>Windows\*</b></td>
-            <td><b>Ubuntu\*</b></td>
-            <td><b>macOS\*</b></td>
+            <td><b>Windows*</b></td>
+            <td><b>Ubuntu*</b></td>
+            <td><b>macOS*</b></td>
         </tr>
         <tr>
-            <td>Chrome\* 62</td>
-            <td>&radic;</td>
-            <td>&radic;</td>
-            <td>&radic;</td>
-        </tr>
-        <tr>
-            <td>Firefox\* 56</td>
+            <td>Chrome* 62</td>
             <td>&radic;</td>
             <td>&radic;</td>
             <td>&radic;</td>
         </tr>
         <tr>
-            <td>Safari\* 11</td>
+            <td>Firefox* 56</td>
+            <td>&radic;</td>
+            <td>&radic;</td>
+            <td>&radic;</td>
+        </tr>
+        <tr>
+            <td>Safari* 11</td>
             <td></td>
             <td></td>
             <td>&radic;</td>
@@ -181,7 +181,7 @@ $(document).ready(function(){
     Woogeen.LocalStream.create({
       video:{
         device:"screen",
-        resolution:"hd1080p",
+        resolution:{width: 1920, height: 1080},
         frameRate: 10
       }
     }, function(err, stream){
@@ -208,7 +208,7 @@ $(document).ready(function(){
       Woogeen.LocalStream.create({
         video:{
           device:"camera",
-          resolution:"hd720p"
+          resolution:{width: 1280, height: 720}
         },
       audio: true
       }, function(err, stream){
