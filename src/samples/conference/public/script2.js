@@ -2,6 +2,7 @@ var runSocketIOSample = function() {
   'use strict';
   var localStream;
   let showedRemoteStreams = [];
+  let myId;
 
   function getParameterByName(name) {
     name = name.replace(/[\[]/, '\\\[').replace(/[\]]/, '\\\]');
@@ -176,16 +177,7 @@ var runSocketIOSample = function() {
     var stream = event.stream;
     // if(stream.id() !== localStream.id()) return;
     L.Logger.info('stream added:', stream.id());
-    var fromMe = false;
-    for (var i in conference.localStreams) {
-      if (conference.localStreams.hasOwnProperty(i)) {
-        if (conference.localStreams[i].id() === stream.id()) {
-          fromMe = true;
-          break;
-        }
-      }
-    }
-    if (fromMe) {
+    if(event.stream.from === myId) {
       L.Logger.info('stream', stream.id(),
         'is from me; will not be subscribed.');
       return;
@@ -308,6 +300,7 @@ var runSocketIOSample = function() {
       var token = response;
 
       conference.join(token, function(resp) {
+        myId = resp.self.id;
         if (typeof mediaUrl === 'string' && mediaUrl !== '') {
           Woogeen.ExternalStream.create({
             url: mediaUrl,
