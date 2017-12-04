@@ -7,15 +7,15 @@ module.exports = function(grunt) {
     '../src/sdk/base/common.js',
     '../src/sdk/base/L.Base64.js',
     '../src/sdk/base/L.Logger.js',
-    '../src/sdk/base/stream.js',
+    '../src/sdk/base/stream.legacy.js',
     '../src/sdk/conference/conferencesignaling.js',
-    '../src/sdk/conference/conference.js',
+    '../src/sdk/conference/conference.legacy.js',
     '../src/sdk/conference/webrtc-stacks/ChromeStableStack.js',
     '../src/sdk/conference/webrtc-stacks/FirefoxStack.js',
     '../src/sdk/conference/webrtc-stacks/EdgeORTCStack.js',
     '../src/sdk/p2p/errors.js',
     '../src/sdk/p2p/gab.proxy.js',
-    '../src/sdk/p2p/peer.js'
+    '../src/sdk/p2p/peer.legacy.js'
   ];
 
   var uiSrcFiles = [
