@@ -2,6 +2,7 @@
 'use strict';
 
 import * as utils from './utils.js'
+import Logger from './logger.js'
 
 export class Resolution {}
 /**
@@ -86,7 +87,7 @@ export class MediaStreamFactory {
           }
           if (constraints.audio && typeof response.options !==
             'object') {
-            L.Logger.warning(
+            Logger.warning(
               'Desktop sharing with audio requires the latest Chrome extension. Your audio constraints will be ignored.'
             );
           }
@@ -101,7 +102,7 @@ export class MediaStreamFactory {
                 }
               }
             } else {
-              L.Logger.warning(
+              Logger.warning(
                 'Sharing screen with audio was not selected by user.'
               );
             }
@@ -144,7 +145,7 @@ export class MediaStreamFactory {
         mediaConstraints.audio = constraints.audio;
       }
       if (constraints.audio instanceof MediaStreamTrackScreenCastConstraintsForAudio) {
-        L.Logger.warning(
+        Logger.warning(
           'Screen sharing with audio is not supported in Firefox.');
         mediaConstraints.audio = false;
       }

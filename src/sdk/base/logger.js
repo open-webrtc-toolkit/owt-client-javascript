@@ -3,7 +3,7 @@
 /*
  * API to write logs based on traditional logging mechanisms: debug, trace, info, warning, error
  */
-L.Logger = (function() {
+var Logger = (function() {
   "use strict";
   var DEBUG = 0,
     TRACE = 1,
@@ -68,3 +68,5 @@ L.Logger = (function() {
 
   return that;
 }());
+
+export default Logger;

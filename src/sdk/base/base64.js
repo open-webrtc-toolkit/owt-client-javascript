@@ -1,6 +1,6 @@
 /*global unescape*/
-L.Base64 = (function() {
-  "use strict";
+"use strict";
+var Base64 = (function() {
   var END_OF_INPUT, base64Chars, reverseBase64Chars, base64Str, base64Count,
     i, setBase64Str, readBase64, encodeBase64, readReverseBase64, ntos,
     decodeBase64;
@@ -134,3 +134,5 @@ L.Base64 = (function() {
     decodeBase64: decodeBase64
   };
 }());
+
+export default Base64;
