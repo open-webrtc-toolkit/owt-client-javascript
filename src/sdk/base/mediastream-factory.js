@@ -1,9 +1,7 @@
 // Copyright © 2017 Intel Corporation. All Rights Reserved.
 'use strict';
-
 import * as utils from './utils.js'
 import Logger from './logger.js'
-
 export class Resolution {}
 /**
   Constraints for creating an audio MediaStreamTrack.

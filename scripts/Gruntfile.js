@@ -81,7 +81,7 @@ window.L = L;\n\
             debug: true,
             standalone: 'Ics'
           },
-          transform: [["babelify", { "presets": ["es2015"] }]],
+          transform: [["babelify", { "presets": ["env"] }]],
         },
       }
     },

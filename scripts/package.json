@@ -17,6 +17,9 @@
     "mcu"
   ],
   "devDependencies": {
+    "babel-core": "^6.26.0",
+    "babel-preset-env": "^1.6.1",
+    "babelify": "^8.0.0",
     "grunt": "~0.4.0",
     "grunt-browserify": "^5.2.0",
     "grunt-cli": "~0.1.6",
