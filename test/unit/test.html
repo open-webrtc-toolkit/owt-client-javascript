@@ -2,23 +2,17 @@
 <head>
   <meta charset="utf-8">
   <title>Unit tests for Stream</title>
-  <link href="resources/styles/mocha.css" rel="stylesheet" />
+  <link href="resources/styles/deps/mocha.css" rel="stylesheet" />
 </head>
 <body>
   <div id="mocha"></div>
 
-  <script src="resources/scripts/jquery.min.js"></script>
-  <script src="resources/scripts/chai.js"></script>
-  <script src="resources/scripts/chai-as-promised-browserify.js"></script>
-  <script src="resources/scripts/mocha.js"></script>
+  <script src="resources/scripts/deps/jquery.min.js"></script>
+  <script src="resources/scripts/deps/chai.js"></script>
+  <script src="resources/scripts/deps/chai-as-promised-browserify.js"></script>
+  <script src="resources/scripts/deps/mocha.js"></script>
 
   <script>mocha.setup('bdd')</script>
-  <script type="module" src="../../src/sdk/base/mediastream-factory.js"></script>
-  <script src="base.js"></script>
-  <script>
-    mocha.checkLeaks();
-    mocha.globals(['jQuery']);
-    mocha.run();
-  </script>
+  <script type="module" src="resources/scripts/runner.js"></script>
 </body>
 </html>

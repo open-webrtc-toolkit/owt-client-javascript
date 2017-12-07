@@ -1,5 +1,6 @@
 // Copyright © 2017 Intel Corporation. All Rights Reserved.
-import * as MediaStreamFactoryModule from '../../src/sdk/base/mediastream-factory.js';
+import * as MediaStreamFactoryModule from '../../../../src/sdk/base/mediastream-factory.js';
+
 const expect = chai.expect;
 const screenSharingExtensionId = 'jniliohjdiikfjjdlpapmngebedgigjn';
 chai.use(chaiAsPromised);
@@ -65,3 +66,5 @@ describe('Unit tests for MediaStreamFactory', function() {
         .and.notify(done);
     });
 });
+
+

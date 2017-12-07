@@ -4,7 +4,7 @@ module.exports = function(grunt) {
   var srcFiles = [
     '../src/sdk/base/property.js',
     '../src/sdk/base/events.js',
-    '../src/sdk/base/common.js',
+    '../src/sdk/base/common.legacy.js',
     '../src/sdk/base/L.Base64.js',
     '../src/sdk/base/L.Logger.js',
     '../src/sdk/base/stream.legacy.js',
@@ -65,6 +65,25 @@ window.L = L;\n\
         configFile: '../src/.eslintrc.json'
       },
       src: srcFiles
+    },
+    browserify: {
+      dist: {
+        src: ['../src/sdk/export.js'],
+        dest: '../dist/sdk/ics.js',
+              banner: '\
+/*\n\
+ * Intel WebRTC SDK version <%= pkg.version %>\n\
+ * Copyright (c) <%= grunt.template.today("yyyy") %> Intel <http://webrtc.intel.com>\n\
+ * Homepage: http://webrtc.intel.com\n\
+ */\n\n\n',
+        options: {
+          browserifyOptions: {
+            debug: true,
+            standalone: 'Ics'
+          },
+          transform: [["babelify", { "presets": ["es2015"] }]],
+        },
+      }
     },
     concat: {
       dist: {
@@ -284,6 +303,7 @@ window.L = L;\n\
   grunt.loadNpmTasks('grunt-string-replace');
   grunt.loadNpmTasks('grunt-contrib-compress');
   grunt.loadNpmTasks('grunt-eslint');
+  grunt.loadNpmTasks('grunt-browserify');
 
   grunt.registerTask('build', ['eslint:src', 'concat:dist', 'concat:ui_dist', 'concat:nuve', 'concat:icsREST', 'jshint:dist', 'concat:merge', 'uglify:dist','copy:dist','string-replace','compress:dist']);
 
