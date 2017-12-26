@@ -1,6 +1,6 @@
 /**
  * @class SignalingChannel
- * @classDesc Network module for WooGeen P2P chat
+ * @classDesc Signaling module for Intel CS for WebRTC P2P chat
  */
 function SignalingChannel() {
 
@@ -8,11 +8,13 @@ function SignalingChannel() {
   this.onServerDisconnected = null;
 
   var clientType = 'Web';
-  var clientVersion = '3.5';
+  var clientVersion = '4.0';
 
   var wsServer = null;
 
   var self = this;
+
+  let connectPromise=null;
 
   /* TODO: Do remember to trigger onMessage when new message is received.
      if(this.onMessage)
@@ -20,21 +22,22 @@ function SignalingChannel() {
    */
 
   // message should a string.
-  this.sendMessage = function(message, targetId, successCallback,
-    failureCallback) {
+  this.send = function(targetId, message) {
     var data = {
       data: message,
       to: targetId
     };
-    wsServer.emit('woogeen-message', data, function(err) {
-      if (err && failureCallback)
-        failureCallback(err);
-      else if (successCallback)
-        successCallback();
+    return new Promise((resolve, reject) => {
+      wsServer.emit('ics-message', data, function(err) {
+        if (err)
+          reject(err);
+        else
+          resolve();
+      });
     });
   };
 
-  this.connect = function(loginInfo, successCallback, failureCallback) {
+  this.connect = function(loginInfo) {
     var serverAddress = loginInfo.host;
     var token = loginInfo.token;
     var paramters = [];
@@ -45,7 +48,7 @@ function SignalingChannel() {
       paramters.push('token=' + encodeURIComponent(token));
     if (paramters)
       queryString = paramters.join('&');
-    L.Logger.debug('Query string: ' + queryString);
+    console.log('Query string: ' + queryString);
     var opts = {
       query: queryString,
       'reconnection': true,
@@ -55,53 +58,58 @@ function SignalingChannel() {
     wsServer = io(serverAddress, opts);
 
     wsServer.on('connect', function() {
-      L.Logger.info('Connected to websocket server.');
+      console.info('Connected to websocket server.');
     });
 
     wsServer.on('server-authenticated', function(data) {
-      L.Logger.debug('Authentication passed. User ID: ' + data.uid);
-      if (successCallback) {
-        successCallback(data.uid);
-        successCallback = null;
-        failureCallback = null;
+      console.log('Authentication passed. User ID: ' + data.uid);
+      if(connectPromise){
+        connectPromise.resolve(data.uid);
       }
+      connectPromise=null;
     });
 
     wsServer.on('disconnect', function() {
-      L.Logger.info('Disconnected from websocket server.');
+      console.info('Disconnected from websocket server.');
       if (self.onServerDisconnected)
         self.onServerDisconnected();
     });
 
     wsServer.on('connect_failed', function(errorCode) {
-      L.Logger.error('Connect to websocket server failed, error:' +
+      console.error('Connect to websocket server failed, error:' +
         errorCode + '.');
-      if (failureCallback) {
-        failureCallback(parseInt(errorCode));
-        successCallback = null;
-        failureCallback = null;
+      if (connectPromise) {
+        connectPromise.reject(parseInt(errorCode))
       }
+      connectPromise = null;
     });
 
     wsServer.on('error', function(err) {
-      L.Logger.error('Socket.IO error:' + err);
-      if (err == '2103' && failureCallback) {
-        failureCallback(err);
-        successCallback = null;
-        failureCallback = null;
+      console.error('Socket.IO error:' + err);
+      if (err == '2103' && connectPromise) {
+        connectPromise.reject(err)
+        connectPromise=null;
       }
     });
 
-    wsServer.on('woogeen-message', function(data) {
-      L.Logger.info('Received woogeen message.');
+    wsServer.on('ics-message', function(data) {
+      console.info('Received woogeen message.');
       if (self.onMessage)
-        self.onMessage(data.data, data.from);
+        self.onMessage(data.from, data.data);
+    });
+
+    return new Promise((resolve, reject) => {
+      connectPromise = {
+        resolve: resolve,
+        reject: reject
+      };
     });
   };
 
   this.disconnect = function() {
     if (wsServer)
       wsServer.close();
+    return Promise.resolve();
   };
 
 }

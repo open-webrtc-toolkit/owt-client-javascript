@@ -36,7 +36,7 @@ var Logger = (function() {
 
   var setLogLevel = function(level) {
     if (level <= DEBUG) {
-      that.debug = bindType('debug');
+      that.debug = bindType('log');
     } else {
       that.debug = noOp;
     }

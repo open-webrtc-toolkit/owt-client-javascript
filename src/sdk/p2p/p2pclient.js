@@ -1,0 +1,216 @@
+// Copyright © 2017 Intel Corporation. All Rights Reserved.
+'use strict';
+import Logger from '../base/logger.js';
+import {EventDispatcher} from '../base/event.js';
+import * as Utils from '../base/utils.js';
+import * as ErrorModule from './error.js';
+import P2PPeerConnectionChannel from './peerconnection-channel.js';
+import * as StreamModule from '../base/stream.js';
+
+const ConnectionState = {
+  READY: 1,
+  CONNECTING: 2,
+  CONNECTED: 3
+};
+
+const pcDisconnectTimeout = 15000; // Close peerconnection after disconnect 15s.let isConnectedToSignalingChannel = false;
+const offerOptions = {
+  'offerToReceiveAudio': true,
+  'offerToReceiveVideo': true
+};
+const sysInfo = Utils.sysInfo();
+const supportsPlanB = navigator.mozGetUserMedia ? false : true;
+const supportsUnifiedPlan = navigator.mozGetUserMedia ? true : false;
+/**
+ * @function isArray
+ * @desc Test if an object is an array.
+ * @return {boolean} DESCRIPTION
+ * @private
+ */
+function isArray(obj) {
+  return (Object.prototype.toString.call(obj) === '[object Array]');
+}
+/*
+ * Return negative value if id1<id2, positive value if id1>id2
+ */
+var compareID = function(id1, id2) {
+  return id1.localeCompare(id2);
+};
+// If targetId is peerId, then return targetId.
+var getPeerId = function(targetId) {
+  return targetId;
+};
+var changeNegotiationState = function(peer, state) {
+  peer.negotiationState = state;
+};
+// Do stop chat locally.
+var stopChatLocally = function(peer, originatorId) {
+  if (peer.state === PeerState.CONNECTED || peer.state === PeerState.CONNECTING) {
+    if (peer.sendDataChannel) {
+      peer.sendDataChannel.close();
+    }
+    if (peer.receiveDataChannel) {
+      peer.receiveDataChannel.close();
+    }
+    if (peer.connection && peer.connection.iceConnectionState !== 'closed') {
+      peer.connection.close();
+    }
+    if (peer.state !== PeerState.READY) {
+      peer.state = PeerState.READY;
+      that.dispatchEvent(new Woogeen.ChatEvent({
+        type: 'chat-stopped',
+        peerId: peer.id,
+        senderId: originatorId
+      }));
+    }
+    // Unbind events for the pc, so the old pc will not impact new peerconnections created for the same target later.
+    unbindEvetsToPeerConnection(peer.connection);
+  }
+};
+const P2PClient = function(configuration, signalingChannel) {
+  const config = configuration;
+  const signaling = signalingChannel;
+  const channels = new Map(); // Map of PeerConnectionChannels.
+  const self=this;
+  let state = ConnectionState.READY;
+  let myId;
+
+  signaling.onMessage = function(origin, message) {
+    Logger.debug('Received signaling message from ' + origin + ': ' + message);
+    const data = JSON.parse(message);
+    if (self.allowedRemoteIds.indexOf(origin) >= 0) {
+      getOrCreateChannel(origin).onMessage(data);
+    } else if (data.type !== 'chat-denied') {
+      sendSignalingMessage(origin, 'chat-denied');
+    }
+  };
+
+  signaling.onServerDisconnected=function(){
+    // TODO:
+  };
+
+  /*
+    Only allowed remote endpoint IDs are able to publish stream or send message to current endpoint.
+    @details Removing an ID from allowedRemoteIds does stop existing connection with certain endpoint. Please call stop to stop the PeerConnection.
+  */
+  this.allowedRemoteIds=[];
+
+  /*
+    Connect to signaling server.
+    @detailsSince signaling can be customized, this method does not define how a token looks like. SDK passes token to signaling channel without changes. It returns a promise resolved with an object returned by signaling channel once signaling channel reports connection has been established.
+  */
+  this.connect = function(token) {
+    if (state === ConnectionState.READY) {
+      state = ConnectionState.CONNECTING;
+    } else {
+      Logger.warning('Invalid connection state: ' + state);
+      return Promise.reject(new ErrorModule.P2PError(ErrorModule.errors.P2P_CLIENT_INVALID_STATE));
+    }
+    return new Promise((resolve, reject) => {
+      signaling.connect(token).then((id) => {
+        myId = id;
+        state = ConnectionState.CONNECTED;
+        resolve(myId);
+      }, (errCode) => {
+        reject(new ErrorModule.P2PError(ErrorModule.getErrorByCode(
+          errCode)));
+      });
+    });
+  };
+
+  /*
+    Disconnect from the signaling channel. It stops all existing sessions with remote endpoints.
+  */
+  this.disconnect = function() {
+    if (state == ConnectionState.READY) {
+      return Promise.reject(new ErrorModule.P2PError(ErrorModule.errors.P2P_CLIENT_INVALID_STATE));
+    }
+    stop();
+    return signaling.disconnect();
+  };
+
+  /*
+    Publish a stream to a remote endpoint.
+    @param stream A LocalStream to be published.
+    @param remoteId Remote endpoint's ID.
+    @return A promised resolved when remote side received the certain stream. However, remote endpoint may not display this stream, or ignore it.
+  */
+  this.publish = function(remoteId, stream) {
+    if (!(stream instanceof StreamModule.LocalStream)) {
+      return Promise.reject(new TypeError('Invalid stream.'));
+    }
+    if (this.allowedRemoteIds.indexOf(remoteId) < 0) {
+      return Promise.reject(new ErrorModule.P2PError(ErrorModule.errors.P2P_CLIENT_NOT_ALLOWED));
+    }
+    return getOrCreateChannel(remoteId).publish(stream);
+  };
+
+  /*
+    Send a message to remote endpoint.
+    @param message Message to be sent. It should be a string.
+    @param remoteId Remote endpoint's ID.
+    @return It returns a promise resolved when remote endpoint received certain message.
+  */
+  this.send=function(remoteId, message){
+    if(!(typeof message === 'string')){
+      return Promise.reject(new TypeError('Invalid message.'));
+    }
+    if (this.allowedRemoteIds.indexOf(remoteId) < 0) {
+      return Promise.reject(new ErrorModule.P2PError(ErrorModule.errors.P2P_CLIENT_NOT_ALLOWED));
+    }
+    return getOrCreateChannel(remoteId).send(message); 
+  };
+
+  this.stop=function(remoteId){
+    if (!channels.has(remoteId)) {
+      return Promise.reject(new ErrorModule.P2PError(ErrorModule.errors.P2P_CLIENT_INVALID_STATE,
+        'No PeerConnection between current endpoint and specific remote endpoint.'
+      ));;
+    }
+    return channels.get(remoteId).stop().then(()=>{
+      channels.delete(remoteId);
+    });
+  };
+
+  this.getStats = function(remoteId){
+    if(!channels.has(remoteId)){
+      return Promise.reject(new ErrorModule.P2PError(ErrorModule.errors.P2P_CLIENT_INVALID_STATE,'No PeerConnection between current endpoint and specific remote endpoint.'));
+    }
+    return channels.get(remoteId).getStats();
+  }
+
+  const sendSignalingMessage= function(remoteId, type, message){
+    const msg = {
+      type: type
+    };
+    if (message) {
+      msg.data = message;
+    }
+    return signaling.send(remoteId, JSON.stringify(msg));
+  };
+
+  const getOrCreateChannel = function(remoteId) {
+    if (!channels.has(remoteId)) {
+      // Construct an signaling sender/receiver for P2PPeerConnection.
+      const signalingForChannel = Object.create(EventDispatcher);
+      signalingForChannel.sendSignalingMessage = sendSignalingMessage;
+      const pcc=new P2PPeerConnectionChannel(config.rtcConfiguration,
+        myId, remoteId, signalingForChannel);
+      pcc.addEventListener('streamadded', (streamEvent)=>{
+        self.dispatchEvent(streamEvent);
+      });
+      pcc.addEventListener('messagereceived', (messageEvent)=>{
+        self.dispatchEvent(messageEvent);
+      });
+      pcc.addEventListener('p2pclosed', ()=>{
+        channels.delete(remoteId);
+      })
+      channels.set(remoteId, pcc);
+    }
+    return channels.get(remoteId);
+  };
+};
+
+P2PClient.prototype = new EventDispatcher();
+
+export default P2PClient;

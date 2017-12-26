@@ -1,6 +1,8 @@
 // Copyright © 2017 Intel Corporation. All Rights Reserved.
+
 'use strict';
 import Logger from './logger.js'
+import {IcsEvent} from './event.js'
 import * as Utils from './utils.js'
 
 function isAllowedValue(obj, allowedValues) {
@@ -65,7 +67,7 @@ export class LocalStream extends Stream {
       configurable: false,
       writable: false,
       value: Utils.createUuid()
-    })
+    });
   };
 }
 /*
@@ -78,11 +80,21 @@ export class RemoteStream extends Stream {
       configurable: false,
       writable: false,
       value: id ? id : Utils.createUuid()
-    })
+    });
     Object.defineProperty(this, 'origin', {
       configurable: false,
       writable: false,
       value: origin
-    })
+    });
+  }
+}
+
+/*
+  Event for Stream.
+*/
+export class StreamEvent extends IcsEvent {
+  constructor(type, init) {
+    super(type);
+    this.stream = init.stream;
   }
 }
