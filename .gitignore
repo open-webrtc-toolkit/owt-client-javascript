@@ -2,3 +2,4 @@ dist/
 release*.zip
 node_modules/
 src/samples/conference/nuve.js
+src/samples/conference/icsREST.js

@@ -1,3 +1,262 @@
+
+var send = function (method, entity, body, onRes) {
+  var req = new XMLHttpRequest();
+  req.onreadystatechange = function() {
+    if (req.readyState === 4) {
+      onRes(req.responseText);
+    }
+  };
+  req.open(method, entity, true);
+  req.setRequestHeader('Content-Type', 'application/json');
+  if (body !== undefined) {
+    req.send(JSON.stringify(body));
+  } else {
+    req.send();
+  }
+};
+
+var onResponse = function(result) {
+  if (result) {
+    try {
+      L.Logger.info('Result:', JSON.parse(result));
+    } catch (e) {
+      L.Logger.info('Result:', result);
+    }
+  } else {
+    L.Logger.info('Null');
+  }
+};
+
+var listRooms = function() {
+  send('GET', '/rooms/', undefined, onResponse);
+};
+
+var getRoom = function(room) {
+  send('GET', '/rooms/' + room + '/', undefined, onResponse);
+};
+
+var createRoom = function() {
+  send('POST', '/rooms/', {name: 'testNewRoom', options: undefined}, onResponse);
+};
+
+var deleteRoom = function(room) {
+  send('DELETE', '/rooms/' + room + '/', undefined, onResponse);
+};
+
+var updateRoom = function(room, config) {
+  send('PUT', '/rooms/' + room + '/', config, onResponse);
+};
+
+var listParticipants = function(room) {
+  send('GET', '/rooms/' + room + '/participants/', undefined, onResponse);
+};
+
+var getParticipant = function(room, participant) {
+  send('GET', '/rooms/' + room + '/participants/' + participant + '/', undefined, onResponse);
+};
+
+var forbidSub = function(room, participant) {
+  var jsonPatch = [{
+    op: 'replace',
+    path: '/permission/subscribe',
+    value: false
+  }];
+  send('PATCH', '/rooms/' + room + '/participants/' + participant + '/', jsonPatch, onResponse);
+};
+
+var forbidPub = function(room, participant) {
+  var jsonPatch = [{
+    op: 'replace',
+    path: '/permission/publish',
+    value: false
+  }];
+  send('PATCH', '/rooms/' + room + '/participants/' + participant + '/', jsonPatch, onResponse);
+};
+
+var dropParticipant = function(room, participant) {
+  send('DELETE', '/rooms/' + room + '/participants/' + participant + '/', undefined, onResponse);
+};
+
+var listStreams = function(room) {
+  send('GET', '/rooms/' + room + '/streams/', undefined, onResponse);
+};
+
+var getStream = function(room, stream) {
+  send('GET', '/rooms/' + room + '/streams/' + stream, undefined, onResponse);
+};
+
+var mixStream = function(room, stream, view) {
+  var jsonPatch = [{
+    op: 'add',
+    path: '/info/inViews',
+    value: view
+  }];
+  send('PATCH', '/rooms/' + room + '/streams/' + stream, jsonPatch, onResponse);
+};
+
+var unmixStream = function(room, stream, view) {
+  var jsonPatch = [{
+    op: 'remove',
+    path: '/info/inViews',
+    value: view
+  }];
+  send('PATCH', '/rooms/' + room + '/streams/' + stream, jsonPatch, onResponse);
+};
+
+var setRegion = function(room, stream, region, subStream) {
+  var jsonPatch = [{
+    op: 'replace',
+    path: '/info/layout/0/stream',
+    value: subStream
+  }];
+  send('PATCH', '/rooms/' + room + '/streams/' + stream, jsonPatch, onResponse);
+};
+
+var pauseStream = function(room, stream, track) {
+  var jsonPatch = [];
+  if (track === 'audio' || track === 'av') {
+    jsonPatch.push({
+      op: 'replace',
+      path: '/media/audio/status',
+      value: 'inactive'
+    });
+  }
+
+  if (track === 'video' || track === 'av') {
+    jsonPatch.push({
+      op: 'replace',
+      path: '/media/video/status',
+      value: 'inactive'
+    });
+  }
+  send('PATCH', '/rooms/' + room + '/streams/' + stream, jsonPatch, onResponse);
+};
+
+var playStream = function(room, stream, track) {
+  var jsonPatch = [];
+  if (track === 'audio' || track === 'av') {
+    jsonPatch.push({
+      op: 'replace',
+      path: '/media/audio/status',
+      value: 'active'
+    });
+  }
+
+  if (track === 'video' || track === 'av') {
+    jsonPatch.push({
+      op: 'replace',
+      path: '/media/video/status',
+      value: 'active'
+    });
+  }
+  send('PATCH', '/rooms/' + room + '/streams/' + stream, jsonPatch, onResponse);
+};
+
+var dropStream = function(room, stream) {
+  send('DELETE', '/rooms/' + room + '/streams/' + stream, undefined, onResponse);
+};
+
+var startStreamingIn = function(room, url) {
+  var options = {
+    url: url,
+    media: {
+      audio: 'auto',
+      video: true
+    },
+    transport: {
+      protocol: 'udp',
+      bufferSize: 2048
+    }
+  };
+  send('POST', '/rooms/' + room + '/streaming-ins', options, onResponse);
+};
+
+var stopStreamingIn = function(room, stream) {
+  send('DELETE', '/rooms/' + room + '/streaming-ins/' + stream, undefined, onResponse);
+};
+
+var listRecordings = function(room) {
+  send('GET', '/rooms/' + room + '/recordings/', undefined, onResponse);
+};
+
+var startRecording = function(room, audioFrom, videoFrom, container) {
+  var options = {
+    media: {
+      audio: {
+        from: audioFrom
+      },
+      video: {
+        from: videoFrom
+      }
+    },
+    container: (container ? container : 'auto')
+  };
+  send('POST', '/rooms/' + room + '/recordings', options, onResponse);
+};
+
+var stopRecording = function(room, id) {
+  send('DELETE', '/rooms/' + room + '/recordings/' + id, undefined, onResponse);
+};
+
+var updateRecording = function(room, id, audioFrom, videoFrom) {
+  var jsonPatch = [{
+    op: 'replace',
+    path: '/media/audio/from',
+    value: audioFrom
+  }, {
+    op: 'replace',
+    path: '/media/video/from',
+    value: videoFrom
+  }];
+  send('PATCH', '/rooms/' + room + '/recordings/' + id, jsonPatch, onResponse);
+};
+
+var listStreamingOuts = function(room) {
+  send('GET', '/rooms/' + room + '/streaming-outs/', undefined, onResponse);
+};
+
+var startStreamingOut = function(room, url, audioFrom, videoFrom) {
+  var options = {
+    media: {
+      audio: {
+        from: audioFrom
+      },
+      video: {
+        from: videoFrom
+      }
+    },
+    url: url
+  };
+  send('POST', '/rooms/' + room + '/streaming-outs', options, onResponse);
+};
+
+var stopStreamingOut = function(room, id) {
+  send('DELETE', '/rooms/' + room + '/streaming-outs/' + id, undefined, onResponse);
+};
+
+var updateStreamingOut = function(room, id, audioFrom, videoFrom) {
+  var jsonPatch = [{
+    op: 'replace',
+    path: '/media/audio/from',
+    value: audioFrom
+  }, {
+    op: 'replace',
+    path: '/media/video/from',
+    value: videoFrom
+  }];
+  send('PATCH', '/rooms/' + room + '/streaming-outs/' + id, jsonPatch, onResponse);
+};
+
+
+var createToken = function(room, user, role, callback) {
+  var body = {
+    room: room,
+    user: user,
+    role: role
+  };
+  send('POST', '/tokens/', body, callback);
+};
+
 var runSocketIOSample = function() {
   'use strict';
   var localStream;
@@ -13,24 +272,6 @@ var runSocketIOSample = function() {
   }
 
   var subscribeMix = getParameterByName('mix') || 'true';
-
-  function createToken(room, userName, role, callback) {
-    var req = new XMLHttpRequest();
-    var url = '/createToken/';
-    var body = {
-      room: room,
-      username: userName,
-      role: role
-    };
-    req.onreadystatechange = function() {
-      if (req.readyState === 4) {
-        callback(req.responseText);
-      }
-    };
-    req.open('POST', url, true);
-    req.setRequestHeader('Content-Type', 'application/json');
-    req.send(JSON.stringify(body));
-  }
 
   var conference = Woogeen.ConferenceClient.create({});
 
