@@ -3,7 +3,7 @@
 
 import Logger from '../base/logger.js';
 import { EventDispatcher, MessageEvent, IcsEvent } from '../base/event.js';
-import Publication from '../base/publication.js';
+import { Publication } from '../base/publication.js';
 import { Subscription } from './subscription.js'
 import * as Utils from '../base/utils.js';
 import * as ErrorModule from './error.js';

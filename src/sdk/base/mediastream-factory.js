@@ -3,6 +3,8 @@
 import * as utils from './utils.js'
 import Logger from './logger.js'
 import { Resolution } from './mediaformat.js'
+import * as MediaFormatModule from './mediaformat.js'
+
 /**
   Constraints for creating an audio MediaStreamTrack.
 */
@@ -11,12 +13,22 @@ export class MediaStreamTrackAudioConstraints {}
   Constraints for creating an audio MediaStreamTrack from mic.
   @details Currently, only deviceId is supported. please create an MediaStreamTrackDeviceConstraintsForAudio and pass it to createMediaStream function to create a MediaStream with audio captured from mic.
 */
-export class MediaStreamTrackDeviceConstraintsForAudio extends MediaStreamTrackAudioConstraints {}
+export class MediaStreamTrackDeviceConstraintsForAudio extends MediaStreamTrackAudioConstraints {
+  constructor() {
+    super();
+    this.source = MediaFormatModule.AudioSourceInfo.MIC;
+  }
+}
 /**
   Constraints for creating an audio MediaStreamTrack from screen cast.
   @details Currently, constrains for audio from screen cast are not supported. please create an MediaStreamTrackScreenCastConstraintsForAudio and pass it to createMediaStream function to create a MediaStream with audio captured from screen cast.
 */
-export class MediaStreamTrackScreenCastConstraintsForAudio extends MediaStreamTrackAudioConstraints {}
+export class MediaStreamTrackScreenCastConstraintsForAudio extends MediaStreamTrackAudioConstraints {
+  constructor() {
+    super();
+    this.source = MediaFormatModule.AudioSourceInfo.SCREENCAST;
+  }
+}
 /**
   Constraints for creating a video MediaStreamTrack.
 */
@@ -24,20 +36,31 @@ export class MediaStreamTrackVideoConstraints {}
 /**
   Constraints for creating a video MediaStreamTrack from camera.
 */
-export class MediaStreamTrackDeviceConstraintsForVideo extends MediaStreamTrackVideoConstraints {}
+export class MediaStreamTrackDeviceConstraintsForVideo extends MediaStreamTrackVideoConstraints {
+  constructor() {
+    super();
+    this.source = MediaFormatModule.VideoSourceInfo.CAMERA;
+  }
+}
 /**
   Constraints for creating a video MediaStreamTrack from screen cast.
 */
-export class MediaStreamTrackScreenCastConstraintsForVideo extends MediaStreamTrackVideoConstraints {}
+export class MediaStreamTrackScreenCastConstraintsForVideo extends MediaStreamTrackVideoConstraints {
+  constructor() {
+    super();
+    this.source = MediaFormatModule.VideoSourceInfo.SCREENCAST;
+  }
+}
 /**
   Constraints for creating a MediaStream from screen mic and camera.
 */
 export class MediaStreamDeviceConstraints {
   constructor(audioConstraints = false, videoConstraints = false) {
-    if (((typeof audioConstraints !== 'boolean') && !(audioConstraints instanceof MediaStreamTrackDeviceConstraintsForAudio)) ||
-      ((typeof videoConstraints !== 'boolean') && !(videoConstraints instanceof MediaStreamTrackDeviceConstraintsForVideo))
-    ) throw new TypeError(
-      'Invalid type of audioConstrains or videoConstraints.');
+    if (((typeof audioConstraints !== 'boolean') && audioConstraints.source !==
+        MediaFormatModule.AudioSourceInfo.MIC) ||
+      ((typeof videoConstraints !== 'boolean') && videoConstraints.source !==
+        MediaFormatModule.VideoSourceInfo.CAMERA))
+      throw new TypeError('Invalid audioConstrains or videoConstraints.');
     this.audio = audioConstraints;
     this.video = videoConstraints;
   }
@@ -47,27 +70,37 @@ export class MediaStreamDeviceConstraints {
 */
 export class MediaStreamScreenCastConstraints {
   constructor(audioConstraints = false, videoConstraints = false) {
-    if (((typeof audioConstraints !== 'boolean') && !(audioConstraints instanceof MediaStreamTrackScreenCastConstraintsForAudio)) ||
-      ((typeof videoConstraints !== 'boolean') && !(videoConstraints instanceof MediaStreamTrackScreenCastConstraintsForVideo))
-    ) throw new TypeError(
-      'Invalid type of audioConstrains or videoConstraints.');
+    if (((typeof audioConstraints !== 'boolean') && audioConstraints.source !==
+        MediaFormatModule.AudioSourceInfo.SCREENCAST) ||
+      ((typeof videoConstraints !== 'boolean') && videoConstraints.source !==
+        MediaFormatModule.VideoSourceInfo.SCREENCAST))
+      throw new TypeError(
+        'Invalid type of audioConstrains or videoConstraints.');
     this.audio = audioConstraints;
     this.video = videoConstraints;
   }
 }
+
+function isConstrainsForScreenCast(constraints) {
+  return ((typeof constraints.audio === 'object' && constraints.audio.source ===
+    MediaFormatModule.AudioSourceInfo.SCREENCAST) || (typeof constraints.video ===
+    'object' && constraints.video.source === MediaFormatModule.VideoSourceInfo
+    .SCREENCAST))
+}
+
 export class MediaStreamFactory {
   static createMediaStream(constraints) {
-    if (!(constraints instanceof MediaStreamDeviceConstraints) && !(
-        constraints instanceof MediaStreamScreenCastConstraints)) {
-      return Promise.reject(new TypeError('Invalid type of constraints.'));
+    if (typeof constraints !== 'object' || (!constraints.audio && !
+        constraints.video)) {
+      return Promise.reject(new TypeError('Invalid constrains'));
     }
-    if (constraints instanceof MediaStreamScreenCastConstraints && !utils.isChrome() &&
-      !utils.isFirefox()) {
+    if (isConstrainsForScreenCast(constraints) && !utils.isChrome() && !utils
+      .isFirefox()) {
       return Promise.reject(new TypeError(
         'Screen sharing only supports Chrome and Firefox.'));
     }
     // Screen sharing on Chrome does not work with the latest constraints format.
-    if (constraints instanceof MediaStreamScreenCastConstraints && utils.isChrome()) {
+    if (isConstrainsForScreenCast(constraints) && utils.isChrome()) {
       if (!constraints.extensionId) {
         return Promise.reject(new TypeError(
           'Extension ID must be specified for screen sharing on Chrome.'));
@@ -136,18 +169,20 @@ export class MediaStreamFactory {
           'At least one of audio and video must be requested.'));
       }
       const mediaConstraints = Object.create({});
-      if (constraints.audio instanceof MediaStreamTrackAudioConstraints) {
+      if (typeof constraints.audio === 'object' && constraints.audio.source ===
+        MediaFormatModule.AudioSourceInfo.MIC) {
         mediaConstraints.audio = Object.create({});
         mediaConstraints.audio.deviceId = constraints.audio.deviceId;
       } else {
         mediaConstraints.audio = constraints.audio;
       }
-      if (constraints.audio instanceof MediaStreamTrackScreenCastConstraintsForAudio) {
+      if (typeof constraints.audio === 'object' && constraints.audio.source ===
+        MediaFormatModule.AudioSourceInfo.SCREENCAST) {
         Logger.warning(
           'Screen sharing with audio is not supported in Firefox.');
         mediaConstraints.audio = false;
       }
-      if (constraints.video instanceof MediaStreamTrackVideoConstraints) {
+      if (typeof constraints.video === 'object') {
         mediaConstraints.video = Object.create({});
         if (constraints.video.frameRate instanceof Number) {
           mediaConstraints.video.frameRate = constraints.video.frameRate;
@@ -159,7 +194,8 @@ export class MediaStreamFactory {
         if (constraints.video.deviceId instanceof String) {
           mediaConstraints.video.deviceId = constraints.video.deviceId;
         }
-        if (utils.isFirefox() && constraints.video instanceof MediaStreamTrackScreenCastConstraintsForVideo) {
+        if (utils.isFirefox() && constraints.video.source ===
+          MediaFormatModule.VideoSourceInfo.SCREENCAST) {
           mediaConstraints.video.mediaSource = 'screen';
         }
       } else {
