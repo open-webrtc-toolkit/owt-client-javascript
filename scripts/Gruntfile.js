@@ -5,8 +5,8 @@ module.exports = function(grunt) {
     '../src/sdk/base/property.js',
     '../src/sdk/base/events.js',
     '../src/sdk/base/common.legacy.js',
-    '../src/sdk/base/L.Base64.js',
-    '../src/sdk/base/L.Logger.js',
+    '../src/sdk/base/base64.js',
+    '../src/sdk/base/logger.js',
     '../src/sdk/base/stream.legacy.js',
     '../src/sdk/conference/conferencesignaling.js',
     '../src/sdk/conference/conference.legacy.js',
@@ -82,8 +82,18 @@ window.L = L;\n\
             standalone: 'Ics'
           },
           transform: [["babelify", { "presets": ["env"] }]],
+          watch: true,
         },
       }
+    },
+    connect: {
+      server: {
+        options: {
+          base: '../',
+          port: 7080,
+          keepalive: true
+        },
+      },
     },
     concat: {
       dist: {
@@ -251,7 +261,7 @@ window.L = L;\n\
           },
           {
             pattern: /<!-- SDK Starts -->[\w\W]+<!-- SDK Stops -->/gm,
-            replacement: '<script src="../../sdk/woogeen.sdk.js" type="text/javascript"></script>'
+            replacement: '<script src="../../sdk/ics.js" type="text/javascript"></script>'
           },
           {
             pattern: /var serverAddress.*/g,
@@ -304,6 +314,7 @@ window.L = L;\n\
   grunt.loadNpmTasks('grunt-contrib-compress');
   grunt.loadNpmTasks('grunt-eslint');
   grunt.loadNpmTasks('grunt-browserify');
+  grunt.loadNpmTasks('grunt-contrib-connect');
 
   grunt.registerTask('build', ['eslint:src', 'concat:dist', 'concat:ui_dist', 'concat:nuve', 'concat:icsREST', 'jshint:dist', 'concat:merge', 'uglify:dist','copy:dist','string-replace','compress:dist']);
 
@@ -311,5 +322,7 @@ window.L = L;\n\
   grunt.registerTask('default', ['build']);
 
   grunt.registerTask('debug', ['concat:dist_debug', 'concat:ui_dist_debug', 'concat:nuve_debug', 'concat:icsREST_debug']);
+
+  grunt.registerTask('dev', ['browserify:dist', 'connect:server']);
 
 };

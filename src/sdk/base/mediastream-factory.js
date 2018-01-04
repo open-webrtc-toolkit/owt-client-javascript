@@ -2,7 +2,7 @@
 'use strict';
 import * as utils from './utils.js'
 import Logger from './logger.js'
-export class Resolution {}
+import { Resolution } from './mediaformat.js'
 /**
   Constraints for creating an audio MediaStreamTrack.
 */
