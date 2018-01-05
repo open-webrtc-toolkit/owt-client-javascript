@@ -138,6 +138,13 @@ const runSocketIOSample = function() {
     });
   }
 
+  conference.addEventListener('streamadded', (event)=>{
+    console.log('A new stream is added ', event.stream.id);
+    event.stream.addEventListener('ended',()=>{
+      console.log(event.stream.id + ' is ended.');
+    });
+  });
+
   /*
     conference.onMessage(function(event) {
       console.log('Message Received:', event.msg);

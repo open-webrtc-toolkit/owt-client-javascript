@@ -1,17 +1,35 @@
 // Copyright © 2017 Intel Corporation. All Rights Reserved.
 'use strict';
 
-import { EventDispatcher } from '../base/event.js'
-import { ConferenceSioSignaling as Signaling } from './signaling.js'
+import {
+  EventDispatcher,
+  IcsEvent
+} from '../base/event.js'
+import {
+  ConferenceSioSignaling as Signaling
+} from './signaling.js'
 import Logger from '../base/logger.js'
-import { Base64} from '../base/base64.js'
-import { ConferenceError } from './error.js'
+import {
+  Base64
+} from '../base/base64.js'
+import {
+  ConferenceError
+} from './error.js'
 import * as Utils from '../base/utils.js'
 import * as StreamModule from '../base/stream.js'
-import {Participant} from './participant.js'
-import {ConferenceInfo} from './info.js'
-import {ConferencePeerConnectionChannel } from './channel.js'
-import {RemoteMixedStream} from './mixedstream.js'
+import {
+  Participant
+} from './participant.js'
+import {
+  ConferenceInfo
+} from './info.js'
+import {
+  ConferencePeerConnectionChannel
+} from './channel.js'
+import {
+  RemoteMixedStream
+} from './mixedstream.js'
+import * as StreamUtilsModule from './streamutils.js'
 
 const SignalingState = {
   READY: 1,
@@ -22,31 +40,65 @@ const SignalingState = {
 const protocolVersion = '1.0';
 
 export const ConferenceClient = function(config, signalingImpl) {
-  config=config||{};
+  config = config || {};
+  const self = this;
   let signalingState = SignalingState.READY;
   const signaling = signalingImpl ? signalingImpl : (new Signaling());
   let myId = null;
   let myParticipantId = null;
-  let remoteStreams = new Map();  // Key is stream ID, value is a RemoteStream.
-  const participants = new Map();  // Key is participant ID, value is a Participant object.
-  const publishChannels = new Map();  // Key is MediaStream's ID, value is pc channel.
-  const channels = new Map();  // Key is channel's internal ID, value is channel.
+  let remoteStreams = new Map(); // Key is stream ID, value is a RemoteStream.
+  const participants = new Map(); // Key is participant ID, value is a Participant object.
+  const publishChannels = new Map(); // Key is MediaStream's ID, value is pc channel.
+  const channels = new Map(); // Key is channel's internal ID, value is channel.
 
   signaling.onMessage = function(notification, data) {
-    if(!channels.has(data.id)){
-      Logger.warning('Cannot find a channel for incoming data.');
+    if (notification === 'soac' || notification === 'progress') {
+      if (!channels.has(data.id)) {
+        Logger.warning('Cannot find a channel for incoming data.');
+        return;
+      }
+      channels.get(data.id).onMessage(notification, data);
+    } else if (notification === 'stream') {
+      if (data.status === 'add') {
+        fireStreamAdded(data.data);
+      } else if (data.status === 'remove') {
+        fireStreamRemoved(data);
+      }
+    }
+  };
+
+  function fireStreamAdded(info) {
+    const stream = createRemoteStream(info);
+    remoteStreams.set(stream.id, stream);
+    const streamEvent = new StreamModule.StreamEvent('streamadded', {
+      stream: stream
+    });
+    self.dispatchEvent(streamEvent);
+  }
+
+  function fireStreamRemoved(info) {
+    if (!remoteStreams.has(info.id)) {
+      Logger.warning('Cannot find specific remote stream.');
       return;
     }
-    channels.get(data.id).onMessage(notification, data);
-  };
+    const stream = remoteStreams.get(info.id);
+    const streamEvent = new IcsEvent('ended');
+    remoteStreams.delete(stream.id);
+    stream.dispatchEvent(streamEvent);
+  }
 
   function createRemoteStream(streamInfo) {
     if (streamInfo.type === 'mixed') {
       return new RemoteMixedStream(streamInfo);
     } else {
-      return new StreamModule.RemoteStream(streamInfo.id, undefined, undefined,
-        new StreamModule
-        .StreamSourceInfo('mixed', 'mixed'));
+      const stream = new StreamModule.RemoteStream(streamInfo.id, streamInfo.info
+        .owner, undefined, new StreamModule.StreamSourceInfo(streamInfo.media
+          .audio.source, streamInfo.media.video.source));
+      stream.settings = StreamUtilsModule.convertToPublicationSettings(
+        streamInfo.media);
+      stream.capabilities = new StreamUtilsModule.convertToSubscriptionCapabilities(
+        streamInfo.media);
+      return stream;
     }
   }
 
@@ -60,7 +112,7 @@ export const ConferenceClient = function(config, signalingImpl) {
     signalingForChannel.sendSignalingMessage = sendSignalingMessage;
     const pcc = new ConferencePeerConnectionChannel(config.rtcConfiguration,
       signalingForChannel);
-    pcc.addEventListener('id', (messageEvent)=>{
+    pcc.addEventListener('id', (messageEvent) => {
       channels.set(messageEvent.message, pcc);
     });
     return pcc;
@@ -71,7 +123,7 @@ export const ConferenceClient = function(config, signalingImpl) {
       const token = JSON.parse(Base64.decodeBase64(tokenString));
       const isSecured = (token.secure === true);
       let host = token.host;
-      let room=null;
+      let room = null;
       if (typeof host !== 'string') {
         reject(new ConferenceError('Invalid host.'));
       }
@@ -82,7 +134,7 @@ export const ConferenceClient = function(config, signalingImpl) {
         reject(new ConferenceError('connection state invalid'));
       }
 
-      signalingState=SignalingState.CONNECTING;
+      signalingState = SignalingState.CONNECTING;
 
       const loginInfo = {
         token: tokenString,
@@ -96,11 +148,11 @@ export const ConferenceClient = function(config, signalingImpl) {
         myParticipantId = resp.id;
         room = resp.room;
         if (room.streams !== undefined) {
-          for(const st of room.streams){
+          for (const st of room.streams) {
             if (st.type === 'mixed') {
               st.viewport = st.info.label;
             }
-            remoteStreams.set(st.id,createRemoteStream(st));
+            remoteStreams.set(st.id, createRemoteStream(st));
           };
         }
         let me;
@@ -112,8 +164,8 @@ export const ConferenceClient = function(config, signalingImpl) {
             }
           }
         }
-        resolve(new ConferenceInfo(resp.id, Array.from(participants.values()), Array
-          .from(remoteStreams.values()), me));
+        resolve(new ConferenceInfo(resp.id, Array.from(participants
+          .values()), Array.from(remoteStreams.values()), me));
       }, (e) => {
         self.state = DISCONNECTED;
         reject(new ConferenceError('Connect to server error.'))

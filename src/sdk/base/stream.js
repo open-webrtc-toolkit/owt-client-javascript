@@ -4,6 +4,7 @@
 import Logger from './logger.js'
 import {IcsEvent} from './event.js'
 import * as Utils from './utils.js'
+import { EventDispatcher} from './event.js';
 
 function isAllowedValue(obj, allowedValues) {
   return (allowedValues.some((ele) => {
@@ -36,8 +37,9 @@ export class StreamSourceInfo {
 /*
   A stream that may have audio or/and video tracks.
 */
-export class Stream {
+export class Stream extends EventDispatcher {
   constructor(stream, sourceInfo) {
+    super();
     if ((stream && !(stream instanceof MediaStream)) || !(sourceInfo instanceof StreamSourceInfo)) {
         throw new TypeError('Invalid stream or sourceInfo.');
       }
