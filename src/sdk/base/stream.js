@@ -11,14 +11,16 @@ function isAllowedValue(obj, allowedValues) {
     return ele === obj;
   }));
 }
-/*
-   Information of a stream's source.
+/**
+ * @class StreamSourceInfo
+ * @memberOf Ics.Base
+ * @classDesc Information of a stream's source.
+ * @constructor
+ * @description Audio source info or video source info could be undefined if a stream does not have audio/video track.
+ * @param {?string} audioSourceInfo Audio source info. Accepted values are: "mic", "screen-cast", "file", "mixed" or undefined.
+ * @param {?string} videoSourceInfo Video source info. Accepted values are: "camera", "screen-cast", "file", "mixed" or undefined.
  */
 export class StreamSourceInfo {
-  /*
-    Constructor a StreamSourceInfo with audio and video source info.
-    @details Audio source info or video source info could be undefined if a stream does not have audio/video track.
-  */
   constructor(audioSourceInfo, videoSourceInfo) {
     if (!isAllowedValue(audioSourceInfo, [undefined, 'mic', 'screen-cast',
         'file', 'mixed'
@@ -34,9 +36,13 @@ export class StreamSourceInfo {
     this.video = videoSourceInfo;
   }
 }
-/*
-  A stream that may have audio or/and video tracks.
-*/
+/**
+ * @class Stream
+ * @memberOf Ics.Base
+ * @classDesc Base class of streams.
+ * @extends Ics.Base.EventDispatcher
+ * @hideconstructor
+ */
 export class Stream extends EventDispatcher {
   constructor(stream, sourceInfo) {
     super();
@@ -47,11 +53,23 @@ export class Stream extends EventDispatcher {
         stream.getVideoTracks().length > 0 && !sourceInfo.video)) {
       throw new TypeError('Missing audio source info or video source info.');
     }
+    /**
+     * @member {?MediaStream} mediaStream
+     * @instance
+     * @memberof Ics.Base.Stream
+     * @see {@link https://www.w3.org/TR/mediacapture-streams/#mediastream|MediaStream API of Media Capture and Streams}.
+     */
     Object.defineProperty(this, 'mediaStream', {
       configurable: false,
       writable: true,
       value: stream
     });
+    /**
+     * @member {Ics.Base.StreamSourceInfo} source
+     * @instance
+     * @memberof Ics.Base.Stream
+     * @desc Source info of a stream.
+     */
     Object.defineProperty(this, 'source', {
       configurable: false,
       writable: false,
@@ -59,15 +77,23 @@ export class Stream extends EventDispatcher {
     });
   };
 }
-/*
-  Stream captured from current endpoint.
-*/
+/**
+ * @class LocalStream
+ * @classDesc Stream captured from current endpoint.
+ * @memberOf Ics.Base
+ * @extends Ics.Base.Stream
+ */
 export class LocalStream extends Stream {
   constructor(stream, sourceInfo) {
     if(!(stream instanceof MediaStream)){
       throw new TypeError('Invalid stream.');
     }
     super(stream, sourceInfo);
+    /**
+     * @member {string} id
+     * @instance
+     * @memberof Ics.Base.Stream
+     */
     Object.defineProperty(this, 'id', {
       configurable: false,
       writable: false,
@@ -75,17 +101,32 @@ export class LocalStream extends Stream {
     });
   };
 }
-/*
-  Stream sends from a remote endpoint.
-*/
+/**
+ * @class RemoteStream
+ * @classDesc Stream sends from a remote endpoint.
+ * @memberOf Ics.Base
+ * @extends Ics.Base.Stream
+ * @hideconstructor
+ */
 export class RemoteStream extends Stream {
   constructor(id, origin, stream, sourceInfo) {
     super(stream, sourceInfo);
+    /**
+     * @member {string} id
+     * @instance
+     * @memberof Ics.Base.Stream
+     */
     Object.defineProperty(this, 'id', {
       configurable: false,
       writable: false,
       value: id ? id : Utils.createUuid()
     });
+    /**
+     * @member {string} origin
+     * @instance
+     * @memberof Ics.Base.Stream
+     * @desc ID of the remote endpoint who published this stream.
+     */
     Object.defineProperty(this, 'origin', {
       configurable: false,
       writable: false,
@@ -94,9 +135,13 @@ export class RemoteStream extends Stream {
   }
 }
 
-/*
-  Event for Stream.
-*/
+/**
+ * @class StreamEvent
+ * @classDesc Event for Stream.
+ * @extends Ics.Base.IcsEvent
+ * @memberof Ics.Base
+ * @hideconstructor
+ */
 export class StreamEvent extends IcsEvent {
   constructor(type, init) {
     super(type);

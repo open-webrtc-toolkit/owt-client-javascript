@@ -1,0 +1,34 @@
+{
+  "plugins": ["plugins/markdown"],
+  "recurseDepth": 10,
+  "source": {
+    "include": "../src/sdk",
+    "exclude": ["../src/sdk/icsREST", "../src/sdk/nuve", "../src/sdk/ui"],
+    "excludePattern": "w*.legacy.*"
+  },
+  "sourceType": "module",
+  "tags": {
+    "allowUnknownTags": true,
+    "dictionaries": ["jsdoc", "closure"]
+  },
+  "templates": {
+    "cleverLinks": false,
+    "monospaceLinks": false,
+    "dateFormat": "ddd MMM Do YYYY",
+    "outputSourceFiles": false,
+    "outputSourcePath": false,
+    "systemName": "Intel® Collaboration Suite for WebRTC (Intel® CS for WebRTC) Client SDK for JavaScript* <sub style=\"font-size: 10pt;\">version 4.0<sub></sub></sub>",
+    "footer": "",
+    "copyright": "Copyright © 2018 Intel Corporation. All Rights Reserved. ",
+    "navType": "vertical",
+    "theme": "cosmo",
+    "linenums": true,
+    "collapseSymbols": false,
+    "inverseNav": true,
+    "highlightTutorialCode": true
+  },
+  "markdown": {
+    "parser": "gfm",
+    "hardwrap": true
+  }
+}

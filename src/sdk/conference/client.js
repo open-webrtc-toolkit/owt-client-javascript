@@ -1,34 +1,17 @@
 // Copyright © 2017 Intel Corporation. All Rights Reserved.
 'use strict';
 
-import {
-  EventDispatcher,
-  IcsEvent
-} from '../base/event.js'
-import {
-  ConferenceSioSignaling as Signaling
-} from './signaling.js'
+import { EventDispatcher, IcsEvent } from '../base/event.js'
+import { ConferenceSioSignaling as Signaling } from './signaling.js'
 import Logger from '../base/logger.js'
-import {
-  Base64
-} from '../base/base64.js'
-import {
-  ConferenceError
-} from './error.js'
+import { Base64 } from '../base/base64.js'
+import { ConferenceError } from './error.js'
 import * as Utils from '../base/utils.js'
 import * as StreamModule from '../base/stream.js'
-import {
-  Participant
-} from './participant.js'
-import {
-  ConferenceInfo
-} from './info.js'
-import {
-  ConferencePeerConnectionChannel
-} from './channel.js'
-import {
-  RemoteMixedStream
-} from './mixedstream.js'
+import { Participant } from './participant.js'
+import { ConferenceInfo } from './info.js'
+import { ConferencePeerConnectionChannel } from './channel.js'
+import { RemoteMixedStream } from './mixedstream.js'
 import * as StreamUtilsModule from './streamutils.js'
 
 const SignalingState = {
@@ -39,6 +22,14 @@ const SignalingState = {
 
 const protocolVersion = '1.0';
 
+/**
+ * @class ConferenceClient
+ * @classDesc The ConferenceClient handles PeerConnections between client and server. Conference controlling is outside the scope of conference SDK.
+ * @memberof Ics.Conference
+ * @extends Ics.Base.EventDispatcher
+ * @constructor
+ * @param {?ConferenceClientConfiguration } config Configuration for ConferenceClient.
+ */
 export const ConferenceClient = function(config, signalingImpl) {
   config = config || {};
   const self = this;
@@ -118,6 +109,14 @@ export const ConferenceClient = function(config, signalingImpl) {
     return pcc;
   }
 
+  /**
+   * @function join
+   * @instance
+   * @desc Join a conference.
+   * @memberof Ics.Conference.ConferenceClient
+   * @returns {Promise<ConferenceInfo, Error>} Return a promise resolved with current conference's information if successfully join the conference. Or return a promise rejected with a newly created Ics.Error if failed to join the conference.
+   * @param {string} token Token is issued by conference server(nuve).
+   */
   this.join = function(tokenString) {
     return new Promise((resolve, reject) => {
       const token = JSON.parse(Base64.decodeBase64(tokenString));
@@ -173,6 +172,14 @@ export const ConferenceClient = function(config, signalingImpl) {
     });
   };
 
+  /**
+   * @function publish
+   * @memberof Ics.Conference.ConferenceClient
+   * @instance
+   * @desc Publish a LocalStream to conference server. Other participants will be able to subscribe this stream when it is successfully published.
+   * @param {LocalStream} stream The stream to be published.
+   * @returns {Promise<Publication, Error>} Returned promise will be resolved with a newly created Publication once specific stream is successfully published, or rejected with a newly created Error if stream is invalid or options cannot be satisfied. Successfully published means PeerConnection is established and server is able to process media data.
+   */
   this.publish = function(stream) {
     if (!(stream instanceof StreamModule.LocalStream)) {
       return Promise.reject(new ConferenceError('Invalid stream.'));
@@ -185,6 +192,14 @@ export const ConferenceClient = function(config, signalingImpl) {
     return channel.publish(stream);
   };
 
+  /**
+   * @function subscribe
+   * @memberof Ics.Conference.ConferenceClient
+   * @instance
+   * @desc Subscribe a RemoteStream from conference server.
+   * @param {RemoteStream} stream The stream to be subscribed.
+   * @returns {Promise<Subscription, Error>} Returned promise will be resolved with a newly created Subscription once specific stream is successfully subscribed, or rejected with a newly created Error if stream is invalid or options cannot be satisfied. Successfully subscribed means PeerConnection is established and server was started to send media data.
+   */
   this.subscribe = function(stream, options) {
     if (!(stream instanceof StreamModule.RemoteStream)) {
       return Promise.reject(new ConferenceError('Invalid stream.'));

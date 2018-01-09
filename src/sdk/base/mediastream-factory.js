@@ -6,54 +6,101 @@ import { Resolution } from './mediaformat.js'
 import * as MediaFormatModule from './mediaformat.js'
 
 /**
-  Constraints for creating an audio MediaStreamTrack.
-*/
+ * @class MediaStreamTrackAudioConstraints
+ * @classDesc Constraints for creating an audio MediaStreamTrack.
+ * @memberof Ics.Base
+ * @hideconstructor
+ */
 export class MediaStreamTrackAudioConstraints {}
 /**
-  Constraints for creating an audio MediaStreamTrack from mic.
-  @details Currently, only deviceId is supported. please create an MediaStreamTrackDeviceConstraintsForAudio and pass it to createMediaStream function to create a MediaStream with audio captured from mic.
-*/
+ * @class MediaStreamTrackDeviceConstraintsForAudio
+ * @classDesc Constraints for creating an audio MediaStreamTrack from mic. Currently, only deviceId is supported. please create an MediaStreamTrackDeviceConstraintsForAudio and pass it to createMediaStream function to create a MediaStream with audio captured from mic.
+ * @memberof Ics.Base
+ * @extends Ics.Base.MediaStreamTrackAudioConstraints
+ * @hideconstructor
+ */
 export class MediaStreamTrackDeviceConstraintsForAudio extends MediaStreamTrackAudioConstraints {
   constructor() {
     super();
+  /**
+   * @member {string} source
+   * @memberof Ics.Base.MediaStreamTrackDeviceConstraintsForAudio
+   * @instance
+   * @desc "mic"
+   */
     this.source = MediaFormatModule.AudioSourceInfo.MIC;
   }
 }
 /**
-  Constraints for creating an audio MediaStreamTrack from screen cast.
-  @details Currently, constrains for audio from screen cast are not supported. please create an MediaStreamTrackScreenCastConstraintsForAudio and pass it to createMediaStream function to create a MediaStream with audio captured from screen cast.
-*/
+ * @class MediaStreamTrackScreenCastConstraintsForAudio
+ * @classDesc Constraints for creating an audio MediaStreamTrack from screen cast. Currently, constrains for audio from screen cast are not supported. please create an MediaStreamTrackScreenCastConstraintsForAudio and pass it to createMediaStream function to create a MediaStream with audio captured from screen cast.
+ * @memberof Ics.Base
+ * @extends Ics.Base.MediaStreamTrackAudioConstraints
+ * @hideconstructor
+ */
 export class MediaStreamTrackScreenCastConstraintsForAudio extends MediaStreamTrackAudioConstraints {
   constructor() {
     super();
+  /**
+   * @member {string} source
+   * @memberof Ics.Base.MediaStreamTrackScreenCastConstraintsForAudio
+   * @instance
+   * @desc "screen-cast"
+   */
     this.source = MediaFormatModule.AudioSourceInfo.SCREENCAST;
   }
 }
 /**
-  Constraints for creating a video MediaStreamTrack.
-*/
+ * @class MediaStreamTrackVideoConstraints
+ * @classDesc Constraints for creating a video MediaStreamTrack.
+ * @memberof Ics.Base
+ * @hideconstructor
+ */
 export class MediaStreamTrackVideoConstraints {}
 /**
-  Constraints for creating a video MediaStreamTrack from camera.
-*/
+ * @class MediaStreamTrackDeviceConstraintsForVideo
+ * @classDesc Constraints for creating a video MediaStreamTrack from camera.
+ * @memberof Ics.Base
+ * @extends Ics.Base.MediaStreamTrackVideoConstraints
+ * @hideconstructor
+ */
 export class MediaStreamTrackDeviceConstraintsForVideo extends MediaStreamTrackVideoConstraints {
   constructor() {
     super();
+  /**
+   * @member {string} source
+   * @memberof Ics.Base.MediaStreamTrackDeviceConstraintsForVideo
+   * @instance
+   * @desc "camera"
+   */
     this.source = MediaFormatModule.VideoSourceInfo.CAMERA;
   }
 }
 /**
-  Constraints for creating a video MediaStreamTrack from screen cast.
-*/
+ * @class MediaStreamTrackScreenCastConstraintsForVideo
+ * @classDesc Constraints for creating a video MediaStreamTrack from screen cast.
+ * @memberof Ics.Base
+ * @extends Ics.Base.MediaStreamTrackVideoConstraints
+ * @hideconstructor
+ */
 export class MediaStreamTrackScreenCastConstraintsForVideo extends MediaStreamTrackVideoConstraints {
   constructor() {
     super();
+  /**
+   * @member {string} source
+   * @memberof Ics.Base.MediaStreamTrackScreenCastConstraintsForVideo
+   * @instance
+   * @desc "screen-cast"
+   */
     this.source = MediaFormatModule.VideoSourceInfo.SCREENCAST;
   }
 }
 /**
-  Constraints for creating a MediaStream from screen mic and camera.
-*/
+ * @class MediaStreamDeviceConstraints
+ * @classDesc Constraints for creating a MediaStream from screen mic and camera.
+ * @memberof Ics.Base
+ * @hideconstructor
+ */
 export class MediaStreamDeviceConstraints {
   constructor(audioConstraints = false, videoConstraints = false) {
     if (((typeof audioConstraints !== 'boolean') && audioConstraints.source !==
@@ -61,13 +108,26 @@ export class MediaStreamDeviceConstraints {
       ((typeof videoConstraints !== 'boolean') && videoConstraints.source !==
         MediaFormatModule.VideoSourceInfo.CAMERA))
       throw new TypeError('Invalid audioConstrains or videoConstraints.');
+  /**
+   * @member {Ics.Base.MediaStreamTrackDeviceConstraintsForAudio} audio
+   * @memberof Ics.Base.MediaStreamDeviceConstraints
+   * @instance
+   */
     this.audio = audioConstraints;
+  /**
+   * @member {Ics.Base.MediaStreamTrackDeviceConstraintsForVideo} Video
+   * @memberof Ics.Base.MediaStreamDeviceConstraints
+   * @instance
+   */
     this.video = videoConstraints;
   }
 }
 /**
-  Constraints for creating a MediaStream from screen cast.
-*/
+ * @class MediaStreamScreenCastConstraints
+ * @classDesc Constraints for creating a MediaStream from screen cast.
+ * @memberof Ics.Base
+ * @hideconstructor
+ */
 export class MediaStreamScreenCastConstraints {
   constructor(audioConstraints = false, videoConstraints = false) {
     if (((typeof audioConstraints !== 'boolean') && audioConstraints.source !==
@@ -76,7 +136,17 @@ export class MediaStreamScreenCastConstraints {
         MediaFormatModule.VideoSourceInfo.SCREENCAST))
       throw new TypeError(
         'Invalid type of audioConstrains or videoConstraints.');
+  /**
+   * @member {Ics.Base.MediaStreamTrackScreenCastConstraintsForAudio} audio
+   * @memberof Ics.Base.MediaStreamScreenCastConstraints
+   * @instance
+   */
     this.audio = audioConstraints;
+  /**
+   * @member {Ics.Base.MediaStreamTrackScreenCastConstraintsForVideo} video
+   * @memberof Ics.Base.MediaStreamScreenCastConstraints
+   * @instance
+   */
     this.video = videoConstraints;
   }
 }
@@ -88,7 +158,23 @@ function isConstrainsForScreenCast(constraints) {
     .SCREENCAST))
 }
 
+/**
+ * @class MediaStreamFactory
+ * @classDesc A factory to create MediaStream. You can also create MediaStream by yourself.
+ * @memberof Ics.Base
+ */
 export class MediaStreamFactory {
+  /**
+   * @function createMediaStream
+   * @static
+   * @desc Create a MediaStream with given constraints.
+   * @memberof Ics.Base.MediaStreamFactory
+   * @returns {Promise<MediaStream, Error>} Return a promise that is resolved when stream is successfully created, or rejected if one of the following error happened:
+   * - One or more parameters cannot be satisfied.
+   * - Specified device is busy.
+   * - Cannot obtain necessary permission or operation is canceled by user.
+   * @param {Ics.Base.MediaStreamDeviceConstraints|Ics.Base.MediaStreamScreenCastConstraints} constraints
+   */
   static createMediaStream(constraints) {
     if (typeof constraints !== 'object' || (!constraints.audio && !
         constraints.video)) {

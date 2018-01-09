@@ -2,8 +2,11 @@
 
 'use strict';
 
-/*
- * A shim for EventTarget.
+/**
+ * @class EventDispatcher
+ * @classDesc A shim for EventTarget. Might be changed to EventTarget later.
+ * @memberof Ics.Base
+ * @hideconstructor
  */
 export const EventDispatcher = function() {
   // Private vars
@@ -11,41 +14,11 @@ export const EventDispatcher = function() {
   spec.dispatcher = {};
   spec.dispatcher.eventListeners = {};
 
-  // Public functions
-
-  /**
-     * @function addEventListener
-     * @desc This function registers a callback function as a handler for the corresponding event. It's shortened form is on(eventType, listener). See the event description in the following table.<br>
-     * @memberOf Woogeen.ConferenceClient
-     * @instance
-     * @param {string} eventType Event string.
-     * @param {function} listener Callback function.
-     * @example
-  <script type="text/JavaScript">
-  ...
-  //client.on("server-disconnected", function (evt) {...});
-  client.addEventListener("server-disconnected", function (evt) {...});
-  </script>
-     */
   /**
    * @function addEventListener
    * @desc This function registers a callback function as a handler for the corresponding event. It's shortened form is on(eventType, listener). See the event description in the following table.<br>
-   * @memberOf Woogeen.SipClient
    * @instance
-   * @param {string} eventType Event string.
-   * @param {function} listener Callback function.
-   * @example
-<script type="text/JavaScript">
-...
-//client.on("server-disconnected", function (evt) {...});
-client.addEventListener("server-disconnected", function (evt) {...});
-</script>
-   */
-  /**
-   * @function addEventListener
-   * @desc This function registers a callback function as a handler for the corresponding event. It's shortened form is on(eventType, listener). See the event description in the following table.<br>
-   * @memberOf Woogeen.PeerClient
-   * @instance
+   * @memberof Ics.Base.EventDispatcher
    * @param {string} eventType Event string.
    * @param {function} listener Callback function.
    */
@@ -59,8 +32,8 @@ client.addEventListener("server-disconnected", function (evt) {...});
   /**
    * @function removeEventListener
    * @desc This function removes a registered event listener.
-   * @memberOf Woogeen.ConferenceClient&Woogeen.SipClient
    * @instance
+   * @memberof Ics.Base.EventDispatcher
    * @param {string} eventType Event string.
    * @param {function} listener Callback function.
    */
@@ -77,8 +50,8 @@ client.addEventListener("server-disconnected", function (evt) {...});
   /**
    * @function clearEventListener
    * @desc This function removes all event listeners for one type.
-   * @memberOf Woogeen.ConferenceClient&Woogeen.SipClient
    * @instance
+   * @memberof Ics.Base.EventDispatcher
    * @param {string} eventType Event string.
    */
   this.clearEventListener = function(eventType) {
@@ -97,10 +70,11 @@ client.addEventListener("server-disconnected", function (evt) {...});
   };
 };
 
-/*
- * Class IcsEvent represents a generic Event in the library.
- * It handles the type of event, that is important when adding
- * event listeners to EventDispatchers and dispatching new events.
+/**
+ * @class IcsEvent
+ * @classDesc Class IcsEvent represents a generic Event in the library.
+ * @memberof Ics.Base
+ * @hideconstructor
  */
 export class IcsEvent {
   constructor(type) {
@@ -108,10 +82,27 @@ export class IcsEvent {
   }
 }
 
+/**
+ * @class MessageEvent
+ * @classDesc Class MessageEvent represents a message Event in the library.
+ * @memberof Ics.Base
+ * @hideconstructor
+ */
 export class MessageEvent extends IcsEvent {
   constructor(type, init) {
     super(type);
+    /**
+     * @member {string} origin
+     * @instance
+     * @memberof Ics.Base.MessageEvent
+     * @desc ID of the remote endpoint who published this stream.
+     */
     this.origin = init.origin;
+    /**
+     * @member {string} message
+     * @instance
+     * @memberof Ics.Base.MessageEvent
+     */
     this.message = init.message;
   }
 }

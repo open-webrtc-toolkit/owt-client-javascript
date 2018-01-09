@@ -67,6 +67,15 @@ var stopChatLocally = function(peer, originatorId) {
     unbindEvetsToPeerConnection(peer.connection);
   }
 };
+
+/**
+ * @class P2PClient
+ * @classDesc The P2PClient handles PeerConnections between different clients.
+ * @memberof Ics.P2P
+ * @extends Ics.Base.EventDispatcher
+ * @constructor
+ * @param {?P2PClientConfiguration } config Configuration for P2PClient.
+ */
 const P2PClient = function(configuration, signalingChannel) {
   const config = configuration;
   const signaling = signalingChannel;
@@ -89,16 +98,21 @@ const P2PClient = function(configuration, signalingChannel) {
     // TODO:
   };
 
-  /*
-    Only allowed remote endpoint IDs are able to publish stream or send message to current endpoint.
-    @details Removing an ID from allowedRemoteIds does stop existing connection with certain endpoint. Please call stop to stop the PeerConnection.
-  */
+  /**
+   * @member {array} allowedRemoteIds
+   * @memberof Ics.P2P.P2PClient
+   * @instance
+   * @desc Only allowed remote endpoint IDs are able to publish stream or send message to current endpoint. Removing an ID from allowedRemoteIds does stop existing connection with certain endpoint. Please call stop to stop the PeerConnection.
+   */
   this.allowedRemoteIds=[];
 
-  /*
-    Connect to signaling server.
-    @detailsSince signaling can be customized, this method does not define how a token looks like. SDK passes token to signaling channel without changes. It returns a promise resolved with an object returned by signaling channel once signaling channel reports connection has been established.
-  */
+  /**
+   * @function connect
+   * @instance
+   * @desc Connect to signaling server. Since signaling can be customized, this method does not define how a token looks like. SDK passes token to signaling channel without changes.
+   * @memberof Ics.P2P.P2PClient
+   * @returns {Promise<object, Error>} It returns a promise resolved with an object returned by signaling channel once signaling channel reports connection has been established.
+   */
   this.connect = function(token) {
     if (state === ConnectionState.READY) {
       state = ConnectionState.CONNECTING;
@@ -118,9 +132,13 @@ const P2PClient = function(configuration, signalingChannel) {
     });
   };
 
-  /*
-    Disconnect from the signaling channel. It stops all existing sessions with remote endpoints.
-  */
+  /**
+   * @function disconnect
+   * @instance
+   * @desc Disconnect from the signaling channel. It stops all existing sessions with remote endpoints.
+   * @memberof Ics.P2P.P2PClient
+   * @returns {Promise<undefined, Error>}
+   */
   this.disconnect = function() {
     if (state == ConnectionState.READY) {
       return Promise.reject(new ErrorModule.P2PError(ErrorModule.errors.P2P_CLIENT_INVALID_STATE));
@@ -129,12 +147,15 @@ const P2PClient = function(configuration, signalingChannel) {
     return signaling.disconnect();
   };
 
-  /*
-    Publish a stream to a remote endpoint.
-    @param stream A LocalStream to be published.
-    @param remoteId Remote endpoint's ID.
-    @return A promised resolved when remote side received the certain stream. However, remote endpoint may not display this stream, or ignore it.
-  */
+  /**
+   * @function publish
+   * @instance
+   * @desc Publish a stream to a remote endpoint.
+   * @memberof Ics.P2P.P2PClient
+   * @param {string} remoteId Remote endpoint's ID.
+   * @param {LocalStream} stream A LocalStream to be published.
+   * @returns {Promise<Publication, Error>} A promised resolved when remote side received the certain stream. However, remote endpoint may not display this stream, or ignore it.
+   */
   this.publish = function(remoteId, stream) {
     if (!(stream instanceof StreamModule.LocalStream)) {
       return Promise.reject(new TypeError('Invalid stream.'));
@@ -145,12 +166,15 @@ const P2PClient = function(configuration, signalingChannel) {
     return getOrCreateChannel(remoteId).publish(stream);
   };
 
-  /*
-    Send a message to remote endpoint.
-    @param message Message to be sent. It should be a string.
-    @param remoteId Remote endpoint's ID.
-    @return It returns a promise resolved when remote endpoint received certain message.
-  */
+  /**
+   * @function send
+   * @instance
+   * @desc Send a message to remote endpoint.
+   * @memberof Ics.P2P.P2PClient
+   * @param {string} remoteId Remote endpoint's ID.
+   * @param {string} message Message to be sent. It should be a string.
+   * @returns {Promise<undefined, Error>} It returns a promise resolved when remote endpoint received certain message.
+   */
   this.send=function(remoteId, message){
     if(!(typeof message === 'string')){
       return Promise.reject(new TypeError('Invalid message.'));
@@ -158,9 +182,17 @@ const P2PClient = function(configuration, signalingChannel) {
     if (this.allowedRemoteIds.indexOf(remoteId) < 0) {
       return Promise.reject(new ErrorModule.P2PError(ErrorModule.errors.P2P_CLIENT_NOT_ALLOWED));
     }
-    return getOrCreateChannel(remoteId).send(message); 
+    return getOrCreateChannel(remoteId).send(message);
   };
 
+  /**
+   * @function stop
+   * @instance
+   * @desc Clean all resources associated with given remote endpoint. It may include RTCPeerConnection, RTCRtpTransceiver and RTCDataChannel. It still possible to publish a stream, or send a message to given remote endpoint after stop.
+   * @memberof Ics.P2P.P2PClient
+   * @param {string} remoteId Remote endpoint's ID.
+   * @returns {undefined}
+   */
   this.stop=function(remoteId){
     if (!channels.has(remoteId)) {
       return Promise.reject(new ErrorModule.P2PError(ErrorModule.errors.P2P_CLIENT_INVALID_STATE,
@@ -172,6 +204,14 @@ const P2PClient = function(configuration, signalingChannel) {
     });
   };
 
+  /**
+   * @function getStats
+   * @instance
+   * @desc Get stats of underlying PeerConnection.
+   * @memberof Ics.P2P.P2PClient
+   * @param {string} remoteId Remote endpoint's ID.
+   * @returns {Promise<RTCStatsReport, Error>} It returns a promise resolved with an RTCStatsReport or reject with an Error if there is no connection with specific user.
+   */
   this.getStats = function(remoteId){
     if(!channels.has(remoteId)){
       return Promise.reject(new ErrorModule.P2PError(ErrorModule.errors.P2P_CLIENT_INVALID_STATE,'No PeerConnection between current endpoint and specific remote endpoint.'));
