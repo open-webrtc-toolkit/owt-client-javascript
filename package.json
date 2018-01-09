@@ -2,7 +2,7 @@
   "name": "intel-webrtc",
   "title": "Intel® CS for WebRTC",
   "description": "Intel® Collaboration Suite for WebRTC JavaScript SDK",
-  "version": "3.5.0",
+  "version": "4.0.0",
   "homepage": "https://webrtc.intel.com",
   "author": "Intel WebRTC team",
   "contributors": [

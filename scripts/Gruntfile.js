@@ -1,6 +1,9 @@
 /*global module:false*/
 module.exports = function(grunt) {
 
+  const sdkEntry = '../src/sdk/export.js';
+  const sdkOutput = '../dist/sdk/ics.js';
+
   var srcFiles = [
     '../src/sdk/base/property.js',
     '../src/sdk/base/events.js',
@@ -45,7 +48,7 @@ module.exports = function(grunt) {
 
   // Project configuration.
   grunt.initConfig({
-    pkg: grunt.file.readJSON('package.json'),
+    pkg: grunt.file.readJSON('../package.json'),
     meta: {
       banner: '\
 /*\n\
@@ -68,21 +71,30 @@ window.L = L;\n\
     },
     browserify: {
       dist: {
-        src: ['../src/sdk/export.js'],
-        dest: '../dist/sdk/ics.js',
-              banner: '\
-/*\n\
- * Intel WebRTC SDK version <%= pkg.version %>\n\
- * Copyright (c) <%= grunt.template.today("yyyy") %> Intel <http://webrtc.intel.com>\n\
- * Homepage: http://webrtc.intel.com\n\
- */\n\n\n',
+        src: [sdkEntry],
+        dest: sdkOutput,
         options: {
           browserifyOptions: {
-            debug: true,
-            standalone: 'Ics'
+            standalone: 'Ics',
+            debug: false
           },
-          transform: [["babelify", { "presets": ["env"] }]],
-          watch: true,
+          transform: [
+            ["babelify", { "presets": ["env"] }]
+          ]
+        },
+      },
+      dev: {
+        src: [sdkEntry],
+        dest: sdkOutput,
+        options: {
+          browserifyOptions: {
+            standalone: 'Ics',
+            debug: true
+          },
+          transform: [
+            ["babelify", { "presets": ["env"] }]
+          ],
+          watch: true
         },
       }
     },
@@ -158,16 +170,16 @@ window.L = L;\n\
         },
         nonull: true
       },
-      icsREST: {
+      rest: {
         src: icsRESTFiles,
-        dest: '../dist/sdk/icsREST.js',
+        dest: '../dist/sdk/rest.js',
         options:{
            footer:'module.exports = ICS_REST;',
            process: true
         },
         nonull: true
       },
-      icsREST_debug: {
+      rest_debug: {
         src: icsRESTFiles,
         dest: '../dist/sdk-debug/icsREST.debug.js',
         options:{
@@ -208,13 +220,13 @@ window.L = L;\n\
     uglify: {
       dist: {
         files: {
-          '../dist/sdk/<%= pkg.name %>.js': ['../dist/sdk/<%= pkg.name %>.js'],
-          '../dist/sdk/nuve.js': ['../dist/sdk/nuve.js'],
-          '../dist/sdk/icsREST.js': ['../dist/sdk/icsREST.js']
+          '../dist/sdk/ics.js': ['../dist/sdk/ics.js'],
+          '../dist/sdk/rest.js': ['../dist/sdk/rest.js']
         },
         options: {
-          banner: '<%= meta.banner %>'
-          //sourceMap:true
+          banner: '<%= meta.banner %>',
+          // TODO: Enable source map.
+          sourceMap: false
         }
       }
     },
@@ -316,13 +328,10 @@ window.L = L;\n\
   grunt.loadNpmTasks('grunt-browserify');
   grunt.loadNpmTasks('grunt-contrib-connect');
 
-  grunt.registerTask('build', ['eslint:src', 'concat:dist', 'concat:ui_dist', 'concat:nuve', 'concat:icsREST', 'jshint:dist', 'concat:merge', 'uglify:dist','copy:dist','string-replace','compress:dist']);
-
-  // Default task is an alias for 'build'.
-  grunt.registerTask('default', ['build']);
-
+  grunt.registerTask('build', ['eslint:src', 'concat:dist', 'concat:ui_dist', 'concat:nuve', 'concat:rest', 'jshint:dist', 'concat:merge', 'uglify:dist','copy:dist','string-replace','compress:dist']);
   grunt.registerTask('debug', ['concat:dist_debug', 'concat:ui_dist_debug', 'concat:nuve_debug', 'concat:icsREST_debug']);
 
-  grunt.registerTask('dev', ['browserify:dist', 'connect:server']);
-
+  grunt.registerTask('pack', ['browserify:dist', 'concat:rest', 'uglify:dist', 'copy:dist', 'compress:dist']);
+  grunt.registerTask('dev', ['browserify:dev', 'connect:server']);
+  grunt.registerTask('default', ['pack']);
 };
