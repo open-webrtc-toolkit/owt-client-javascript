@@ -46,9 +46,11 @@ module.exports = function(grunt) {
     '../src/sdk/icsREST/API.js'
   ];
 
+  grunt.file.setBase('../');
+
   // Project configuration.
   grunt.initConfig({
-    pkg: grunt.file.readJSON('../package.json'),
+    pkg: grunt.file.readJSON('package.json'),
     meta: {
       banner: '\
 /*\n\
@@ -319,7 +321,7 @@ window.L = L;\n\
 
   // Load Grunt plugins.
   grunt.loadNpmTasks('grunt-contrib-concat');
-  grunt.loadNpmTasks('grunt-contrib-uglify');
+  grunt.loadNpmTasks('grunt-contrib-uglify-es');
   grunt.loadNpmTasks('grunt-contrib-jshint');
   grunt.loadNpmTasks('grunt-contrib-copy');
   grunt.loadNpmTasks('grunt-string-replace');
