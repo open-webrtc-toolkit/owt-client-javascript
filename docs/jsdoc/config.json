@@ -2,8 +2,8 @@
   "plugins": ["plugins/markdown"],
   "recurseDepth": 10,
   "source": {
-    "include": "../src/sdk",
-    "exclude": ["../src/sdk/icsREST", "../src/sdk/nuve", "../src/sdk/ui"],
+    "include": "src/sdk",
+    "exclude": ["src/sdk/rest", "src/sdk/nuve", "src/sdk/ui"],
     "excludePattern": "w*.legacy.*"
   },
   "sourceType": "module",
@@ -25,7 +25,8 @@
     "linenums": true,
     "collapseSymbols": false,
     "inverseNav": true,
-    "highlightTutorialCode": true
+    "highlightTutorialCode": true,
+    "search": false
   },
   "markdown": {
     "parser": "gfm",
