@@ -24,7 +24,16 @@ const protocolVersion = '1.0';
 
 /**
  * @class ConferenceClient
- * @classdesc The ConferenceClient handles PeerConnections between client and server. Conference controlling is outside the scope of conference SDK.
+ * @classdesc The ConferenceClient handles PeerConnections between client and server. For conference controlling, please refer to REST API guide.
+ * Events:
+ *
+ * | Event Name            | Argument Type    | Fired when       |
+ * | --------------------- | ---------------- | ---------------- |
+ * | streamadded           | StreamEvent      | A new stream is available in the conference. |
+ * | participantjoined     | ParticipantEvent | A new participant joined the conference. |
+ * | messagereceived       | MessageEvent     | A new message is received. |
+ * | serverdisconnected    | IcsEvent         | Disconnected from conference server. |
+ *
  * @memberof Ics.Conference
  * @extends Ics.Base.EventDispatcher
  * @constructor

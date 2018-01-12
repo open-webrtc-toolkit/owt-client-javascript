@@ -91,6 +91,12 @@ export class PublicationSettings {
  * @class Publication
  * @memberOf Ics.Base
  * @classDesc The settings of a publication.
+ * Events:
+ *
+ * | Event Name      | Argument Type    | Fired when       |
+ * | ----------------| ---------------- | ---------------- |
+ * | ended           | Event            | Publication is ended. |
+ *
  * @hideconstructor
  */
 export class Publication extends EventDispatcher {

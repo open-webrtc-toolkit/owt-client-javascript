@@ -179,6 +179,12 @@ export class SubscribeOptions {
  * @class Subscription
  * @memberof Ics.Conference
  * @classDesc Subscription is a receiver for receiving a stream.
+ * Events:
+ *
+ * | Event Name      | Argument Type    | Fired when       |
+ * | ----------------| ---------------- | ---------------- |
+ * | ended           | Event            | Subscription is ended. |
+ *
  * @extends Ics.Base.EventDispatcher
  * @hideconstructor
  */

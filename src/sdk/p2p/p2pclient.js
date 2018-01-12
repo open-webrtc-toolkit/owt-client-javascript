@@ -71,6 +71,14 @@ var stopChatLocally = function(peer, originatorId) {
 /**
  * @class P2PClient
  * @classDesc The P2PClient handles PeerConnections between different clients.
+ * Events:
+ *
+ * | Event Name            | Argument Type    | Fired when       |
+ * | --------------------- | ---------------- | ---------------- |
+ * | streamadded           | StreamEvent      | A new stream is sent from remote endpoint. |
+ * | messagereceived       | MessageEvent     | A new message is received. |
+ * | serverdisconnected    | IcsEvent         | Disconnected from signaling server. |
+ *
  * @memberof Ics.P2P
  * @extends Ics.Base.EventDispatcher
  * @constructor

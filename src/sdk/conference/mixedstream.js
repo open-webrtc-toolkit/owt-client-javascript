@@ -4,8 +4,18 @@
 import * as StreamModule from '../base/stream.js'
 import * as StreamUtilsModule from './streamutils.js'
 
-/*
-   Mixed stream from MCU.
+/**
+ * @class RemoteMixedStream
+ * @classDesc Mixed stream from conference server.
+ * @memberOf Ics.Conference
+ * @extends Ics.Base.RemoteStream
+ * Events:
+ *
+ * | Event Name      | Argument Type    | Fired when       |
+ * | ----------------| ---------------- | ---------------- |
+ * | layoutchanged   | Event            | Video's layout has been changed. It usually happens when a new video is mixed into the target mixed stream or an existing video has been removed from mixed stream. |
+ *
+ * @hideconstructor
  */
 export class RemoteMixedStream extends StreamModule.RemoteStream {
   constructor(info) {

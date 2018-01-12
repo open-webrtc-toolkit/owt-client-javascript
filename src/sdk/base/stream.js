@@ -41,6 +41,12 @@ export class StreamSourceInfo {
  * @memberOf Ics.Base
  * @classDesc Base class of streams.
  * @extends Ics.Base.EventDispatcher
+ * Events:
+ *
+ * | Event Name      | Argument Type    | Fired when       |
+ * | ----------------| ---------------- | ---------------- |
+ * | ended           | Event            | Stream is ended. |
+ *
  * @hideconstructor
  */
 export class Stream extends EventDispatcher {
