@@ -4,6 +4,7 @@
 
 import * as MediaFormatModule from '../base/mediaformat.js'
 import * as CodecModule from '../base/codec.js'
+import { EventDispatcher} from '../base/event.js'
 
 /**
  * @class AudioSubscriptionCapabilities
@@ -181,8 +182,9 @@ export class SubscribeOptions {
  * @extends Ics.Base.EventDispatcher
  * @hideconstructor
  */
-export class Subscription {
-  constructor(id, stop) {
+export class Subscription extends EventDispatcher {
+  constructor(id, stop, getStats) {
+    super();
     if (!id) {
       throw new TypeError('ID cannot be null or undefined.');
     }
@@ -204,5 +206,13 @@ export class Subscription {
    * @returns {undefined}
    */
     this.stop = stop;
+  /**
+   * @function getStats
+   * @instance
+   * @desc Get stats of underlying PeerConnection.
+   * @memberof Ics.Conference.Subscription
+   * @returns {Promise<RTCStatsReport, Error>}
+   */
+    this.getStats = getStats;
   }
 }

@@ -24,7 +24,7 @@ const protocolVersion = '1.0';
 
 /**
  * @class ConferenceClient
- * @classDesc The ConferenceClient handles PeerConnections between client and server. Conference controlling is outside the scope of conference SDK.
+ * @classdesc The ConferenceClient handles PeerConnections between client and server. Conference controlling is outside the scope of conference SDK.
  * @memberof Ics.Conference
  * @extends Ics.Base.EventDispatcher
  * @constructor

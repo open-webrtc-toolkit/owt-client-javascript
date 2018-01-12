@@ -4,6 +4,7 @@
 
 import * as Utils from './utils.js'
 import * as MediaFormat from './mediaformat.js'
+import { EventDispatcher} from '../base/event.js'
 
 /**
  * @class AudioPublicationSettings
@@ -92,8 +93,9 @@ export class PublicationSettings {
  * @classDesc The settings of a publication.
  * @hideconstructor
  */
-export class Publication {
-  constructor(id, stop, mute, unmute) {
+export class Publication extends EventDispatcher {
+  constructor(id, stop, getStats, mute, unmute) {
+    super();
     /**
      * @member {string} id
      * @instance
@@ -112,5 +114,13 @@ export class Publication {
    * @returns {undefined}
    */
     this.stop = stop;
+  /**
+   * @function getStats
+   * @instance
+   * @desc Get stats of underlying PeerConnection.
+   * @memberof Ics.Base.Publication
+   * @returns {Promise<RTCStatsReport, Error>}
+   */
+    this.getStats = getStats;
   }
 }

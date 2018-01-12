@@ -2,9 +2,10 @@
 'use strict';
 
 import Logger from '../base/logger.js';
-import { EventDispatcher, MessageEvent, IcsEvent } from '../base/event.js';
+import { EventDispatcher, MessageEvent, IcsEvent, ErrorEvent } from '../base/event.js';
 import { Publication } from '../base/publication.js';
 import { Subscription } from './subscription.js'
+import { ConferenceError } from './error.js'
 import * as Utils from '../base/utils.js';
 import * as ErrorModule from './error.js';
 import * as StreamModule from '../base/stream.js';
@@ -20,6 +21,8 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
     this._subscribePromise = null;
     this._publishPromise = null;
     this._subscribedStream = null;
+    this._publication = null;
+    this._subscription = null;
   }
 
   onMessage(notification, message) {
@@ -29,6 +32,8 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
           this._sdpHandler(message.data);
         else if (message.status === 'ready')
           this._readyHandler();
+        else if(message.status === 'error')
+          this._errorHandler(message.data);
         break;
       default:
         Logger.warning('Unknown notification from MCU.');
@@ -101,6 +106,9 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
           error));
       });
     });
+    return new Promise((resolve, reject) => {
+      this._publishPromise = { resolve: resolve, reject: reject };
+    });
   }
 
   subscribe(stream, options) {
@@ -120,7 +128,8 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
         mediaOptions.video.parameters = {
           resolution: options.video.resolution,
           framerate: options.video.frameRate,
-          bitrate: options.video.bitrateMultiplier?'x' + options.video.bitrateMultiplier.toString():undefined,
+          bitrate: options.video.bitrateMultiplier ? 'x' + options.video.bitrateMultiplier
+            .toString() : undefined,
           keyFrameInterval: options.video.keyFrameInterval
         }
       }
@@ -163,6 +172,10 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
     return new Promise((resolve, reject) => {
       this._subscribePromise = { resolve: resolve, reject: reject };
     });
+  }
+
+  _unpublish(){
+    this._signaling.sendSignalingMessage('unpublish', {id: this._internalId});
   }
 
   _unsubscribe() {
@@ -211,12 +224,32 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
     };
   }
 
+  _getStats() {
+    if (this._pc) {
+      return this._pc.getStats();
+    } else {
+      return Promise.reject(new ConferenceError(
+        'PeerConnection is not available.'));
+    }
+  }
+
   _readyHandler() {
     if (this._subscribePromise) {
-      this._subscribePromise.resolve(new Subscription(this._internalId, () => {
+      this._subscription = new Subscription(this._internalId, () => {
         this._unsubscribe();
         return Promise.resolve();
-      }));
+      }, () => {
+        return this._getStats();
+      });
+      this._subscribePromise.resolve(this._subscription);
+    } else if (this._publishPromise) {
+      this._publication = new Publication(this._internalId, () => {
+        this._unpublish();
+        return Promise.resolve();
+      }, () => {
+        return this._getStats();
+      });
+      this._publishPromise.resolve(this._publication);
     }
     this._publishPromise = null;
     this._subscribePromise = null;
@@ -232,5 +265,18 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
         }
       });
     }
+  }
+
+  _errorHandler(errorMessage) {
+    const dispatcher = this._publication || this._subscription;
+    if (!dispatcher) {
+      Logger.warning('Neither publication nor subscription is available.');
+    }
+    const error = new ConferenceError(errorMessage);
+    const errorEvent = new ErrorEvent('error', {
+      error: error
+    });
+    dispatcher.dispatchEvent(errorEvent);
+    // TODO: test
   }
 }

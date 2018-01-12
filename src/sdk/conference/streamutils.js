@@ -52,7 +52,7 @@ export function convertToSubscriptionCapabilities(mediaInfo) {
     audioCodecs.push(audioCodec);
   }
   audioCodecs.sort();
-  const audio = new SubscriptionModule.AudioSubscriptionCapacities(audioCodecs);
+  const audio = new SubscriptionModule.AudioSubscriptionCapabilities(audioCodecs);
   const videoCodecs = [new CodecModule.VideoCodecParameters(mediaInfo.video
     .format.codec, mediaInfo.video.format.profile)];
   for (const videoCodecInfo of mediaInfo.video.optional.format) {

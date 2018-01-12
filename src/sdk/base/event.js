@@ -106,3 +106,21 @@ export class MessageEvent extends IcsEvent {
     this.message = init.message;
   }
 }
+
+/**
+ * @class ErrorEvent
+ * @classDesc Class ErrorEvent represents an error Event in the library.
+ * @memberof Ics.Base
+ * @hideconstructor
+ */
+export class ErrorEvent extends IcsEvent{
+  constructor(type, init) {
+    super(type);
+    /**
+     * @member {Error} error
+     * @instance
+     * @memberof Ics.Base.ErrorEvent
+     */
+    this.error = init.error;
+  }
+}

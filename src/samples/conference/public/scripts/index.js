@@ -288,7 +288,11 @@ const runSocketIOSample = function() {
                 mediaStream, new Ics.Base.StreamSourceInfo(
                   'mic', 'camera'));
               $('.local video').get(0).srcObject=stream;
-              conference.publish(localStream);
+              conference.publish(localStream).then(publication => {
+                publication.addEventListener('error', (err) => {
+                  console.log('Publication error: ' + err.error.message);
+                });
+              });
             }, err => {
               console.error('Failed to create MediaStream, ' +
                 err);
@@ -353,6 +357,9 @@ const runSocketIOSample = function() {
             conference.subscribe(stream, { audio: true, video: true }).then((subscription) => {
               subscriptionForMixedStream=subscription;
               $('.remote video').get(0).srcObject = stream.mediaStream;
+              subscription.addEventListener('error',(err)=>{
+                console.log('Subscription error: ' + err.error.message);
+              })
             });
             for (const resolution of stream.capabilities.video.resolutions) {
               const button = $('<button/>', { text: resolution.width + 'x' +
