@@ -1,6 +1,7 @@
 // Copyright © 2017 Intel Corporation. All Rights Reserved.
 import * as MediaStreamFactoryModule from '../../../../src/sdk/base/mediastream-factory.js';
 import * as StreamModule from '../../../../src/sdk/base/stream.js';
+import * as MediaFormatModule from '../../../../src/sdk/base/mediaformat.js'
 
 const expect = chai.expect;
 const screenSharingExtensionId = 'jniliohjdiikfjjdlpapmngebedgigjn';
@@ -27,40 +28,38 @@ describe('Unit tests for MediaStreamFactory', function() {
     expect(MediaStreamFactoryModule.MediaStreamFactory.createMediaStream())
       .to.be.rejected;
     expect(MediaStreamFactoryModule.MediaStreamFactory.createMediaStream(
-      new MediaStreamFactoryModule.MediaStreamDeviceConstraints(
-        false, false))).to.be.rejected;
+      new MediaStreamFactoryModule.StreamConstraints(false, false))).to.be.rejected;
     expect(MediaStreamFactoryModule.MediaStreamFactory.createMediaStream(
-        new MediaStreamFactoryModule.MediaStreamDeviceConstraints())).to
+        new MediaStreamFactoryModule.StreamConstraints())).to
       .be.rejected.and.notify(done);
   });
   it('Create a MediaStream with audio and/or video should be resolved.', (
     done) => {
-    const audioConstraintsForMic = new MediaStreamFactoryModule.MediaStreamTrackDeviceConstraintsForAudio();
-    const videoConstraintsForCamera = new MediaStreamFactoryModule.MediaStreamTrackDeviceConstraintsForVideo();
-    expect(Promise.all([createMediaStream(new MediaStreamFactoryModule.MediaStreamDeviceConstraints(
+    const audioConstraintsForMic = new MediaStreamFactoryModule.AudioTrackConstraints(MediaFormatModule.AudioSourceInfo.MIC);
+    const videoConstraintsForCamera = new MediaStreamFactoryModule.VideoTrackConstraints(MediaFormatModule.VideoSourceInfo.CAMERA);
+    expect(Promise.all([createMediaStream(new MediaStreamFactoryModule.StreamConstraints(
         audioConstraintsForMic), 1, 0),
-      createMediaStream(new MediaStreamFactoryModule.MediaStreamDeviceConstraints(
+      createMediaStream(new MediaStreamFactoryModule.StreamConstraints(
         audioConstraintsForMic, false), 1, 0),
-      createMediaStream(new MediaStreamFactoryModule.MediaStreamDeviceConstraints(
+      createMediaStream(new MediaStreamFactoryModule.StreamConstraints(
         undefined, videoConstraintsForCamera), 0, 1),
-      createMediaStream(new MediaStreamFactoryModule.MediaStreamDeviceConstraints(
+      createMediaStream(new MediaStreamFactoryModule.StreamConstraints(
         false, videoConstraintsForCamera), 0, 1),
-      createMediaStream(new MediaStreamFactoryModule.MediaStreamDeviceConstraints(
+      createMediaStream(new MediaStreamFactoryModule.StreamConstraints(
           audioConstraintsForMic, videoConstraintsForCamera), 1,
         1),
     ])).to.be.fulfilled.and.notify(done);
   });
-  xit(
+  it(
     'Create a MediaStream for screen sharing with audio and/or video should be resolved.',
     (done) => {
-      const audioConstraintsForScreenCast = new MediaStreamFactoryModule.MediaStreamTrackScreenCastConstraintsForAudio();
-      const videoConstraintsForScreenCast = new MediaStreamFactoryModule.MediaStreamTrackScreenCastConstraintsForVideo();
-      const screenCastConstraints = new MediaStreamFactoryModule.MediaStreamScreenCastConstraints(
+      const audioConstraintsForScreenCast = new MediaStreamFactoryModule.AudioTrackConstraints(MediaFormatModule.AudioSourceInfo.SCREENCAST);
+      const videoConstraintsForScreenCast = new MediaStreamFactoryModule.VideoTrackConstraints(MediaFormatModule.VideoSourceInfo.SCREENCAST);
+      const screenCastConstraints = new MediaStreamFactoryModule.StreamConstraints(
         audioConstraintsForScreenCast, videoConstraintsForScreenCast);
       screenCastConstraints.extensionId = screenSharingExtensionId;
       const screenCastConstraintsVideoOnly = new MediaStreamFactoryModule
-        .MediaStreamScreenCastConstraints(false,
-          videoConstraintsForScreenCast);
+        .StreamConstraints(false, videoConstraintsForScreenCast);
       screenCastConstraintsVideoOnly.extensionId =
         screenSharingExtensionId;
       expect(createMediaStream(screenCastConstraints, 1, 1)).to.be.fulfilled

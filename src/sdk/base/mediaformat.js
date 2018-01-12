@@ -3,13 +3,15 @@
 export const AudioSourceInfo = {
   MIC: 'mic',
   SCREENCAST: 'screen-cast',
-  FILE: 'file'
+  FILE: 'file',
+  MIXED: 'mixed'
 };
 
 export const VideoSourceInfo = {
   CAMERA: 'camera',
   SCREENCAST: 'screen-cast',
-  FILE: 'file'
+  FILE: 'file',
+  MIXED: 'mixed'
 }
 
 /**
