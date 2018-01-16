@@ -2,7 +2,7 @@
 'use strict';
 
 import Logger from '../base/logger.js';
-import {EventDispatcher, MessageEvent} from '../base/event.js';
+import {EventDispatcher, MessageEvent, IcsEvent} from '../base/event.js';
 import {Publication} from '../base/publication.js';
 import * as Utils from '../base/utils.js';
 import * as ErrorModule from './error.js';
@@ -476,10 +476,9 @@ class P2PPeerConnectionChannel extends EventDispatcher {
       return s.mediaStream.id===event.stream.id;
     });
     if (i !== -1) {
-      const streamEvent = new StreamModule.StreamEvent('streamremoved', {
-        stream: this._remoteStreams[i]
-      });
-      this.dispatchEvent(streamEvent);
+      const stream = this._remoteStreams[i];
+      const event = new IcsEvent('ended');
+      stream.dispatchEvent(event);
       this._remoteStreams.splice(i, 1);
     }
   }

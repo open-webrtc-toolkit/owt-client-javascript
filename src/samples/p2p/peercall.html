@@ -130,6 +130,8 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     var isVideo = 1;
     var serverAddress = 'https://jianjun-ubuntu.sh.intel.com:8096'; // Please change example.com to signaling server's address.
     const signaling = new SignalingChannel();
+    let publicationForCamera;
+    let publicationForScreen;
     var p2p = new Ics.P2P.P2PClient({
       iceServers: [{
         urls: "stun:example.com:3478"
@@ -165,14 +167,16 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
             return console.error('create LocalStream failed:', err);
           }
           localScreen = stream;
-          p2p.publish(localScreen, $('#target-uid').val()); // Publish local stream to remote client
+          p2p.publish(localScreen, $('#target-uid').val()).then(publication=>{
+            publicationForScreen = publication;
+          }); // Publish local stream to remote client
         });
       });
 
       $('#target-video-unpublish').click(function() {
         $('#target-video-publish').prop('disabled', false);
         $('#target-video-unpublish').prop('disabled', true);
-        p2p.unpublish(localStream, $('#target-uid').val()); // Publish local stream to remote client
+        publicationForCamera.stop();
         localStream.close();
         localStream = undefined;
       });
@@ -181,16 +185,20 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
         $('#target-video-unpublish').prop('disabled', false);
         $('#target-video-publish').prop('disabled', true);
         if (localStream) {
-          p2p.publish(localStream, $('#target-uid').val()); // Publish local stream to remote client
+          p2p.publish(localStream, $('#target-uid').val()).then(publication=>{
+            publicationForCamera = publication;
+          }); // Publish local stream to remote client
         } else {
-          const audioConstraintsForMic = new Ics.Base.MediaStreamTrackDeviceConstraintsForAudio();
-          const videoConstraintsForCamera = new Ics.Base.MediaStreamTrackDeviceConstraintsForVideo();
+          const audioConstraintsForMic = new Ics.Base.AudioTrackConstraints(Ics.Base.AudioSourceInfo.MIC);
+          const videoConstraintsForCamera = new Ics.Base.VideoTrackConstraints(Ics.Base.VideoSourceInfo.CAMERA);
           let mediaStream;
-          Ics.Base.MediaStreamFactory.createMediaStream(new Ics.Base.MediaStreamDeviceConstraints(audioConstraintsForMic, videoConstraintsForCamera)).then(stream=>{
+          Ics.Base.MediaStreamFactory.createMediaStream(new Ics.Base.StreamConstraints(audioConstraintsForMic, videoConstraintsForCamera)).then(stream=>{
             mediaStream=stream;
             localStream = new Ics.Base.LocalStream(mediaStream, new Ics.Base.StreamSourceInfo('mic', 'camera'));
             $('#local').children('video').get(0).srcObject = localStream.mediaStream;
-            p2p.publish(getTargetId(), localStream);
+            p2p.publish(getTargetId(), localStream).then(publication=>{
+              publicationForCamera = publication;
+            });
           }, err=>{
             console.error('Failed to create MediaStream, '+err);
           });
@@ -241,6 +249,9 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     });
 
     p2p.addEventListener('streamadded', function(e) { // A remote stream is available.
+      e.stream.addEventListener('ended', ()=>{
+        console.log('Stream is removed.');
+      });
       if (e.stream.source.video==='screen-cast') {
         $('#screen video').show();
         $('#screen video').get(0).srcObject = e.stream.mediaStream;
