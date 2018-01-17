@@ -172,7 +172,7 @@ export const ConferenceClient = function(config, signalingImpl) {
             }
           }
         }
-        resolve(new ConferenceInfo(resp.id, Array.from(participants
+        resolve(new ConferenceInfo(resp.room.id, Array.from(participants
           .values()), Array.from(remoteStreams.values()), me));
       }, (e) => {
         self.state = DISCONNECTED;
