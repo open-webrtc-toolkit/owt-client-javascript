@@ -327,7 +327,7 @@ ICS_REST.API = (function(ICS_REST) {
     send('GET', 'rooms', undefined, function(roomsRtn) {
       var rooms = JSON.parse(roomsRtn);
       callback(rooms);
-    }, callbackError, );
+    }, callbackError);
   };
 
   /**
@@ -536,6 +536,9 @@ ICS_REST.API = (function(ICS_REST) {
   });
      */
   var getParticipant = function(room, participant, callback, callbackError) {
+    if (typeof participant !== 'string' || participant.trim().length === 0) {
+      return callbackError('Invalid participant ID');
+    }
     send('GET', 'rooms/' + room + '/participants/' + participant, undefined, function(participantRtn) {
       var p = JSON.parse(participantRtn);
       callback(p);
@@ -566,6 +569,12 @@ ICS_REST.API = (function(ICS_REST) {
   });
      */
   var updateParticipant = function(room, participant, items, callback, callbackError) {
+    if (typeof participant !== 'string' || participant.trim().length === 0) {
+      return callbackError('Invalid participant ID');
+    }
+    if (!(items instanceof Array)) {
+      return callbackError('Invalid update list');
+    }
     send('PATCH', 'rooms/' + room + '/participants/' + participant, items, function(participantRtn) {
       var p = JSON.parse(participantRtn);
       callback(p);
@@ -591,6 +600,9 @@ ICS_REST.API = (function(ICS_REST) {
   });
      */
   var dropParticipant = function(room, participant, callback, callbackError) {
+    if (typeof participant !== 'string' || participant.trim().length === 0) {
+      return callbackError('Invalid participant ID');
+    }
     send('DELETE', 'rooms/' + room + '/participants/' + participant, undefined, function(participant) {
       callback(participant);
     }, callbackError);
@@ -651,6 +663,9 @@ ICS_REST.API = (function(ICS_REST) {
   });
      */
   var getStream = function(room, stream, callback, callbackError) {
+    if (typeof stream !== 'string' || stream.trim().length === 0) {
+      return callbackError('Invalid stream ID');
+    }
     send('GET', 'rooms/' + room + '/streams/' + stream, undefined, function(streamRtn) {
       var st = JSON.parse(streamRtn);
       callback(st);
@@ -681,6 +696,12 @@ ICS_REST.API = (function(ICS_REST) {
   });
      */
   var updateStream = function(room, stream, items, callback, callbackError) {
+    if (typeof stream !== 'string' || stream.trim().length === 0) {
+      return callbackError('Invalid stream ID');
+    }
+    if (!(items instanceof Array)) {
+      return callbackError('Invalid update list');
+    }
     send('PATCH', 'rooms/' + room + '/streams/' + stream, items, function(streamRtn) {
       var st = JSON.parse(streamRtn);
       callback(st);
@@ -706,6 +727,9 @@ ICS_REST.API = (function(ICS_REST) {
   });
      */
   var deleteStream = function(room, stream, callback, callbackError) {
+    if (typeof stream !== 'string' || stream.trim().length === 0) {
+      return callbackError('Invalid stream ID');
+    }
     send('DELETE', 'rooms/' + room + '/streams/' + stream, undefined, function(result) {
       callback(result);
     }, callbackError);
@@ -783,6 +807,9 @@ ICS_REST.API = (function(ICS_REST) {
   });
      */
   var stopStreamingIn = function(room, stream, callback, callbackError) {
+    if (typeof stream !== 'string' || stream.trim().length === 0) {
+      return callbackError('Invalid stream ID');
+    }
     send('DELETE', 'rooms/' + room + '/streaming-ins/' + stream, undefined, function(result) {
       callback(result);
     }, callbackError);
@@ -889,6 +916,12 @@ ICS_REST.API = (function(ICS_REST) {
   });
      */
   var updateStreamingOut = function(room, id, items, callback, callbackError) {
+    if (typeof id !== 'string' || id.trim().length === 0) {
+      return callbackError('Invalid streamingOut ID');
+    }
+    if (!(items instanceof Array)) {
+      return callbackError('Invalid update list');
+    }
     send('PATCH', 'rooms/' + room + '/streaming-outs/' + id, items, function(streamingOutRtn) {
       var result = JSON.parse(streamingOutRtn);
       callback(result);
@@ -914,6 +947,9 @@ ICS_REST.API = (function(ICS_REST) {
   });
      */
   var stopStreamingOut = function(room, id, callback, callbackError) {
+    if (typeof id !== 'string' || id.trim().length === 0) {
+      return callbackError('Invalid streamingOut ID');
+    }
     send('DELETE', 'rooms/' + room + '/streaming-outs/' + id, undefined, function(result) {
       callback(result);
     }, callbackError);
@@ -1025,6 +1061,12 @@ ICS_REST.API = (function(ICS_REST) {
   });
      */
   var updateRecording = function(room, id, items, callback, callbackError) {
+    if (typeof id !== 'string' || id.trim().length === 0) {
+      return callbackError('Invalid recording ID');
+    }
+    if (!(items instanceof Array)) {
+      return callbackError('Invalid update list');
+    }
     send('PATCH', 'rooms/' + room + '/recordings/' + id, items, function(recordingRtn) {
       var result = JSON.parse(recordingRtn);
       callback(result);
@@ -1050,6 +1092,9 @@ ICS_REST.API = (function(ICS_REST) {
   });
      */
   var stopRecording = function(room, id, callback, callbackError) {
+    if (typeof id !== 'string' || id.trim().length === 0) {
+      return callbackError('Invalid recording ID');
+    }
     send('DELETE', 'rooms/' + room + '/recordings/' + id, undefined, function(result) {
       callback(result);
     }, callbackError);
