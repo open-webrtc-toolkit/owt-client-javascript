@@ -8,7 +8,7 @@ var express = require('express'),
   morgan = require('morgan'),
   fs = require('fs'),
   https = require('https'),
-  icsREST = require('./icsREST');
+  icsREST = require('./rest');
 
 var app = express();
 

@@ -58,7 +58,7 @@ window.L = L;\n\
       },
       dev: {
         src: [sdkEntry],
-        dest: sdkOutput,
+        dest: 'dist/sdk-debug/ics.js',
         options: {
           browserifyOptions: {
             standalone: 'Ics',
@@ -170,22 +170,13 @@ window.L = L;\n\
           {expand: true,cwd:'src/samples/conference/',src:['**'],dest:'dist/samples/conference/',flatten:false},
           {expand: true,cwd:'src/samples/conference/',src:['initcert.js'],dest:'dist/samples/conference/',flatten:false,mode:true},
           {expand: true,cwd:'src/samples/conference/cert/',src:['.woogeen.keystore'],dest:'dist/samples/conference/cert/',flatten:false,mode:true},
-          {expand: true,cwd:'src/samples/sipgw/',src:['**'],dest:'dist/samples/sipgw/',flatten:false},
           {expand: true,cwd:'src/sdk/base/',src:['socket.io.js'],dest:'dist/sdk/dependencies/',flatten:false},
           {expand: true,cwd:'src/sdk/base/',src:['adapter.js'],dest:'dist/sdk/dependencies',flatten:false},
           {expand: true,cwd:'src/sdk/base/',src:['adapter.js'],dest:'dist/samples/conference/public/',flatten:false},
-          {expand: true,cwd:'src/sdk/base/',src:['adapter.js'],dest:'dist/samples/sipgw/public/',flatten:false},
           {expand: true,cwd:'src/extension/',src:['**'],dest:'dist/',flatten:false},
           {expand: true,cwd:'src/sdk/base/',src:['socket.io.js'],dest:'dist/samples/conference/public/',flatten:false},
-          {expand: true,cwd:'src/sdk/base/',src:['socket.io.js'],dest:'dist/samples/sipgw/public/',flatten:false},
-          {expand: true,cwd:'dist/sdk/',src:['woogeen.sdk.js'],dest:'dist/samples/conference/public/',flatten:false},
-          {expand: true,cwd:'dist/sdk/',src:['woogeen.sdk.js'],dest:'dist/samples/sipgw/public/',flatten:false},
-          {expand: true,cwd:'dist/sdk/',src:['woogeen.sdk.ui.js'],dest:'dist/samples/conference/public/',flatten:false},
-          {expand: true,cwd:'dist/sdk/',src:['woogeen.sdk.ui.js'],dest:'dist/samples/sipgw/public/',flatten:false},
-          {expand: true,cwd:'dist/sdk/',src:['nuve.js'],dest:'dist/samples/conference/',flatten:false},
-          {expand: true,cwd:'dist/sdk/',src:['nuve.js'],dest:'src/samples/conference/',flatten:false},
-          {expand: true,cwd:'dist/sdk/',src:['icsREST.js'],dest:'dist/samples/conference/',flatten:false},
-          {expand: true,cwd:'dist/sdk/',src:['icsREST.js'],dest:'src/samples/conference/',flatten:false}
+          {expand: true,cwd:'dist/sdk/',src:['ics.js'],dest:'dist/samples/conference/public/scripts/',flatten:false},
+          {expand: true,cwd:'dist/sdk/',src:['rest.js'],dest:'dist/samples/conference/',flatten:false}
         ]
       }
     },
@@ -240,11 +231,12 @@ window.L = L;\n\
     compress:{
       dist:{
         options:{
-          archive:'../release-<%= pkg.version %>.zip'
+          archive:'release-<%= pkg.version %>.zip'
         },
-        files:[
-          {src:['dist/**'],dest:'../'}
-        ]
+        files:[{
+          src:['dist/samples','dist/screen-sharing-chrome-extension','dist/sdk','dist/ThirdpartyLicenses.txt'],
+          dest:'./'
+        }]
       }
     },
     jsdoc : {
