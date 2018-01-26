@@ -175,7 +175,7 @@ export const ConferenceClient = function(config, signalingImpl) {
         resolve(new ConferenceInfo(resp.room.id, Array.from(participants
           .values()), Array.from(remoteStreams.values()), me));
       }, (e) => {
-        self.state = DISCONNECTED;
+        signalingState = SignalingState.READY;
         reject(new ConferenceError('Connect to server error.'))
       });
     });
@@ -215,6 +215,19 @@ export const ConferenceClient = function(config, signalingImpl) {
     }
     const channel = createPeerConnectionChannel();
     return channel.subscribe(stream, options);
+  };
+
+  /**
+   * @function leave
+   * @memberOf Ics.Conference.ConferenceClient
+   * @instance
+   * @desc Leave a conference.
+   * @returns {Promise<void, Error>} Returned promise will be resolved with undefined once the connection is disconnected.
+   */
+  this.leave = function() {
+    return signaling.disconnect().then(() => {
+      signalingState = SignalingState.READY;
+    });
   };
 };
 
