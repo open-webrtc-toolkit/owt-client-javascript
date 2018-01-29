@@ -128,5 +128,21 @@ export class Publication extends EventDispatcher {
    * @returns {Promise<RTCStatsReport, Error>}
    */
     this.getStats = getStats;
+  /**
+   * @function mute
+   * @instance
+   * @desc Stop sending data to remote endpoint.
+   * @memberof Ics.Base.Publication
+   * @returns {Promise<undefined, Error>}
+   */
+    this.mute=mute;
+  /**
+   * @function unmute
+   * @instance
+   * @desc Continue sending data to remote endpoint.
+   * @memberof Ics.Base.Publication
+   * @returns {Promise<undefined, Error>}
+   */
+    this.unmute=unmute;
   }
 }

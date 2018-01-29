@@ -12,7 +12,13 @@ export const VideoSourceInfo = {
   SCREENCAST: 'screen-cast',
   FILE: 'file',
   MIXED: 'mixed'
-}
+};
+
+export const TrackKind = {
+  AUDIO: 'audio',
+  VIDEO: 'video',
+  AUDIO_AND_VIDEO: 'av'
+};
 
 /**
  * @class Resolution

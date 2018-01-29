@@ -189,7 +189,7 @@ export class SubscribeOptions {
  * @hideconstructor
  */
 export class Subscription extends EventDispatcher {
-  constructor(id, stop, getStats) {
+  constructor(id, stop, getStats, mute, unmute) {
     super();
     if (!id) {
       throw new TypeError('ID cannot be null or undefined.');
@@ -220,5 +220,21 @@ export class Subscription extends EventDispatcher {
    * @returns {Promise<RTCStatsReport, Error>}
    */
     this.getStats = getStats;
+  /**
+   * @function mute
+   * @instance
+   * @desc Stop reeving data from remote endpoint.
+   * @memberof Ics.Base.Subscription
+   * @returns {Promise<undefined, Error>}
+   */
+    this.mute=mute;
+  /**
+   * @function unmute
+   * @instance
+   * @desc Continue reeving data from remote endpoint.
+   * @memberof Ics.Base.Subscription
+   * @returns {Promise<undefined, Error>}
+   */
+    this.unmute=unmute;
   }
 }

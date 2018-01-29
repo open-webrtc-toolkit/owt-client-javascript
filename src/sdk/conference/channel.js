@@ -183,6 +183,17 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
     this._pc.close();
   }
 
+  _muteOrUnmute(isMute, isPub, trackKind) {
+    const eventName = isPub ? 'stream-control' :
+      'subscription-control';
+    const operation = isMute ? 'pause' : 'play';
+    return this._signaling.sendSignalingMessage(eventName, {
+      id: this._internalId,
+      operation: operation,
+      data: trackKind
+    });
+  }
+
   _onRemoteStreamAdded(event) {
     Logger.debug('Remote stream added.');
     this._subscribedStream.mediaStream = event.stream;
@@ -240,6 +251,10 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
         return Promise.resolve();
       }, () => {
         return this._getStats();
+      }, (trackKind) => {
+        return this._muteOrUnmute(true, false, trackKind);
+      }, (trackKind) => {
+        return this._muteOrUnmute(false, false, trackKind);
       });
       this._subscribePromise.resolve(this._subscription);
     } else if (this._publishPromise) {
@@ -248,6 +263,10 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
         return Promise.resolve();
       }, () => {
         return this._getStats();
+      }, (trackKind) => {
+        return this._muteOrUnmute(true, true, trackKind);
+      }, (trackKind) => {
+        return this._muteOrUnmute(false, true, trackKind);
       });
       this._publishPromise.resolve(this._publication);
     }
@@ -277,6 +296,5 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
       error: error
     });
     dispatcher.dispatchEvent(errorEvent);
-    // TODO: test
   }
 }
