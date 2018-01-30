@@ -242,8 +242,8 @@ const P2PClient = function(configuration, signalingChannel) {
       // Construct an signaling sender/receiver for P2PPeerConnection.
       const signalingForChannel = Object.create(EventDispatcher);
       signalingForChannel.sendSignalingMessage = sendSignalingMessage;
-      const pcc=new P2PPeerConnectionChannel(config.rtcConfiguration,
-        myId, remoteId, signalingForChannel);
+      const pcc = new P2PPeerConnectionChannel(config, myId, remoteId,
+        signalingForChannel);
       pcc.addEventListener('streamadded', (streamEvent)=>{
         self.dispatchEvent(streamEvent);
       });

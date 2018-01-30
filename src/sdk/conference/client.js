@@ -110,8 +110,7 @@ export const ConferenceClient = function(config, signalingImpl) {
     // Construct an signaling sender/receiver for ConferencePeerConnection.
     const signalingForChannel = Object.create(EventDispatcher);
     signalingForChannel.sendSignalingMessage = sendSignalingMessage;
-    const pcc = new ConferencePeerConnectionChannel(config.rtcConfiguration,
-      signalingForChannel);
+    const pcc = new ConferencePeerConnectionChannel(config, signalingForChannel);
     pcc.addEventListener('id', (messageEvent) => {
       channels.set(messageEvent.message, pcc);
     });
@@ -189,7 +188,7 @@ export const ConferenceClient = function(config, signalingImpl) {
    * @param {LocalStream} stream The stream to be published.
    * @returns {Promise<Publication, Error>} Returned promise will be resolved with a newly created Publication once specific stream is successfully published, or rejected with a newly created Error if stream is invalid or options cannot be satisfied. Successfully published means PeerConnection is established and server is able to process media data.
    */
-  this.publish = function(stream) {
+  this.publish = function(stream, options) {
     if (!(stream instanceof StreamModule.LocalStream)) {
       return Promise.reject(new ConferenceError('Invalid stream.'));
     }
@@ -198,7 +197,7 @@ export const ConferenceClient = function(config, signalingImpl) {
         'Cannot publish a published stream.'));
     }
     const channel = createPeerConnectionChannel();
-    return channel.publish(stream);
+    return channel.publish(stream, options);
   };
 
   /**

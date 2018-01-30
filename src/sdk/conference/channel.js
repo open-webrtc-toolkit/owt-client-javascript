@@ -9,6 +9,7 @@ import { ConferenceError } from './error.js'
 import * as Utils from '../base/utils.js';
 import * as ErrorModule from './error.js';
 import * as StreamModule from '../base/stream.js';
+import * as SdpUtils from '../base/sdputils.js';
 
 export class ConferencePeerConnectionChannel extends EventDispatcher {
   constructor(config, signaling) {
@@ -40,7 +41,7 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
     }
   }
 
-  publish(stream) {
+  publish(stream, options) {
     const mediaOptions = {};
     if (stream.mediaStream.getAudioTracks().length > 0) {
       if (stream.mediaStream.getAudioTracks().length > 1) {
@@ -91,6 +92,9 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
         offerToReceiveVideo: false
       };
       this._pc.createOffer(offerOptions).then(desc => {
+        if (options) {
+          desc.sdp = this._setRtpReceiverOptions(desc.sdp, options);
+        }
         this._pc.setLocalDescription(desc).then(() => {
           this._signaling.sendSignalingMessage('soac', {
             id: this
@@ -154,6 +158,9 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
         offerToReceiveVideo: !!options.video
       };
       this._pc.createOffer(offerOptions).then(desc => {
+        if (options) {
+          desc.sdp = this._setRtpReceiverOptions(desc.sdp, options);
+        }
         this._pc.setLocalDescription(desc).then(() => {
           this._signaling.sendSignalingMessage('soac', {
             id: this
@@ -226,7 +233,7 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
   }
 
   _createPeerConnection() {
-    this._pc = new RTCPeerConnection(this._config);
+    this._pc = new RTCPeerConnection(this._config.rtcConfiguration);
     this._pc.onicecandidate = (event) => {
       this._onLocalIceCandidate.apply(this, [event]);
     };
@@ -296,5 +303,41 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
       error: error
     });
     dispatcher.dispatchEvent(errorEvent);
+  }
+
+  _setCodecOrder(sdp, options) {
+    if (this._publication || this._publishPromise) {
+      if (options.audio) {
+        const audioCodecNames = Array.from(options.audio,
+          encodingParameters => encodingParameters.codec.name);
+        sdp = SdpUtils.reorderCodecs(sdp, 'audio', audioCodecNames);
+      }
+      if (options.video) {
+        const videoCodecNames = Array.from(options.video,
+          encodingParameters => encodingParameters.codec.name);
+        sdp = SdpUtils.reorderCodecs(sdp, 'video', videoCodecNames);
+      }
+    } else {
+      if (options.audio && options.audio.codecs) {
+        const audioCodecNames = Array.from(options.audio.codecs, codec =>
+          codec.name);
+        sdp = SdpUtils.reorderCodecs(sdp, 'audio', audioCodecNames);
+      }
+      if (options.video && options.video.codecs) {
+        const videoCodecNames = Array.from(options.video.codecs, codec =>
+          codec.name);
+        sdp = SdpUtils.reorderCodecs(sdp, 'video', videoCodecNames);
+      }
+    }
+    return sdp;
+  }
+
+  _setRtpSenderOptions(sdp, options) {
+    return sdp;
+  }
+
+  _setRtpReceiverOptions(sdp, options) {
+    sdp = this._setCodecOrder(sdp, options);
+    return sdp;
   }
 }

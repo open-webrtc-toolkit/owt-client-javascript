@@ -7,6 +7,7 @@ import {Publication} from '../base/publication.js';
 import * as Utils from '../base/utils.js';
 import * as ErrorModule from './error.js';
 import * as StreamModule from '../base/stream.js';
+import * as SdpUtils from '../base/sdputils.js';
 
 /*
   Event for Stream.
@@ -554,7 +555,7 @@ class P2PPeerConnectionChannel extends EventDispatcher {
   };
 
   _createPeerConnection(){
-    this._pc = new RTCPeerConnection(this._config);
+    this._pc = new RTCPeerConnection(this._config.rtcConfiguration);
     if (typeof this._pc.addTransceiver === 'function') {
       this._pc.addTransceiver('audio');
       this._pc.addTransceiver('video');
@@ -685,6 +686,29 @@ class P2PPeerConnectionChannel extends EventDispatcher {
     this._createAndSendOffer();
   };
 
+  _setCodecOrder(sdp) {
+    if (this._config.audio) {
+      const audioCodecNames = Array.from(this._config.audio,
+        encodingParameters => encodingParameters.codec.name);
+      sdp = SdpUtils.reorderCodecs(sdp, 'audio', audioCodecNames);
+    }
+    if (this._config.video) {
+      const videoCodecNames = Array.from(this._config.video,
+        encodingParameters => encodingParameters.codec.name);
+      sdp = SdpUtils.reorderCodecs(sdp, 'video', videoCodecNames);
+    }
+    return sdp;
+  }
+
+  _setRtpSenderOptions(sdp) {
+    return sdp;
+  }
+
+  _setRtpReceiverOptions(sdp) {
+    sdp = this._setCodecOrder(sdp);
+    return sdp;
+  }
+
   _createAndSendOffer() {
     if (!this._pc) {
       Logger.error('Peer connection have not been created.');
@@ -697,7 +721,7 @@ class P2PPeerConnectionChannel extends EventDispatcher {
     this._drainPendingStreams();
     this._isNegotiationNeeded = false;
     this._pc.createOffer(offerOptions).then(desc => {
-      // desc.sdp = setRtpReceiverOptions(desc.sdp, peer);
+      desc.sdp = this._setRtpReceiverOptions(desc.sdp);
       this._pc.setLocalDescription(desc).then(() => {
         Logger.debug('Set local description successfully.');
         this._negotiationState = NegotiationState.READY;
@@ -716,7 +740,7 @@ class P2PPeerConnectionChannel extends EventDispatcher {
     this._drainPendingStreams();
     this._isNegotiationNeeded = false;
     this._pc.createAnswer().then(desc => {
-      //desc.sdp = setRtpReceiverOptions(desc.sdp, peer);
+      desc.sdp = this._setRtpReceiverOptions(desc.sdp);
       this._pc.setLocalDescription(desc).then(() => {
         Logger.debug("Set local description successfully.");
         this._sendSdp(desc);
