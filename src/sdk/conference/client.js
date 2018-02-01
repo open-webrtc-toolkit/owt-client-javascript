@@ -22,6 +22,12 @@ const SignalingState = {
 
 const protocolVersion = '1.0';
 
+const ParticipantEvent = function(type, init) {
+  const that = new EventModule.IcsEvent(type, init);
+  that.participant = init.participant;
+  return that;
+};
+
 /**
  * @class ConferenceClient
  * @classdesc The ConferenceClient handles PeerConnections between client and server. For conference controlling, please refer to REST API guide.
@@ -66,8 +72,30 @@ export const ConferenceClient = function(config, signalingImpl) {
       }
     } else if (notification === 'text') {
       fireMessageReceived(data);
+    } else if(notification === 'participant'){
+      fireParticipantEvent(data);
     }
   };
+
+  function fireParticipantEvent(data) {
+    if (data.action === 'join') {
+      data = data.data;
+      const participant = new Participant(data.id, data.role, data.user)
+      participants.set(data.id, participant);
+      const event = new ParticipantEvent('participantjoined', { participant: participant });
+      self.dispatchEvent(event);
+    } else if (data.action === 'leave') {
+      const participantId = data.data;
+      if (!participants.has(participantId)) {
+        Logger.warning(
+          'Received leave message from MCU for an unknown participant.');
+        return;
+      }
+      const participant = participants.get(participantId);
+      participants.delete(participantId);
+      participant.dispatchEvent(new EventModule.IcsEvent('left'));
+    }
+  }
 
   function fireMessageReceived(data) {
     const messageEvent = new EventModule.MessageEvent('messagereceived', {

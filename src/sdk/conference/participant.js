@@ -1,5 +1,7 @@
 // Copyright © 2017 Intel Corporation. All Rights Reserved.
 
+import * as EventModule from '../base/event.js';
+
 'use strict';
 
 /**
@@ -15,8 +17,9 @@
  *
  * @hideconstructor
  */
-export class Participant {
+export class Participant extends EventModule.EventDispatcher {
   constructor(id, role, userId) {
+    super();
     /**
      * @member {string} id
      * @instance
