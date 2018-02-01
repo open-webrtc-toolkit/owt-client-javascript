@@ -44,8 +44,8 @@ export const ConferenceClient = function(config, signalingImpl) {
   const self = this;
   let signalingState = SignalingState.READY;
   const signaling = signalingImpl ? signalingImpl : (new Signaling());
-  let myId = null;
-  let myParticipantId = null;
+  let me;
+  let room;
   let remoteStreams = new Map(); // Key is stream ID, value is a RemoteStream.
   const participants = new Map(); // Key is participant ID, value is a Participant object.
   const publishChannels = new Map(); // Key is MediaStream's ID, value is pc channel.
@@ -127,6 +127,22 @@ export const ConferenceClient = function(config, signalingImpl) {
     return pcc;
   }
 
+  function clean() {
+    participants.clear();
+    remoteStreams.clear();
+  }
+
+  Object.defineProperty(this, 'info', {
+    configurable: false,
+    get: () => {
+      if (!room) {
+        return null;
+      }
+      return new ConferenceInfo(room.id, Array.from(participants, x => x[
+        1]), Array.from(remoteStreams, x => x[1]), me);
+    }
+  });
+
   /**
    * @function join
    * @instance
@@ -140,7 +156,6 @@ export const ConferenceClient = function(config, signalingImpl) {
       const token = JSON.parse(Base64.decodeBase64(tokenString));
       const isSecured = (token.secure === true);
       let host = token.host;
-      let room = null;
       if (typeof host !== 'string') {
         reject(new ConferenceError('Invalid host.'));
       }
@@ -161,8 +176,6 @@ export const ConferenceClient = function(config, signalingImpl) {
 
       signaling.connect(host, isSecured, loginInfo).then((resp) => {
         signalingState = SignalingState.CONNECTED;
-        myId = resp.user;
-        myParticipantId = resp.id;
         room = resp.room;
         if (room.streams !== undefined) {
           for (const st of room.streams) {
@@ -172,7 +185,6 @@ export const ConferenceClient = function(config, signalingImpl) {
             remoteStreams.set(st.id, createRemoteStream(st));
           };
         }
-        let me;
         if (resp.room && resp.room.participants !== undefined) {
           for (const p of resp.room.participants) {
             participants.set(p.id, new Participant(p.id, p.role, p.user));
@@ -252,6 +264,7 @@ export const ConferenceClient = function(config, signalingImpl) {
    */
   this.leave = function() {
     return signaling.disconnect().then(() => {
+      clean();
       signalingState = SignalingState.READY;
     });
   };
