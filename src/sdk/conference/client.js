@@ -1,7 +1,7 @@
 // Copyright © 2017 Intel Corporation. All Rights Reserved.
 'use strict';
 
-import { EventDispatcher, IcsEvent } from '../base/event.js'
+import * as EventModule from '../base/event.js'
 import { ConferenceSioSignaling as Signaling } from './signaling.js'
 import Logger from '../base/logger.js'
 import { Base64 } from '../base/base64.js'
@@ -64,8 +64,18 @@ export const ConferenceClient = function(config, signalingImpl) {
       } else if (data.status === 'remove') {
         fireStreamRemoved(data);
       }
+    } else if (notification === 'text') {
+      fireMessageReceived(data);
     }
   };
+
+  function fireMessageReceived(data) {
+    const messageEvent = new EventModule.MessageEvent('messagereceived', {
+      message: data.message,
+      origin: data.from
+    });
+    self.dispatchEvent(messageEvent);
+  }
 
   function fireStreamAdded(info) {
     const stream = createRemoteStream(info);
@@ -82,7 +92,7 @@ export const ConferenceClient = function(config, signalingImpl) {
       return;
     }
     const stream = remoteStreams.get(info.id);
-    const streamEvent = new IcsEvent('ended');
+    const streamEvent = new EventModule.IcsEvent('ended');
     remoteStreams.delete(stream.id);
     stream.dispatchEvent(streamEvent);
   }
@@ -108,7 +118,7 @@ export const ConferenceClient = function(config, signalingImpl) {
 
   function createPeerConnectionChannel() {
     // Construct an signaling sender/receiver for ConferencePeerConnection.
-    const signalingForChannel = Object.create(EventDispatcher);
+    const signalingForChannel = Object.create(EventModule.EventDispatcher);
     signalingForChannel.sendSignalingMessage = sendSignalingMessage;
     const pcc = new ConferencePeerConnectionChannel(config, signalingForChannel);
     pcc.addEventListener('id', (messageEvent) => {
@@ -217,6 +227,22 @@ export const ConferenceClient = function(config, signalingImpl) {
   };
 
   /**
+   * @function send
+   * @memberof Ics.Conference.ConferenceClient
+   * @instance
+   * @desc Send a text message to a participant or all participants.
+   * @param {string} message Message to be sent.
+   * @param {string} participantId Receiver of this message. Message will be sent to all participants if participantId is undefined.
+   * @returns {Promise<void, Error>} Returned promise will be resolved when conference server received certain message.
+   */
+  this.send = function(message, participantId) {
+    if (participantId === undefined) {
+      participantId = 'all';
+    }
+    return sendSignalingMessage('text', { to: participantId, message: message });
+  };
+
+  /**
    * @function leave
    * @memberOf Ics.Conference.ConferenceClient
    * @instance
@@ -230,4 +256,4 @@ export const ConferenceClient = function(config, signalingImpl) {
   };
 };
 
-ConferenceClient.prototype = new EventDispatcher();
+ConferenceClient.prototype = new EventModule.EventDispatcher();
