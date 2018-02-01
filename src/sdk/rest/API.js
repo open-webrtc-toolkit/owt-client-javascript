@@ -460,8 +460,8 @@ ICS_REST.API = (function(ICS_REST) {
      * @param {function} callbackError               -Callback function on error
      * @example
   ICS_REST.API.updateRoomPartially(XXXXXXXXXX, [
-    {op: 'replace', path: 'enableMixing', value: 0},
-    {op: 'replace', path: 'viewports/0/mediaMixing/video/avCoordinated', value: 1}
+    {op: 'replace', path: '/enableMixing', value: 0},
+    {op: 'replace', path: '/viewports/0/mediaMixing/video/avCoordinated', value: 1}
   ], function (res) {
     console.log ('Room', res._id, 'updated');
   }, function (err) {
@@ -688,7 +688,7 @@ ICS_REST.API = (function(ICS_REST) {
      * @example
   var roomID = '51c10d86909ad1f939000001';
   var streamID = '878889273471677';
-  ICS_REST.API.updateStream(roomID, streamID, [{op: 'replace', patch: 'media/audio/status', value: 'inactive'}], function(stream) {
+  ICS_REST.API.updateStream(roomID, streamID, [{op: 'replace', path: '/media/audio/status', value: 'inactive'}], function(stream) {
     console.log('Stream:', stream);
   }, function(status, error) {
     // HTTP status and error
@@ -908,7 +908,7 @@ ICS_REST.API = (function(ICS_REST) {
      * @example
   var roomID = '51c10d86909ad1f939000001';
   var id = '878889273471677';
-  ICS_REST.API.updateStreamingOut(roomID, id, [{op: 'replace', patch: 'media/audio/from', value: '9836636255531'}], function(subscription) {
+  ICS_REST.API.updateStreamingOut(roomID, id, [{op: 'replace', path: '/media/audio/from', value: '9836636255531'}], function(subscription) {
     console.log('Subscription:', subscription);
   }, function(status, error) {
     // HTTP status and error
@@ -1053,7 +1053,7 @@ ICS_REST.API = (function(ICS_REST) {
      * @example
   var roomID = '51c10d86909ad1f939000001';
   var id = '878889273471677';
-  ICS_REST.API.updateRecording(roomID, id, [{op: 'replace', patch: 'media/audio/from', value: '9836636255531'}], function(subscription) {
+  ICS_REST.API.updateRecording(roomID, id, [{op: 'replace', path: '/media/audio/from', value: '9836636255531'}], function(subscription) {
     console.log('Subscription:', subscription);
   }, function(status, error) {
     // HTTP status and error

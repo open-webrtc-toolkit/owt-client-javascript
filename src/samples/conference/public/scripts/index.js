@@ -496,13 +496,32 @@ const runSocketIOSample = function() {
   };
 
   var setRegion = function(room, stream, region, subStream) {
-    var jsonPatch = [{
-      op: 'replace',
-      path: '/info/layout/0/stream',
-      value: subStream
-    }];
-    send('PATCH', '/rooms/' + room + '/streams/' + stream, jsonPatch,
-      onResponse);
+    send('GET', '/rooms/' + room + '/streams/' + stream, undefined, function (stJSON) {
+      var st = JSON.parse(stJSON);
+
+      if (st.type !== 'mixed') {
+        return console.info('Invalid stream');
+      }
+
+      var index = 0;
+      for (index = 0; index <= st.info.layout.length; index++) {
+        if (st.info.layout[index].region.id === region) {
+          break;
+        }
+      }
+
+      if (index < st.info.layout.length) {
+        var jsonPatch = [{
+          op: 'replace',
+          path: '/info/layout/0/stream',
+          value: subStream
+        }];
+        send('PATCH', '/rooms/' + room + '/streams/' + stream, jsonPatch,
+          onResponse);
+      } else {
+        console.info('Invalid region');
+      }
+    });
   };
 
   var pauseStream = function(room, stream, track) {
