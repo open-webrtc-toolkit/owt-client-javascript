@@ -124,3 +124,21 @@ export class ErrorEvent extends IcsEvent{
     this.error = init.error;
   }
 }
+
+/**
+ * @class MuteEvent
+ * @classDesc Class MuteEvent represents a mute or unmute event.
+ * @memberof Ics.Base
+ * @hideconstructor
+ */
+export class MuteEvent extends IcsEvent {
+  constructor(type, init){
+    super(type);
+    /**
+     * @member {Ics.Base.TrackKind} kind
+     * @instance
+     * @memberof Ics.Base.MuteEvent
+     */
+    this.kind = init.kind;
+  }
+}

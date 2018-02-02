@@ -57,7 +57,7 @@ export const ConferenceClient = function(config, signalingImpl) {
   const publishChannels = new Map(); // Key is MediaStream's ID, value is pc channel.
   const channels = new Map(); // Key is channel's internal ID, value is channel.
 
-  signaling.onMessage = function(notification, data) {
+  function onSignalingMessage (notification, data) {
     if (notification === 'soac' || notification === 'progress') {
       if (!channels.has(data.id)) {
         Logger.warning('Cannot find a channel for incoming data.');
@@ -69,6 +69,13 @@ export const ConferenceClient = function(config, signalingImpl) {
         fireStreamAdded(data.data);
       } else if (data.status === 'remove') {
         fireStreamRemoved(data);
+      } else if(data.status === 'update') {
+        // Boardcast audio/video update status to channel so specific events can be fired on publication or subscription.
+        if(data.data.field === 'audio.status'||data.data.field === 'video.status'){
+          channels.forEach(c=>{
+            c.onMessage(notification, data);
+          });
+        }
       }
     } else if (notification === 'text') {
       fireMessageReceived(data);
@@ -76,6 +83,14 @@ export const ConferenceClient = function(config, signalingImpl) {
       fireParticipantEvent(data);
     }
   };
+
+  signaling.addEventListener('data', (event) => {
+    onSignalingMessage(event.message.notification, event.message.data);
+  });
+
+  signaling.addEventListener('disconnect', ()=>{
+    self.dispatchEvent(new EventModule.IcsEvent('serverdisconnected'));
+  });
 
   function fireParticipantEvent(data) {
     if (data.action === 'join') {

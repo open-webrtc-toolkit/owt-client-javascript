@@ -1,6 +1,6 @@
 /* global io */
 import Logger from '../base/logger.js'
-import { EventDispatcher } from '../base/event.js'
+import * as EventModule from '../base/event.js'
 
 'use strict';
 
@@ -14,7 +14,7 @@ function handleResponse(status, data, resolve, reject) {
   }
 };
 
-export class ConferenceSioSignaling extends EventDispatcher {
+export class ConferenceSioSignaling extends EventModule.EventDispatcher {
   constructor() {
     super();
     this._socket = null;
@@ -30,13 +30,12 @@ export class ConferenceSioSignaling extends EventDispatcher {
       ['drop', 'participant', 'text', 'stream', 'progress'].forEach((
         notification) => {
         this._socket.on(notification, (data) => {
-          this.onMessage(notification, data);
+          this.dispatchEvent(new EventModule.MessageEvent('data', { message: { notification: notification,
+              data: data } }));
         });
       });
       this._socket.on('disconnect', () => {
-        this.dispatchEvent({
-          type: 'disconnect'
-        });
+        this.dispatchEvent(new EventModule.IcsEvent('disconnect'));
       });
       this._socket.emit('login', loginInfo, (status, data) => {
         handleResponse(status, data, resolve, reject);

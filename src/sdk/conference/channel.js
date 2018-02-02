@@ -2,7 +2,8 @@
 'use strict';
 
 import Logger from '../base/logger.js';
-import { EventDispatcher, MessageEvent, IcsEvent, ErrorEvent } from '../base/event.js';
+import { EventDispatcher, MessageEvent, IcsEvent, ErrorEvent, MuteEvent } from '../base/event.js';
+import { TrackKind } from '../base/mediaformat.js'
 import { Publication } from '../base/publication.js';
 import { Subscription } from './subscription.js'
 import { ConferenceError } from './error.js'
@@ -22,6 +23,7 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
     this._subscribePromise = null;
     this._publishPromise = null;
     this._subscribedStream = null;
+    this._publishedStream = null;
     this._publication = null;
     this._subscription = null;
   }
@@ -35,6 +37,9 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
           this._readyHandler();
         else if(message.status === 'error')
           this._errorHandler(message.data);
+        break;
+      case 'stream':
+        this._onStreamEvent(message);
         break;
       default:
         Logger.warning('Unknown notification from MCU.');
@@ -73,6 +78,7 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
     } else {
       mediaOptions.video = false;
     }
+    this._publishedStream = stream;
     this._signaling.sendSignalingMessage('publish', {
       media: mediaOptions,
       attributes: stream.attributes
@@ -259,6 +265,10 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
       }, (trackKind) => {
         return this._muteOrUnmute(false, false, trackKind);
       });
+      // Fire subscription's ended event when associated stream is ended.
+      this._subscribedStream.addEventListener('ended', ()=>{
+        this._subscription.dispatchEvent('ended', new IcsEvent('ended'));
+      });
       this._subscribePromise.resolve(this._subscription);
     } else if (this._publishPromise) {
       this._publication = new Publication(this._internalId, () => {
@@ -272,6 +282,9 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
         return this._muteOrUnmute(false, true, trackKind);
       });
       this._publishPromise.resolve(this._publication);
+      // Do not fire publication's ended event when associated stream is ended.
+      // It may still sending silence or black frames.
+      // Refer to https://w3c.github.io/webrtc-pc/#rtcrtpsender-interface.
     }
     this._publishPromise = null;
     this._subscribePromise = null;
@@ -335,5 +348,35 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
   _setRtpReceiverOptions(sdp, options) {
     sdp = this._setCodecOrder(sdp, options);
     return sdp;
+  }
+
+  // Handle stream event sent from MCU. Some stream events should be publication event or subscription event. It will be handled here.
+  _onStreamEvent(message) {
+    let eventTarget;
+    if (this._publishedStream && message.id === this._publishedStream.id) {
+      eventTarget = this._publication;
+    } else if (
+      this._subscribedStream && message.id === this._subscribedStream.id) {
+      eventTarget = this._subscription;
+    }
+    if (!eventTarget) {
+      Logger.warning('Cannot find valid event target.');
+      return;
+    }
+    let trackKind;
+    if (message.data.field === 'audio.status') {
+      trackKind = TrackKind.AUDIO;
+    } else if (message.data.field === 'video.status') {
+      trackKind = TrackKind.VIDEO;
+    } else {
+      Logger.warning('Invalid data field for stream update info.');
+    }
+    if (message.data.value === 'active') {
+      eventTarget.dispatchEvent(new MuteEvent('unmute', { kind: trackKind }));
+    } else if (message.data.value === 'inactive') {
+      eventTarget.dispatchEvent(new MuteEvent('mute', { kind: trackKind }));
+    } else {
+      Logger.warning('Invalid data value for stream update info.');
+    }
   }
 }
