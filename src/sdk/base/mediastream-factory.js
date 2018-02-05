@@ -174,30 +174,29 @@ export class MediaStreamFactory {
                 'Sharing screen with audio was not selected by user.'
               );
             }
-            mediaConstraints.video = Object.create({});
-            mediaConstraints.video.mandatory = Object.create({});
-            mediaConstraints.video.mandatory.chromeMediaSource =
-              'desktop';
-            mediaConstraints.video.mandatory.chromeMediaSourceId =
-              response.streamId;
-            // Transform new constraint format to the old style. Because chromeMediaSource only supported in the old style, and mix new and old style will result type error: "Cannot use both optional/mandatory and specific or advanced constraints.".
-            if (constraints.video.resolution) {
-              mediaConstraints.video.mandatory.maxHeight =
-                mediaConstraints.video.mandatory.minHeight =
-                constraints.video.resolution.height;
-              mediaConstraints.video.mandatory.maxWidth =
-                mediaConstraints.video.mandatory.minWidth =
-                constraints.video.resolution.width;
-            }
-            if (constraints.video.frameRate) {
-              mediaConstraints.video.mandatory.minFrameRate =
-                constraints.video.frameRate;
-              mediaConstraints.video.mandatory.maxFrameRate =
-                constraints.video.frameRate;
-            }
-            resolve(navigator.mediaDevices.getUserMedia(
-              mediaConstraints));
-          };
+          }
+          mediaConstraints.video = Object.create({});
+          mediaConstraints.video.mandatory = Object.create({});
+          mediaConstraints.video.mandatory.chromeMediaSource =
+            'desktop';
+          mediaConstraints.video.mandatory.chromeMediaSourceId =
+            response.streamId;
+          // Transform new constraint format to the old style. Because chromeMediaSource only supported in the old style, and mix new and old style will result type error: "Cannot use both optional/mandatory and specific or advanced constraints.".
+          if (constraints.video.resolution) {
+            mediaConstraints.video.mandatory.maxHeight =
+              mediaConstraints.video.mandatory.minHeight =
+              constraints.video.resolution.height;
+            mediaConstraints.video.mandatory.maxWidth =
+              mediaConstraints.video.mandatory.minWidth =
+              constraints.video.resolution.width;
+          }
+          if (constraints.video.frameRate) {
+            mediaConstraints.video.mandatory.minFrameRate = constraints.video.frameRate;
+            mediaConstraints.video.mandatory.maxFrameRate =
+              constraints.video.frameRate;
+          }
+          resolve(navigator.mediaDevices.getUserMedia(
+            mediaConstraints));
         });
       })
     } else {
@@ -221,7 +220,7 @@ export class MediaStreamFactory {
       }
       if (typeof constraints.video === 'object') {
         mediaConstraints.video = Object.create({});
-        if (constraints.video.frameRate instanceof Number) {
+        if (typeof constraints.video.frameRate === 'number') {
           mediaConstraints.video.frameRate = constraints.video.frameRate;
         }
         if (constraints.video.resolution && constraints.video.resolution.width &&
