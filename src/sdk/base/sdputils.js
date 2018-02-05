@@ -538,7 +538,7 @@ function appendRtxPayloads(sdpLines, payloads) {
 
 // Remove a codec with all its associated a lines.
 function removeCodecFramALine(sdpLines, payload){
-  const pattern = new RegExp('a=(rtpmap|rtcp-fb|fmtp):'+payload);
+  const pattern = new RegExp('a=(rtpmap|rtcp-fb|fmtp):'+payload+'\\s');
   for(let i=sdpLines.length-1;i>0;i--){
     if(sdpLines[i].match(pattern)){
       sdpLines.splice(i, 1);
