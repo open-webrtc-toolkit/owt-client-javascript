@@ -216,6 +216,7 @@ export const ConferenceClient = function(config, signalingImpl) {
    * @instance
    * @desc Subscribe a RemoteStream from conference server.
    * @param {RemoteStream} stream The stream to be subscribed.
+   * @param {Ics.Conference.SubscriptionOptions} options Options for subscription.
    * @returns {Promise<Subscription, Error>} Returned promise will be resolved with a newly created Subscription once specific stream is successfully subscribed, or rejected with a newly created Error if stream is invalid or options cannot be satisfied. Successfully subscribed means PeerConnection is established and server was started to send media data.
    */
   this.subscribe = function(stream, options) {
