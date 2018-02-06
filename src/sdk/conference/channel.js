@@ -26,6 +26,7 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
     this._publishedStream = null;
     this._publication = null;
     this._subscription = null;
+    this._disconnectTimer = null;  // Timer for PeerConnection disconnected. Will stop connection after timer.
   }
 
   onMessage(notification, message) {
@@ -183,13 +184,24 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
     });
   }
 
-  _unpublish(){
-    this._signaling.sendSignalingMessage('unpublish', {id: this._internalId});
+  _unpublish() {
+    this._signaling.sendSignalingMessage('unpublish', { id: this._internalId })
+      .catch(e => {
+        Logger.warning('MCU returns negative ack for unpublishing, ' + e);
+      });
+    if (this._pc.signalingState !== 'closed') {
+      this._pc.close();
+    }
   }
 
   _unsubscribe() {
-    this._signaling.sendSignalingMessage('unsubscribe', { id: this._internalId });
-    this._pc.close();
+    this._signaling.sendSignalingMessage('unsubscribe', { id: this._internalId })
+      .catch(e => {
+        Logger.warning('MCU returns negative ack for unsubscribing, +e');
+      });
+    if (this._pc.signalingState !== 'closed') {
+      this._pc.close();
+    }
   }
 
   _muteOrUnmute(isMute, isPub, trackKind) {
@@ -220,6 +232,32 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
     }
   }
 
+  _fireEndedEventOnPublicationOrSubscription() {
+    const event = new IcsEvent('ended')
+    if (this._publication) {
+      this._publication.dispatchEvent(event);
+      this._publication.stop();
+    } else if (this._subscription) {
+      this._subscription.dispatchEvent(event);
+      this._subscription.stop();
+    }
+  }
+
+  _onIceConnectionStateChange(event) {
+    if (event.currentTarget.iceConnectionState === 'closed' || event.currentTarget
+      .iceConnectionState === 'failed') {
+      const error = new ConferenceError('ICE connection failed or closed.');
+      // Rejecting corresponding promise if publishing and subscribing is ongoing.
+      if (this._publishPromise) {
+        this._publishPromise.reject(error);
+      } else if (this._subscribePromise) {
+        this._subscribePromise.reject(error);
+      }
+      // Fire ended event if publication or subscription exists.
+      this._fireEndedEventOnPublicationOrSubscription();
+    }
+  }
+
   _sendCandidate(candidate) {
     this._signaling.sendSignalingMessage('soac', {
       id: this._internalId,
@@ -241,6 +279,9 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
     };
     this._pc.onaddstream = (event) => {
       this._onRemoteStreamAdded.apply(this, [event]);
+    };
+    this._pc.oniceconnectionstatechange = (event) => {
+      this._onIceConnectionStateChange.apply(this, [event]);
     };
   }
 

@@ -42,14 +42,6 @@ export const errors = {
     message: 'Remote user cannot be reached.'
   },
   // 2301-2399 for chat room errors
-  P2P_CHATROOM_ATTENDEE_EXCEED: {
-    code: 2301,
-    message: "Exceed room's limitation"
-  },
-  P2P_CHATROOM_PEER_NOT_FOUND: {
-    code: 2302,
-    message: "Peer not found. Only one client in the room."
-  },
   // 2401-2499 for client errors
   P2P_CLIENT_UNKNOWN: {
     code: 2400,
@@ -67,6 +59,11 @@ export const errors = {
     code: 2403,
     message: 'Invalid peer state.'
   },
+  // 2501-2599 for WebRTC erros.
+  P2P_WEBRTC_UNKNOWN:{
+    code: 2500,
+    message: 'WebRTC error.'
+  },
 };
 
 export function getErrorByCode(errorCode) {
@@ -80,13 +77,12 @@ export function getErrorByCode(errorCode) {
     2120: errors.P2P_CONN_AUTH_UNKNOWN,
     2121: errors.P2P_CONN_AUTH_FAILED,
     2201: errors.P2P_MESSAGING_TARGET_UNREACHABLE,
-    2301: errors.P2P_CHATROOM_ATTENDEE_EXCEED,
-    2302: errors.P2P_CHATROOM_PEER_NOT_FOUND,
     2400: errors.P2P_CLIENT_UNKNOWN,
     2401: errors.P2P_CLIENT_UNSUPPORTED_METHOD,
     2402: errors.P2P_CLIENT_ILLEGAL_ARGUMENT,
     2403: errors.P2P_CLIENT_INVALID_STATE,
-    2404: errors.P2P_CLIENT_NOT_ALLOWED
+    2404: errors.P2P_CLIENT_NOT_ALLOWED,
+    2500: errors.P2P_WEBRTC_UNKNOWN
   };
   return codeErrorMap[errorCode];
 }
