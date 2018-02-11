@@ -74,8 +74,6 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
       mediaOptions.video = false;
     }
     this._signaling.sendSignalingMessage('publish', {
-      type: 'webrtc',
-      connection: undefined,
       media: mediaOptions,
       attributes: stream.attributes
     }).then((data) => {
@@ -142,8 +140,6 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
     }
     this._subscribedStream = stream;
     this._signaling.sendSignalingMessage('subscribe', {
-      type: 'webrtc',
-      connection: undefined,
       media: mediaOptions
     }).then((data) => {
       const messageEvent = new MessageEvent('id', {
