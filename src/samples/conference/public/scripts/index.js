@@ -445,7 +445,7 @@ const runSocketIOSample = function() {
     var jsonPatch = [{
       op: 'replace',
       path: '/permission/subscribe',
-      value: false
+      value: {audio: false, video: false}
     }];
     send('PATCH', '/rooms/' + room + '/participants/' + participant + '/',
       jsonPatch, onResponse);
@@ -455,7 +455,7 @@ const runSocketIOSample = function() {
     var jsonPatch = [{
       op: 'replace',
       path: '/permission/publish',
-      value: false
+      value: {audio: false, video: false}
     }];
     send('PATCH', '/rooms/' + room + '/participants/' + participant + '/',
       jsonPatch, onResponse);
