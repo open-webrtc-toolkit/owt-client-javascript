@@ -133,6 +133,8 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     let publicationForCamera;
     let publicationForScreen;
     var p2p = new Ics.P2P.P2PClient({
+      audioEncodings: true,
+      videoEncodings: [{codec:{name: 'h264'}}, {codec: {name: 'vp9'}}, {codec: {name: 'vp8'}}],
       iceServers: [{
         urls: "stun:example.com:3478"
       }, {

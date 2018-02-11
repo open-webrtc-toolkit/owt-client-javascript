@@ -688,12 +688,12 @@ class P2PPeerConnectionChannel extends EventDispatcher {
 
   _setCodecOrder(sdp) {
     if (this._config.audio) {
-      const audioCodecNames = Array.from(this._config.audio,
+      const audioCodecNames = Array.from(this._config.audioEncodings,
         encodingParameters => encodingParameters.codec.name);
       sdp = SdpUtils.reorderCodecs(sdp, 'audio', audioCodecNames);
     }
     if (this._config.video) {
-      const videoCodecNames = Array.from(this._config.video,
+      const videoCodecNames = Array.from(this._config.videoEncodings,
         encodingParameters => encodingParameters.codec.name);
       sdp = SdpUtils.reorderCodecs(sdp, 'video', videoCodecNames);
     }
@@ -799,7 +799,7 @@ class P2PPeerConnectionChannel extends EventDispatcher {
       return;
     }
     Logger.debug('Create data channel.');
-    const dc = this._pc.createDataChannel(label, null);
+    const dc = this._pc.createDataChannel(label);
     this._bindEventsToDataChannel(dc);
     this._dataChannels.set(DataChannelLabel.MESSAGE,dc);
   }
