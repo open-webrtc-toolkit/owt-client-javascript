@@ -96,6 +96,15 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
         offerToReceiveAudio: false,
         offerToReceiveVideo: false
       };
+      if (typeof this._pc.addTransceiver === 'function') {
+        // |direction| seems not working on Safari.
+        if (mediaOptions.audio) {
+          const audioTransceiver = this._pc.addTransceiver('audio', { direction: 'sendonly' });
+        }
+        if (mediaOptions.video) {
+          const videoTransceiver = this._pc.addTransceiver('video', { direction: 'sendonly' });
+        }
+      }
       this._pc.createOffer(offerOptions).then(desc => {
         if (options) {
           desc.sdp = this._setRtpReceiverOptions(desc.sdp, options);
@@ -160,6 +169,15 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
         offerToReceiveAudio: !!options.audio,
         offerToReceiveVideo: !!options.video
       };
+      if (typeof this._pc.addTransceiver === 'function') {
+        // |direction| seems not working on Safari.
+        if (mediaOptions.audio) {
+          const audioTransceiver = this._pc.addTransceiver('audio', { direction: 'recvonly' });
+        }
+        if (mediaOptions.video) {
+          const videoTransceiver = this._pc.addTransceiver('video', { direction: 'recvonly' });
+        }
+      }
       this._pc.createOffer(offerOptions).then(desc => {
         if (options) {
           desc.sdp = this._setRtpReceiverOptions(desc.sdp, options);
@@ -217,7 +235,13 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
 
   _onRemoteStreamAdded(event) {
     Logger.debug('Remote stream added.');
-    this._subscribedStream.mediaStream = event.stream;
+    if (this._subscribedStream) {
+      this._subscribedStream.mediaStream = event.stream;
+    } else {
+      // This is not expected path. However, this is going to happen on Safari
+      // because it does not support setting direction of transceiver.
+      Logger.warning('Received remote stream without subscription.');
+    }
   }
 
   _onLocalIceCandidate(event) {
@@ -244,6 +268,7 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
   }
 
   _onIceConnectionStateChange(event) {
+    Logger.debug('ICE connection state changed to ' + event.currentTarget.iceConnectionState);
     if (event.currentTarget.iceConnectionState === 'closed' || event.currentTarget
       .iceConnectionState === 'failed') {
       const error = new ConferenceError('ICE connection failed or closed.');
@@ -339,6 +364,8 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
             this._sendCandidate(candidate);
           }
         }
+      }, (error) => {
+        Logger.error('Set remote description failed: ' + error);
       });
     }
   }
