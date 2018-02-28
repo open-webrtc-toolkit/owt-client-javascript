@@ -170,9 +170,9 @@ class P2PPeerConnectionChannel extends EventDispatcher {
     }
   }
 
-  getStats() {
+  getStats(mediaStream) {
     if (this._pc) {
-      return this._pc.getStats();
+      return this._pc.getStats(mediaStream);
     } else {
       return Promise.reject(new ErrorModule.P2PError(ErrorModule.errors.P2P_CLIENT_INVALID_STATE));
     }
@@ -285,6 +285,8 @@ class P2PPeerConnectionChannel extends EventDispatcher {
                 return this._unpublish(targetStream).then(() => {
                   publication.dispatchEvent(new IcsEvent('ended'));
                 });
+              }, () => {
+                return this.getStats(targetStream.mediaStream);
               });
             this._publishedStreams.set(targetStream, publication);
             this._publishPromises.get(mediaStreamId).resolve(publication);
@@ -440,6 +442,10 @@ class P2PPeerConnectionChannel extends EventDispatcher {
     }
   }
 
+  _onRemoteTrackAdded(event) {
+    Logger.debug('Remote track added.');
+  }
+
   _onRemoteStreamAdded(event) {
     Logger.debug('Remote stream added.');
     this._remoteStreamTracks.set(event.stream.id, []);
@@ -452,6 +458,18 @@ class P2PPeerConnectionChannel extends EventDispatcher {
     this._sendSignalingMessage(SignalingType.TRACKS_ADDED, tracksInfo);
     const sourceInfo = new StreamModule.StreamSourceInfo(this._getAndDeleteTrackSourceInfo(
       event.stream.getAudioTracks()), this._getAndDeleteTrackSourceInfo(event.stream.getVideoTracks()));
+    if (Utils.isSafari()) {
+      if (!sourceInfo.audio) {
+        event.stream.getAudioTracks().forEach((track) => {
+          event.stream.removeTrack(track);
+        });
+      }
+      if (!sourceInfo.video) {
+        event.stream.getVideoTracks().forEach((track) => {
+          event.stream.removeTrack(track);
+        });
+      }
+    }
     const stream = new StreamModule.RemoteStream(undefined, this._remoteId, event.stream,
       sourceInfo);
     if (stream) {
@@ -584,6 +602,9 @@ class P2PPeerConnectionChannel extends EventDispatcher {
     }
     this._pc.onaddstream = (event) => {
       this._onRemoteStreamAdded.apply(this, [event]);
+    };
+    this._pc.ontrack = (event) => {
+      this._onRemoteTrackAdded.apply(this, [event]);
     };
     this._pc.onremovestream = (event) => {
       this._onRemoteStreamRemoved.apply(this, [event]);
