@@ -714,12 +714,12 @@ class P2PPeerConnectionChannel extends EventDispatcher {
   };
 
   _setCodecOrder(sdp) {
-    if (this._config.audio) {
+    if (this._config.audioEncodings) {
       const audioCodecNames = Array.from(this._config.audioEncodings,
         encodingParameters => encodingParameters.codec.name);
       sdp = SdpUtils.reorderCodecs(sdp, 'audio', audioCodecNames);
     }
-    if (this._config.video) {
+    if (this._config.videoEncodings) {
       const videoCodecNames = Array.from(this._config.videoEncodings,
         encodingParameters => encodingParameters.codec.name);
       sdp = SdpUtils.reorderCodecs(sdp, 'video', videoCodecNames);
