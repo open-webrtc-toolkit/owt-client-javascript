@@ -207,9 +207,8 @@ const P2PClient = function(configuration, signalingChannel) {
         'No PeerConnection between current endpoint and specific remote endpoint.'
       ));;
     }
-    return channels.get(remoteId).stop().then(()=>{
-      channels.delete(remoteId);
-    });
+    channels.get(remoteId).stop();
+    channels.delete(remoteId);
   };
 
   /**

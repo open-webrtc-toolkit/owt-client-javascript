@@ -150,7 +150,6 @@ class P2PPeerConnectionChannel extends EventDispatcher {
     if (this._pc && this._pc.iceConnectionState !== 'closed') {
       this._pc.close();
     }
-    this._pc = null;
     for (const [id, promise] of this._publishPromises) {
       promise.reject(new ErrorModule.P2PError(ErrorModule.errors.P2P_CLIENT_INVALID_STATE,
         'PeerConnection is closed.'))
