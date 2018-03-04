@@ -179,7 +179,9 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
         $('#target-video-publish').prop('disabled', false);
         $('#target-video-unpublish').prop('disabled', true);
         publicationForCamera.stop();
-        localStream.close();
+        for(const track of localStream.mediaStream.getTracks()){
+          track.stop();
+        }
         localStream = undefined;
       });
 
