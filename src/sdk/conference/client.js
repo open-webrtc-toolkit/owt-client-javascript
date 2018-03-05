@@ -248,7 +248,7 @@ export const ConferenceClient = function(config, signalingImpl) {
           .values()), Array.from(remoteStreams.values()), me));
       }, (e) => {
         signalingState = SignalingState.READY;
-        reject(new ConferenceError('Connect to server error.'))
+        reject(new ConferenceError(e))
       });
     });
   };
