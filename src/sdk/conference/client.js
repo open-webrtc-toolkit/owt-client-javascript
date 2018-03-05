@@ -144,9 +144,16 @@ export const ConferenceClient = function(config, signalingImpl) {
     if (streamInfo.type === 'mixed') {
       return new RemoteMixedStream(streamInfo);
     } else {
+      let audioSourceInfo, videoSourceInfo;
+      if (streamInfo.media.audio) {
+        audioSourceInfo = streamInfo.media.audio.source;
+      }
+      if (streamInfo.media.video) {
+        videoSourceInfo = streamInfo.media.video.source;
+      }
       const stream = new StreamModule.RemoteStream(streamInfo.id, streamInfo.info
-        .owner, undefined, new StreamModule.StreamSourceInfo(streamInfo.media
-          .audio.source, streamInfo.media.video.source));
+        .owner, undefined, new StreamModule.StreamSourceInfo(audioSourceInfo,
+          videoSourceInfo));
       stream.settings = StreamUtilsModule.convertToPublicationSettings(
         streamInfo.media);
       stream.capabilities = new StreamUtilsModule.convertToSubscriptionCapabilities(
