@@ -14,24 +14,38 @@ function handleResponse(status, data, resolve, reject) {
   }
 };
 
-export class ConferenceSioSignaling extends EventModule.EventDispatcher {
-  constructor() {
+/**
+ * @class SioSignaling
+ * @classdesc Socket.IO signaling channel for ConferenceClient. It is not recommended to directly access this class.
+ * @memberof Ics.Conference
+ * @extends Ics.Base.EventDispatcher
+ * @constructor
+ * @param {?Object } sioConfig Configuration for Socket.IO options.
+ * @see https://socket.io/docs/client-api/#io-url-options
+ */
+export class SioSignaling extends EventModule.EventDispatcher {
+  constructor(sioConfig) {
     super();
     this._socket = null;
+    this._sioConfig = sioConfig || {};
   }
 
   connect(host, isSecured, loginInfo) {
+    this._sioConfig.secure = isSecured;
+    if (this._sioConfig['force new connection'] === undefined) {
+      this._sioConfig['force new connection'] = true;
+    }
     return new Promise((resolve, reject) => {
-      this._socket = io.connect(host, {
-        reconnect: false,
-        secure: isSecured,
-        'force new connection': true
-      });
+      this._socket = io.connect(host, this._sioConfig);
       ['drop', 'participant', 'text', 'stream', 'progress'].forEach((
         notification) => {
         this._socket.on(notification, (data) => {
-          this.dispatchEvent(new EventModule.MessageEvent('data', { message: { notification: notification,
-              data: data } }));
+          this.dispatchEvent(new EventModule.MessageEvent('data', {
+            message: {
+              notification: notification,
+              data: data
+            }
+          }));
         });
       });
       this._socket.on('disconnect', () => {

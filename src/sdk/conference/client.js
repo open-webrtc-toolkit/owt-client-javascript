@@ -2,7 +2,7 @@
 'use strict';
 
 import * as EventModule from '../base/event.js'
-import { ConferenceSioSignaling as Signaling } from './signaling.js'
+import { SioSignaling as Signaling } from './signaling.js'
 import Logger from '../base/logger.js'
 import { Base64 } from '../base/base64.js'
 import { ConferenceError } from './error.js'
@@ -44,6 +44,7 @@ const ParticipantEvent = function(type, init) {
  * @extends Ics.Base.EventDispatcher
  * @constructor
  * @param {?ConferenceClientConfiguration } config Configuration for ConferenceClient.
+ * @param {?SioSignaling } signalingImpl Signaling channel implementation for ConferenceClient. SDK uses default signaling channel implementation if this parameter is undefined. Currently, a Socket.IO signaling channel implementation was provided as ics.conference.SioSignaling. However, it is not recommended to directly access signaling channel or customize signaling channel for ConferenceClient as this time.
  */
 export const ConferenceClient = function(config, signalingImpl) {
   config = config || {};
