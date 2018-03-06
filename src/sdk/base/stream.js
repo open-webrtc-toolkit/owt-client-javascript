@@ -41,12 +41,6 @@ export class StreamSourceInfo {
  * @memberOf Ics.Base
  * @classDesc Base class of streams.
  * @extends Ics.Base.EventDispatcher
- * Events:
- *
- * | Event Name      | Argument Type    | Fired when       |
- * | ----------------| ---------------- | ---------------- |
- * | ended           | Event            | Stream is ended. |
- *
  * @hideconstructor
  */
 export class Stream extends EventDispatcher {
@@ -109,9 +103,15 @@ export class LocalStream extends Stream {
 }
 /**
  * @class RemoteStream
- * @classDesc Stream sends from a remote endpoint.
+ * @classDesc Stream sent from a remote endpoint.
  * @memberOf Ics.Base
  * @extends Ics.Base.Stream
+ * Events:
+ *
+ * | Event Name      | Argument Type    | Fired when       |
+ * | ----------------| ---------------- | ---------------- |
+ * | ended           | Event            | Stream is ended. |
+ *
  * @hideconstructor
  */
 export class RemoteStream extends Stream {
