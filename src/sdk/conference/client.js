@@ -209,12 +209,14 @@ export const ConferenceClient = function(config, signalingImpl) {
       let host = token.host;
       if (typeof host !== 'string') {
         reject(new ConferenceError('Invalid host.'));
+        return;
       }
       if (host.indexOf('http') === -1) {
         host = isSecured ? ('https://' + host) : ('http://' + host);
       }
       if (signalingState !== SignalingState.READY) {
         reject(new ConferenceError('connection state invalid'));
+        return;
       }
 
       signalingState = SignalingState.CONNECTING;
