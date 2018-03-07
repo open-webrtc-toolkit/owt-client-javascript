@@ -8,13 +8,13 @@ import * as EventModule from '../base/event.js';
  * @class Participant
  * @memberOf Ics.Conference
  * @classDesc The Participant defines a participant in a conference.
- * @extends Ics.Base.EventDispatcher
  * Events:
  *
  * | Event Name      | Argument Type    | Fired when       |
  * | ----------------| ---------------- | ---------------- |
  * | left            | Event            | The participant left the conference. |
  *
+ * @extends Ics.Base.EventDispatcher
  * @hideconstructor
  */
 export class Participant extends EventModule.EventDispatcher {
