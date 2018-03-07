@@ -241,7 +241,7 @@ window.L = L;\n\
     },
     jsdoc : {
       dist : {
-        src: ['src/sdk/', 'docs/mdfiles/index.md'],
+        src: ['docs/mdfiles/index.md'],
         options: {
           destination: 'dist/doc',
           template : 'node_modules/ink-docstrap/template',

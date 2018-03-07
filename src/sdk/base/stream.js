@@ -92,7 +92,7 @@ export class LocalStream extends Stream {
     /**
      * @member {string} id
      * @instance
-     * @memberof Ics.Base.Stream
+     * @memberof Ics.Base.LocalStream
      */
     Object.defineProperty(this, 'id', {
       configurable: false,
@@ -120,7 +120,7 @@ export class RemoteStream extends Stream {
     /**
      * @member {string} id
      * @instance
-     * @memberof Ics.Base.Stream
+     * @memberof Ics.Base.RemoteStream
      */
     Object.defineProperty(this, 'id', {
       configurable: false,
@@ -130,7 +130,7 @@ export class RemoteStream extends Stream {
     /**
      * @member {string} origin
      * @instance
-     * @memberof Ics.Base.Stream
+     * @memberof Ics.Base.RemoteStream
      * @desc ID of the remote endpoint who published this stream.
      */
     Object.defineProperty(this, 'origin', {
