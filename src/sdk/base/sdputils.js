@@ -353,6 +353,10 @@ function maybePreferCodec(sdp, type, dir, codec) {
 // Set fmtp param to specific codec in SDP. If param does not exists, add it.
 function setCodecParam(sdp, codec, param, value) {
   var sdpLines = sdp.split('\r\n');
+  // SDPs sent from MCU use \n as line break.
+  if (sdpLines.length <= 1) {
+    sdpLines = sdp.split('\n');
+  }
 
   var fmtpLineIndex = findFmtpLine(sdpLines, codec);
 
@@ -594,5 +598,16 @@ export function reorderCodecs(sdp, type, codecs){
   }
 
   sdp = sdpLines.join('\r\n');
+  return sdp;
+}
+
+export function setMaxBitrate(sdp, encodingParametersList) {
+  for (const encodingParameters of encodingParametersList) {
+    if (encodingParameters.maxBitrate) {
+      sdp = setCodecParam(
+          sdp, encodingParameters.codec.name, 'x-google-max-bitrate',
+          (encodingParameters.maxBitrate / 1000).toString());
+    }
+  }
   return sdp;
 }

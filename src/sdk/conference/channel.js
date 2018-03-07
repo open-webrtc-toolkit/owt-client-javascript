@@ -16,6 +16,7 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
   constructor(config, signaling) {
     super();
     this._config = config;
+    this._options = null;
     this._signaling = signaling;
     this._pc = null;
     this._internalId = null; // It's publication ID or subscription ID.
@@ -48,6 +49,7 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
   }
 
   publish(stream, options) {
+    this._options = options;
     const mediaOptions = {};
     if (stream.mediaStream.getAudioTracks().length > 0) {
       if (stream.mediaStream.getAudioTracks().length > 1) {
@@ -130,6 +132,7 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
   }
 
   subscribe(stream, options) {
+    this._options = options;
     const mediaOptions = {};
     if (options.audio) {
       mediaOptions.audio = {};
@@ -358,6 +361,9 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
 
   _sdpHandler(sdp) {
     if (sdp.type === 'answer') {
+      if ((this._publication || this._publishPromise) && this._options) {
+        sdp.sdp = this._setRtpSenderOptions(sdp.sdp, this._options);
+      }
       this._pc.setRemoteDescription(sdp).then(() => {
         if (this._pendingCandidates.length > 0) {
           for (const candidate of this._pendingCandidates) {
@@ -415,7 +421,18 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
     return sdp;
   }
 
+  _setMaxBitrate(sdp, options) {
+    if (typeof options.audio === 'object') {
+      sdp = SdpUtils.setMaxBitrate(sdp, options.audio);
+    }
+    if (typeof options.video === 'object') {
+      sdp = SdpUtils.setMaxBitrate(sdp, options.video);
+    }
+    return sdp;
+  }
+
   _setRtpSenderOptions(sdp, options) {
+    sdp = this._setMaxBitrate(sdp, options);
     return sdp;
   }
 
