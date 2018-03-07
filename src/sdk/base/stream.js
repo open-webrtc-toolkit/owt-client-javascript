@@ -104,14 +104,14 @@ export class LocalStream extends Stream {
 /**
  * @class RemoteStream
  * @classDesc Stream sent from a remote endpoint.
- * @memberOf Ics.Base
- * @extends Ics.Base.Stream
  * Events:
  *
  * | Event Name      | Argument Type    | Fired when       |
  * | ----------------| ---------------- | ---------------- |
  * | ended           | Event            | Stream is ended. |
  *
+ * @memberOf Ics.Base
+ * @extends Ics.Base.Stream
  * @hideconstructor
  */
 export class RemoteStream extends Stream {
