@@ -371,9 +371,15 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
   }
 
   _errorHandler(errorMessage) {
+    const p = this._publishPromise || this._subscribePromise;
+    if (p) {
+      p.reject(new ConferenceError(errorMessage));
+      return;
+    }
     const dispatcher = this._publication || this._subscription;
     if (!dispatcher) {
       Logger.warning('Neither publication nor subscription is available.');
+      return;
     }
     const error = new ConferenceError(errorMessage);
     const errorEvent = new ErrorEvent('error', {
