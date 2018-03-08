@@ -184,6 +184,8 @@ export class SubscribeOptions {
  * | Event Name      | Argument Type    | Fired when       |
  * | ----------------| ---------------- | ---------------- |
  * | ended           | Event            | Subscription is ended. |
+ * | mute            | MuteEvent        | Publication is muted. Remote side stopped sending audio and/or video data. |
+ * | unmute          | MuteEvent        | Publication is unmuted. Remote side continued sending audio and/or video data. |
  *
  * @extends Ics.Base.EventDispatcher
  * @hideconstructor

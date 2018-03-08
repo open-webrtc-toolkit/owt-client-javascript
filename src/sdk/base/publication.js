@@ -96,6 +96,8 @@ export class PublicationSettings {
  * | Event Name      | Argument Type    | Fired when       |
  * | ----------------| ---------------- | ---------------- |
  * | ended           | Event            | Publication is ended. |
+ * | mute            | MuteEvent        | Publication is muted. Client stopped sending audio and/or video data to remote endpoint. |
+ * | unmute          | MuteEvent        | Publication is unmuted. Client continued sending audio and/or video data to remote endpoint. |
  *
  * @hideconstructor
  */
