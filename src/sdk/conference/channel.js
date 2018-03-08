@@ -216,9 +216,11 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
   }
 
   _unsubscribe() {
-    this._signaling.sendSignalingMessage('unsubscribe', { id: this._internalId })
+    this._signaling.sendSignalingMessage('unsubscribe', {
+        id: this._internalId
+      })
       .catch(e => {
-        Logger.warning('MCU returns negative ack for unsubscribing, +e');
+        Logger.warning('MCU returns negative ack for unsubscribing, ' + e);
       });
     if (this._pc.signalingState !== 'closed') {
       this._pc.close();
