@@ -9,66 +9,77 @@ import * as MediaFormatModule from './mediaformat.js'
  * @class AudioTrackConstraints
  * @classDesc Constraints for creating an audio MediaStreamTrack.
  * @memberof Ics.Base
+ * @constructor
+ * @param {AudioSourceInfo} source Source info of this audio track.
  */
 export class AudioTrackConstraints {
   constructor(source) {
-      if (!Object.values(MediaFormatModule.AudioSourceInfo).some(v => v ===
-          source)) {
-        throw new TypeError('Invalid source.');
-      }
-      this.source = source;
+    if (!Object.values(MediaFormatModule.AudioSourceInfo)
+             .some(v => v === source)) {
+      throw new TypeError('Invalid source.');
     }
     /**
-   * @member {string} source
-   * @memberof Ics.Base.AudioTrackConstraints
-   * @desc Values could be "mic", "screen-cast", "file" or "mixed".
-   * @instance
-   */
-  /**
-   * @member {string} deviceId
-   * @memberof Ics.Base.AudioTrackConstraints
-   * @desc Do not provide deviceId if source is not "mic".
-   * @instance
-   * @see https://w3c.github.io/mediacapture-main/#def-constraint-deviceId
-   */
+     * @member {string} source
+     * @memberof Ics.Base.AudioTrackConstraints
+     * @desc Values could be "mic", "screen-cast", "file" or "mixed".
+     * @instance
+     */
+    this.source = source;
+    /**
+     * @member {string} deviceId
+     * @memberof Ics.Base.AudioTrackConstraints
+     * @desc Do not provide deviceId if source is not "mic".
+     * @instance
+     * @see https://w3c.github.io/mediacapture-main/#def-constraint-deviceId
+     */
+     this.deviceId = undefined;
+  }
 }
 
 /**
  * @class VideoTrackConstraints
  * @classDesc Constraints for creating a video MediaStreamTrack.
  * @memberof Ics.Base
+ * @constructor
+ * @param {VideoSourceInfo} source Source info of this video track.
  */
 export class VideoTrackConstraints {
   constructor(source) {
-    if (!Object.values(MediaFormatModule.VideoSourceInfo).some(v => v ===
-        source)) {
+    if (!Object.values(MediaFormatModule.VideoSourceInfo)
+             .some(v => v === source)) {
       throw new TypeError('Invalid source.');
     }
+    /**
+     * @member {string} source
+     * @memberof Ics.Base.VideoTrackConstraints
+     * @desc Values could be "camera", "screen-cast", "file" or "mixed".
+     * @instance
+     */
     this.source = source;
+    /**
+     * @member {string} deviceId
+     * @memberof Ics.Base.VideoTrackConstraints
+     * @desc Do not provide deviceId if source is not "camera".
+     * @instance
+     * @see https://w3c.github.io/mediacapture-main/#def-constraint-deviceId
+     */
+
+    this.deviceId = undefined;
+
+    /**
+     * @member {Ics.Base.Resolution} resolution
+     * @memberof Ics.Base.VideoTrackConstraints
+     * @instance
+     */
+    this.resolution = undefined;
+
+    /**
+     * @member {number} frameRate
+     * @memberof Ics.Base.VideoTrackConstraints
+     * @instance
+     */
+    this.frameRate = undefined;
   }
-  /**
-   * @member {string} source
-   * @memberof Ics.Base.VideoTrackConstraints
-   * @desc Values could be "camera", "screen-cast", "file" or "mixed".
-   * @instance
-   */
-  /**
-   * @member {string} deviceId
-   * @memberof Ics.Base.VideoTrackConstraints
-   * @desc Do not provide deviceId if source is not "camera".
-   * @instance
-   * @see https://w3c.github.io/mediacapture-main/#def-constraint-deviceId
-   */
-  /**
-   * @member {Ics.Base.Resolution} resolution
-   * @memberof Ics.Base.VideoTrackConstraints
-   * @instance
-   */
-  /**
-   * @member {number} frameRate
-   * @memberof Ics.Base.VideoTrackConstraints
-   * @instance
-   */
 }
 /**
  * @class StreamConstraints
