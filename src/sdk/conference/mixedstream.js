@@ -7,14 +7,14 @@ import * as StreamUtilsModule from './streamutils.js'
 /**
  * @class RemoteMixedStream
  * @classDesc Mixed stream from conference server.
- * @memberOf Ics.Conference
- * @extends Ics.Base.RemoteStream
  * Events:
  *
  * | Event Name      | Argument Type    | Fired when       |
  * | ----------------| ---------------- | ---------------- |
  * | layoutchanged   | Event            | Video's layout has been changed. It usually happens when a new video is mixed into the target mixed stream or an existing video has been removed from mixed stream. |
  *
+ * @memberOf Ics.Conference
+ * @extends Ics.Base.RemoteStream
  * @hideconstructor
  */
 export class RemoteMixedStream extends StreamModule.RemoteStream {
@@ -25,9 +25,19 @@ export class RemoteMixedStream extends StreamModule.RemoteStream {
     super(info.id, undefined, undefined, new StreamModule.StreamSourceInfo(
       'mixed', 'mixed'));
 
-    /// Original settings for publishing this stream.
+    /**
+     * @member {Ics.Base.PublicationSettings} settings
+     * @instance
+     * @memberof Ics.Conference.RemoteMixedStream
+     * @desc Original settings for publishing this stream.
+     */
     this.settings = StreamUtilsModule.convertToPublicationSettings(info.media);
-    /// Capabilities remote endpoint provides for subscription.
+    /**
+     * @member {Ics.Conference.SubscriptionCapabilities} capabilities
+     * @instance
+     * @memberof Ics.Conference.RemoteMixedStream
+     * @desc Capabilities remote endpoint provides for subscription.
+     */
     this.capabilities = new StreamUtilsModule.convertToSubscriptionCapabilities(
       info.media);
   }

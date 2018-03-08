@@ -226,7 +226,7 @@ export class Subscription extends EventDispatcher {
    * @function mute
    * @instance
    * @desc Stop reeving data from remote endpoint.
-   * @memberof Ics.Base.Subscription
+   * @memberof Ics.Conference.Subscription
    * @returns {Promise<undefined, Error>}
    */
     this.mute=mute;
@@ -234,7 +234,7 @@ export class Subscription extends EventDispatcher {
    * @function unmute
    * @instance
    * @desc Continue reeving data from remote endpoint.
-   * @memberof Ics.Base.Subscription
+   * @memberof Ics.Conference.Subscription
    * @returns {Promise<undefined, Error>}
    */
     this.unmute=unmute;

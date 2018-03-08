@@ -148,3 +148,25 @@ export class Publication extends EventDispatcher {
     this.unmute=unmute;
   }
 }
+
+/**
+ * @class PublishOptions
+ * @memberOf Ics.Base
+ * @classDesc PublishOptions defines options for publishing a Ics.Base.LocalStream.
+ */
+export class PublishOptions {
+  constructor(audio, video) {
+    /**
+     * @member {?Array<AudioEncodingParameters>} audio
+     * @instance
+     * @memberof Ics.Base.PublishOptions
+     */
+    this.audio = audio;
+    /**
+     * @member {?Array<VideoEncodingParameters>} video
+     * @instance
+     * @memberof Ics.Base.PublishOptions
+     */
+    this.video = video;
+  }
+}

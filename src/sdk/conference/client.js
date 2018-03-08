@@ -260,7 +260,8 @@ export const ConferenceClient = function(config, signalingImpl) {
    * @memberof Ics.Conference.ConferenceClient
    * @instance
    * @desc Publish a LocalStream to conference server. Other participants will be able to subscribe this stream when it is successfully published.
-   * @param {LocalStream} stream The stream to be published.
+   * @param {Ics.Base.LocalStream} stream The stream to be published.
+   * @param {Ics.Base.PublishOptions} options Options for publication.
    * @returns {Promise<Publication, Error>} Returned promise will be resolved with a newly created Publication once specific stream is successfully published, or rejected with a newly created Error if stream is invalid or options cannot be satisfied. Successfully published means PeerConnection is established and server is able to process media data.
    */
   this.publish = function(stream, options) {
@@ -280,8 +281,8 @@ export const ConferenceClient = function(config, signalingImpl) {
    * @memberof Ics.Conference.ConferenceClient
    * @instance
    * @desc Subscribe a RemoteStream from conference server.
-   * @param {RemoteStream} stream The stream to be subscribed.
-   * @param {Ics.Conference.SubscriptionOptions} options Options for subscription.
+   * @param {Ics.Base.RemoteStream} stream The stream to be subscribed.
+   * @param {Ics.Conference.SubscribeOptions} options Options for subscription.
    * @returns {Promise<Subscription, Error>} Returned promise will be resolved with a newly created Subscription once specific stream is successfully subscribed, or rejected with a newly created Error if stream is invalid or options cannot be satisfied. Successfully subscribed means PeerConnection is established and server was started to send media data.
    */
   this.subscribe = function(stream, options) {
