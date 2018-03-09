@@ -35,8 +35,9 @@ app.use(function(req, res, next) {
 icsREST.API.init('_service_ID_', '_service_KEY_', 'http://localhost:3000/', true);
 
 var sampleRoom;
+var pageOption = { page: 1, per_page: 100 };
 (function initSampleRoom () {
-  icsREST.API.getRooms(function(rooms) {
+  icsREST.API.getRooms(pageOption, function(rooms) {
     console.log(rooms.length + ' rooms in this service.');
     for (var i = 0; i < rooms.length; i++) {
       if (sampleRoom === undefined && rooms[i].name === 'sampleRoom') {
@@ -111,7 +112,7 @@ app.post('/createRoom/', function(req, res) {
 });
 app.get('/getRooms/', function(req, res) {
   'use strict';
-  icsREST.API.getRooms(function(rooms) {
+  icsREST.API.getRooms(pageOption, function(rooms) {
     res.send(rooms);
   }, function(err) {
     res.send(err);
@@ -180,7 +181,7 @@ app.post('/rooms', function(req, res) {
 
 app.get('/rooms', function(req, res) {
   'use strict';
-  icsREST.API.getRooms(function(rooms) {
+  icsREST.API.getRooms(pageOption, function(rooms) {
     res.send(rooms);
   }, function(err) {
     res.send(err);

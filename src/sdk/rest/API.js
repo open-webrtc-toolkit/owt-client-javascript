@@ -323,8 +323,12 @@ ICS_REST.API = (function(ICS_REST) {
     console.log(status, error);
   });
      */
-  var getRooms = function(callback, callbackError) {
-    send('GET', 'rooms', undefined, function(roomsRtn) {
+  var getRooms = function(option, callback, callbackError) {
+    option = option || {};
+    var page = option.page || 1;
+    var per_page = option.per_page || 50;
+    var query = '?page=' + page + '&per_page=' + per_page;
+    send('GET', 'rooms' + query, undefined, function(roomsRtn) {
       var rooms = JSON.parse(roomsRtn);
       callback(rooms);
     }, callbackError);
