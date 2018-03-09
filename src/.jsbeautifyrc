@@ -18,6 +18,5 @@
   "wrap_line_length": 80,
   "wrap_attributes": "auto",
   "wrap_attributes_indent_size": 2,
-  "end_with_newline": true,
-  "newline_between_rules": false
+  "end_with_newline": true
 }
