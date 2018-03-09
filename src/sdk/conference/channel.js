@@ -229,6 +229,10 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
     const eventName = isPub ? 'stream-control' :
       'subscription-control';
     const operation = isMute ? 'pause' : 'play';
+    if (!isPub) {
+      const muteEventName = isMute ? 'mute' : 'unmute';
+      this._subscription.dispatchEvent(new MuteEvent(muteEventName, { kind: trackKind }));
+    }
     return this._signaling.sendSignalingMessage(eventName, {
       id: this._internalId,
       operation: operation,
@@ -444,14 +448,14 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
   // Handle stream event sent from MCU. Some stream events should be publication event or subscription event. It will be handled here.
   _onStreamEvent(message) {
     let eventTarget;
-    if (this._publishedStream && message.id === this._publishedStream.id) {
+    if (this._publication && message.id === this._publication.id) {
       eventTarget = this._publication;
     } else if (
       this._subscribedStream && message.id === this._subscribedStream.id) {
       eventTarget = this._subscription;
     }
     if (!eventTarget) {
-      Logger.warning('Cannot find valid event target.');
+      Logger.debug('Cannot find valid event target.');
       return;
     }
     let trackKind;
