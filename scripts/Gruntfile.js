@@ -265,8 +265,8 @@ window.L = L;\n\
   grunt.loadNpmTasks('grunt-contrib-connect');
   grunt.loadNpmTasks('grunt-jsdoc');
 
-  grunt.registerTask('build', ['eslint:src', 'concat:dist', 'concat:ui_dist', 'concat:nuve', 'concat:rest', 'jshint:dist', 'concat:merge', 'uglify:dist','copy:dist','string-replace','compress:dist']);
-  grunt.registerTask('debug', ['concat:dist_debug', 'concat:ui_dist_debug', 'concat:nuve_debug', 'concat:icsREST_debug']);
+  grunt.registerTask('build', ['eslint:src', 'concat:dist', 'concat:ui_dist', 'concat:rest', 'jshint:dist', 'concat:merge', 'uglify:dist','copy:dist','string-replace','compress:dist']);
+  grunt.registerTask('debug', ['concat:dist_debug', 'concat:ui_dist_debug', 'concat:icsREST_debug']);
 
   grunt.registerTask('pack', ['browserify:dist', 'concat:rest', 'uglify:dist', 'copy:dist', 'compress:dist', 'jsdoc:dist']);
   grunt.registerTask('dev', ['browserify:dev', 'connect:server']);
