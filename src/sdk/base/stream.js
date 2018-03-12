@@ -82,6 +82,9 @@ export class Stream extends EventDispatcher {
  * @classDesc Stream captured from current endpoint.
  * @memberOf Ics.Base
  * @extends Ics.Base.Stream
+ * @constructor
+ * @param {MediaStream} stream Underlying MediaStream.
+ * @param {Ics.Base.StreamSourceInfo} sourceInfo Information about stream's source.
  */
 export class LocalStream extends Stream {
   constructor(stream, sourceInfo) {
