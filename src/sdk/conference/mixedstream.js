@@ -25,19 +25,8 @@ export class RemoteMixedStream extends StreamModule.RemoteStream {
     super(info.id, undefined, undefined, new StreamModule.StreamSourceInfo(
       'mixed', 'mixed'));
 
-    /**
-     * @member {Ics.Base.PublicationSettings} settings
-     * @instance
-     * @memberof Ics.Conference.RemoteMixedStream
-     * @desc Original settings for publishing this stream.
-     */
     this.settings = StreamUtilsModule.convertToPublicationSettings(info.media);
-    /**
-     * @member {Ics.Conference.SubscriptionCapabilities} capabilities
-     * @instance
-     * @memberof Ics.Conference.RemoteMixedStream
-     * @desc Capabilities remote endpoint provides for subscription.
-     */
+
     this.capabilities = new StreamUtilsModule.convertToSubscriptionCapabilities(
       info.media);
   }

@@ -141,6 +141,20 @@ export class RemoteStream extends Stream {
       writable: false,
       value: origin
     });
+    /**
+     * @member {Ics.Base.PublicationSettings} settings
+     * @instance
+     * @memberof Ics.Base.RemoteStream
+     * @desc Original settings for publishing this stream. This property is only valid in conference mode.
+     */
+    this.settings = undefined;
+    /**
+     * @member {Ics.Conference.SubscriptionCapabilities} capabilities
+     * @instance
+     * @memberof Ics.Base.RemoteStream
+     * @desc Capabilities remote endpoint provides for subscription. This property is only valid in conference mode.
+     */
+    this.capabilities = undefined;
   }
 }
 
