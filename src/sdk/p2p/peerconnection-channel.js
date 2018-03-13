@@ -40,8 +40,6 @@ const DataChannelLabel = {
 };
 
 const SignalingType = {
-  INVITATION: 'chat-invitation',
-  ACCEPTANCE:'chat-accepted',
   DENIED: 'chat-denied',
   CLOSED: 'chat-closed',
   NEGOTIATION_NEEDED:'chat-negotiation-needed',
@@ -49,7 +47,8 @@ const SignalingType = {
   SDP: 'chat-signal',
   TRACKS_ADDED: 'chat-tracks-added',
   TRACKS_REMOVED: 'chat-tracks-removed',
-  DATA_RECEIVED: 'chat-data-received'
+  DATA_RECEIVED: 'chat-data-received',
+  UA: 'chat-ua'
 }
 
 const offerOptions = {
@@ -78,10 +77,8 @@ class P2PPeerConnectionChannel extends EventDispatcher {
     this._publishingStreamTracks = new Map();  // Key is MediaStream's ID, value is an array of the ID of its MediaStreamTracks that haven't been acked.
     this._publishedStreamTracks = new Map();  // Key is MediaStream's ID, value is an array of the ID of its MediaStreamTracks that haven't been removed.
     this._remoteStreamTracks = new Map();  // Key is MediaStream's ID, value is an array of the ID of its MediaStreamTracks.
-    this._isCaller = false;
     this._negotiationState = NegotiationState.READY;
     this._isNegotiationNeeded = false;
-    this._channelState=ChannelState.READY;
     this._remoteSideSupportsRemoveStream = true;
     this._remoteSideSupportsPlanB = true;
     this._remoteSideSupportsUnifiedPlan = true;
@@ -90,6 +87,8 @@ class P2PPeerConnectionChannel extends EventDispatcher {
     this._pendingMessages = [];
     this._dataSeq = 1;  // Sequence number for data channel messages.
     this._sendDataPromises = new Map();  // Key is data sequence number, value is an object has |resolve| and |reject|.
+
+    this._createPeerConnection();
   }
 
   publish(stream) {
@@ -97,11 +96,10 @@ class P2PPeerConnectionChannel extends EventDispatcher {
       return Promise.reject(new ErrorModule.P2PError(ErrorModule.errors.P2P_CLIENT_ILLEGAL_ARGUMENT,
         'Duplicated stream.'));
     }
-    if (this._channelState === ChannelState.READY) {
-      this._invite();
-    }
+    this._sendSysInfo();
+    this._sendStreamSourceInfo(stream);
     // Replace |addStream| with PeerConnection.addTrack when all browsers are ready.
-    //this._pc.addStream(stream.mediaStream);
+    this._pc.addStream(stream.mediaStream);
     this._pendingStreams.push(stream);
     const trackIds = Array.from(stream.mediaStream.getTracks(), track => track.id);
     this._publishingStreamTracks.set(stream.mediaStream.id, trackIds);
@@ -110,7 +108,6 @@ class P2PPeerConnectionChannel extends EventDispatcher {
         resolve: resolve,
         reject: reject
       });
-      this._drainPendingStreams();
     });
   }
 
@@ -125,11 +122,6 @@ class P2PPeerConnectionChannel extends EventDispatcher {
         reject: reject
       });
     });
-    if (this._channelState === ChannelState.READY) {
-      this._invite();
-      this._pendingMessages.push(data);
-      return promise;
-    }
     if (!this._dataChannels.has(DataChannelLabel.MESSAGE)) {
       this._createDataChannel(DataChannelLabel.MESSAGE);
     }
@@ -192,44 +184,14 @@ class P2PPeerConnectionChannel extends EventDispatcher {
     this._signaling.sendSignalingMessage(this._remoteId, type, message);
   }
 
-  _invite() {
-    if (this._channelState === ChannelState.READY) {
-      this._channelState = ChannelState.OFFERED;
-      this._sendSignalingMessage(SignalingType.CLOSED);
-      this._sendSignalingMessage(SignalingType.INVITATION, {
-        ua: sysInfo
-      });
-    } else {
-      Logger.debug('Cannot send invitation during this state: ' + this._channelState);
-    }
-    this._isCaller = true;
-  }
-
-  _accept() {
-    if (this._channelState === ChannelState.PENDING) {
-      this._sendSignalingMessage(SignalingType.ACCEPTANCE, {
-        ua: sysInfo
-      });
-      this._channelState = ChannelState.MATCHED;
-    } else {
-      Logger.debug('Cannot send acceptance during this state: ' + this._channelState);
-    }
-  }
-
   _SignalingMesssageHandler(message) {
     Logger.debug('Channel received message: ' + message);
     switch (message.type) {
-      case SignalingType.INVITATION:
-        this._chatInvitationHandler(message.data.ua);
-        break;
       case SignalingType.DENIED:
         this._chatDeniedHandler();
         break;
-      case SignalingType.ACCEPTANCE:
-        this._chatAcceptedHandler(message.data.ua);
-        break;
-      case SignalingType.NEGOTIATION_NEEDED:
-        this._negotiationNeededHandler();
+      case SignalingType.UA:
+        this._handleRemoteCapability(message.data);
         break;
       case SignalingType.TRACK_SOURCES:
         this._trackSourcesHandler(message.data);
@@ -330,34 +292,6 @@ class P2PPeerConnectionChannel extends EventDispatcher {
     }
   }
 
-  _chatInvitationHandler(ua) {
-    Logger.debug('Received chat invitation.');
-    this._channelState = ChannelState.PENDING;
-    // Rejection of an invitation will be performed in P2PClient since no PeerConnectionChannel will be constructed.
-    this._accept();
-  }
-
-  _chatAcceptedHandler(ua) {
-    Logger.debug('Received chat accepted.');
-    this._handleRemoteCapability(ua);
-    this._channelState = ChannelState.CONNECTING;
-    this._createPeerConnection();
-  }
-
-  _negotiationNeededHandler() {
-    Logger.debug('Remote side needs negotiation.');
-    if (this._isCaller && this._pc.signalingState === 'stable' &&
-      this._negotiationState ===
-      NegotiationState.READY) {
-      this._doNegotiate();
-    } else {
-      this._isNegotiationNeeded = true;
-      Logger.warning(
-        'Should not receive negotiation needed request because user is callee.'
-      );
-    }
-  }
-
   _sdpHandler(sdp) {
     if (sdp.type === 'offer') {
       this._onOffer(sdp);
@@ -383,50 +317,31 @@ class P2PPeerConnectionChannel extends EventDispatcher {
   }
 
   _onOffer(sdp) {
-    switch (this._channelState) {
-      case ChannelState.OFFERED:
-      case ChannelState.MATCHED:
-        this._channelState = ChannelState.CONNECTING;
-        this._createPeerConnection(); /*jshint ignore:line*/ //Expected a break before case.
-      case ChannelState.CONNECTING:
-      case ChannelState.CONNECTED:
-        Logger.debug('About to set remote description. Signaling state: ' +
-          this._pc.signalingState);
-        // event.message.sdp = setRtpSenderOptions(event.message.sdp);
-        const sessionDescription = new RTCSessionDescription(sdp);
-        this._pc.setRemoteDescription(sessionDescription).then(() => {
-          this._createAndSendAnswer();
-          //this._drainIceCandidates();
-        }, function(errorMessage) {
-          Logger.debug('Set remote description failed. Message: ' + JSON.stringify(
-            errorMessage));
-        });
-        break;
-      default:
-        Logger.debug('Unexpected peer state: ' + this._channelState);
-    }
+    Logger.debug('About to set remote description. Signaling state: ' +
+      this._pc.signalingState);
+    // event.message.sdp = setRtpSenderOptions(event.message.sdp);
+    const sessionDescription = new RTCSessionDescription(sdp);
+    this._pc.setRemoteDescription(sessionDescription).then(() => {
+      this._createAndSendAnswer();
+    }, function(errorMessage) {
+      Logger.debug('Set remote description failed. Message: ' + JSON.stringify(
+        errorMessage));
+    });
   }
 
   _onAnswer(sdp) {
-    if (this._channelState === ChannelState.CONNECTING || this._channelState ===
-      ChannelState.CONNECTED) {
-      Logger.debug('About to set remote description. Signaling state: ' +
-        this._pc.signalingState);
-      //event.message.sdp = setRtpSenderOptions(event.message.sdp);
-      const sessionDescription = new RTCSessionDescription(sdp);
-      this._pc.setRemoteDescription(new RTCSessionDescription(
-        sessionDescription)).then(() => {
-        Logger.debug('Set remote descripiton successfully.');
-        //this._drainIceCandidates(peer);
-        this._drainPendingMessages();
-      }, function(errorMessage) {
-        Logger.debug('Set remote description failed. Message: ' +
-          errorMessage);
-      });
-    } else {
-      Logger.warning('Received answer at invalid state. Current state: ' + this
-        ._channelState);
-    }
+    Logger.debug('About to set remote description. Signaling state: ' +
+      this._pc.signalingState);
+    //event.message.sdp = setRtpSenderOptions(event.message.sdp);
+    const sessionDescription = new RTCSessionDescription(sdp);
+    this._pc.setRemoteDescription(new RTCSessionDescription(
+      sessionDescription)).then(() => {
+      Logger.debug('Set remote descripiton successfully.');
+      this._drainPendingMessages();
+    }, function(errorMessage) {
+      Logger.debug('Set remote description failed. Message: ' +
+        errorMessage);
+    });
   }
 
   _onLocalIceCandidate(event) {
@@ -505,34 +420,31 @@ class P2PPeerConnectionChannel extends EventDispatcher {
   }
 
   _onNegotiationneeded() {
+    // TODO: send NEGOTIATION-NEEDED message.
     Logger.debug('On negotiation needed.');
-    if (this._isCaller && this._pc.signalingState === 'stable' && this._negotiationState ===
+
+    if (this._pc.signalingState === 'stable' && this._negotiationState ===
       NegotiationState.READY) {
       this._doNegotiate();
-    } else if (!this._isCaller) {
-      this._sendSignalingMessage(SignalingType.NEGOTIATION_NEEDED);
     } else {
       this._isNegotiationNeeded = true;
     }
   }
 
   _onRemoteIceCandidate(candidateInfo) {
-    if (this._channelState === ChannelState.OFFERED || this._channelState ===
-      ChannelState.CONNECTING || this._channelState === ChannelState.CONNECTED) {
-      const candidate = new RTCIceCandidate({
-        candidate: candidateInfo.candidate,
-        sdpMid: candidateInfo.sdpMid,
-        sdpMLineIndex: candidateInfo.sdpMLineIndex
+    const candidate = new RTCIceCandidate({
+      candidate: candidateInfo.candidate,
+      sdpMid: candidateInfo.sdpMid,
+      sdpMLineIndex: candidateInfo.sdpMLineIndex
+    });
+    if (this._pc.remoteDescription.sdp !== "") {
+      Logger.debug('Add remote ice candidates.');
+      this._pc.addIceCandidate(candidate).catch(error=>{
+        Logger.warning('Error processing ICE candidate: '+error);
       });
-      if (this._pc) {
-        Logger.debug('Add remote ice candidates.');
-        this._pc.addIceCandidate(candidate).catch(error=>{
-          Logger.warning('Error processing ICE candidate: '+error);
-        });
-      } else {
-        Logger.debug('Cache remote ice candidates.');
-        this._remoteIceCandidates.push(candidate);
-      }
+    } else {
+      Logger.debug('Cache remote ice candidates.');
+      this._remoteIceCandidates.push(candidate);
     }
   };
 
@@ -542,12 +454,14 @@ class P2PPeerConnectionChannel extends EventDispatcher {
       //stopChatLocally(peer, peer.id);
     } else if (this._pc.signalingState === 'stable') {
       this._negotiationState = NegotiationState.READY;
-      if (this._isCaller && this._isNegotiationNeeded) {
+      if (this._isNegotiationNeeded) {
         this._doNegotiate();
       } else {
         this._drainPendingStreams();
         this._drainPendingMessages();
       }
+    } else if (this._pc.signalingState === 'have-remote-offer') {
+      this._drainPendingRemoteIceCandidates();
     }
   };
 
@@ -630,8 +544,6 @@ class P2PPeerConnectionChannel extends EventDispatcher {
       }
       this._bindEventsToDataChannel(event.channel);
     };
-    this._drainPendingStreams();
-    this._drainPendingMessages();
     /*
     this._pc.onicecandidate = _onIceChannelStateChange;
 
@@ -686,6 +598,16 @@ class P2PPeerConnectionChannel extends EventDispatcher {
     }
   }
 
+  _drainPendingRemoteIceCandidates() {
+    for (var i = 0; i < this._remoteIceCandidates.length; i++) {
+      Logger.debug('Add candidate');
+      this._pc.addIceCandidate(this._remoteIceCandidates[i]).catch(error=>{
+        Logger.warning('Error processing ICE candidate: '+error);
+      });
+    }
+    this._remoteIceCandidates.length = 0;
+  }
+
   _drainPendingMessages(){
     Logger.debug('Draining pending messages.');
     if (this._pendingMessages.length == 0) {
@@ -714,6 +636,10 @@ class P2PPeerConnectionChannel extends EventDispatcher {
     this._sendSignalingMessage(SignalingType.TRACK_SOURCES, info);
   }
 
+  _sendSysInfo() {
+    this._sendSignalingMessage(SignalingType.UA, sysInfo);
+  }
+
   _handleRemoteCapability(ua) {
     if (ua.sdk && ua.sdk && ua.sdk.type === "JavaScript" && ua.runtime && ua.runtime
       .name === "Firefox") {
@@ -728,7 +654,6 @@ class P2PPeerConnectionChannel extends EventDispatcher {
   }
 
   _doNegotiate() {
-    Logger.debug('Do negotiation.');
     this._negotiationState = NegotiationState.NEGOTIATING;
     this._createAndSendOffer();
   };
@@ -765,7 +690,6 @@ class P2PPeerConnectionChannel extends EventDispatcher {
       this._negotiationState = NegotiationState.NEGOTIATING;
       return;
     }
-    this._drainPendingStreams();
     this._isNegotiationNeeded = false;
     this._pc.createOffer(offerOptions).then(desc => {
       desc.sdp = this._setRtpReceiverOptions(desc.sdp);
