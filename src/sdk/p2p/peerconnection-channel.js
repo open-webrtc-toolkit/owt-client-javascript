@@ -48,7 +48,8 @@ const SignalingType = {
   TRACKS_ADDED: 'chat-tracks-added',
   TRACKS_REMOVED: 'chat-tracks-removed',
   DATA_RECEIVED: 'chat-data-received',
-  UA: 'chat-ua'
+  UA: 'chat-ua',
+  FAILED: 'chat-failed'
 }
 
 const offerOptions = {
@@ -175,6 +176,20 @@ class P2PPeerConnectionChannel extends EventDispatcher {
     this._SignalingMesssageHandler(message);
   }
 
+  _onError(errorMessage) {
+    var errorMsg = {
+      code: 2000,
+      message: errorMessage
+    };
+    this._sendSignalingMessage(SignalingType.FAILED, errorMsg);
+    for (const [id, promise] of this._publishPromises) {
+      promise.reject(new ErrorModule.P2PError(ErrorModule.errors.P2P_WEBRTC_UNKNOWN,
+        'PeerConnection is closed.'))
+    }
+    this._publishPromises.clear();
+    this.dispatchEvent(new Event('ended'));
+  }
+
   _sendSdp(sdp) {
     this._signaling.sendSignalingMessage(this._remoteId, SignalingType.SDP,
       sdp);
@@ -210,6 +225,9 @@ class P2PPeerConnectionChannel extends EventDispatcher {
         break;
       case SignalingType.CLOSED:
         this._chatClosedHandler();
+        break;
+      case SignalingType.FAILED:
+        this._chatFailedHandler();
         break;
       default:
         Logger.error('Invalid signaling message received. Type: ' + message.type);
@@ -316,6 +334,10 @@ class P2PPeerConnectionChannel extends EventDispatcher {
     this.stop();
   }
 
+  _chatFailedHandler() {
+    this.stop();
+  }
+
   _onOffer(sdp) {
     Logger.debug('About to set remote description. Signaling state: ' +
       this._pc.signalingState);
@@ -326,6 +348,7 @@ class P2PPeerConnectionChannel extends EventDispatcher {
     }, function(errorMessage) {
       Logger.debug('Set remote description failed. Message: ' + JSON.stringify(
         errorMessage));
+      this._onError(errorMessage);
     });
   }
 
@@ -341,6 +364,7 @@ class P2PPeerConnectionChannel extends EventDispatcher {
     }, function(errorMessage) {
       Logger.debug('Set remote description failed. Message: ' +
         errorMessage);
+      this._onError(errorMessage);
     });
   }
 
@@ -700,10 +724,12 @@ class P2PPeerConnectionChannel extends EventDispatcher {
       }, function(errorMessage) {
         Logger.error('Set local description failed. Message: ' + JSON
           .stringify(errorMessage));
+        this._onError(error);
       });
     }, function(error) {
       Logger.error('Create offer failed. Error info: ' + JSON.stringify(
         error));
+      this._onError(error);
     });
   }
 
@@ -719,9 +745,11 @@ class P2PPeerConnectionChannel extends EventDispatcher {
         Logger.error(
           "Error occurred while setting local description. Error message:" +
           errorMessage);
+        this._onError(errorMessage);
       });
     }, function(error) {
       Logger.error('Create answer failed. Message: ' + error);
+      this._onError(errorMessage);
     });
   }
 
