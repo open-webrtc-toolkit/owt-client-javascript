@@ -8,6 +8,9 @@ export function isFirefox() {
 export function isChrome() {
   return window.navigator.userAgent.match('Chrome') !== null;
 }
+export function isSafari() {
+  return /^((?!chrome|android).)*safari/i.test(window.navigator.userAgent);
+}
 export function createUuid() {
   return 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
     var r = Math.random() * 16 | 0,
@@ -29,6 +32,7 @@ export function sysInfo() {
   var firefoxRegex = /Firefox\/([0-9\.]+)/;
   var chromeRegex = /Chrome\/([0-9\.]+)/;
   var edgeRegex = /Edge\/([0-9\.]+)/;
+  var safariVersionRegex = /Version\/([0-9\.]+) Safari/;
   var result = chromeRegex.exec(userAgent);
   if (result) {
     info.runtime = {
@@ -45,6 +49,12 @@ export function sysInfo() {
       name: 'Edge',
       version: result[1]
     };
+  } else if (isSafari()) {
+    result = safariVersionRegex.exec(userAgent);
+    info.runtime = {
+      name: 'Safari',
+      version: result[1]
+    }
   } else {
     info.runtime = {
       name: 'Unknown',
