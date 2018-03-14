@@ -11,7 +11,7 @@ import * as StreamModule from '../base/stream.js'
 import { Participant } from './participant.js'
 import { ConferenceInfo } from './info.js'
 import { ConferencePeerConnectionChannel } from './channel.js'
-import { RemoteMixedStream } from './mixedstream.js'
+import { RemoteMixedStream, ActiveAudioInputChangeEvent, LayoutChangeEvent } from './mixedstream.js'
 import * as StreamUtilsModule from './streamutils.js'
 
 const SignalingState = {
@@ -91,10 +91,17 @@ export const ConferenceClient = function(config, signalingImpl) {
         fireStreamRemoved(data);
       } else if(data.status === 'update') {
         // Boardcast audio/video update status to channel so specific events can be fired on publication or subscription.
-        if(data.data.field === 'audio.status'||data.data.field === 'video.status'){
-          channels.forEach(c=>{
+        if (data.data.field === 'audio.status' || data.data.field ===
+          'video.status') {
+          channels.forEach(c => {
             c.onMessage(notification, data);
           });
+        } else if (data.data.field === 'activeInput') {
+          fireActiveAudioInputChange(data);
+        } else if (data.data.field === 'video.layout') {
+          fireLayoutChange(data);
+        } else {
+          Logger.warning('Unknown stream event from MCU.');
         }
       }
     } else if (notification === 'text') {
@@ -160,6 +167,33 @@ export const ConferenceClient = function(config, signalingImpl) {
     remoteStreams.delete(stream.id);
     stream.dispatchEvent(streamEvent);
   }
+
+  function fireActiveAudioInputChange(info) {
+    if (!remoteStreams.has(info.id)) {
+      Logger.warning('Cannot find specific remote stream.');
+      return;
+    }
+    const stream = remoteStreams.get(info.id);
+    const streamEvent = new ActiveAudioInputChangeEvent(
+      'activeaudioinputchange', {
+        activeAudioInputStreamId: info.data.value
+      });
+    stream.dispatchEvent(streamEvent);
+  }
+
+  function fireLayoutChange(info) {
+    if (!remoteStreams.has(info.id)) {
+      Logger.warning('Cannot find specific remote stream.');
+      return;
+    }
+    const stream = remoteStreams.get(info.id);
+    const streamEvent = new LayoutChangeEvent(
+      'layoutchange', {
+        layout: info.data.value
+      });
+    stream.dispatchEvent(streamEvent);
+  }
+
 
   function createRemoteStream(streamInfo) {
     if (streamInfo.type === 'mixed') {
