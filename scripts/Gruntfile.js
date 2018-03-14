@@ -234,7 +234,7 @@ window.L = L;\n\
           archive:'release-<%= pkg.version %>.zip'
         },
         files:[{
-          src:['dist/samples','dist/screen-sharing-chrome-extension','dist/sdk','dist/ThirdpartyLicenses.txt'],
+          src:['dist/samples/*','dist/screen-sharing-chrome-extension/*','dist/sdk/*','dist/ThirdpartyLicenses.txt'],
           dest:'./'
         }]
       }
