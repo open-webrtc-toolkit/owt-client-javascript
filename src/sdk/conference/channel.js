@@ -100,10 +100,10 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
       };
       if (typeof this._pc.addTransceiver === 'function') {
         // |direction| seems not working on Safari.
-        if (mediaOptions.audio) {
+        if (mediaOptions.audio && stream.mediaStream.getAudioTracks() > 0) {
           const audioTransceiver = this._pc.addTransceiver('audio', { direction: 'sendonly' });
         }
-        if (mediaOptions.video) {
+        if (mediaOptions.video && stream.mediaStream.getVideoTracks() > 0) {
           const videoTransceiver = this._pc.addTransceiver('video', { direction: 'sendonly' });
         }
       }
