@@ -43,8 +43,10 @@ export function convertToPublicationSettings(mediaInfo) {
         .format.codec, mediaInfo.video.format.profile);
     }
     if (mediaInfo.video.parameters) {
-      resolution = new MediaFormatModule.Resolution(mediaInfo.video.parameters
-        .resolution.width, mediaInfo.video.parameters.resolution.height);
+      if (mediaInfo.video.parameters.resolution) {
+        resolution = new MediaFormatModule.Resolution(mediaInfo.video.parameters
+          .resolution.width, mediaInfo.video.parameters.resolution.height);
+      }
       framerate = mediaInfo.video.parameters.framerate;
       bitrate = mediaInfo.video.parameters.bitrate * 1000;
       keyFrameInterval = mediaInfo.video.parameters.keyFrameInterval;
