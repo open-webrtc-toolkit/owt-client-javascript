@@ -89,7 +89,8 @@ export const ConferenceClient = function(config, signalingImpl) {
     onSignalingMessage(event.message.notification, event.message.data);
   });
 
-  signaling.addEventListener('disconnect', ()=>{
+  signaling.addEventListener('disconnect', () => {
+    signalingState = SignalingState.READY;
     self.dispatchEvent(new EventModule.IcsEvent('serverdisconnected'));
   });
 
