@@ -473,9 +473,9 @@ ICS_REST.API = (function(ICS_REST) {
   });
      */
   var updateRoomPartially = function(room, items, callback, callbackError) {
-    send('PATCH', 'rooms/' + roomId, (items || []), function(roomRtn) {
-      var room = JSON.parse(roomRtn);
-      callback(room);
+    send('PATCH', 'rooms/' + room, (items || []), function(roomRtn) {
+      var new_room = JSON.parse(roomRtn);
+      callback(new_room);
     }, callbackError);
   };
 
