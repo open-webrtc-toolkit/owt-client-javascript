@@ -117,7 +117,8 @@ export function convertToSubscriptionCapabilities(mediaInfo) {
     frameRates.sort(sortNumbers);
     const keyFrameIntervals = JSON.parse(
       JSON.stringify(mediaInfo.video.optional.parameters.keyFrameInterval));
-    if (mediaInfo.video && mediaInfo.video.parameters) {
+    if (mediaInfo.video && mediaInfo.video.parameters && mediaInfo.video.parameters
+      .keyFrameInterval) {
       keyFrameIntervals.push(mediaInfo.video.parameters.keyFrameInterval);
     }
     keyFrameIntervals.sort(sortNumbers);
