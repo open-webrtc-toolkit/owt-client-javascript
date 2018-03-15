@@ -29,6 +29,25 @@ const ParticipantEvent = function(type, init) {
 };
 
 /**
+ * @class ConferenceClientConfiguration
+ * @classDesc Configuration for ConferenceClient.
+ * @memberOf Ics.Conference
+ * @hideconstructor
+ */
+class ConferenceClientConfiguration {
+  constructor() {
+    /**
+     * @member {?RTCConfiguration} rtcConfiguration
+     * @instance
+     * @memberof Ics.Conference.ConferenceClientConfiguration
+     * @desc It will be used for creating PeerConnection.
+     * @see {@link https://www.w3.org/TR/webrtc/#rtcconfiguration-dictionary|RTCConfiguration Dictionary of WebRTC 1.0}.
+     */
+    this.rtcConfiguration = undefined;
+  }
+}
+
+/**
  * @class ConferenceClient
  * @classdesc The ConferenceClient handles PeerConnections between client and server. For conference controlling, please refer to REST API guide.
  * Events:
@@ -43,8 +62,8 @@ const ParticipantEvent = function(type, init) {
  * @memberof Ics.Conference
  * @extends Ics.Base.EventDispatcher
  * @constructor
- * @param {?ConferenceClientConfiguration } config Configuration for ConferenceClient.
- * @param {?SioSignaling } signalingImpl Signaling channel implementation for ConferenceClient. SDK uses default signaling channel implementation if this parameter is undefined. Currently, a Socket.IO signaling channel implementation was provided as ics.conference.SioSignaling. However, it is not recommended to directly access signaling channel or customize signaling channel for ConferenceClient as this time.
+ * @param {?Ics.Conference.ConferenceClientConfiguration } config Configuration for ConferenceClient.
+ * @param {?Ics.Conference.SioSignaling } signalingImpl Signaling channel implementation for ConferenceClient. SDK uses default signaling channel implementation if this parameter is undefined. Currently, a Socket.IO signaling channel implementation was provided as ics.conference.SioSignaling. However, it is not recommended to directly access signaling channel or customize signaling channel for ConferenceClient as this time.
  */
 export const ConferenceClient = function(config, signalingImpl) {
   config = config || {};
