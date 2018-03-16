@@ -97,6 +97,10 @@ class P2PPeerConnectionChannel extends EventDispatcher {
       return Promise.reject(new ErrorModule.P2PError(ErrorModule.errors.P2P_CLIENT_ILLEGAL_ARGUMENT,
         'Duplicated stream.'));
     }
+    if (this._areAllTracksEnded(stream.mediaStream)) {
+      return Promise.reject(new ErrorModule.P2PError(ErrorModule.errors.P2P_CLIENT_INVALID_STATE,
+        'All tracks are ended.'));
+    }
     this._sendSysInfo();
     this._sendStreamSourceInfo(stream);
     // Replace |addStream| with PeerConnection.addTrack when all browsers are ready.
@@ -815,6 +819,16 @@ class P2PPeerConnectionChannel extends EventDispatcher {
       Logger.debug("Data Channel Error:", error);
     };
   }
+
+  _areAllTracksEnded(mediaStream) {
+    for (const track of mediaStream.getTracks()) {
+      if (track.readyState === 'live') {
+        return false;
+      }
+    }
+    return true;
+  }
+
 }
 
 export default P2PPeerConnectionChannel;
