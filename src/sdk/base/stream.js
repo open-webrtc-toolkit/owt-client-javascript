@@ -46,7 +46,7 @@ export class StreamSourceInfo {
 export class Stream extends EventDispatcher {
   constructor(stream, sourceInfo) {
     super();
-    if ((stream && !(stream instanceof MediaStream)) || !(sourceInfo instanceof StreamSourceInfo)) {
+    if ((stream && !(stream instanceof MediaStream)) || (typeof sourceInfo !== 'object')) {
         throw new TypeError('Invalid stream or sourceInfo.');
       }
     if (stream && ((stream.getAudioTracks().length > 0 && !sourceInfo.audio) ||
