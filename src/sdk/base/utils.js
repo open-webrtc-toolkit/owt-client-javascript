@@ -53,8 +53,8 @@ export function sysInfo() {
     result = safariVersionRegex.exec(userAgent);
     info.runtime = {
       name: 'Safari',
-      version: result[1]
     }
+    info.runtime.version = result ? result[1] : 'Unknown';
   } else {
     info.runtime = {
       name: 'Unknown',
