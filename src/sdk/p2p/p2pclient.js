@@ -1,7 +1,7 @@
 // Copyright © 2017 Intel Corporation. All Rights Reserved.
 'use strict';
 import Logger from '../base/logger.js';
-import {EventDispatcher} from '../base/event.js';
+import {EventDispatcher, IcsEvent} from '../base/event.js';
 import * as Utils from '../base/utils.js';
 import * as ErrorModule from './error.js';
 import P2PPeerConnectionChannel from './peerconnection-channel.js';
@@ -102,8 +102,9 @@ const P2PClient = function(configuration, signalingChannel) {
     }
   };
 
-  signaling.onServerDisconnected=function(){
-    // TODO:
+  signaling.onServerDisconnected = function() {
+    state = ConnectionState.READY;
+    self.dispatchEvent(new IcsEvent('serverdisconnected'));
   };
 
   /**
