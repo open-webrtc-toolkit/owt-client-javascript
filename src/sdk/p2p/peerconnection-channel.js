@@ -44,6 +44,7 @@ const SignalingType = {
   CLOSED: 'chat-closed',
   NEGOTIATION_NEEDED:'chat-negotiation-needed',
   TRACK_SOURCES: 'chat-track-sources',
+  STREAM_INFO: 'chat-stream-info',
   SDP: 'chat-signal',
   TRACKS_ADDED: 'chat-tracks-added',
   TRACKS_REMOVED: 'chat-tracks-removed',
@@ -73,6 +74,8 @@ class P2PPeerConnectionChannel extends EventDispatcher {
     this._pendingUnpublishStreams = [];  // Streams going to be removed.
     this._remoteStreams = [];
     this._remoteTrackSourceInfo = new Map(); // Key is MediaStreamTrack's ID, value is source info.
+    this._remoteStreamSourceInfo = new Map(); // Key is MediaStream's ID, value is source info. Only used in Safari.
+    this._remoteStreamAttributes = new Map() // Key is MediaStream's ID, value is its attributes.
     this._publishPromises = new Map(); // Key is MediaStream's ID, value is an object has |resolve| and |reject|.
     this._unpublishPromises = new Map(); // Key is MediaStream's ID, value is an object has |resolve| and |reject|.
     this._publishingStreamTracks = new Map();  // Key is MediaStream's ID, value is an array of the ID of its MediaStreamTracks that haven't been acked.
@@ -102,7 +105,7 @@ class P2PPeerConnectionChannel extends EventDispatcher {
         'All tracks are ended.'));
     }
     this._sendSysInfo();
-    this._sendStreamSourceInfo(stream);
+    this._sendStreamInfo(stream);
     // Replace |addStream| with PeerConnection.addTrack when all browsers are ready.
     this._pc.addStream(stream.mediaStream);
     this._pendingStreams.push(stream);
@@ -214,6 +217,9 @@ class P2PPeerConnectionChannel extends EventDispatcher {
         break;
       case SignalingType.TRACK_SOURCES:
         this._trackSourcesHandler(message.data);
+        break;
+      case SignalingType.STREAM_INFO:
+        this._streamInfoHandler(message.data);
         break;
       case SignalingType.SDP:
         this._sdpHandler(message.data);
@@ -330,6 +336,15 @@ class P2PPeerConnectionChannel extends EventDispatcher {
     }
   }
 
+  _streamInfoHandler(data){
+    if (!data) {
+      Logger.warning('Unexpected stream info.');
+      return;
+    }
+    this._remoteStreamSourceInfo.set(data.id, data.source);
+    this._remoteStreamAttributes.set(data.id, data.attributes);
+  }
+
   _chatClosedHandler() {
     this.stop();
   }
@@ -399,8 +414,21 @@ class P2PPeerConnectionChannel extends EventDispatcher {
       this._remoteStreamTracks.get(event.stream.id).push(track.id);
     });
     this._sendSignalingMessage(SignalingType.TRACKS_ADDED, tracksInfo);
-    const sourceInfo = new StreamModule.StreamSourceInfo(this._getAndDeleteTrackSourceInfo(
-      event.stream.getAudioTracks()), this._getAndDeleteTrackSourceInfo(event.stream.getVideoTracks()));
+    let audioTrackSource, videoTrackSource;
+    if (Utils.isSafari()) {
+      if (!this._remoteStreamSourceInfo.has(event.stream.id)) {
+        Logger.warning('Cannot find source info for stream ' + event.stream.id);
+      }
+      audioTrackSource = this._remoteStreamSourceInfo.get(event.stream.id).audio;
+      videoTrackSource = this._remoteStreamSourceInfo.get(event.stream.id).video;
+      this._remoteStreamSourceInfo.delete(event.stream.id);
+    } else {
+      audioTrackSource = this._getAndDeleteTrackSourceInfo(
+        event.stream.getAudioTracks());
+      videoTrackSource = this._getAndDeleteTrackSourceInfo(event.stream.getVideoTracks());
+    }
+    const sourceInfo = new StreamModule.StreamSourceInfo(audioTrackSource,
+      videoTrackSource);
     if (Utils.isSafari()) {
       if (!sourceInfo.audio) {
         event.stream.getAudioTracks().forEach((track) => {
@@ -611,8 +639,6 @@ class P2PPeerConnectionChannel extends EventDispatcher {
         }
         this._pc.addStream(stream.mediaStream);
         Logger.debug('Added stream to peer connection.');
-        this._sendStreamSourceInfo(stream);
-        Logger.debug('Sent stream source info.');
         this._publishedStreams.set(stream);
       }
       this._pendingStreams.length = 0;
@@ -654,7 +680,7 @@ class P2PPeerConnectionChannel extends EventDispatcher {
     }
   }
 
-  _sendStreamSourceInfo(stream) {
+  _sendStreamInfo(stream) {
     const info = [];
     stream.mediaStream.getTracks().map((track) => {
       info.push({
@@ -663,7 +689,16 @@ class P2PPeerConnectionChannel extends EventDispatcher {
       });
     });
     this._sendSignalingMessage(SignalingType.TRACK_SOURCES, info);
+    this._sendSignalingMessage(SignalingType.STREAM_INFO, {
+      id: stream.mediaStream.id,
+      attributes: stream.attributes,
+      // Track IDs may be useful in the future when onaddstream is removed. It maintains the relationship of tracks and streams.
+      tracks: Array.from(info, item => item.id),
+      // This is a workaround for Safari. Please use track-sources if possible.
+      source: stream.source
+    });
   }
+
 
   _sendSysInfo() {
     this._sendSignalingMessage(SignalingType.UA, sysInfo);
