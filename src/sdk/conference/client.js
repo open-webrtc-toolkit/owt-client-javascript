@@ -208,7 +208,7 @@ export const ConferenceClient = function(config, signalingImpl) {
       }
       const stream = new StreamModule.RemoteStream(streamInfo.id, streamInfo.info
         .owner, undefined, new StreamModule.StreamSourceInfo(audioSourceInfo,
-          videoSourceInfo));
+          videoSourceInfo), streamInfo.info.attributes);
       stream.settings = StreamUtilsModule.convertToPublicationSettings(
         streamInfo.media);
       stream.capabilities = new StreamUtilsModule.convertToSubscriptionCapabilities(

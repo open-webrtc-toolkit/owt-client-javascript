@@ -44,7 +44,7 @@ export class StreamSourceInfo {
  * @hideconstructor
  */
 export class Stream extends EventDispatcher {
-  constructor(stream, sourceInfo) {
+  constructor(stream, sourceInfo, attributes) {
     super();
     if ((stream && !(stream instanceof MediaStream)) || (typeof sourceInfo !== 'object')) {
         throw new TypeError('Invalid stream or sourceInfo.');
@@ -75,6 +75,17 @@ export class Stream extends EventDispatcher {
       writable: false,
       value: sourceInfo
     });
+    /**
+     * @member {string} attributes
+     * @instance
+     * @memberof Ics.Base.Stream
+     * @desc Custom attributes of a stream.
+     */
+    Object.defineProperty(this, 'attributes', {
+      configurable: true,
+      writable: false,
+      value: attributes
+    });
   };
 }
 /**
@@ -85,13 +96,14 @@ export class Stream extends EventDispatcher {
  * @constructor
  * @param {MediaStream} stream Underlying MediaStream.
  * @param {Ics.Base.StreamSourceInfo} sourceInfo Information about stream's source.
+ * @param {string} attributes Custom attributes of the stream.
  */
 export class LocalStream extends Stream {
-  constructor(stream, sourceInfo) {
+  constructor(stream, sourceInfo, attributes) {
     if(!(stream instanceof MediaStream)){
       throw new TypeError('Invalid stream.');
     }
-    super(stream, sourceInfo);
+    super(stream, sourceInfo, attributes);
     /**
      * @member {string} id
      * @instance
@@ -118,8 +130,8 @@ export class LocalStream extends Stream {
  * @hideconstructor
  */
 export class RemoteStream extends Stream {
-  constructor(id, origin, stream, sourceInfo) {
-    super(stream, sourceInfo);
+  constructor(id, origin, stream, sourceInfo, attributes) {
+    super(stream, sourceInfo, attributes);
     /**
      * @member {string} id
      * @instance

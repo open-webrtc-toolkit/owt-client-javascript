@@ -413,8 +413,9 @@ class P2PPeerConnectionChannel extends EventDispatcher {
         });
       }
     }
+    const attributes = this._remoteStreamAttributes.get(event.stream.id);
     const stream = new StreamModule.RemoteStream(undefined, this._remoteId, event.stream,
-      sourceInfo);
+      sourceInfo, attributes);
     if (stream) {
       this._remoteStreams.push(stream);
       const streamEvent = new StreamModule.StreamEvent('streamadded', {
