@@ -49,6 +49,26 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
   }
 
   publish(stream, options) {
+    if (options === undefined) {
+      options = { audio: !!stream.mediaStream.getAudioTracks(), video: !!stream
+          .mediaStream.getVideoTracks() };
+    }
+    if (options.audio === undefined) {
+      options.audio = !!stream.mediaStream.getAudioTracks();
+    }
+    if (options.video === undefined) {
+      options.video = !!stream.mediaStream.getVideoTracks();
+    }
+    if (options.audio && !stream.mediaStream.getAudioTracks() || (options.video &&
+        !stream.mediaStream.getVideoTracks())) {
+      return Promise.reject(new ConferenceError(
+        'options.audio/video cannot be true or an object if there is no audio/video track present in the MediaStream.'
+      ));
+    }
+    if (options.audio === false && options.video === false) {
+      return Promise.reject(new ConferenceError(
+        'Cannot publish a stream without audio and video.'));
+    }
     this._options = options;
     const mediaOptions = {};
     if (stream.mediaStream.getAudioTracks().length > 0) {
@@ -56,6 +76,12 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
         Logger.warning(
           'Publishing a stream with multiple audio tracks is not fully supported.'
         );
+      }
+      if (typeof options.audio !== 'boolean' && typeof options.audio !==
+        'object') {
+        return Promise.reject(new ConferenceError(
+          'Type of audio options should be boolean which indicates whether audio is enabled or not.'
+        ));
       }
       mediaOptions.audio = {};
       mediaOptions.audio.source = stream.source.audio;
@@ -132,6 +158,28 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
   }
 
   subscribe(stream, options) {
+    if (options === undefined) {
+      options = {
+        audio: !!stream.capabilities.audio,
+        video: !!stream.capabilities.video
+      };
+    }
+    if (options.audio === undefined) {
+      options.audio = !!stream.capabilities.audio
+    }
+    if (options.video === undefined) {
+      options.video = !!stream.capabilities.video
+    }
+    if (options.audio && !stream.capabilities.audio || (options.video &&
+        !stream.capabilities.video)) {
+      return Promise.reject(new ConferenceError(
+        'options.audio/video cannot be true or an object if there is no audio/video track in remote stream.'
+      ));
+    }
+    if (options.audio === false && options.video === false) {
+      return Promise.reject(new ConferenceError(
+        'Cannot subscribe a stream without audio and video.'));
+    }
     this._options = options;
     const mediaOptions = {};
     if (options.audio) {
