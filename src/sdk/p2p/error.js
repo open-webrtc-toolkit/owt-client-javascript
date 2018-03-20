@@ -64,6 +64,10 @@ export const errors = {
     code: 2500,
     message: 'WebRTC error.'
   },
+  P2P_WEBRTC_SDP:{
+    code:2502,
+    message: 'SDP error.'
+  }
 };
 
 export function getErrorByCode(errorCode) {
@@ -82,7 +86,8 @@ export function getErrorByCode(errorCode) {
     2402: errors.P2P_CLIENT_ILLEGAL_ARGUMENT,
     2403: errors.P2P_CLIENT_INVALID_STATE,
     2404: errors.P2P_CLIENT_NOT_ALLOWED,
-    2500: errors.P2P_WEBRTC_UNKNOWN
+    2500: errors.P2P_WEBRTC_UNKNOWN,
+    2501: errors.P2P_WEBRTC_SDP
   };
   return codeErrorMap[errorCode];
 }

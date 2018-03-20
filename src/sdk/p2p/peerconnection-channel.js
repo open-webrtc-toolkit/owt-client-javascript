@@ -49,8 +49,7 @@ const SignalingType = {
   TRACKS_ADDED: 'chat-tracks-added',
   TRACKS_REMOVED: 'chat-tracks-removed',
   DATA_RECEIVED: 'chat-data-received',
-  UA: 'chat-ua',
-  FAILED: 'chat-failed'
+  UA: 'chat-ua'
 }
 
 const offerOptions = {
@@ -91,11 +90,15 @@ class P2PPeerConnectionChannel extends EventDispatcher {
     this._pendingMessages = [];
     this._dataSeq = 1;  // Sequence number for data channel messages.
     this._sendDataPromises = new Map();  // Key is data sequence number, value is an object has |resolve| and |reject|.
+    this._addedTrackIds = []; // Tracks that have been added after receiving remote SDP but before connection is established. Draining these messages when ICE connection state is connected.
 
     this._createPeerConnection();
   }
 
   publish(stream) {
+    if (!(stream instanceof StreamModule.LocalStream)) {
+      return Promise.reject(new TypeError('Invalid stream.'));
+    }
     if (this._publishedStreams.has(stream)) {
       return Promise.reject(new ErrorModule.P2PError(ErrorModule.errors.P2P_CLIENT_ILLEGAL_ARGUMENT,
         'Duplicated stream.'));
@@ -104,22 +107,29 @@ class P2PPeerConnectionChannel extends EventDispatcher {
       return Promise.reject(new ErrorModule.P2PError(ErrorModule.errors.P2P_CLIENT_INVALID_STATE,
         'All tracks are ended.'));
     }
-    this._sendSysInfo();
-    this._sendStreamInfo(stream);
-    // Replace |addStream| with PeerConnection.addTrack when all browsers are ready.
-    this._pc.addStream(stream.mediaStream);
-    this._pendingStreams.push(stream);
-    const trackIds = Array.from(stream.mediaStream.getTracks(), track => track.id);
-    this._publishingStreamTracks.set(stream.mediaStream.id, trackIds);
-    return new Promise((resolve, reject) => {
-      this._publishPromises.set(stream.mediaStream.id, {
-        resolve: resolve,
-        reject: reject
+    return Promise.all([this._sendSysInfo(), this._sendStreamInfo(stream)]).then(
+      () => {
+        return new Promise((resolve, reject) => {
+          // Replace |addStream| with PeerConnection.addTrack when all browsers are ready.
+          this._pc.addStream(stream.mediaStream);
+          this._pendingStreams.push(stream);
+          const trackIds = Array.from(stream.mediaStream.getTracks(),
+            track => track.id);
+          this._publishingStreamTracks.set(stream.mediaStream.id,
+            trackIds);
+          this._publishPromises.set(stream.mediaStream.id, {
+            resolve: resolve,
+            reject: reject
+          });
+        });
       });
-    });
   }
 
+
   send(message) {
+    if (!(typeof message === 'string')) {
+      return Promise.reject(new TypeError('Invalid message.'));
+    }
     const data = {
       id: this._dataSeq++,
       data: message
@@ -143,31 +153,7 @@ class P2PPeerConnectionChannel extends EventDispatcher {
   }
 
   stop() {
-    for (const [label, dc] of this._dataChannels) {
-      dc.close();
-    }
-    this._dataChannels.clear();
-    if (this._pc && this._pc.iceConnectionState !== 'closed') {
-      this._pc.close();
-    }
-    for (const [id, promise] of this._publishPromises) {
-      promise.reject(new ErrorModule.P2PError(ErrorModule.errors.P2P_CLIENT_INVALID_STATE,
-        'PeerConnection is closed.'))
-    }
-    this._publishPromises.clear();
-    for (const [id, promise] of this._unpublishPromises) {
-      promise.reject(new ErrorModule.P2PError(ErrorModule.errors.P2P_CLIENT_INVALID_STATE,
-        'PeerConnection is closed.'))
-    }
-    this._unpublishPromises.clear();
-    for (const [id, promise] of this._sendDataPromises) {
-      promise.reject(new ErrorModule.P2PError(ErrorModule.errors.P2P_CLIENT_INVALID_STATE,
-        'PeerConnection is closed.'))
-    }
-    if (this._state !== ChannelState.READY) {
-      this._state = ChannelState.READY;
-      this.dispatchEvent(new Event('p2pclosed'));
-    }
+    this._stop();
   }
 
   getStats(mediaStream) {
@@ -183,27 +169,18 @@ class P2PPeerConnectionChannel extends EventDispatcher {
     this._SignalingMesssageHandler(message);
   }
 
-  _onError(errorMessage) {
-    var errorMsg = {
-      code: 2000,
-      message: errorMessage
-    };
-    this._sendSignalingMessage(SignalingType.FAILED, errorMsg);
-    for (const [id, promise] of this._publishPromises) {
-      promise.reject(new ErrorModule.P2PError(ErrorModule.errors.P2P_WEBRTC_UNKNOWN,
-        'PeerConnection is closed.'))
-    }
-    this._publishPromises.clear();
-    this.dispatchEvent(new Event('ended'));
-  }
-
   _sendSdp(sdp) {
-    this._signaling.sendSignalingMessage(this._remoteId, SignalingType.SDP,
+    return this._signaling.sendSignalingMessage(this._remoteId, SignalingType.SDP,
       sdp);
   }
 
   _sendSignalingMessage(type, message) {
-    this._signaling.sendSignalingMessage(this._remoteId, type, message);
+    return this._signaling.sendSignalingMessage(this._remoteId, type, message)
+      .catch(e => {
+        if (typeof e == 'number') {
+          throw ErrorModule.getErrorByCode(e);
+        }
+      });
   }
 
   _SignalingMesssageHandler(message) {
@@ -235,9 +212,6 @@ class P2PPeerConnectionChannel extends EventDispatcher {
         break;
       case SignalingType.CLOSED:
         this._chatClosedHandler();
-        break;
-      case SignalingType.FAILED:
-        this._chatFailedHandler();
         break;
       default:
         Logger.error('Invalid signaling message received. Type: ' + message.type);
@@ -345,15 +319,11 @@ class P2PPeerConnectionChannel extends EventDispatcher {
     this._remoteStreamAttributes.set(data.id, data.attributes);
   }
 
-  _chatClosedHandler() {
-    this.stop();
+  _chatClosedHandler(data) {
+    this.stop(data);
   }
 
   _chatDeniedHandler() {
-    this.stop();
-  }
-
-  _chatFailedHandler() {
     this.stop();
   }
 
@@ -364,10 +334,9 @@ class P2PPeerConnectionChannel extends EventDispatcher {
     const sessionDescription = new RTCSessionDescription(sdp);
     this._pc.setRemoteDescription(sessionDescription).then(() => {
       this._createAndSendAnswer();
-    }, function(errorMessage) {
-      Logger.debug('Set remote description failed. Message: ' + JSON.stringify(
-        errorMessage));
-      this._onError(errorMessage);
+    }, function(error) {
+      Logger.debug('Set remote description failed. Message: ' + error.message);
+      this._stop(error);
     });
   }
 
@@ -380,10 +349,9 @@ class P2PPeerConnectionChannel extends EventDispatcher {
       sessionDescription)).then(() => {
       Logger.debug('Set remote descripiton successfully.');
       this._drainPendingMessages();
-    }, function(errorMessage) {
-      Logger.debug('Set remote description failed. Message: ' +
-        errorMessage);
-      this._onError(errorMessage);
+    }, function(error) {
+      Logger.debug('Set remote description failed. Message: ' + error.message);
+      this._stop(error);
     });
   }
 
@@ -413,7 +381,12 @@ class P2PPeerConnectionChannel extends EventDispatcher {
       tracksInfo.push(track.id);
       this._remoteStreamTracks.get(event.stream.id).push(track.id);
     });
-    this._sendSignalingMessage(SignalingType.TRACKS_ADDED, tracksInfo);
+    if (this._pc.iceConnectionState === 'connected' || this._pc.iceConnectionState ===
+      'completed') {
+      this._sendSignalingMessage(SignalingType.TRACKS_ADDED, tracksInfo);
+    } else {
+      this._addedTrackIds = this._addedTrackIds.concat(tracksInfo);
+    }
     let audioTrackSource, videoTrackSource;
     // Safari and Firefox generates new ID for remote tracks.
     if (Utils.isSafari() || Utils.isFirefox()) {
@@ -535,11 +508,23 @@ class P2PPeerConnectionChannel extends EventDispatcher {
         value.reject(new ErrorModule.P2PError(ErrorModule.errors.P2P_WEBRTC_UNKNOWN,
           'ICE connection failed or closed.'));
       });
-      // Fire ended event if publication or subscription exists.
+      // Fire ended event if publication or remote stream exists.
       this._publishedStreams.forEach(publication => {
         publication.dispatchEvent(new IcsEvent('ended'));
       });
       this._publishedStreams.clear();
+      this._remoteStreams.forEach(stream => {
+        stream.dispatchEvent(new IcsEvent('ended'));
+      });
+      if (this._state !== ChannelState.READY) {
+        this._sendSignalingMessage(SignalingType.CLOSED).catch(e=>{
+          Logger.warning(e);
+        });
+      }
+    } else if (event.currentTarget.iceConnectionState === 'connected' || event.currentTarget
+      .iceConnectionState === 'completed') {
+      this._sendSignalingMessage(SignalingType.TRACKS_ADDED, this._addedTrackIds);
+      this._addedTrackIds = [];
     }
   }
 
@@ -591,9 +576,6 @@ class P2PPeerConnectionChannel extends EventDispatcher {
     this._pc.onsignalingstatechange = (event) => {
       this._onSignalingStateChange.apply(this, [event])
     };
-    this._pc.onicecandidate = (event) => {
-      this._onLocalIceCandidate.apply(this, [event]);
-    };
     this._pc.ondatachannel = (event) => {
       Logger.debug('On data channel.');
       // Save remote created data channel.
@@ -603,10 +585,10 @@ class P2PPeerConnectionChannel extends EventDispatcher {
       }
       this._bindEventsToDataChannel(event.channel);
     };
+    this._pc.oniceconnectionstatechange = (event) => {
+      this._onIceConnectionStateChange.apply(this, [event]);
+    };
     /*
-    this._pc.onicecandidate = _onIceChannelStateChange;
-
-
     this._pc.oniceChannelStatechange = function(event) {
       _onIceChannelStateChange(peer, event);
     };
@@ -683,6 +665,9 @@ class P2PPeerConnectionChannel extends EventDispatcher {
   }
 
   _sendStreamInfo(stream) {
+    if (!stream || !stream.mediaStream) {
+      return new ErrorModule.P2PError(ErrorModule.errors.P2P_CLIENT_ILLEGAL_ARGUMENT);
+    }
     const info = [];
     stream.mediaStream.getTracks().map((track) => {
       info.push({
@@ -690,20 +675,22 @@ class P2PPeerConnectionChannel extends EventDispatcher {
         source: stream.source[track.kind]
       });
     });
-    this._sendSignalingMessage(SignalingType.TRACK_SOURCES, info);
-    this._sendSignalingMessage(SignalingType.STREAM_INFO, {
-      id: stream.mediaStream.id,
-      attributes: stream.attributes,
-      // Track IDs may be useful in the future when onaddstream is removed. It maintains the relationship of tracks and streams.
-      tracks: Array.from(info, item => item.id),
-      // This is a workaround for Safari. Please use track-sources if possible.
-      source: stream.source
-    });
+    return Promise.all([this._sendSignalingMessage(SignalingType.TRACK_SOURCES,
+        info),
+      this._sendSignalingMessage(SignalingType.STREAM_INFO, {
+        id: stream.mediaStream.id,
+        attributes: stream.attributes,
+        // Track IDs may be useful in the future when onaddstream is removed. It maintains the relationship of tracks and streams.
+        tracks: Array.from(info, item => item.id),
+        // This is a workaround for Safari. Please use track-sources if possible.
+        source: stream.source
+      })
+    ]);
   }
 
 
   _sendSysInfo() {
-    this._sendSignalingMessage(SignalingType.UA, sysInfo);
+    return this._sendSignalingMessage(SignalingType.UA, sysInfo);
   }
 
   _handleRemoteCapability(ua) {
@@ -757,43 +744,40 @@ class P2PPeerConnectionChannel extends EventDispatcher {
       return;
     }
     this._isNegotiationNeeded = false;
+    let localDesc;
     this._pc.createOffer(offerOptions).then(desc => {
       desc.sdp = this._setRtpReceiverOptions(desc.sdp);
-      this._pc.setLocalDescription(desc).then(() => {
-        Logger.debug('Set local description successfully.');
-        this._negotiationState = NegotiationState.READY;
-        this._sendSdp(desc);
-      }, function(errorMessage) {
-        Logger.error('Set local description failed. Message: ' + JSON
-          .stringify(errorMessage));
-        this._onError(error);
-      });
-    }, function(error) {
-      Logger.error('Create offer failed. Error info: ' + JSON.stringify(
-        error));
-      this._onError(error);
+      this._negotiationState = NegotiationState.READY;
+      localDesc = desc;
+      return this._pc.setLocalDescription(desc);
+    }).then(() => {
+      this._sendSdp(localDesc);
+    }).catch(e => {
+      Logger.error(e.message + ' Please check your codec settings.');
+      const error = new ErrorModule.P2PError(ErrorModule.errors.P2P_WEBRTC_SDP,
+        e.message);
+      this._stop(error);
     });
   }
 
   _createAndSendAnswer() {
     this._drainPendingStreams();
     this._isNegotiationNeeded = false;
+    let localDesc;
     this._pc.createAnswer().then(desc => {
       desc.sdp = this._setRtpReceiverOptions(desc.sdp);
-      this._pc.setLocalDescription(desc).then(() => {
-        Logger.debug("Set local description successfully.");
-        this._sendSdp(desc);
-      }, function(errorMessage) {
-        Logger.error(
-          "Error occurred while setting local description. Error message:" +
-          errorMessage);
-        this._onError(errorMessage);
-      });
-    }, function(error) {
-      Logger.error('Create answer failed. Message: ' + error);
-      this._onError(errorMessage);
+      localDesc=desc;
+      return this._pc.setLocalDescription(desc);
+    }).then(()=>{
+      this._sendSdp(localDesc);
+    }).catch(e => {
+      Logger.error(e.message + ' Please check your codec settings.');
+      const error = new ErrorModule.P2PError(ErrorModule.errors.P2P_WEBRTC_SDP,
+        e.message);
+      this._stop(error);
     });
   }
+
 
   _getAndDeleteTrackSourceInfo(tracks) {
     if (tracks.length > 0) {
@@ -869,6 +853,38 @@ class P2PPeerConnectionChannel extends EventDispatcher {
     return true;
   }
 
+  _stop(error) {
+    let promiseError = error;
+    if (!promiseError) {
+      promiseError = new ErrorModule.P2PError(ErrorModule.errors.P2P_CLIENT_UNKNOWN);
+    }
+    for (const [label, dc] of this._dataChannels) {
+      dc.close();
+    }
+    this._dataChannels.clear();
+    if (this._pc && this._pc.iceConnectionState !== 'closed') {
+      this._pc.close();
+    }
+    for (const [id, promise] of this._publishPromises) {
+      promise.reject(promiseError);
+    }
+    this._publishPromises.clear();
+    for (const [id, promise] of this._unpublishPromises) {
+      promise.reject(promiseError);
+    }
+    this._unpublishPromises.clear();
+    for (const [id, promise] of this._sendDataPromises) {
+      promise.reject(promiseError);
+    }
+    if (this._state !== ChannelState.READY) {
+      this._state = ChannelState.READY;
+      const sendError = JSON.parse(JSON.stringify(error));
+      // Avoid to leak detailed error to remote side.
+      sendError.message = 'Error happened at remote side.';
+      this._sendSignalingMessage(SignalingType.CLOSED, sendError);
+      this.dispatchEvent(new Event('ended'));
+    }
+  }
 }
 
 export default P2PPeerConnectionChannel;

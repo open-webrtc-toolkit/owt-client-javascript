@@ -166,8 +166,9 @@ const P2PClient = function(configuration, signalingChannel) {
    * @returns {Promise<Publication, Error>} A promised resolved when remote side received the certain stream. However, remote endpoint may not display this stream, or ignore it.
    */
   this.publish = function(remoteId, stream) {
-    if (!(stream instanceof StreamModule.LocalStream)) {
-      return Promise.reject(new TypeError('Invalid stream.'));
+    if (state !== ConnectionState.CONNECTED) {
+      return Promise.reject(new ErrorModule.P2PError(ErrorModule.errors.P2P_CLIENT_INVALID_STATE,
+        'P2P Client is not connected to signaling channel.'));
     }
     if (this.allowedRemoteIds.indexOf(remoteId) < 0) {
       return Promise.reject(new ErrorModule.P2PError(ErrorModule.errors.P2P_CLIENT_NOT_ALLOWED));
@@ -185,8 +186,9 @@ const P2PClient = function(configuration, signalingChannel) {
    * @returns {Promise<undefined, Error>} It returns a promise resolved when remote endpoint received certain message.
    */
   this.send=function(remoteId, message){
-    if(!(typeof message === 'string')){
-      return Promise.reject(new TypeError('Invalid message.'));
+    if (state !== ConnectionState.CONNECTED) {
+      return Promise.reject(new ErrorModule.P2PError(ErrorModule.errors.P2P_CLIENT_INVALID_STATE,
+        'P2P Client is not connected to signaling channel.'));
     }
     if (this.allowedRemoteIds.indexOf(remoteId) < 0) {
       return Promise.reject(new ErrorModule.P2PError(ErrorModule.errors.P2P_CLIENT_NOT_ALLOWED));
@@ -251,7 +253,7 @@ const P2PClient = function(configuration, signalingChannel) {
       pcc.addEventListener('messagereceived', (messageEvent)=>{
         self.dispatchEvent(messageEvent);
       });
-      pcc.addEventListener('p2pclosed', ()=>{
+      pcc.addEventListener('ended', ()=>{
         channels.delete(remoteId);
       })
       channels.set(remoteId, pcc);
