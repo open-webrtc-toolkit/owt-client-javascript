@@ -279,14 +279,15 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
     const eventName = isPub ? 'stream-control' :
       'subscription-control';
     const operation = isMute ? 'pause' : 'play';
-    if (!isPub) {
-      const muteEventName = isMute ? 'mute' : 'unmute';
-      this._subscription.dispatchEvent(new MuteEvent(muteEventName, { kind: trackKind }));
-    }
     return this._signaling.sendSignalingMessage(eventName, {
       id: this._internalId,
       operation: operation,
       data: trackKind
+    }).then(() => {
+      if (!isPub) {
+        const muteEventName = isMute ? 'mute' : 'unmute';
+        this._subscription.dispatchEvent(new MuteEvent(muteEventName, { kind: trackKind }));
+      }
     });
   }
 
