@@ -53,6 +53,9 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
       options = { audio: !!stream.mediaStream.getAudioTracks(), video: !!stream
           .mediaStream.getVideoTracks() };
     }
+    if (typeof options !== 'object') {
+      return Promise.reject(new TypeError('Options should be an object.'));
+    }
     if (options.audio === undefined) {
       options.audio = !!stream.mediaStream.getAudioTracks();
     }
@@ -80,7 +83,7 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
       if (typeof options.audio !== 'boolean' && typeof options.audio !==
         'object') {
         return Promise.reject(new ConferenceError(
-          'Type of audio options should be boolean which indicates whether audio is enabled or not.'
+          'Type of audio options should be boolean or an object.'
         ));
       }
       mediaOptions.audio = {};
@@ -163,6 +166,9 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
         audio: !!stream.capabilities.audio,
         video: !!stream.capabilities.video
       };
+    }
+    if (typeof options !== 'object') {
+      return Promise.reject(new TypeError('Options should be an object.'));
     }
     if (options.audio === undefined) {
       options.audio = !!stream.capabilities.audio
