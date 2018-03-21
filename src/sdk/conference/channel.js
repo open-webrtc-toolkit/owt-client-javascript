@@ -136,23 +136,25 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
           const videoTransceiver = this._pc.addTransceiver('video', { direction: 'sendonly' });
         }
       }
+      let localDesc;
       this._pc.createOffer(offerOptions).then(desc => {
         if (options) {
           desc.sdp = this._setRtpReceiverOptions(desc.sdp, options);
         }
-        this._pc.setLocalDescription(desc).then(() => {
-          this._signaling.sendSignalingMessage('soac', {
-            id: this
-              ._internalId,
-            signaling: desc
-          })
-        }, function(errorMessage) {
-          Logger.error('Set local description failed. Message: ' +
-            JSON.stringify(errorMessage));
+        return desc;
+      }).then(desc => {
+        localDesc = desc;
+        return this._pc.setLocalDescription(desc);
+      }).then(() => {
+        this._signaling.sendSignalingMessage('soac', {
+          id: this
+            ._internalId,
+          signaling: localDesc
         });
-      }, function(error) {
-        Logger.error('Create offer failed. Error info: ' + JSON.stringify(
-          error));
+      }).catch(e => {
+        Logger.error('Failed to create offer or set SDP. Message: ' + e.message);
+        this._rejectPromise(e);
+        this._fireEndedEventOnPublicationOrSubscription();
       });
     });
     return new Promise((resolve, reject) => {
@@ -331,17 +333,25 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
     }
   }
 
+  _rejectPromise(error) {
+    if (!error) {
+      const error = new ConferenceError('Connection failed or closed.');
+    }
+    // Rejecting corresponding promise if publishing and subscribing is ongoing.
+    if (this._publishPromise) {
+      this._publishPromise.reject(error);
+      this._publishPromise = undefined;
+    } else if (this._subscribePromise) {
+      this._subscribePromise.reject(error);
+      this._subscribePromise = undefined;
+    }
+  }
+
   _onIceConnectionStateChange(event) {
     Logger.debug('ICE connection state changed to ' + event.currentTarget.iceConnectionState);
     if (event.currentTarget.iceConnectionState === 'closed' || event.currentTarget
       .iceConnectionState === 'failed') {
-      const error = new ConferenceError('ICE connection failed or closed.');
-      // Rejecting corresponding promise if publishing and subscribing is ongoing.
-      if (this._publishPromise) {
-        this._publishPromise.reject(error);
-      } else if (this._subscribePromise) {
-        this._subscribePromise.reject(error);
-      }
+      this._rejectPromise(new ConferenceError('ICE connection failed or closed.'));
       // Fire ended event if publication or subscription exists.
       this._fireEndedEventOnPublicationOrSubscription();
     }
@@ -433,6 +443,8 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
         }
       }, (error) => {
         Logger.error('Set remote description failed: ' + error);
+        this._rejectPromise(error);
+        this._fireEndedEventOnPublicationOrSubscription();
       });
     }
   }
