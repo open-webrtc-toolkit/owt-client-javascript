@@ -266,9 +266,7 @@ class P2PPeerConnectionChannel extends EventDispatcher {
                 mediaStreamId);
               continue;
             }
-            const publishedStreams = Array.from(this._publishedStreams, x => x[
-              0]);
-            const targetStream = publishedStreams.find(
+            const targetStream = this._pendingStreams.find(
               element => element.mediaStream.id == mediaStreamId);
             const publication = new Publication(
               id, () => {
