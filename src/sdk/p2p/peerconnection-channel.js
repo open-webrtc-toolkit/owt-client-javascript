@@ -811,7 +811,9 @@ class P2PPeerConnectionChannel extends EventDispatcher {
   _unpublish(stream) {
     if (navigator.mozGetUserMedia || !this._remoteSideSupportsRemoveStream) {
       // Actually unpublish is supported. It is a little bit complex since Firefox implemented WebRTC spec while Chrome implemented an old API.
-      Logger.error('Unpublish is not supported on Firefox.');
+      Logger.error(
+        'Stopping a publication is not supported on Firefox. Please use P2PClient.stop() to stop the connection with remote endpoint.'
+      );
       return Promise.reject(new ErrorModule.P2PError(ErrorModule.errors.P2P_CLIENT_UNSUPPORTED_METHOD));
     }
     if (!this._publishedStreams.has(stream)) {
