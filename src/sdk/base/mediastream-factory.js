@@ -112,11 +112,9 @@ export class StreamConstraints {
   }
 }
 
-function isConstrainsForScreenCast(constraints) {
-  return ((typeof constraints.audio === 'object' && constraints.audio.source ===
-    MediaFormatModule.AudioSourceInfo.SCREENCAST) || (typeof constraints.video ===
-    'object' && constraints.video.source === MediaFormatModule.VideoSourceInfo
-    .SCREENCAST))
+function isVideoConstrainsForScreenCast(constraints) {
+  return (typeof constraints.video === 'object' && constraints.video.source ===
+    MediaFormatModule.VideoSourceInfo.SCREENCAST);
 }
 
 /**
@@ -134,7 +132,8 @@ export class MediaStreamFactory {
    * - One or more parameters cannot be satisfied.
    * - Specified device is busy.
    * - Cannot obtain necessary permission or operation is canceled by user.
-   * - Either audio or video source is screen cast, but the other one is not.
+   * - Video source is screen cast, while audio source is not.
+   * - Audio source is screen cast, while video source is disabled.
    * @param {Ics.Base.MediaStreamDeviceConstraints|Ics.Base.MediaStreamScreenCastConstraints} constraints
    */
   static createMediaStream(constraints) {
@@ -142,13 +141,18 @@ export class MediaStreamFactory {
         constraints.video)) {
       return Promise.reject(new TypeError('Invalid constrains'));
     }
-    if (isConstrainsForScreenCast(constraints) && !utils.isChrome() && !utils
+    if (!isVideoConstrainsForScreenCast(constraints) && (typeof constraints.audio ===
+        'object') && constraints.audio.source === MediaFormatModule.AudioSourceInfo
+      .SCREENCAST) {
+      return Promise.reject(new TypeError('Cannot share screen without video.'));
+    }
+    if (isVideoConstrainsForScreenCast(constraints) && !utils.isChrome() && !utils
       .isFirefox()) {
       return Promise.reject(new TypeError(
         'Screen sharing only supports Chrome and Firefox.'));
     }
     // Screen sharing on Chrome does not work with the latest constraints format.
-    if (isConstrainsForScreenCast(constraints) && utils.isChrome()) {
+    if (isVideoConstrainsForScreenCast(constraints) && utils.isChrome()) {
       if (!constraints.extensionId) {
         return Promise.reject(new TypeError(
           'Extension ID must be specified for screen sharing on Chrome.'));
