@@ -153,7 +153,7 @@ class P2PPeerConnectionChannel extends EventDispatcher {
   }
 
   stop() {
-    this._stop();
+    this._stop(undefined, true);
   }
 
   getStats(mediaStream) {
@@ -246,8 +246,13 @@ class P2PPeerConnectionChannel extends EventDispatcher {
               element => element.mediaStream.id == mediaStreamId);
             const publication = new Publication(
               id, () => {
-                return this._unpublish(targetStream).then(() => {
+                this._unpublish(targetStream).then(() => {
                   publication.dispatchEvent(new IcsEvent('ended'));
+                }, (err) => {
+                  // Use debug mode because this error usually doesn't block stopping a publication.
+                  Logger.debug(
+                    'Something wrong happened during stopping a publication. ' +
+                    err.message);
                 });
               }, () => {
                 return this.getStats(targetStream.mediaStream);
@@ -269,16 +274,6 @@ class P2PPeerConnectionChannel extends EventDispatcher {
         for (let i = 0; i < mediaTrackIds.length; i++) {
           if (mediaTrackIds[i] === id) {
             mediaTrackIds.splice(i, 1);
-          }
-          // Resolving certain publish promise when remote endpoint received all tracks of a MediaStream.
-          if (mediaTrackIds.length == 0) {
-            if (!this._unpublishPromises.has(mediaStreamId)) {
-              Logger.warning('Cannot find the promise for removing ' +
-                mediaStreamId);
-              continue;
-            }
-            this._unpublishPromises.get(mediaStreamId).resolve();
-            this._unpublishPromises.delete(mediaStreamId);
           }
         }
       });
@@ -320,11 +315,11 @@ class P2PPeerConnectionChannel extends EventDispatcher {
   }
 
   _chatClosedHandler(data) {
-    this.stop(data);
+    this._stop(data, false);
   }
 
   _chatDeniedHandler() {
-    this.stop();
+    this._stop();
   }
 
   _onOffer(sdp) {
@@ -336,7 +331,7 @@ class P2PPeerConnectionChannel extends EventDispatcher {
       this._createAndSendAnswer();
     }, function(error) {
       Logger.debug('Set remote description failed. Message: ' + error.message);
-      this._stop(error);
+      this._stop(error, true);
     });
   }
 
@@ -351,7 +346,7 @@ class P2PPeerConnectionChannel extends EventDispatcher {
       this._drainPendingMessages();
     }, function(error) {
       Logger.debug('Set remote description failed. Message: ' + error.message);
-      this._stop(error);
+      this._stop(error, true);
     });
   }
 
@@ -499,29 +494,11 @@ class P2PPeerConnectionChannel extends EventDispatcher {
   _onIceConnectionStateChange(event) {
     if (event.currentTarget.iceConnectionState === 'closed' || event.currentTarget
       .iceConnectionState === 'failed') {
-      // Rejecting all promise in pending status.
-      this._publishPromises.forEach(value => {
-        value.reject(new ErrorModule.P2PError(ErrorModule.errors.P2P_WEBRTC_UNKNOWN,
-          'ICE connection failed or closed.'));
-      });
-      this._unpublishPromises.forEach(value => {
-        value.reject(new ErrorModule.P2PError(ErrorModule.errors.P2P_WEBRTC_UNKNOWN,
-          'ICE connection failed or closed.'));
-      });
-      // Fire ended event if publication or remote stream exists.
-      this._publishedStreams.forEach(publication => {
-        publication.dispatchEvent(new IcsEvent('ended'));
-      });
-      this._publishedStreams.clear();
-      this._remoteStreams.forEach(stream => {
-        stream.dispatchEvent(new IcsEvent('ended'));
-      });
-      if (this._state !== ChannelState.READY) {
-        this._sendSignalingMessage(SignalingType.CLOSED).catch(e=>{
-          Logger.warning(e);
-        });
-      }
-    } else if (event.currentTarget.iceConnectionState === 'connected' || event.currentTarget
+      const error = new ErrorModule.P2PError(ErrorModule.errors.P2P_WEBRTC_UNKNOWN,
+        'ICE connection failed or closed.');
+      this._stop(error, true);
+    } else if (event.currentTarget.iceConnectionState === 'connected' ||
+      event.currentTarget
       .iceConnectionState === 'completed') {
       this._sendSignalingMessage(SignalingType.TRACKS_ADDED, this._addedTrackIds);
       this._addedTrackIds = [];
@@ -756,7 +733,7 @@ class P2PPeerConnectionChannel extends EventDispatcher {
       Logger.error(e.message + ' Please check your codec settings.');
       const error = new ErrorModule.P2PError(ErrorModule.errors.P2P_WEBRTC_SDP,
         e.message);
-      this._stop(error);
+      this._stop(error, true);
     });
   }
 
@@ -774,7 +751,7 @@ class P2PPeerConnectionChannel extends EventDispatcher {
       Logger.error(e.message + ' Please check your codec settings.');
       const error = new ErrorModule.P2PError(ErrorModule.errors.P2P_WEBRTC_SDP,
         e.message);
-      this._stop(error);
+      this._stop(error, true);
     });
   }
 
@@ -853,7 +830,7 @@ class P2PPeerConnectionChannel extends EventDispatcher {
     return true;
   }
 
-  _stop(error) {
+  _stop(error, notifyRemote) {
     let promiseError = error;
     if (!promiseError) {
       promiseError = new ErrorModule.P2PError(ErrorModule.errors.P2P_CLIENT_UNKNOWN);
@@ -876,12 +853,29 @@ class P2PPeerConnectionChannel extends EventDispatcher {
     for (const [id, promise] of this._sendDataPromises) {
       promise.reject(promiseError);
     }
+    this._sendDataPromises.clear();
     if (this._state !== ChannelState.READY) {
       this._state = ChannelState.READY;
-      const sendError = JSON.parse(JSON.stringify(error));
-      // Avoid to leak detailed error to remote side.
-      sendError.message = 'Error happened at remote side.';
-      this._sendSignalingMessage(SignalingType.CLOSED, sendError);
+      // Fire ended event if publication or remote stream exists.
+      this._publishedStreams.forEach(publication => {
+        publication.dispatchEvent(new IcsEvent('ended'));
+      });
+      this._publishedStreams.clear();
+      this._remoteStreams.forEach(stream => {
+        stream.dispatchEvent(new IcsEvent('ended'));
+      });
+      this._remoteStreams = [];
+      if (notifyRemote) {
+        let sendError;
+        if (error) {
+          sendError = JSON.parse(JSON.stringify(error));
+          // Avoid to leak detailed error to remote side.
+          sendError.message = 'Error happened at remote side.';
+        }
+        this._sendSignalingMessage(SignalingType.CLOSED, sendError).catch(err => {
+          Logger.debug('Failed to send close.' + err.message);
+        });
+      }
       this.dispatchEvent(new Event('ended'));
     }
   }
