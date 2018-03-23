@@ -415,7 +415,8 @@ class P2PPeerConnectionChannel extends EventDispatcher {
     });
     this._sendSignalingMessage(SignalingType.TRACKS_ADDED, tracksInfo);
     let audioTrackSource, videoTrackSource;
-    if (Utils.isSafari()) {
+    // Safari and Firefox generates new ID for remote tracks.
+    if (Utils.isSafari() || Utils.isFirefox()) {
       if (!this._remoteStreamSourceInfo.has(event.stream.id)) {
         Logger.warning('Cannot find source info for stream ' + event.stream.id);
       }
@@ -494,10 +495,10 @@ class P2PPeerConnectionChannel extends EventDispatcher {
       sdpMid: candidateInfo.sdpMid,
       sdpMLineIndex: candidateInfo.sdpMLineIndex
     });
-    if (this._pc.remoteDescription.sdp !== "") {
+    if (this._pc.remoteDescription && this._pc.remoteDescription.sdp !== "") {
       Logger.debug('Add remote ice candidates.');
-      this._pc.addIceCandidate(candidate).catch(error=>{
-        Logger.warning('Error processing ICE candidate: '+error);
+      this._pc.addIceCandidate(candidate).catch(error => {
+        Logger.warning('Error processing ICE candidate: ' + error);
       });
     } else {
       Logger.debug('Cache remote ice candidates.');
@@ -567,7 +568,8 @@ class P2PPeerConnectionChannel extends EventDispatcher {
 
   _createPeerConnection(){
     this._pc = new RTCPeerConnection(this._config.rtcConfiguration);
-    if (typeof this._pc.addTransceiver === 'function') {
+    // Firefox 59 implemented addTransceiver. However, mid in SDP will differ from track's ID in this case. And transceiver's mid is null.
+    if (typeof this._pc.addTransceiver === 'function' && Utils.isSafari()) {
       this._pc.addTransceiver('audio');
       this._pc.addTransceiver('video');
     }
