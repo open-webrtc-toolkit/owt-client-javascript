@@ -562,7 +562,7 @@ class P2PPeerConnectionChannel extends EventDispatcher {
   };
 
   _onDataChannelClose(event) {
-    Logger.debug('Data Channel for ' + peerId + ' is closed.');
+    Logger.debug('Data Channel is closed.');
   };
 
   _createPeerConnection(){
