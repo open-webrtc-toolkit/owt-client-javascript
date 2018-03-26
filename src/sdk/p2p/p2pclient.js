@@ -202,11 +202,12 @@ const P2PClient = function(configuration, signalingChannel) {
    * @param {string} remoteId Remote endpoint's ID.
    * @returns {undefined}
    */
-  this.stop=function(remoteId){
+  this.stop = function(remoteId) {
     if (!channels.has(remoteId)) {
-      return Promise.reject(new ErrorModule.P2PError(ErrorModule.errors.P2P_CLIENT_INVALID_STATE,
+      Logger.warning(
         'No PeerConnection between current endpoint and specific remote endpoint.'
-      ));;
+      );
+      return;
     }
     channels.get(remoteId).stop();
     channels.delete(remoteId);
