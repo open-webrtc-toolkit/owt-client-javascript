@@ -19,21 +19,6 @@ export class P2PPeerConnectionChannelEvent extends Event {
   }
 }
 
-const ChannelState = {
-  READY: 1, // Ready to chat.
-  OFFERED: 2, // Sent invitation to remote user.
-  PENDING: 3, // Received an invitation.
-  MATCHED: 4, // Both sides agreed to establish a WebRTC connection.
-  CONNECTING: 5, // Exchange SDP and prepare for video chat.
-  CONNECTED: 6, // Chat.
-};
-
-const NegotiationState = {
-  READY: 1,
-  REQUESTED: 2,
-  ACCEPTED: 3,
-  NEGOTIATING: 4
-};
 const DataChannelLabel = {
   MESSAGE: 'message',
   FILE: 'file'
@@ -80,7 +65,6 @@ class P2PPeerConnectionChannel extends EventDispatcher {
     this._publishingStreamTracks = new Map();  // Key is MediaStream's ID, value is an array of the ID of its MediaStreamTracks that haven't been acked.
     this._publishedStreamTracks = new Map();  // Key is MediaStream's ID, value is an array of the ID of its MediaStreamTracks that haven't been removed.
     this._remoteStreamTracks = new Map();  // Key is MediaStream's ID, value is an array of the ID of its MediaStreamTracks.
-    this._negotiationState = NegotiationState.READY;
     this._isNegotiationNeeded = false;
     this._remoteSideSupportsRemoveStream = true;
     this._remoteSideSupportsPlanB = true;
@@ -91,7 +75,7 @@ class P2PPeerConnectionChannel extends EventDispatcher {
     this._dataSeq = 1;  // Sequence number for data channel messages.
     this._sendDataPromises = new Map();  // Key is data sequence number, value is an object has |resolve| and |reject|.
     this._addedTrackIds = []; // Tracks that have been added after receiving remote SDP but before connection is established. Draining these messages when ICE connection state is connected.
-
+    this._isCaller = true;
     this._createPeerConnection();
   }
 
@@ -212,6 +196,9 @@ class P2PPeerConnectionChannel extends EventDispatcher {
         break;
       case SignalingType.CLOSED:
         this._chatClosedHandler();
+        break;
+      case SignalingType.NEGOTIATION_NEEDED:
+        this._doNegotiate();
         break;
       default:
         Logger.error('Invalid signaling message received. Type: ' + message.type);
@@ -446,12 +433,11 @@ class P2PPeerConnectionChannel extends EventDispatcher {
   }
 
   _onNegotiationneeded() {
-    // TODO: send NEGOTIATION-NEEDED message.
     Logger.debug('On negotiation needed.');
 
-    if (this._pc.signalingState === 'stable' && this._negotiationState ===
-      NegotiationState.READY) {
+    if (this._pc.signalingState === 'stable') {
       this._doNegotiate();
+      this._isNegotiationNeeded = false;
     } else {
       this._isNegotiationNeeded = true;
     }
@@ -479,9 +465,8 @@ class P2PPeerConnectionChannel extends EventDispatcher {
     if (this._pc.signalingState === 'closed') {
       //stopChatLocally(peer, peer.id);
     } else if (this._pc.signalingState === 'stable') {
-      this._negotiationState = NegotiationState.READY;
       if (this._isNegotiationNeeded) {
-        this._doNegotiate();
+        this._onNegotiationneeded();
       } else {
         this._drainPendingStreams();
         this._drainPendingMessages();
@@ -684,8 +669,11 @@ class P2PPeerConnectionChannel extends EventDispatcher {
   }
 
   _doNegotiate() {
-    this._negotiationState = NegotiationState.NEGOTIATING;
-    this._createAndSendOffer();
+    if (this._isCaller) {
+      this._createAndSendOffer();
+    } else {
+      this._sendSignalingMessage(SignalingType.NEGOTIATION_NEEDED);
+    }
   };
 
   _setCodecOrder(sdp) {
@@ -716,15 +704,11 @@ class P2PPeerConnectionChannel extends EventDispatcher {
       Logger.error('Peer connection have not been created.');
       return;
     }
-    if (this._pc.signalingState !== 'stable') {
-      this._negotiationState = NegotiationState.NEGOTIATING;
-      return;
-    }
     this._isNegotiationNeeded = false;
+    this._isCaller = true;
     let localDesc;
     this._pc.createOffer(offerOptions).then(desc => {
       desc.sdp = this._setRtpReceiverOptions(desc.sdp);
-      this._negotiationState = NegotiationState.READY;
       localDesc = desc;
       return this._pc.setLocalDescription(desc);
     }).then(() => {
@@ -740,6 +724,7 @@ class P2PPeerConnectionChannel extends EventDispatcher {
   _createAndSendAnswer() {
     this._drainPendingStreams();
     this._isNegotiationNeeded = false;
+    this._isCaller = false;
     let localDesc;
     this._pc.createAnswer().then(desc => {
       desc.sdp = this._setRtpReceiverOptions(desc.sdp);
