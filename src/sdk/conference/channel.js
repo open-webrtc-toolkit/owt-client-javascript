@@ -72,6 +72,35 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
       return Promise.reject(new ConferenceError(
         'Cannot publish a stream without audio and video.'));
     }
+    if (typeof options.audio === 'object') {
+      if (!Array.isArray(options.audio)) {
+        return Promise.reject(new TypeError(
+          'options.audio should be a boolean or an array.'));
+      }
+      for (const parameters of options.audio) {
+        if (!parameters.codec || typeof parameters.codec.name !== 'string' || (
+            parameters.maxBitrate !== undefined && typeof parameters.maxBitrate !==
+            'number')) {
+          return Promise.reject(new TypeError(
+            'options.audio has incorrect parameters.'));
+        }
+      }
+    }
+    if (typeof options.video === 'object') {
+      if (!Array.isArray(options.video)) {
+        return Promise.reject(new TypeError(
+          'options.video should be a boolean or an array.'));
+      }
+      for (const parameters of options.video) {
+        if (!parameters.codec || typeof parameters.codec.name !== 'string' || (
+            parameters.maxBitrate !== undefined && typeof parameters.maxBitrate !==
+            'number') || (parameters.codec.profile !== undefined && typeof parameters
+            .codec.profile !== 'string')) {
+          return Promise.reject(new TypeError(
+            'options.video has incorrect parameters.'));
+        }
+      }
+    }
     this._options = options;
     const mediaOptions = {};
     if (stream.mediaStream.getAudioTracks().length > 0) {
