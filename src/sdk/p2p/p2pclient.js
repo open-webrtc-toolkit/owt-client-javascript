@@ -150,10 +150,13 @@ const P2PClient = function(configuration, signalingChannel) {
    */
   this.disconnect = function() {
     if (state == ConnectionState.READY) {
-      return Promise.reject(new ErrorModule.P2PError(ErrorModule.errors.P2P_CLIENT_INVALID_STATE));
+      return;
     }
-    stop();
-    return signaling.disconnect();
+    channels.forEach((channel)=>{
+      channel.stop();
+    });
+    channels.clear();
+    signaling.disconnect();
   };
 
   /**
