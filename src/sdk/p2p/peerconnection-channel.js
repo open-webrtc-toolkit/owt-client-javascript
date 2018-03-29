@@ -243,6 +243,11 @@ class P2PPeerConnectionChannel extends EventDispatcher {
                     err.message);
                 });
               }, () => {
+                if (!targetStream || !targetStream.mediaStream) {
+                  return Promise.reject(new ErrorModule.P2PError(ErrorModule.errors
+                    .P2P_CLIENT_INVALID_STATE,
+                    'Publication is not available.'));
+                }
                 return this.getStats(targetStream.mediaStream);
               });
             this._publishedStreams.set(targetStream, publication);
