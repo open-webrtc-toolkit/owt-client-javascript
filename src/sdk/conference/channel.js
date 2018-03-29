@@ -207,6 +207,12 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
     if (options.video === undefined) {
       options.video = !!stream.capabilities.video
     }
+    if ((options.audio !== undefined && typeof options.audio !== 'object' &&
+        typeof options.audio !== 'boolean' && options.audio !== null) || (
+        options.video !== undefined && typeof options.video !== 'object' &&
+        typeof options.video !== 'boolean' && options.video !== null)) {
+      return Promise.reject(new TypeError('Invalid options type.'))
+    }
     if (options.audio && !stream.capabilities.audio || (options.video &&
         !stream.capabilities.video)) {
       return Promise.reject(new ConferenceError(
