@@ -85,6 +85,7 @@ var stopChatLocally = function(peer, originatorId) {
  * @param {?P2PClientConfiguration } config Configuration for P2PClient.
  */
 const P2PClient = function(configuration, signalingChannel) {
+  Object.setPrototypeOf(this, new EventDispatcher());
   const config = configuration;
   const signaling = signalingChannel;
   const channels = new Map(); // Map of PeerConnectionChannels.
@@ -264,7 +265,5 @@ const P2PClient = function(configuration, signalingChannel) {
     return channels.get(remoteId);
   };
 };
-
-P2PClient.prototype = new EventDispatcher();
 
 export default P2PClient;
