@@ -96,7 +96,6 @@ class P2PPeerConnectionChannel extends EventDispatcher {
         return new Promise((resolve, reject) => {
           // Replace |addStream| with PeerConnection.addTrack when all browsers are ready.
           this._pc.addStream(stream.mediaStream);
-          this._pendingStreams.push(stream);
           const trackIds = Array.from(stream.mediaStream.getTracks(),
             track => track.id);
           this._publishingStreamTracks.set(stream.mediaStream.id,
@@ -839,30 +838,27 @@ class P2PPeerConnectionChannel extends EventDispatcher {
       promise.reject(promiseError);
     }
     this._sendDataPromises.clear();
-    if (this._state !== ChannelState.READY) {
-      this._state = ChannelState.READY;
-      // Fire ended event if publication or remote stream exists.
-      this._publishedStreams.forEach(publication => {
-        publication.dispatchEvent(new IcsEvent('ended'));
-      });
-      this._publishedStreams.clear();
-      this._remoteStreams.forEach(stream => {
-        stream.dispatchEvent(new IcsEvent('ended'));
-      });
-      this._remoteStreams = [];
-      if (notifyRemote) {
-        let sendError;
-        if (error) {
-          sendError = JSON.parse(JSON.stringify(error));
-          // Avoid to leak detailed error to remote side.
-          sendError.message = 'Error happened at remote side.';
-        }
-        this._sendSignalingMessage(SignalingType.CLOSED, sendError).catch(err => {
-          Logger.debug('Failed to send close.' + err.message);
-        });
+    // Fire ended event if publication or remote stream exists.
+    this._publishedStreams.forEach(publication => {
+      publication.dispatchEvent(new IcsEvent('ended'));
+    });
+    this._publishedStreams.clear();
+    this._remoteStreams.forEach(stream => {
+      stream.dispatchEvent(new IcsEvent('ended'));
+    });
+    this._remoteStreams = [];
+    if (notifyRemote) {
+      let sendError;
+      if (error) {
+        sendError = JSON.parse(JSON.stringify(error));
+        // Avoid to leak detailed error to remote side.
+        sendError.message = 'Error happened at remote side.';
       }
-      this.dispatchEvent(new Event('ended'));
+      this._sendSignalingMessage(SignalingType.CLOSED, sendError).catch(err => {
+        Logger.debug('Failed to send close.' + err.message);
+      });
     }
+    this.dispatchEvent(new Event('ended'));
   }
 }
 
