@@ -867,7 +867,7 @@ class P2PPeerConnectionChannel extends EventDispatcher {
     if (notifyRemote) {
       let sendError;
       if (error) {
-        sendError = JSON.parse(JSON.stringify(error));
+        sendError.code = error.code;
         // Avoid to leak detailed error to remote side.
         sendError.message = 'Error happened at remote side.';
       }
