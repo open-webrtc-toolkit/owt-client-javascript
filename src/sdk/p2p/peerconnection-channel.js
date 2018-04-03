@@ -61,6 +61,7 @@ class P2PPeerConnectionChannel extends EventDispatcher {
     this._remoteTrackSourceInfo = new Map(); // Key is MediaStreamTrack's ID, value is source info.
     this._remoteStreamSourceInfo = new Map(); // Key is MediaStream's ID, value is source info. Only used in Safari.
     this._remoteStreamAttributes = new Map() // Key is MediaStream's ID, value is its attributes.
+    this._remoteStreamOriginalTrackIds = new Map(); // Key is MediaStream's ID, value is its track ID list. This member is used when some browsers implemented the latest WebRTC spec that MID in SDP does not equal to track ID.
     this._publishPromises = new Map(); // Key is MediaStream's ID, value is an object has |resolve| and |reject|.
     this._unpublishPromises = new Map(); // Key is MediaStream's ID, value is an object has |resolve| and |reject|.
     this._publishingStreamTracks = new Map();  // Key is MediaStream's ID, value is an array of the ID of its MediaStreamTracks that haven't been acked.
@@ -306,6 +307,7 @@ class P2PPeerConnectionChannel extends EventDispatcher {
     }
     this._remoteStreamSourceInfo.set(data.id, data.source);
     this._remoteStreamAttributes.set(data.id, data.attributes);
+    this._remoteStreamOriginalTrackIds.set(data.id, data.tracks);
   }
 
   _chatClosedHandler(data) {
@@ -365,11 +367,13 @@ class P2PPeerConnectionChannel extends EventDispatcher {
     Logger.debug('Remote stream added.');
     this._remoteStreamTracks.set(event.stream.id, []);
     // Ack track added when onaddstream/onaddtrack is fired for a specific track. It's better to check the state of PeerConnection before acknowledge since media data will not flow if ICE fails.
-    const tracksInfo=[];
+    let tracksInfo=[];
     event.stream.getTracks().forEach((track)=>{
       tracksInfo.push(track.id);
       this._remoteStreamTracks.get(event.stream.id).push(track.id);
     });
+    tracksInfo = tracksInfo.concat(this._remoteStreamOriginalTrackIds.get(event
+      .stream.id));
     if (this._pc.iceConnectionState === 'connected' || this._pc.iceConnectionState ===
       'completed') {
       this._sendSignalingMessage(SignalingType.TRACKS_ADDED, tracksInfo);
