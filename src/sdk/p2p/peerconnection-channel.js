@@ -54,7 +54,8 @@ class P2PPeerConnectionChannel extends EventDispatcher {
     this._signaling = signaling;
     this._pc = null;
     this._publishedStreams = new Map(); // Key is streams published, value is its publication.
-    this._pendingStreams = []; // Streams going to be published.
+    this._pendingStreams = []; // Streams going to be added to PeerConnection.
+    this._publishingStreams = []; // Streams have been added to PeerConnection, but does not receive ack from remote side.
     this._pendingUnpublishStreams = [];  // Streams going to be removed.
     this._remoteStreams = [];
     this._remoteTrackSourceInfo = new Map(); // Key is MediaStreamTrack's ID, value is source info.
@@ -97,6 +98,7 @@ class P2PPeerConnectionChannel extends EventDispatcher {
         return new Promise((resolve, reject) => {
           // Replace |addStream| with PeerConnection.addTrack when all browsers are ready.
           this._pc.addStream(stream.mediaStream);
+          this._publishingStreams.push(stream);
           const trackIds = Array.from(stream.mediaStream.getTracks(),
             track => track.id);
           this._publishingStreamTracks.set(stream.mediaStream.id,
@@ -227,10 +229,10 @@ class P2PPeerConnectionChannel extends EventDispatcher {
                 mediaStreamId);
               continue;
             }
-            const publishedStreams = Array.from(this._publishedStreams, x => x[
-              0]);
-            const targetStream = publishedStreams.find(
+            const targetStreamIndex = this._publishingStreams.findIndex(
               element => element.mediaStream.id == mediaStreamId);
+            const targetStream = this._publishingStreams[targetStreamIndex];
+            this._publishingStreams.splice(targetStreamIndex, 1);
             const publication = new Publication(
               id, () => {
                 this._unpublish(targetStream).then(() => {
@@ -590,7 +592,7 @@ class P2PPeerConnectionChannel extends EventDispatcher {
         }
         this._pc.addStream(stream.mediaStream);
         Logger.debug('Added stream to peer connection.');
-        this._publishedStreams.set(stream);
+        this._publishingStreams.push(stream);
       }
       this._pendingStreams.length = 0;
       for (let j = 0; j < this._pendingUnpublishStreams.length; j++) {
