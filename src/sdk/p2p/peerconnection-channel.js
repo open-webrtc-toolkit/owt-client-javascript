@@ -76,6 +76,7 @@ class P2PPeerConnectionChannel extends EventDispatcher {
     this._sendDataPromises = new Map();  // Key is data sequence number, value is an object has |resolve| and |reject|.
     this._addedTrackIds = []; // Tracks that have been added after receiving remote SDP but before connection is established. Draining these messages when ICE connection state is connected.
     this._isCaller = true;
+    this._infoSent = false;
     this._createPeerConnection();
   }
 
@@ -91,7 +92,7 @@ class P2PPeerConnectionChannel extends EventDispatcher {
       return Promise.reject(new ErrorModule.P2PError(ErrorModule.errors.P2P_CLIENT_INVALID_STATE,
         'All tracks are ended.'));
     }
-    return Promise.all([this._sendSysInfo(), this._sendStreamInfo(stream)]).then(
+    return Promise.all([this._sendClosedMsgIfNecessary(), this._sendSysInfoIfNecessary(), this._sendStreamInfo(stream)]).then(
       () => {
         return new Promise((resolve, reject) => {
           // Replace |addStream| with PeerConnection.addTrack when all browsers are ready.
@@ -655,8 +656,19 @@ class P2PPeerConnectionChannel extends EventDispatcher {
   }
 
 
-  _sendSysInfo() {
+  _sendSysInfoIfNecessary() {
+    if (this._infoSent) {
+      return Promise.resolve();
+    }
+    this._infoSent = true;
     return this._sendSignalingMessage(SignalingType.UA, sysInfo);
+  }
+
+  _sendClosedMsgIfNecessary() {
+    if (this._pc.remoteDescription.sdp !== "") {
+      return Promise.resolve();
+    }
+    return this._sendSignalingMessage(SignalingType.CLOSED);
   }
 
   _handleRemoteCapability(ua) {
