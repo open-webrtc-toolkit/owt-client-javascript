@@ -667,10 +667,10 @@ class P2PPeerConnectionChannel extends EventDispatcher {
   }
 
   _sendClosedMsgIfNecessary() {
-    if (this._pc.remoteDescription.sdp !== "") {
-      return Promise.resolve();
+    if (this._pc.remoteDescription === null || this._pc.remoteDescription.sdp === "") {
+      return this._sendSignalingMessage(SignalingType.CLOSED);
     }
-    return this._sendSignalingMessage(SignalingType.CLOSED);
+    return Promise.resolve();
   }
 
   _handleRemoteCapability(ua) {
