@@ -28,7 +28,6 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 <head>
   <title>Intel&reg; Collaboration Suite for WebRTC P2P Direct Call Sample</title>
-  <link rel="stylesheet" type="text/css" href="https://www.intel.com/etc/designs/ver/6.8.288/intel/us/en/Fonts/intel-clear-latin.woff2" />
   <style>
     html{
       font-family: "intel-clear","tahoma",Helvetica,"helvetica",Arial,sans-serif;
@@ -128,7 +127,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
   <div id="infoDiv"></div>
   <script type="text/javascript">
     var isVideo = 1;
-    var serverAddress = 'https://jianjun-ubuntu.sh.intel.com:8096'; // Please change example.com to signaling server's address.
+    var serverAddress = 'http://10.239.10.7:8095'; // Please change example.com to signaling server's address.
     const signaling = new SignalingChannel();
     let publicationForCamera;
     let publicationForScreen;
@@ -223,33 +222,13 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
       });
 
       $('#logoff').click(function() {
-        p2p.disconnect().then(()=>{ // Disconnected from peer server.
-          $('#uid').prop('disabled', false);
-        });
+        p2p.disconnect();
+        $('#uid').prop('disabled', false);
       });
 
       $('#data-send').click(function() {
         p2p.send(getTargetId(), $('#dataSent').val()); // Send data to remote endpoint.
       });
-    });
-
-    p2p.addEventListener('chat-invited', function(e) { // Receive invitation from remote client.
-      $('#target-uid').val(e.senderId);
-      p2p.accept(getTargetId());
-      //p2p.deny(e.senderId);
-    });
-
-    p2p.addEventListener('chat-accepted', function(e) {});
-
-    p2p.addEventListener('chat-denied', function(e) {
-      console.log('Invitation to ' + e.senderId + ' has been denied.');
-    });
-
-    p2p.addEventListener('chat-started', function(e) { // Chat started
-      console.log('chat started.');
-      $('#target-screen').prop('disabled', false);
-      $('#data-send').prop('disabled', false);
-      $('#target-video-publish').prop('disabled', false);
     });
 
     p2p.addEventListener('streamadded', function(e) { // A remote stream is available.
@@ -278,24 +257,6 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
       console.log('Stream removed. Stream ID: ' + e.stream.mediaStream.id);
     });
 
-    p2p.addEventListener('chat-stopped', function(e) { // Chat stopped.
-      console.log('chat stopped.');
-      $('#data-send').prop('disabled', true);
-      $('#target-video-publish').prop('disabled', true);
-      $('#target-video-unpublish').prop('disabled', true);
-      $('#target-screen').prop('disabled', true);
-      $('#remote video').hide();
-      if (localStream) {
-        localStream.close();
-        localStream = undefined;
-      }
-      if (localScreen) {
-        localScreen.close();
-        localScreen = undefined;
-      }
-      console.log('Chat stopped. Sender ID: ' + e.senderId + ', peer ID: ' +
-        e.peerId);
-    });
 
     p2p.addEventListener('messagereceived', function(e) { // Received data from datachannel.
       $('#dataReceived').val(e.origin + ': ' + e.message);
