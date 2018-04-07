@@ -606,7 +606,7 @@ export function setMaxBitrate(sdp, encodingParametersList) {
     if (encodingParameters.maxBitrate) {
       sdp = setCodecParam(
           sdp, encodingParameters.codec.name, 'x-google-max-bitrate',
-          (encodingParameters.maxBitrate / 1000).toString());
+          (encodingParameters.maxBitrate).toString());
     }
   }
   return sdp;

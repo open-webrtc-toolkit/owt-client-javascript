@@ -61,7 +61,7 @@ export class AudioEncodingParameters {
      * @member {?number} maxBitrate
      * @instance
      * @memberof Ics.Base.AudioEncodingParameters
-     * @desc Max bitrate expressed in bps.
+     * @desc Max bitrate expressed in kbps.
      */
     this.maxBitrate = maxBitrate;
   }

@@ -323,6 +323,8 @@ class P2PPeerConnectionChannel extends EventDispatcher {
       this._pc.signalingState);
     // event.message.sdp = setRtpSenderOptions(event.message.sdp);
     const sessionDescription = new RTCSessionDescription(sdp);
+    sessionDescription.sdp = this._setRtpSenderOptions(sessionDescription.sdp,
+      this._config);
     this._pc.setRemoteDescription(sessionDescription).then(() => {
       this._createAndSendAnswer();
     }, function(error) {
@@ -336,6 +338,8 @@ class P2PPeerConnectionChannel extends EventDispatcher {
       this._pc.signalingState);
     //event.message.sdp = setRtpSenderOptions(event.message.sdp);
     const sessionDescription = new RTCSessionDescription(sdp);
+    sessionDescription.sdp = this._setRtpSenderOptions(sessionDescription.sdp,
+      this._config);
     this._pc.setRemoteDescription(new RTCSessionDescription(
       sessionDescription)).then(() => {
       Logger.debug('Set remote descripiton successfully.');
@@ -712,7 +716,18 @@ class P2PPeerConnectionChannel extends EventDispatcher {
     return sdp;
   }
 
-  _setRtpSenderOptions(sdp) {
+  _setMaxBitrate(sdp, options) {
+    if (typeof options.audio === 'object') {
+      sdp = SdpUtils.setMaxBitrate(sdp, options.audio);
+    }
+    if (typeof options.video === 'object') {
+      sdp = SdpUtils.setMaxBitrate(sdp, options.video);
+    }
+    return sdp;
+  }
+
+  _setRtpSenderOptions(sdp, options) {
+    sdp = this._setMaxBitrate(sdp, options);
     return sdp;
   }
 
