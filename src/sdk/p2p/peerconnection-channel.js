@@ -163,12 +163,7 @@ class P2PPeerConnectionChannel extends EventDispatcher {
   }
 
   _sendSignalingMessage(type, message) {
-    return this._signaling.sendSignalingMessage(this._remoteId, type, message)
-      .catch(e => {
-        if (typeof e == 'number') {
-          throw ErrorModule.getErrorByCode(e);
-        }
-      });
+    return this._signaling.sendSignalingMessage(this._remoteId, type, message);
   }
 
   _SignalingMesssageHandler(message) {
@@ -358,6 +353,8 @@ class P2PPeerConnectionChannel extends EventDispatcher {
         candidate: event.candidate.candidate,
         sdpMid: event.candidate.sdpMid,
         sdpMLineIndex: event.candidate.sdpMLineIndex
+      }).catch(e=>{
+        Logger.warning('Failed to send candidate.');
       });
     } else {
       Logger.debug('Empty candidate.');
@@ -753,7 +750,7 @@ class P2PPeerConnectionChannel extends EventDispatcher {
       localDesc = desc;
       return this._pc.setLocalDescription(desc);
     }).then(() => {
-      this._sendSdp(localDesc);
+      return this._sendSdp(localDesc);
     }).catch(e => {
       Logger.error(e.message + ' Please check your codec settings.');
       const error = new ErrorModule.P2PError(ErrorModule.errors.P2P_WEBRTC_SDP,
@@ -772,7 +769,7 @@ class P2PPeerConnectionChannel extends EventDispatcher {
       localDesc=desc;
       return this._pc.setLocalDescription(desc);
     }).then(()=>{
-      this._sendSdp(localDesc);
+      return this._sendSdp(localDesc);
     }).catch(e => {
       Logger.error(e.message + ' Please check your codec settings.');
       const error = new ErrorModule.P2PError(ErrorModule.errors.P2P_WEBRTC_SDP,

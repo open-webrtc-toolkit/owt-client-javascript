@@ -237,14 +237,18 @@ const P2PClient = function(configuration, signalingChannel) {
     return channels.get(remoteId).getStats();
   }
 
-  const sendSignalingMessage= function(remoteId, type, message){
+  const sendSignalingMessage = function(remoteId, type, message) {
     const msg = {
       type: type
     };
     if (message) {
       msg.data = message;
     }
-    return signaling.send(remoteId, JSON.stringify(msg));
+    return signaling.send(remoteId, JSON.stringify(msg)).catch(e => {
+      if (typeof e === 'number') {
+        throw ErrorModule.getErrorByCode(e);
+      }
+    });
   };
 
   const getOrCreateChannel = function(remoteId) {
