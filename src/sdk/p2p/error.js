@@ -59,6 +59,10 @@ export const errors = {
     code: 2403,
     message: 'Invalid peer state.'
   },
+  P2P_CLIENT_NOT_ALLOWED: {
+    code: 2404,
+    message: 'Remote user is not allowed.'
+  },
   // 2501-2599 for WebRTC erros.
   P2P_WEBRTC_UNKNOWN:{
     code: 2500,
@@ -92,8 +96,12 @@ export function getErrorByCode(errorCode) {
   return codeErrorMap[errorCode];
 }
 export class P2PError extends Error {
-  constructor(code, message) {
+  constructor(error, message) {
     super(message);
-    this.code = code;
+    if (typeof error === 'number') {
+      this.code = error;
+    } else {
+      this.code = error.code;
+    }
   }
 }
