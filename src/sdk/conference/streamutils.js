@@ -111,7 +111,8 @@ export function convertToSubscriptionCapabilities(mediaInfo) {
     bitrates.sort(sortNumbers);
     const frameRates = JSON.parse(
       JSON.stringify(mediaInfo.video.optional.parameters.framerate));
-    if (mediaInfo.video && mediaInfo.video.parameters) {
+    if (mediaInfo.video && mediaInfo.video.parameters && mediaInfo.video.parameters
+      .framerate) {
       frameRates.push(mediaInfo.video.parameters.framerate);
     }
     frameRates.sort(sortNumbers);
