@@ -328,7 +328,7 @@ class P2PPeerConnectionChannel extends EventDispatcher {
       this._config);
     this._pc.setRemoteDescription(sessionDescription).then(() => {
       this._createAndSendAnswer();
-    }, function(error) {
+    }, (error) => {
       Logger.debug('Set remote description failed. Message: ' + error.message);
       this._stop(error, true);
     });
@@ -345,7 +345,7 @@ class P2PPeerConnectionChannel extends EventDispatcher {
       sessionDescription)).then(() => {
       Logger.debug('Set remote descripiton successfully.');
       this._drainPendingMessages();
-    }, function(error) {
+    }, (error) => {
       Logger.debug('Set remote description failed. Message: ' + error.message);
       this._stop(error, true);
     });
