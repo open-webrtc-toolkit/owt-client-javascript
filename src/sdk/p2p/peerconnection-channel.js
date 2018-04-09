@@ -174,6 +174,7 @@ class P2PPeerConnectionChannel extends EventDispatcher {
         break;
       case SignalingType.UA:
         this._handleRemoteCapability(message.data);
+        this._sendSignalingMessage(SignalingType.UA, sysInfo);
         break;
       case SignalingType.TRACK_SOURCES:
         this._trackSourcesHandler(message.data);
