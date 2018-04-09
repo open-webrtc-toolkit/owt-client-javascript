@@ -318,10 +318,8 @@ class P2PPeerConnectionChannel extends EventDispatcher {
   _onOffer(sdp) {
     Logger.debug('About to set remote description. Signaling state: ' +
       this._pc.signalingState);
-    // event.message.sdp = setRtpSenderOptions(event.message.sdp);
+    sdp.sdp = this._setRtpSenderOptions(sdp.sdp, this._config);
     const sessionDescription = new RTCSessionDescription(sdp);
-    sessionDescription.sdp = this._setRtpSenderOptions(sessionDescription.sdp,
-      this._config);
     this._pc.setRemoteDescription(sessionDescription).then(() => {
       this._createAndSendAnswer();
     }, (error) => {
@@ -333,10 +331,8 @@ class P2PPeerConnectionChannel extends EventDispatcher {
   _onAnswer(sdp) {
     Logger.debug('About to set remote description. Signaling state: ' +
       this._pc.signalingState);
-    //event.message.sdp = setRtpSenderOptions(event.message.sdp);
+    sdp.sdp = this._setRtpSenderOptions(sdp.sdp, this._config);
     const sessionDescription = new RTCSessionDescription(sdp);
-    sessionDescription.sdp = this._setRtpSenderOptions(sessionDescription.sdp,
-      this._config);
     this._pc.setRemoteDescription(new RTCSessionDescription(
       sessionDescription)).then(() => {
       Logger.debug('Set remote descripiton successfully.');
