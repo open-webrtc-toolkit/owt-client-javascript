@@ -68,6 +68,7 @@ class P2PPeerConnectionChannel extends EventDispatcher {
     this._publishedStreamTracks = new Map();  // Key is MediaStream's ID, value is an array of the ID of its MediaStreamTracks that haven't been removed.
     this._remoteStreamTracks = new Map();  // Key is MediaStream's ID, value is an array of the ID of its MediaStreamTracks.
     this._isNegotiationNeeded = false;
+    this._negotiating = false;
     this._remoteSideSupportsRemoveStream = true;
     this._remoteSideSupportsPlanB = true;
     this._remoteSideSupportsUnifiedPlan = true;
@@ -450,7 +451,8 @@ class P2PPeerConnectionChannel extends EventDispatcher {
   _onNegotiationneeded() {
     Logger.debug('On negotiation needed.');
 
-    if (this._pc.signalingState === 'stable') {
+    if (this._pc.signalingState === 'stable' && this._negotiating === false) {
+      this._negotiating = true;
       this._doNegotiate();
       this._isNegotiationNeeded = false;
     } else {
@@ -480,6 +482,7 @@ class P2PPeerConnectionChannel extends EventDispatcher {
     if (this._pc.signalingState === 'closed') {
       //stopChatLocally(peer, peer.id);
     } else if (this._pc.signalingState === 'stable') {
+      this._negotiating = false;
       if (this._isNegotiationNeeded) {
         this._onNegotiationneeded();
       } else {
