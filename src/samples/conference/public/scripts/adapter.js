@@ -2316,8 +2316,10 @@ module.exports = function(window, edgeVersion) {
 
       var rtcpParameters = SDPUtils.parseRtcpParameters(mediaSection);
 
-      var isComplete = SDPUtils.matchPrefix(mediaSection,
-          'a=end-of-candidates', sessionpart).length > 0;
+      // Conference server will send all the ICE candidates in SDP
+      //var isComplete = SDPUtils.matchPrefix(mediaSection,
+      //    'a=end-of-candidates', sessionpart).length > 0;
+      var isComplete = true;
       var cands = SDPUtils.matchPrefix(mediaSection, 'a=candidate:')
           .map(function(cand) {
             return SDPUtils.parseCandidate(cand);
@@ -2436,7 +2438,9 @@ module.exports = function(window, edgeVersion) {
         self.transceivers[sdpMLineIndex].rtcpParameters = rtcpParameters;
 
         if ((isIceLite || isComplete) && cands.length) {
-          iceTransport.setRemoteCandidates(cands);
+          if (iceTransport.state !== 'closed' && sdpMLineIndex === 0) {
+            iceTransport.setRemoteCandidates(cands);
+          }
         }
         if (!usingBundle || sdpMLineIndex === 0) {
           iceTransport.start(iceGatherer, remoteIceParameters,
