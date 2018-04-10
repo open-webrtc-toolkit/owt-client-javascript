@@ -151,6 +151,13 @@ export class MediaStreamFactory {
       return Promise.reject(new TypeError(
         'Screen sharing only supports Chrome and Firefox.'));
     }
+    if (isVideoConstrainsForScreenCast(constraints) && typeof constraints.audio ===
+      'object' && constraints.audio.source !== MediaFormatModule.AudioSourceInfo
+      .SCREENCAST) {
+      return Promise.reject(new TypeError(
+        'Cannot capture video from screen cast while capture audio from other source.'
+      ));
+    };
     // Screen sharing on Chrome does not work with the latest constraints format.
     if (isVideoConstrainsForScreenCast(constraints) && utils.isChrome()) {
       if (!constraints.extensionId) {
