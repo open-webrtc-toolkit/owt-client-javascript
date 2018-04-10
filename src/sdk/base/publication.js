@@ -9,7 +9,7 @@ import { EventDispatcher} from '../base/event.js'
 /**
  * @class AudioPublicationSettings
  * @memberOf Ics.Base
- * @classDesc The settings of a publication.
+ * @classDesc The audio settings of a publication.
  * @hideconstructor
  */
 export class AudioPublicationSettings {
@@ -26,7 +26,7 @@ export class AudioPublicationSettings {
 /**
  * @class VideoPublicationSettings
  * @memberOf Ics.Base
- * @classDesc The settings of a publication.
+ * @classDesc The video settings of a publication.
  * @hideconstructor
  */
 export class VideoPublicationSettings {
@@ -90,7 +90,7 @@ export class PublicationSettings {
 /**
  * @class Publication
  * @memberOf Ics.Base
- * @classDesc The settings of a publication.
+ * @classDesc Publication represents a sender for publishing a stream. It handles the actions on a LocalStream published to a conference.
  * Events:
  *
  * | Event Name      | Argument Type    | Fired when       |
@@ -157,13 +157,13 @@ export class Publication extends EventDispatcher {
 export class PublishOptions {
   constructor(audio, video) {
     /**
-     * @member {?Array<AudioEncodingParameters>} audio
+     * @member {?Array<Ics.Base.AudioEncodingParameters>} audio
      * @instance
      * @memberof Ics.Base.PublishOptions
      */
     this.audio = audio;
     /**
-     * @member {?Array<VideoEncodingParameters>} video
+     * @member {?Array<Ics.Base.VideoEncodingParameters>} video
      * @instance
      * @memberof Ics.Base.PublishOptions
      */

@@ -69,6 +69,51 @@ var stopChatLocally = function(peer, originatorId) {
 };
 
 /**
+ * @class P2PClientConfiguration
+ * @classDesc Configuration for P2PClient.
+ * @memberOf Ics.P2P
+ * @hideconstructor
+ */
+const P2PClientConfiguration = function() {
+  /**
+   * @member {?Array<Ics.Base.AudioEncodingParameters>} audioEncoding
+   * @instance
+   * @desc Encoding parameters for publishing audio tracks.
+   * @memberof Ics.P2P.P2PClientConfiguration
+   */
+  this.audioEncoding = undefined;
+  /**
+   * @member {?Array<Ics.Base.VideoEncodingParameters>} videoEncoding
+   * @instance
+   * @desc Encoding parameters for publishing video tracks.
+   * @memberof Ics.P2P.P2PClientConfiguration
+   */
+  this.videoEncoding = undefined;
+  /**
+   * @member {?RTCConfiguration} rtcConfiguration
+   * @instance
+   * @memberof Ics.P2P.P2PClientConfiguration
+   * @desc It will be used for creating PeerConnection.
+   * @see {@link https://www.w3.org/TR/webrtc/#rtcconfiguration-dictionary|RTCConfiguration Dictionary of WebRTC 1.0}.
+   * @example
+   * // Following object can be set to p2pClientConfiguration.rtcConfiguration.
+   * {
+   *   iceServers: [{
+   *      urls: "stun:example.com:3478"
+   *   }, {
+   *     urls: [
+   *       "turn:example.com:3478?transport=udp",
+   *       "turn:example.com:3478?transport=tcp"
+   *     ],
+   *      credential: "password",
+   *      username: "username"
+   *   }
+   * }
+   */
+  this.rtcConfiguration = undefined;
+};
+
+/**
  * @class P2PClient
  * @classDesc The P2PClient handles PeerConnections between different clients.
  * Events:
@@ -82,7 +127,7 @@ var stopChatLocally = function(peer, originatorId) {
  * @memberof Ics.P2P
  * @extends Ics.Base.EventDispatcher
  * @constructor
- * @param {?P2PClientConfiguration } config Configuration for P2PClient.
+ * @param {?Ics.P2P.P2PClientConfiguration } config Configuration for P2PClient.
  */
 const P2PClient = function(configuration, signalingChannel) {
   Object.setPrototypeOf(this, new EventDispatcher());

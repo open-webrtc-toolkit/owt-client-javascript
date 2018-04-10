@@ -6,7 +6,7 @@ The Intel CS for WebRTC Client SDK for JavaScript provides tools to help you dev
 
 Refer to the SDK release notes for the latest information on the SDK release package, including features, supported browsers, bug fixes, and known issues.
 
-Please include `adapter.js` before `ics.js` in HTML files. `adapter.js` is an open source project hosted on [Github](https://github.com/webrtc/adapter). The revision we depend on is `d6e8b1a45add33f382fed872f32908ea225a1996`.
+Please include `adapter.js` before `ics.js` in HTML files. `adapter.js` is an open source project hosted on [Github](https://github.com/webrtc/adapter). The revision we depend on is `4.0.2`.
 
 If you want to use conference SDK, please also include `socket.io.js` before `ics.js`.
 
@@ -19,7 +19,7 @@ Conference Mode:
 |                                 | Windows* | Ubuntu* | macOS* |
 | ------------------------------- | -------- | ------- |------- |
 | Chrome* 65                      | √        | √       | √      |
-| Firefox* 58                     | √        | √       | √      |
+| Firefox* 59                     | √        | √       | √      |
 | Safari* 11                      |          |         | √      |
 | Microsoft Edge* 41.16299.371.0  | √        |         |        |    |
 
@@ -31,7 +31,7 @@ P2P Mode:
 |                                 | Windows* | Ubuntu* | macOS* |
 | ------------------------------- | -------- | ------- |------- |
 | Chrome* 65                      | √        | √       | √      |
-| Firefox* 58                     | √        | √       | √      |
+| Firefox* 59                     | √        | √       | √      |
 | Safari* 11                      |          |         | √      |
 
 *Table 2: Browser requirements for P2P Mode*
@@ -78,11 +78,6 @@ If you're using customized signling channel, please replace `socket.io.js` and `
 ## 5.1 P2P direct call chat
 
 Direct call chat refers to the discovery of another client by chatting with that user's ID. This is a synchronous call and requires that the two clients should be online on the signaling server.
-~~~~~~{.js}
-<script type="text/javascript">
-// TODO: Samples need to be updated.
-</script>
-~~~~~~
 
 ## 5.2 Customize signaling channel
 
@@ -93,6 +88,14 @@ In the customized signaling channel, you need to implement `connect`, `disconnec
 # 6 Events
 
 The JavaScript objects fires events using `Ics.Base.EventDispatchers`. For more detailed events, please refer to the specific class description page.
+
+# 7 Migrating from 3.x
+
+There are significant API changes since 3.x.
+- Client SDKs are focus on WebRTC connections. Please refer to REST API guide for other conference features, e.g. external input/output, recording.
+- Publication was introduced for both conference and P2P mode. You'll get a publication when publish successfully.
+- Subscription was introduced for conference mode. You'll get a subscription when subscribe a stream successfully. P2P mode does not have subscription at this time since remote stream will be added to PeerConnection automatically.
+- Callbacks were changed to promises.
 
 **Note:** \* Other names and brands may be claimed as the property of others.
 

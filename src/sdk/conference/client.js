@@ -42,6 +42,20 @@ class ConferenceClientConfiguration {
      * @memberof Ics.Conference.ConferenceClientConfiguration
      * @desc It will be used for creating PeerConnection.
      * @see {@link https://www.w3.org/TR/webrtc/#rtcconfiguration-dictionary|RTCConfiguration Dictionary of WebRTC 1.0}.
+     * @example
+     * // Following object can be set to conferenceClientConfiguration.rtcConfiguration.
+     * {
+     *   iceServers: [{
+     *      urls: "stun:example.com:3478"
+     *   }, {
+     *     urls: [
+     *       "turn:example.com:3478?transport=udp",
+     *       "turn:example.com:3478?transport=tcp"
+     *     ],
+     *      credential: "password",
+     *      username: "username"
+     *   }
+     * }
      */
     this.rtcConfiguration = undefined;
   }

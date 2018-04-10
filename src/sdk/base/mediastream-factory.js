@@ -10,7 +10,7 @@ import * as MediaFormatModule from './mediaformat.js'
  * @classDesc Constraints for creating an audio MediaStreamTrack.
  * @memberof Ics.Base
  * @constructor
- * @param {AudioSourceInfo} source Source info of this audio track.
+ * @param {Ics.Base.AudioSourceInfo} source Source info of this audio track.
  */
 export class AudioTrackConstraints {
   constructor(source) {
@@ -41,7 +41,7 @@ export class AudioTrackConstraints {
  * @classDesc Constraints for creating a video MediaStreamTrack.
  * @memberof Ics.Base
  * @constructor
- * @param {VideoSourceInfo} source Source info of this video track.
+ * @param {Ics.Base.VideoSourceInfo} source Source info of this video track.
  */
 export class VideoTrackConstraints {
   constructor(source) {
