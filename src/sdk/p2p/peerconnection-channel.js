@@ -109,6 +109,9 @@ class P2PPeerConnectionChannel extends EventDispatcher {
             resolve: resolve,
             reject: reject
           });
+          if (!this._dataChannels.has(DataChannelLabel.MESSAGE)) {
+            this._createDataChannel(DataChannelLabel.MESSAGE);
+          }
         });
       });
   }
