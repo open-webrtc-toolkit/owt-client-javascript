@@ -134,6 +134,8 @@ class P2PPeerConnectionChannel extends EventDispatcher {
     if (!this._dataChannels.has(DataChannelLabel.MESSAGE)) {
       this._createDataChannel(DataChannelLabel.MESSAGE);
     }
+
+    this._sendSysInfoIfNecessary();
     const dc = this._dataChannels.get(DataChannelLabel.MESSAGE);
     if (dc.readyState === 'open') {
       this._dataChannels.get(DataChannelLabel.MESSAGE).send(JSON.stringify(data));
