@@ -383,6 +383,9 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
   }
 
   _onIceConnectionStateChange(event) {
+    if (!event || !event.currentTarget)
+      return;
+
     Logger.debug('ICE connection state changed to ' + event.currentTarget.iceConnectionState);
     if (event.currentTarget.iceConnectionState === 'closed' || event.currentTarget
       .iceConnectionState === 'failed') {
