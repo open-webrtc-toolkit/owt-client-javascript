@@ -21,7 +21,7 @@ Conference Mode:
 | Chrome* 65                      | √        | √       | √      |
 | Firefox* 58                     | √        | √       | √      |
 | Safari* 11                      |          |         | √      |
-| Microsoft Edge* 40.15063.674.0  | √        |         |        |    |
+| Microsoft Edge* 41.16299.371.0  | √        |         |        |    |
 
 *Table 1: Browser requirements for Conference Mode*
 
@@ -38,7 +38,8 @@ P2P Mode:
 
 
 Different browsers may have different supported codec list.
-Currently, Edge browser only supports H.264 and OPUS, and there is some video codec capability limitation, such as no FIR support in Edge.
+
+Microsoft Edge browser supports H.264, VP8 as video codecs and OPUS, PCMA, PCMU as audio codecs. And there is some video codec capability limitation, such as no FIR support in Edge yet.
 
 Safari support is limited. Not all functions work in Safari.
 
