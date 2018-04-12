@@ -247,8 +247,10 @@ export class MediaStreamFactory {
         }
         if (constraints.video.resolution && constraints.video.resolution.width &&
           constraints.video.resolution.height) {
-          mediaConstraints.video.width = constraints.video.resolution.width;
-          mediaConstraints.video.height = constraints.video.resolution.height;
+          mediaConstraints.video.width = Object.create({});
+          mediaConstraints.video.width.exact = constraints.video.resolution.width;
+          mediaConstraints.video.height = Object.create({});
+          mediaConstraints.video.height.exact = constraints.video.resolution.height;
         }
         if (constraints.video.deviceId instanceof String) {
           mediaConstraints.video.deviceId = constraints.video.deviceId;
