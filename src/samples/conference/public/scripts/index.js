@@ -1,5 +1,6 @@
 // Copyright © 2017 Intel Corporation. All Rights Reserved.
 'use strict';
+var conference;
 
 const runSocketIOSample = function() {
 
@@ -7,6 +8,7 @@ const runSocketIOSample = function() {
     let showedRemoteStreams = [];
     let myId;
     let subscriptionForMixedStream;
+    let myRoom;
 
     function getParameterByName(name) {
         name = name.replace(/[\[]/, '\\\[').replace(/[\]]/, '\\\]');
@@ -16,10 +18,18 @@ const runSocketIOSample = function() {
             /\+/g, ' '));
     }
 
-    var subscribeMix = getParameterByName('mix') || 'true';
+    var subscribeForward = getParameterByName('forward') === 'true'?true:false;
 
-    const conference = new Ics.Conference.ConferenceClient();
-
+    conference = new Ics.Conference.ConferenceClient();
+    function renderVideo(stream){
+        conference.subscribe(stream)
+        .then((subscriptions)=>{
+           let $video = $('<video controls autoplay width="320" height="240">this browser does not supported video tag</video>');
+           $video.get(0).srcObject = stream.mediaStream;
+           $('body').append($video);
+        }, (err)=>{ console.log('subscribe failed', err);
+        });
+    }
     function subscribeDifferentResolution(stream, resolution) {
         subscriptionForMixedStream.stop();
         subscriptionForMixedStream = null;
@@ -37,6 +47,8 @@ const runSocketIOSample = function() {
 
     conference.addEventListener('streamadded', (event) => {
         console.log('A new stream is added ', event.stream.id);
+        subscribeForward &&  renderVideo(event.stream);
+        mixStream(myRoom, event.stream.id, 'common');
         event.stream.addEventListener('ended', () => {
             console.log(event.stream.id + ' is ended.');
         });
@@ -49,16 +61,18 @@ const runSocketIOSample = function() {
             height: 720
         };
         var shareScreen = getParameterByName('screen') || false;
-        var myRoom = getParameterByName('room');
+        myRoom = getParameterByName('room');
         var isHttps = (location.protocol === 'https:');
         var mediaUrl = getParameterByName('url');
         var isPublish = getParameterByName('publish');
-
         createToken(myRoom, 'user', 'presenter', function(response) {
             var token = response;
             conference.join(token).then(resp => {
                 myId = resp.self.id;
                 myRoom = resp.id;
+                if(mediaUrl){
+                     startStreamingIn(myRoom, mediaUrl);
+                }
                 if (isPublish !== 'false') {
                     const audioConstraintsForMic = new Ics.Base.AudioTrackConstraints(Ics.Base.AudioSourceInfo.MIC);
                     const videoConstraintsForCamera = new Ics.Base.VideoTrackConstraints(Ics.Base.VideoSourceInfo.CAMERA);
@@ -83,7 +97,8 @@ const runSocketIOSample = function() {
                 }
                 var streams = resp.remoteStreams;
                 for (const stream of streams) {
-                    if (stream.source.audio === 'mixed' || stream.source.video ===
+                    if(!subscribeForward){
+                      if (stream.source.audio === 'mixed' || stream.source.video ===
                         'mixed') {
                         conference.subscribe(stream, {
                             audio: {codecs:[{name:'opus'}]},
@@ -105,6 +120,9 @@ const runSocketIOSample = function() {
                             });
                             button.appendTo($('#resolutions'));
                         };
+                      }
+                    }else if(stream.source.audio !== 'mixed'){
+                        subscribeForward && renderVideo(stream);
                     }
                 }
                 console.log('Streams in conference:', streams.length);
