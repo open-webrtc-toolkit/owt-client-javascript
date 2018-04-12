@@ -151,10 +151,21 @@ class P2PPeerConnectionChannel extends EventDispatcher {
 
   getStats(mediaStream) {
     if (this._pc) {
-      return this._pc.getStats(mediaStream);
+      const tracksStatsReports = [];
+      return Promise.all([mediaStream.getTracks().forEach((track) => {this._getStats(track, tracksStatsReports)})]).then(
+        () => {
+          return new Promise((resolve, reject) => {
+            resolve(tracksStatsReports);
+          });
+        });
     } else {
       return Promise.reject(new ErrorModule.P2PError(ErrorModule.errors.P2P_CLIENT_INVALID_STATE));
     }
+  }
+
+  _getStats(mediaStreamTrack, reportsResult) {
+    return this._pc.getStats(mediaStreamTrack).then(
+      (statsReport) => {reportsResult.push(statsReport);});
   }
 
   // This method is called by P2PClient when there is new signaling message arrived.
