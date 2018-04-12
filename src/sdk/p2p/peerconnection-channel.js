@@ -738,11 +738,11 @@ class P2PPeerConnectionChannel extends EventDispatcher {
   }
 
   _setMaxBitrate(sdp, options) {
-    if (typeof options.audio === 'object') {
-      sdp = SdpUtils.setMaxBitrate(sdp, options.audio);
+    if (typeof options.audioEncodings === 'object') {
+      sdp = SdpUtils.setMaxBitrate(sdp, options.audioEncodings);
     }
-    if (typeof options.video === 'object') {
-      sdp = SdpUtils.setMaxBitrate(sdp, options.video);
+    if (typeof options.videoEncodings === 'object') {
+      sdp = SdpUtils.setMaxBitrate(sdp, options.videoEncodings);
     }
     return sdp;
   }
