@@ -135,7 +135,10 @@ class P2PPeerConnectionChannel extends EventDispatcher {
       this._createDataChannel(DataChannelLabel.MESSAGE);
     }
 
-    this._sendSysInfoIfNecessary();
+    this._sendSysInfoIfNecessary().catch(err => {
+        Logger.debug('Failed to send sysInfo.' + err.message);
+    });
+
     const dc = this._dataChannels.get(DataChannelLabel.MESSAGE);
     if (dc.readyState === 'open') {
       this._dataChannels.get(DataChannelLabel.MESSAGE).send(JSON.stringify(data));
