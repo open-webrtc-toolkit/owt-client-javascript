@@ -334,6 +334,27 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
     });
   }
 
+  _applyOptions(options) {
+    if (typeof options !== 'object' || typeof options.video !== 'object') {
+      return Promise.reject(new ConferenceError(
+        'Options should be an object.'));
+    }
+    const videoOptions = {};
+    videoOptions.resolution = options.video.resolution;
+    videoOptions.framerate = options.video.frameRate;
+    videoOptions.bitrate = options.video.bitrateMultiplier ? 'x' + options.video
+      .bitrateMultiplier
+      .toString() : undefined;
+    videoOptions.keyFrameInterval = options.video.keyFrameInterval;
+    return this._signaling.sendSignalingMessage('subscription-control', {
+      id: this._internalId,
+      operation: 'update',
+      data: {
+        video: { parameters: videoOptions }
+      }
+    }).then();
+  }
+
   _onRemoteStreamAdded(event) {
     Logger.debug('Remote stream added.');
     if (this._subscribedStream) {
@@ -434,31 +455,24 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
   _readyHandler() {
     if (this._subscribePromise) {
       this._subscription = new Subscription(this._internalId, () => {
-        this._unsubscribe();
-        return Promise.resolve();
-      }, () => {
-        return this._getStats();
-      }, (trackKind) => {
-        return this._muteOrUnmute(true, false, trackKind);
-      }, (trackKind) => {
-        return this._muteOrUnmute(false, false, trackKind);
-      });
+          this._unsubscribe();
+          return Promise.resolve();
+        }, () => this._getStats(),
+        trackKind => this._muteOrUnmute(true, false, trackKind),
+        trackKind => this._muteOrUnmute(false, false, trackKind),
+        options => this._applyOptions(options));
       // Fire subscription's ended event when associated stream is ended.
-      this._subscribedStream.addEventListener('ended', ()=>{
+      this._subscribedStream.addEventListener('ended', () => {
         this._subscription.dispatchEvent('ended', new IcsEvent('ended'));
       });
       this._subscribePromise.resolve(this._subscription);
     } else if (this._publishPromise) {
       this._publication = new Publication(this._internalId, () => {
-        this._unpublish();
-        return Promise.resolve();
-      }, () => {
-        return this._getStats();
-      }, (trackKind) => {
-        return this._muteOrUnmute(true, true, trackKind);
-      }, (trackKind) => {
-        return this._muteOrUnmute(false, true, trackKind);
-      });
+          this._unpublish();
+          return Promise.resolve();
+        }, () => this._getStats(),
+        trackKind => this._muteOrUnmute(true, true, trackKind),
+        trackKind => this._muteOrUnmute(false, true, trackKind));
       this._publishPromise.resolve(this._publication);
       // Do not fire publication's ended event when associated stream is ended.
       // It may still sending silence or black frames.

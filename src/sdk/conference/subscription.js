@@ -132,21 +132,21 @@ export class VideoSubscriptionConstraints {
     /**
      * @member {?number} frameRates
      * @instance
-     * @memberof Ics.Conference.VideoSubscriptionCapabilities
+     * @memberof Ics.Conference.VideoSubscriptionConstraints
      * @desc Only frameRates listed in VideoSubscriptionCapabilities are allowed.
      */
     this.frameRate = frameRate;
     /**
      * @member {?number} bitrateMultipliers
      * @instance
-     * @memberof Ics.Conference.VideoSubscriptionCapabilities
+     * @memberof Ics.Conference.VideoSubscriptionConstraints
      * @desc Only bitrateMultipliers listed in VideoSubscriptionCapabilities are allowed.
      */
     this.bitrateMultiplier = bitrateMultiplier;
     /**
      * @member {?number} keyFrameIntervals
      * @instance
-     * @memberof Ics.Conference.VideoSubscriptionCapabilities
+     * @memberof Ics.Conference.VideoSubscriptionConstraints
      * @desc Only keyFrameIntervals listed in VideoSubscriptionCapabilities are allowed.
      */
     this.keyFrameInterval = keyFrameInterval;
@@ -176,6 +176,62 @@ export class SubscribeOptions {
 }
 
 /**
+ * @class VideoSubscriptionUpdateOptions
+ * @memberOf Ics.Conference
+ * @classDesc VideoSubscriptionUpdateOptions defines options for updating a subscription's video part.
+ * @hideconstructor
+ */
+export class VideoSubscriptionUpdateOptions {
+  constructor() {
+    /**
+     * @member {?Ics.Base.Resolution} resolution
+     * @instance
+     * @memberof Ics.Conference.VideoSubscriptionUpdateOptions
+     * @desc Only resolutions listed in VideoSubscriptionCapabilities are allowed.
+     */
+    this.resolution = undefined;
+    /**
+     * @member {?number} frameRates
+     * @instance
+     * @memberof Ics.Conference.VideoSubscriptionUpdateOptions
+     * @desc Only frameRates listed in VideoSubscriptionCapabilities are allowed.
+     */
+    this.frameRate = undefined;
+    /**
+     * @member {?number} bitrateMultipliers
+     * @instance
+     * @memberof Ics.Conference.VideoSubscriptionUpdateOptions
+     * @desc Only bitrateMultipliers listed in VideoSubscriptionCapabilities are allowed.
+     */
+    this.bitrateMultipliers = undefined;
+    /**
+     * @member {?number} keyFrameIntervals
+     * @instance
+     * @memberof Ics.Conference.VideoSubscriptionUpdateOptions
+     * @desc Only keyFrameIntervals listed in VideoSubscriptionCapabilities are allowed.
+     */
+    this.keyFrameInterval = undefined;
+  }
+}
+
+/**
+ * @class SubscriptionUpdateOptions
+ * @memberOf Ics.Conference
+ * @classDesc SubscriptionUpdateOptions defines options for updating a subscription.
+ * @hideconstructor
+ */
+export class SubscriptionUpdateOptions {
+  constructor() {
+    /**
+     * @member {?VideoSubscriptionUpdateOptions} video
+     * @instance
+     * @memberof Ics.Conference.SubscriptionUpdateOptions
+     */
+    this.video = undefined;
+  }
+}
+
+/**
  * @class Subscription
  * @memberof Ics.Conference
  * @classDesc Subscription is a receiver for receiving a stream.
@@ -191,7 +247,7 @@ export class SubscribeOptions {
  * @hideconstructor
  */
 export class Subscription extends EventDispatcher {
-  constructor(id, stop, getStats, mute, unmute) {
+  constructor(id, stop, getStats, mute, unmute, applyOptions) {
     super();
     if (!id) {
       throw new TypeError('ID cannot be null or undefined.');
@@ -240,5 +296,14 @@ export class Subscription extends EventDispatcher {
      * @returns {Promise<undefined, Error>}
      */
     this.unmute = unmute;
+    /**
+     * @function applyOptions
+     * @instance
+     * @desc Update subscription with given options.
+     * @memberof Ics.Conference.Subscription
+     * @param {Ics.Conference.SubscriptionUpdateOptions } options Subscription update options.
+     * @returns {Promise<undefined, Error>}
+     */
+    this.applyOptions = applyOptions;
   }
 }
