@@ -206,37 +206,39 @@ export class Subscription extends EventDispatcher {
       writable: false,
       value: id
     });
-  /**
-   * @function stop
-   * @instance
-   * @desc Stop certain subscription. Once a subscription is stopped, it cannot be recovered.
-   * @memberof Ics.Conference.Subscription
-   * @returns {undefined}
-   */
+    /**
+     * @function stop
+     * @instance
+     * @desc Stop certain subscription. Once a subscription is stopped, it cannot be recovered.
+     * @memberof Ics.Conference.Subscription
+     * @returns {undefined}
+     */
     this.stop = stop;
-  /**
-   * @function getStats
-   * @instance
-   * @desc Get stats of underlying PeerConnection.
-   * @memberof Ics.Conference.Subscription
-   * @returns {Promise<RTCStatsReport, Error>}
-   */
+    /**
+     * @function getStats
+     * @instance
+     * @desc Get stats of underlying PeerConnection.
+     * @memberof Ics.Conference.Subscription
+     * @returns {Promise<RTCStatsReport, Error>}
+     */
     this.getStats = getStats;
-  /**
-   * @function mute
-   * @instance
-   * @desc Stop reeving data from remote endpoint.
-   * @memberof Ics.Conference.Subscription
-   * @returns {Promise<undefined, Error>}
-   */
-    this.mute=mute;
-  /**
-   * @function unmute
-   * @instance
-   * @desc Continue reeving data from remote endpoint.
-   * @memberof Ics.Conference.Subscription
-   * @returns {Promise<undefined, Error>}
-   */
-    this.unmute=unmute;
+    /**
+     * @function mute
+     * @instance
+     * @desc Stop reeving data from remote endpoint.
+     * @memberof Ics.Conference.Subscription
+     * @param {Ics.Base.TrackKind } kind Kind of tracks to be muted.
+     * @returns {Promise<undefined, Error>}
+     */
+    this.mute = mute;
+    /**
+     * @function unmute
+     * @instance
+     * @desc Continue reeving data from remote endpoint.
+     * @memberof Ics.Conference.Subscription
+     * @param {Ics.Base.TrackKind } kind Kind of tracks to be unmuted.
+     * @returns {Promise<undefined, Error>}
+     */
+    this.unmute = unmute;
   }
 }

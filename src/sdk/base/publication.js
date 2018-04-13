@@ -114,38 +114,40 @@ export class Publication extends EventDispatcher {
       writable: false,
       value: id ? id : Utils.createUuid()
     });
-  /**
-   * @function stop
-   * @instance
-   * @desc Stop certain publication. Once a subscription is stopped, it cannot be recovered.
-   * @memberof Ics.Base.Publication
-   * @returns {undefined}
-   */
+    /**
+     * @function stop
+     * @instance
+     * @desc Stop certain publication. Once a subscription is stopped, it cannot be recovered.
+     * @memberof Ics.Base.Publication
+     * @returns {undefined}
+     */
     this.stop = stop;
-  /**
-   * @function getStats
-   * @instance
-   * @desc Get stats of underlying PeerConnection.
-   * @memberof Ics.Base.Publication
-   * @returns {Promise<RTCStatsReport, Error>}
-   */
+    /**
+     * @function getStats
+     * @instance
+     * @desc Get stats of underlying PeerConnection.
+     * @memberof Ics.Base.Publication
+     * @returns {Promise<RTCStatsReport, Error>}
+     */
     this.getStats = getStats;
-  /**
-   * @function mute
-   * @instance
-   * @desc Stop sending data to remote endpoint.
-   * @memberof Ics.Base.Publication
-   * @returns {Promise<undefined, Error>}
-   */
-    this.mute=mute;
-  /**
-   * @function unmute
-   * @instance
-   * @desc Continue sending data to remote endpoint.
-   * @memberof Ics.Base.Publication
-   * @returns {Promise<undefined, Error>}
-   */
-    this.unmute=unmute;
+    /**
+     * @function mute
+     * @instance
+     * @desc Stop sending data to remote endpoint.
+     * @memberof Ics.Base.Publication
+     * @param {Ics.Base.TrackKind } kind Kind of tracks to be muted.
+     * @returns {Promise<undefined, Error>}
+     */
+    this.mute = mute;
+    /**
+     * @function unmute
+     * @instance
+     * @desc Continue sending data to remote endpoint.
+     * @memberof Ics.Base.Publication
+     * @param {Ics.Base.TrackKind } kind Kind of tracks to be unmuted.
+     * @returns {Promise<undefined, Error>}
+     */
+    this.unmute = unmute;
   }
 }
 

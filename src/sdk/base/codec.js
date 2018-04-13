@@ -84,14 +84,14 @@ export class VideoCodecParameters {
   constructor(name, profile) {
     /**
      * @member {string} name
-     * @memberof Ics.Base.AudioCodecParameters
+     * @memberof Ics.Base.VideoCodecParameters
      * @instance
      * @desc Name of a codec. Please a value in Ics.Base.AudioCodec. However, some functions do not support all the values in Ics.Base.AudioCodec.
      */
     this.name = name;
     /**
      * @member {?string} profile
-     * @memberof Ics.Base.AudioCodecParameters
+     * @memberof Ics.Base.VideoCodecParameters
      * @instance
      * @desc The profile of a codec. Profile may not apply to all codecs.
      */

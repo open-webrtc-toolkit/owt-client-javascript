@@ -96,7 +96,7 @@ export class Stream extends EventDispatcher {
  * @constructor
  * @param {MediaStream} stream Underlying MediaStream.
  * @param {Ics.Base.StreamSourceInfo} sourceInfo Information about stream's source.
- * @param {string} attributes Custom attributes of the stream.
+ * @param {object} attributes Custom attributes of the stream.
  */
 export class LocalStream extends Stream {
   constructor(stream, sourceInfo, attributes) {
