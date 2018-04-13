@@ -16,6 +16,8 @@ function SignalingChannel() {
 
   let connectPromise=null;
 
+  var reconnectTimes = 0;
+
   /* TODO: Do remember to trigger onMessage when new message is received.
      if(this.onMessage)
        this.onMessage(from, message);
@@ -58,6 +60,7 @@ function SignalingChannel() {
     wsServer = io(serverAddress, opts);
 
     wsServer.on('connect', function() {
+      reconnectTimes = 0;
       console.info('Connected to websocket server.');
     });
 
@@ -69,9 +72,18 @@ function SignalingChannel() {
       connectPromise=null;
     });
 
+    wsServer.on('reconnecting', function(){
+      reconnectTimes++;
+    });
+
+    wsServer.on('reconnect_failed', function(){
+      if (self.onServerDisconnected)
+        self.onServerDisconnected();
+    })
+
     wsServer.on('disconnect', function() {
       console.info('Disconnected from websocket server.');
-      if (self.onServerDisconnected)
+      if (reconnectTimes >= 9 && self.onServerDisconnected)
         self.onServerDisconnected();
     });
 
@@ -107,6 +119,7 @@ function SignalingChannel() {
   };
 
   this.disconnect = function() {
+    reconnectTimes = 9;
     if (wsServer)
       wsServer.close();
     return Promise.resolve();
