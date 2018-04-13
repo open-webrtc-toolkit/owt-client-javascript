@@ -127,7 +127,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
   <div id="infoDiv"></div>
   <script type="text/javascript">
     var isVideo = 1;
-    var serverAddress = 'http://10.239.10.7:8095'; // Please change example.com to signaling server's address.
+    var serverAddress = 'http://example.com'; // Please change example.com to signaling server's address.
     const signaling = new SignalingChannel();
     let publicationForCamera;
     let publicationForScreen;
@@ -157,21 +157,31 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
       });
 
       $('#target-screen').click(function() {
-        Woogeen.LocalStream.create({
-          audio: true,
-          video: {
-            device: "screen",
-            extensionId: "pndohhifhheefbpeljcmnhnkphepimhe"
+         var config = {
+            audio:{
+              source:'screen-cast'
+            },
+            video:{
+              resolution:{
+                "width": 640,
+                "height":480
+              },
+              frameRate:20,
+              source:'screen-cast'
+            },
+            extensionId:'pndohhifhheefbpeljcmnhnkphepimhe'
           }
-        }, function(err, stream) {
-          if (err) {
-            return console.error('create LocalStream failed:', err);
-          }
-          localScreen = stream;
-          p2p.publish(localScreen, $('#target-uid').val()).then(publication=>{
-            publicationForScreen = publication;
-          }); // Publish local stream to remote client
-        });
+          let mediaStream;
+          Ics.Base.MediaStreamFactory.createMediaStream(config).then(stream => {
+            mediaStream = stream;
+            ScreenStream = new Ics.Base.LocalStream(mediaStream, new Ics.Base.StreamSourceInfo('screen-cast', 'screen-cast'));
+            $('#local').children('video').get(0).srcObject = ScreenStream.mediaStream;
+            p2p.publish(getTargetId(), ScreenStream).then(publication=>{
+              publicationForScreen = publication;
+            });
+          }, err=>{
+            console.error('Failed to create MediaStream, '+ err);
+          });
       });
 
       $('#target-video-unpublish').click(function() {
@@ -263,10 +273,6 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     });
 
     window.onbeforeunload = function() {
-      if (localStream) {
-        p2p.unpublish(localStream, $('#target-uid').val());
-        localStream.close();
-      }
       p2p.stop($('#target-uid').val());
     }
   </script>
