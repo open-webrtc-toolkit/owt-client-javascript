@@ -1,16 +1,10 @@
 {
-  "name": "woogeen.conference.sample",
+  "name": "ics.conference.sample",
   "title": "Intel WebRTC Conference Sample",
-  "description": "Intel WebRTC JavaScript Conference Sample",
-  "version": "3.5.0",
+  "description": "Intel CS for WebRTC JavaScript Conference Sample",
+  "version": "4.0.0",
   "homepage": "http://webrtc.intel.com",
   "author": "Intel WebRTC team",
-  "contributors": [
-    "Markus Chou <yue.y.zhou@intel.com>",
-    "Xiaoyun Zhao <xiaoyun.zhao@intel.com>",
-    "Jianjun Zhu <jianjun.zhu@intel.com>"
-  ],
-  "contributors": [],
   "keywords": [
     "webrtc",
     "library",

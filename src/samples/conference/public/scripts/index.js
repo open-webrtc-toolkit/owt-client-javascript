@@ -64,11 +64,11 @@ const runSocketIOSample = function() {
                     const videoConstraintsForCamera = new Ics.Base.VideoTrackConstraints(Ics.Base.VideoSourceInfo.CAMERA);
                     let mediaStream;
                     Ics.Base.MediaStreamFactory.createMediaStream(new Ics.Base.StreamConstraints(
-                        audioConstraintsForMic, videoConstraintsForCamera)).then(stream => {
+                        undefined, videoConstraintsForCamera)).then(stream => {
                         mediaStream = stream;
                         localStream = new Ics.Base.LocalStream(
                             mediaStream, new Ics.Base.StreamSourceInfo(
-                                'mic', 'camera'));
+                                undefined, 'camera'));
                         $('.local video').get(0).srcObject = stream;
                         conference.publish(localStream).then(publication => {
                             mixStream(myRoom, publication.id, 'common')
@@ -86,7 +86,7 @@ const runSocketIOSample = function() {
                     if (stream.source.audio === 'mixed' || stream.source.video ===
                         'mixed') {
                         conference.subscribe(stream, {
-                            audio: true,
+                            audio: {codecs:[{name:'opus'}]},
                             video: true
                         }).then((subscription) => {
                             subscriptionForMixedStream = subscription;
@@ -125,7 +125,7 @@ const runSocketIOSample = function() {
                 onRes(req.responseText);
             }
         };
-        req.open(method, entity, true);
+        req.open(method, 'http://192.168.1.8:3001'+entity, true);
         req.setRequestHeader('Content-Type', 'application/json');
         if (body !== undefined) {
             req.send(JSON.stringify(body));
