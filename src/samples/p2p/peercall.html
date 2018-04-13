@@ -198,7 +198,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
         $('#target-video-unpublish').prop('disabled', false);
         $('#target-video-publish').prop('disabled', true);
         if (localStream) {
-          p2p.publish(localStream, $('#target-uid').val()).then(publication=>{
+          p2p.publish(getTargetId(), localStream).then(publication=>{
             publicationForCamera = publication;
           }); // Publish local stream to remote client
         } else {
@@ -256,17 +256,6 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
       }
       isVideo++;
     });
-
-    p2p.addEventListener('stream-removed', function(e) { // A remote stream is available.
-      var stream = e.stream;
-      if (stream && stream.isScreen()) {
-        $("#screen video").hide();
-      } else {
-        $("#remote video").hide();
-      }
-      console.log('Stream removed. Stream ID: ' + e.stream.mediaStream.id);
-    });
-
 
     p2p.addEventListener('messagereceived', function(e) { // Received data from datachannel.
       $('#dataReceived').val(e.origin + ': ' + e.message);
