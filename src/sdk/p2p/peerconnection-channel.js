@@ -154,13 +154,17 @@ class P2PPeerConnectionChannel extends EventDispatcher {
 
   getStats(mediaStream) {
     if (this._pc) {
-      const tracksStatsReports = [];
-      return Promise.all([mediaStream.getTracks().forEach((track) => {this._getStats(track, tracksStatsReports)})]).then(
-        () => {
-          return new Promise((resolve, reject) => {
-            resolve(tracksStatsReports);
+      if (mediaStream === undefined) {
+        return this._pc.getStats();
+      } else {
+        const tracksStatsReports = [];
+        return Promise.all([mediaStream.getTracks().forEach((track) => {this._getStats(track, tracksStatsReports)})]).then(
+          () => {
+            return new Promise((resolve, reject) => {
+              resolve(tracksStatsReports);
+            });
           });
-        });
+      }
     } else {
       return Promise.reject(new ErrorModule.P2PError(ErrorModule.errors.P2P_CLIENT_INVALID_STATE));
     }
