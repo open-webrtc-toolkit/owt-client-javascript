@@ -104,7 +104,9 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
     }
     this._options = options;
     const mediaOptions = {};
-    if (stream.mediaStream.getAudioTracks().length > 0) {
+    this._createPeerConnection();
+    if (stream.mediaStream.getAudioTracks().length > 0 && options.audio !==
+      false && options.audio !== null) {
       if (stream.mediaStream.getAudioTracks().length > 1) {
         Logger.warning(
           'Publishing a stream with multiple audio tracks is not fully supported.'
@@ -118,10 +120,14 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
       }
       mediaOptions.audio = {};
       mediaOptions.audio.source = stream.source.audio;
+      for(const track of stream.mediaStream.getAudioTracks()){
+        this._pc.addTrack(track);
+      }
     } else {
       mediaOptions.audio = false;
     }
-    if (stream.mediaStream.getVideoTracks().length > 0) {
+    if (stream.mediaStream.getVideoTracks().length > 0 && options.video !==
+      false && options.video !== null) {
       if (stream.mediaStream.getVideoTracks().length > 1) {
         Logger.warning(
           'Publishing a stream with multiple video tracks is not fully supported.'
@@ -137,6 +143,9 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
         },
         framerate: trackSettings.frameRate
       };
+      for(const track of stream.mediaStream.getVideoTracks()){
+        this._pc.addTrack(track);
+      }
     } else {
       mediaOptions.video = false;
     }
@@ -151,8 +160,6 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
       });
       this.dispatchEvent(messageEvent);
       this._internalId = data.id;
-      this._createPeerConnection();
-      this._pc.addStream(stream.mediaStream);
       const offerOptions = {
         offerToReceiveAudio: false,
         offerToReceiveVideo: false
