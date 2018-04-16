@@ -628,6 +628,7 @@ class P2PPeerConnectionChannel extends EventDispatcher {
           continue;
         }
         this._pc.removeStream(this._pendingUnpublishStreams[j].mediaStream);
+        this._unpublishPromises.get(this._pendingUnpublishStreams[j].mediaStream.id).resolve();
         this._publishedStreams.delete(this._pendingUnpublishStreams[j]);
         Logger.debug('Remove stream.');
       }
