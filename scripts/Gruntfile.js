@@ -105,16 +105,7 @@ window.L = L;\n\
       },
       rest: {
         src: restFiles,
-        dest: 'dist/sdk/rest.js',
-        options:{
-           footer:'module.exports = ICS_REST;',
-           process: true
-        },
-        nonull: true
-      },
-      rest_debug: {
-        src: restFiles,
-        dest: 'dist/sdk-debug/icsREST.debug.js',
+        dest: 'dist/samples/conference/public/scripts/rest.js',
         options:{
            footer:'module.exports = ICS_REST;',
            process: true
@@ -153,8 +144,7 @@ window.L = L;\n\
     uglify: {
       dist: {
         files: {
-          'dist/sdk/ics.js': ['dist/sdk/ics.js'],
-          'dist/sdk/rest.js': ['dist/sdk/rest.js']
+          'dist/sdk/ics.js': ['dist/sdk/ics.js']
         },
         options: {
           banner: '<%= meta.banner %>',
@@ -170,13 +160,10 @@ window.L = L;\n\
           {expand: true,cwd:'src/samples/conference/',src:['**'],dest:'dist/samples/conference/',flatten:false},
           {expand: true,cwd:'src/samples/conference/',src:['initcert.js'],dest:'dist/samples/conference/',flatten:false,mode:true},
           {expand: true,cwd:'src/samples/conference/cert/',src:['.woogeen.keystore'],dest:'dist/samples/conference/cert/',flatten:false,mode:true},
-          {expand: true,cwd:'src/sdk/base/',src:['socket.io.js'],dest:'dist/sdk/dependencies/',flatten:false},
-          {expand: true,cwd:'src/sdk/base/',src:['adapter.js'],dest:'dist/sdk/dependencies',flatten:false},
-          {expand: true,cwd:'src/sdk/base/',src:['adapter.js'],dest:'dist/samples/conference/public/',flatten:false},
           {expand: true,cwd:'src/extension/',src:['**'],dest:'dist/',flatten:false},
-          {expand: true,cwd:'src/sdk/base/',src:['socket.io.js'],dest:'dist/samples/conference/public/',flatten:false},
           {expand: true,cwd:'dist/sdk/',src:['ics.js'],dest:'dist/samples/conference/public/scripts/',flatten:false},
-          {expand: true,cwd:'dist/sdk/',src:['rest.js'],dest:'dist/samples/conference/',flatten:false}
+          {expand: true,cwd:'dist/samples/conference/public/scripts',src:['rest.js'],dest:'dist/samples/conference/',flatten:false},
+          {expand: true,cwd:'dist/sdk/',src:['ics.js'],dest:'dist/samples/p2p/js',flatten:false},
         ]
       }
     },
@@ -188,16 +175,8 @@ window.L = L;\n\
         options: {
         replacements: [
           {
-            pattern: '<script src="../../sdk/base/adapter.js" type="text/javascript"></script>',
-            replacement: '<script src="../../sdk/dependencies/adapter.js" type="text/javascript"></script>'
-          },
-          {
-            pattern: '<script src="../../sdk/base/socket.io.js" type="text/javascript"></script>',
-            replacement: '<script src="../../sdk/dependencies/socket.io.js" type="text/javascript"></script>'
-          },
-          {
             pattern: /<!-- SDK Starts -->[\w\W]+<!-- SDK Stops -->/gm,
-            replacement: '<script src="../../sdk/ics.js" type="text/javascript"></script>'
+            replacement: '<script src="js/ics.js" type="text/javascript"></script>'
           },
           {
             pattern: /var serverAddress.*/g,
@@ -243,7 +222,7 @@ window.L = L;\n\
       dist : {
         src: ['docs/mdfiles/index.md'],
         options: {
-          destination: 'dist/doc',
+          destination: 'dist/docs',
           template : 'node_modules/ink-docstrap/template',
           configure : 'docs/jsdoc/config.json',
           recurse: true
@@ -265,10 +244,7 @@ window.L = L;\n\
   grunt.loadNpmTasks('grunt-contrib-connect');
   grunt.loadNpmTasks('grunt-jsdoc');
 
-  grunt.registerTask('build', ['eslint:src', 'concat:dist', 'concat:ui_dist', 'concat:rest', 'jshint:dist', 'concat:merge', 'uglify:dist','copy:dist','string-replace','compress:dist']);
-  grunt.registerTask('debug', ['concat:dist_debug', 'concat:ui_dist_debug', 'concat:icsREST_debug']);
-
-  grunt.registerTask('pack', ['browserify:dist', 'concat:rest', 'uglify:dist', 'copy:dist', 'compress:dist', 'jsdoc:dist']);
+  grunt.registerTask('pack', ['browserify:dist', 'concat:rest', 'uglify:dist', 'copy:dist', 'string-replace', 'compress:dist', 'jsdoc:dist']);
   grunt.registerTask('dev', ['browserify:dev', 'connect:server']);
   grunt.registerTask('default', ['pack']);
 };

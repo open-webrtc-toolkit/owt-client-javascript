@@ -5,7 +5,7 @@ After dependencies successfully installed,  you can run the peerserver.js by usi
 ###2nd step:  Deploy p2p sample page and sdk on web server
 You need to edit the sample page `peercall.html`:
 
- - Set serverAddress in line 130, change `example.com` to your p2p server address.
+ - Set serverAddress in line 128, change `example.com` to your p2p server address.
  - Set correct ICE server address.
 
 Then choose a webserver such as apache, deploy the page and sdk.
