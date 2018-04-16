@@ -78,11 +78,11 @@ const runSocketIOSample = function() {
                     const videoConstraintsForCamera = new Ics.Base.VideoTrackConstraints(Ics.Base.VideoSourceInfo.CAMERA);
                     let mediaStream;
                     Ics.Base.MediaStreamFactory.createMediaStream(new Ics.Base.StreamConstraints(
-                        undefined, videoConstraintsForCamera)).then(stream => {
+                        audioConstraintsForMic, videoConstraintsForCamera)).then(stream => {
                         mediaStream = stream;
                         localStream = new Ics.Base.LocalStream(
                             mediaStream, new Ics.Base.StreamSourceInfo(
-                                undefined, 'camera'));
+                                'mic', 'camera'));
                         $('.local video').get(0).srcObject = stream;
                         conference.publish(localStream).then(publication => {
                             mixStream(myRoom, publication.id, 'common')
