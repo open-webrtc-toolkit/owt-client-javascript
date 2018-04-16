@@ -76,7 +76,7 @@ export class Stream extends EventDispatcher {
       value: sourceInfo
     });
     /**
-     * @member {string} attributes
+     * @member {object} attributes
      * @instance
      * @memberof Ics.Base.Stream
      * @desc Custom attributes of a stream.
