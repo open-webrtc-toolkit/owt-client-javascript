@@ -16,6 +16,7 @@ function SignalingChannel() {
 
   let connectPromise=null;
 
+  var MAX_TRIALS = 10;
   var reconnectTimes = 0;
 
   /* TODO: Do remember to trigger onMessage when new message is received.
@@ -54,7 +55,7 @@ function SignalingChannel() {
     var opts = {
       query: queryString,
       'reconnection': true,
-      'reconnectionAttempts': 10,
+      'reconnectionAttempts': MAX_TRIALS,
       'force new connection': true
     };
     wsServer = io(serverAddress, opts);
@@ -81,9 +82,13 @@ function SignalingChannel() {
         self.onServerDisconnected();
     })
 
+    wsServer.on('server-disconnect', function(){
+      reconnectTimes = MAX_TRIALS;
+    })
+
     wsServer.on('disconnect', function() {
       console.info('Disconnected from websocket server.');
-      if (reconnectTimes >= 9 && self.onServerDisconnected)
+      if (reconnectTimes >= MAX_TRIALS && self.onServerDisconnected)
         self.onServerDisconnected();
     });
 
@@ -119,7 +124,7 @@ function SignalingChannel() {
   };
 
   this.disconnect = function() {
-    reconnectTimes = 9;
+    reconnectTimes = MAX_TRIALS;
     if (wsServer)
       wsServer.close();
     return Promise.resolve();
