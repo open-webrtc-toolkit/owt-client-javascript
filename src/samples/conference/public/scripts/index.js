@@ -125,7 +125,7 @@ const runSocketIOSample = function() {
                 onRes(req.responseText);
             }
         };
-        req.open(method, 'http://192.168.1.8:3001'+entity, true);
+        req.open(method, entity, true);
         req.setRequestHeader('Content-Type', 'application/json');
         if (body !== undefined) {
             req.send(JSON.stringify(body));
