@@ -1,7 +1,6 @@
 'use strict';
-
 /**
- * Source info about an audio track.
+ * Source info about an audio track. Values: 'mic', 'screen-cast', 'file', 'mixed'.
  * @memberOf Ics.Base
  * @readonly
  * @enum {string}
@@ -14,7 +13,7 @@ export const AudioSourceInfo = {
 };
 
 /**
- * Source info about a video track.
+ * Source info about a video track. Values: 'camera', 'screen-cast', 'file', 'mixed'.
  * @memberOf Ics.Base
  * @readonly
  * @enum {string}
@@ -27,7 +26,7 @@ export const VideoSourceInfo = {
 };
 
 /**
- * Kind of a track.
+ * Kind of a track. Values: 'audio' for audio track, 'video' for video track, 'av' for both audio and video tracks.
  * @memberOf Ics.Base
  * @readonly
  * @enum {string}
@@ -49,7 +48,6 @@ export const TrackKind = {
    */
   AUDIO_AND_VIDEO: 'av'
 };
-
 /**
  * @class Resolution
  * @memberOf Ics.Base
