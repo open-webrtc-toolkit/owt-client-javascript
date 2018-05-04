@@ -12,12 +12,20 @@
     "dictionaries": ["jsdoc", "closure"]
   },
   "templates": {
+    "default":{
+      "staticFiles": {
+        "include":[
+          "docs/templates/intellogo.png"
+        ]
+      }
+    },
+    "logoFile": "./intellogo.png",
     "cleverLinks": false,
     "monospaceLinks": false,
     "dateFormat": "ddd MMM Do YYYY",
     "outputSourceFiles": false,
     "outputSourcePath": false,
-    "systemName": "Intel® Collaboration Suite for WebRTC (Intel® CS for WebRTC) Client SDK for JavaScript* <sub style=\"font-size: 10pt;\">version 4.0<sub></sub></sub>",
+    "systemName": "Intel® Collaboration Suite for WebRTC",
     "footer": "",
     "copyright": "Copyright © 2018 Intel Corporation. All Rights Reserved. ",
     "navType": "vertical",
