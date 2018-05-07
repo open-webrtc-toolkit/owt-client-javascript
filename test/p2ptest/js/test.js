@@ -1,42 +1,42 @@
-var TestClient = function(user, serverURL, config) {
-  if (typeof user === "string" && user.indexOf("http") > -1 && !serverURL && !config) {
-    serverURL = user;
-    user = undefined;
-  } else if (typeof user === "object") {
-    config = user;
-    user = undefined;
-  } else if (typeof user === "string" && user.indexOf("http") < 0 && typeof serverURL === "object") {
-    config = serverURL;
-    serverURL = undefined;
-  } else if (user && user.indexOf("http") > -1 && typeof serverURL === "object") {
-    config = serverURL;
-    serverURL = user;
-    user = undefined;
-  }
+var TestClient = function(userName, serverURL, config) {
+  this.serverURL = serverURL;
+  this.userName = userName;
   this.localStream = undefined;
-  if (!config) {
-    config = {
-      iceServers: [{
-        urls: "stun:61.152.239.47"
-      }, {
-        urls: ["turn:61.152.239.47:4478?transport=udp", "turn:61.152.239.47:443?transport=udp", "turn:61.152.239.47:4478?transport=tcp", "turn:61.152.239.47:443?transport=tcp"],
-        credential: "master",
-        username: "woogeen"
-      }]
-    };
-  } else {
-    config["iceServers"] = [{
-      urls: "stun:61.152.239.47"
-    }, {
-      urls: ["turn:61.152.239.47:4478?transport=udp", "turn:61.152.239.47:443?transport=udp", "turn:61.152.239.47:4478?transport=tcp", "turn:61.152.239.47:443?transport=tcp"],
-      credential: "master",
-      username: "woogeen"
-    }];
-  };
-  this.peerClient = new Woogeen.PeerClient(config);
-  this.serverURL = serverURL || "http://localhost:8095/";
-  this.user = user || "user" + new Date().getTime();
+  this.publication = undefined;
+  this.RTCStatsReport = undefined;
+  this.RTCStatsReportList = [];
+  this.timeList = []
+  if(!config){
+    config = {}
+  }
+  const signaling = new SignalingChannel();
+  this.peerClient = new Ics.P2P.P2PClient(config,signaling);
+  this.serverURL = serverURL || "http://10.239.44.127:8095/";
+  console.log('serverURL:'+this.serverURL);
+  this.userName = userName || "userName" + new Date().getTime();
+  console.log('userName:'+this.userName);
   this.request = {};
+  this.request["createLocal_success"] = 0;
+  this.request["createLocal_failed"] = 0;
+  this.request["connect_success"] = 0;
+  this.request["connect_failed"] = 0;
+  this.request["publish_success"] = 0
+  this.request["publish_failed"] = 0;
+  this.request["send_success"] = 0;
+  this.request["send_failed"] = 0;
+  this.request["stop_success"] = 0;
+  this.request["stop_failed"] = 0;
+  this.request["p2pclient_getStats_success"] = 0;
+  this.request["p2pclient_getStats_failed"] = 0;
+  this.request["publication_getStats_success"] = 0;
+  this.request["publication_getStats_failed"] = 0;
+  this.request["checkgetStats_success"] =  0;
+  this.request["checkgetStats_failed"] = 0;
+  this.request["server-disconnected_success"] = 0;
+  this.request["streamadded_success"] = 0;
+  this.request["data-received_success"] = 0;
+  this.request["publication_end_success"] = 0;
+  this.request["streamended_success"] = 0;
 }
 
 TestClient.prototype = {
@@ -44,266 +44,238 @@ TestClient.prototype = {
     console.log("TestClient DEBUG MESSAGE: ");
     console.log(title, msg);
   },
-  createLocalStream: function(config) {
-    if (!config) {
-      config = {
-        audio: true,
-        video: true
-      };
-    }
+
+  isIE: function() {
+          if (!!window.ActiveXObject || "ActiveXObject" in window)
+            return true;
+          else
+            return false;
+  },
+
+  createLocalStream: function(resolution,fps) {
     var that = this;
-    if (this.localStream) {
-      this.localStream = undefined;
-    }
-    this.request["createLocal_success"] = this.request["createLocal_success"] || 0;
-    this.request["createLocal_failed"] = this.request["createLocal_failed"] || 0;
-    Woogeen.LocalStream.create(config, function(err, stream) {
-      if (err) {
-        that.debug("create stream error:", err);
-        that.request["createLocal_failed"]++;
-        return;
+    var videoConstraintsForCamera
+    var audioConstraintsForMic = new Ics.Base.AudioTrackConstraints(Ics.Base.AudioSourceInfo.MIC);
+    videoConstraintsForCamera = new Ics.Base.VideoTrackConstraints(Ics.Base.VideoSourceInfo.CAMERA);
+    videoConstraintsForCamera.resolution = resolution
+    videoConstraintsForCamera.frameRate = fps
+    let mediaStream;
+    Ics.Base.MediaStreamFactory.createMediaStream(new Ics.Base.StreamConstraints(audioConstraintsForMic, videoConstraintsForCamera)).then(stream=>{
+      mediaStream=stream;
+      localStream = new Ics.Base.LocalStream(mediaStream, new Ics.Base.StreamSourceInfo('mic', 'camera'));
+      that.localStream = localStream;
+      var hasVideo = that.hasVideo(localStream)
+      var hasAudio = that.hasAudio(localStream)
+      if(hasVideo && hasAudio){
+        that.request["createLocal_success"]++
+      }else{
+        console.log("hasVideo is "+hasVideo +" and hasAudio is "+hasAudio);
+        that.request["createLocal_failed"]++
       }
-      that.debug("create stream", "success");
-      that.localStream = stream;
-      that.request["createLocal_success"]++;
-      that.showInPage(stream, 'local');
-    }, function(err) {
-      that.request["createLocal_failed"]++;
+      that.request["localStreamId"] = localStream.id;
+      that.debug("Create stream id:", localStream.id);
+      that.showInPage(localStream, "LOCAL STREAM"); 
+    }, err=>{
+          console.error('Failed to create MediaStream, '+err);
+          that.request["createLocal_failed"]++;
     });
   },
+
+  createLocalStreamVideoOnly: function(resolution,fps) {
+    var that = this;
+    var videoConstraintsForCamera
+    videoConstraintsForCamera = new Ics.Base.VideoTrackConstraints(Ics.Base.VideoSourceInfo.CAMERA);
+    videoConstraintsForCamera = new Ics.Base.VideoTrackConstraints(Ics.Base.VideoSourceInfo.CAMERA);
+    videoConstraintsForCamera.resolution = resolution
+    videoConstraintsForCamera.frameRate = fps
+    let mediaStream;
+    Ics.Base.MediaStreamFactory.createMediaStream(new Ics.Base.StreamConstraints(false, videoConstraintsForCamera)).then(stream=>{
+      mediaStream=stream;
+      localStream = new Ics.Base.LocalStream(mediaStream, new Ics.Base.StreamSourceInfo('mic', 'camera'));
+      that.debug("Create stream", "success");
+      that.localStream = localStream;
+      var hasVideo = that.hasVideo(localStream)
+      var hasAudio = that.hasAudio(localStream)
+      if(hasVideo && !hasAudio){
+        that.request["createLocal_success"]++
+      }else{
+        console.log("HasVideo is "+hasVideo +" and hasAudio is "+hasAudio);
+        that.request["createLocal_failed"]++
+      }
+      that.request["localStreamId"] = localStream.id;
+      that.debug("Create stream id:", localStream.id);
+      that.showInPage(localStream, "LOCAL STREAM");
+    }, err=>{
+          console.error('Failed to create MediaStream, '+err);
+          that.request["createLocal_failed"]++;
+    });
+  },
+
+  createLocalStreamAudioOnly: function() {
+    var that = this;
+    const audioConstraintsForMic = new Ics.Base.AudioTrackConstraints(Ics.Base.AudioSourceInfo.MIC);
+    let mediaStream;
+    Ics.Base.MediaStreamFactory.createMediaStream(new Ics.Base.StreamConstraints(audioConstraintsForMic, false)).then(stream=>{
+      mediaStream=stream;
+      localStream = new Ics.Base.LocalStream(mediaStream, new Ics.Base.StreamSourceInfo('mic', 'camera'));
+      that.debug("create stream", "success");
+      that.localStream = localStream;
+      var hasVideo = that.hasVideo(localStream)
+      var hasAudio = that.hasAudio(localStream)
+      if(!hasVideo && hasAudio){
+        that.request["createLocal_success"]++
+      }else{
+        console.log("HasVideo is "+hasVideo +" and hasAudio is "+hasAudio);
+        that.request["createLocal_failed"]++
+      }
+      that.request["localStreamId"] = localStream.id;
+      that.debug("Create stream id:", localStream.id);
+      that.showInPage(localStream, "LOCAL STREAM");
+    }, err=>{
+          console.error('Failed to create MediaStream, '+err);
+          that.request["createLocal_failed"]++;
+    });
+  },
+
   bindDefaultListener: function(types) {
     var i = 0,
       count = types.length,
       that = this;
     while (i < count) {
       var str = types[i];
-      this.request[str + "_success"] = this.request[str + "_success"] || 0;
-      this.request[str + "_failed"] = this.request[str + "_failed"] || 0;
       this.peerClient.addEventListener(str, function(e) {
         that.debug(str + "_success", e);
         that.request[str + "_success"]++;
-      }, function(e) {
-        that.debug(str + "_failed", e);
-        that.request[str + "_failed"]++;
       });
       i++;
     }
   },
+
   bindListener: function(type, seccessCallBack, errCallBack) {
-    this.request[type + "_success"] = this.request[type + "_success"] || 0;
-    this.request[type + "_failed"] = this.request[type + "_failed"] || 0;
     this.peerClient.addEventListener(type, seccessCallBack, errCallBack);
   },
-  connect: function() {
+
+  replaceAllowedRemoteIds : function(id){
+    this.peerClient.allowedRemoteIds = id
+  },
+
+  connect: function(serverip,userName) {
     var that = this;
-    this.request["connect_success"] = this.request["connect_success"] || 0;
-    this.request["connect_failed"] = this.request["connect_failed"] || 0;
+    var ip,name;
+    if(typeof(serverip) === "undefined"){
+      ip = this.serverURL
+    }else{
+      ip = serverip
+    }
+    if(typeof(userName) === "undefined"){
+      name = this.userName
+    }else{
+      name = userName
+    }
     this.peerClient.connect({
-      host: this.serverURL,
-      token: this.user
-    }, function() {
-      that.debug("connect peer", "success");
+      host: ip,
+      token: name
+    }).then(()=>{
+      that.debug("Connect peer", "success");
       that.request["connect_success"]++;
-    }, function() {
-      that.debug("connect peer", "failed");
+    },err=>{
+      that.debug("Connect peer", "failed");
       that.request["connect_failed"]++;
     });
   },
+
   disconnect: function() {
     var that = this;
-    this.request["disconnect_success"] = this.request["disconnect_success"] || 0;
-    this.request["disconnect_failed"] = this.request["disconnect_failed"] || 0;
-    this.peerClient.disconnect(function() {
-      that.debug("disconnect peer", "success");
-      that.request["disconnect_success"]++;
-    }, function() {
-      that.debug("disconnect peer", "failed");
-      that.request["disconnect_failed"]++;
-    });
+    this.peerClient.disconnect()
   },
-  accept: function(tc) {
+
+  publish: function(peerId) {
     var that = this;
-    this.request["accept_success"] = this.request["accept_success"] || 0;
-    this.request["accept_failed"] = this.request["accept_failed"] || 0;
-    this.peerClient.accept(tc.user, function() {
-      that.debug("accept:", "accept user: " + tc.user + " success");
-      that.request["accept_success"]++;
-    }, function() {
-      that.debug("accept:", "accept user: " + tc.user + " failed");
-      that.request["accept_failed"]++;
-    });
-  },
-  deny: function(tc) {
-    var that = this;
-    this.request["deny_success"] = this.request["deny_success"] || 0;
-    this.request["deny_failed"] = this.request["deny_failed"] || 0;
-    this.peerClient.deny(tc.user, function() {
-      that.debug("deny:", "deny user: " + tc.user + " success");
-      that.request["deny_success"]++;
-    }, function() {
-      that.debug("deny:", "deny user: " + tc.user + " failed");
-      that.request["deny_failed"]++;
-    });
-  },
-  invited: function(tc) {
-    var that = this;
-    this.request["invite_success"] = this.request["invite_success"] || 0;
-    this.request["invite_failed"] = this.request["invite_failed"] || 0;
-    this.peerClient.invite(tc.user, function() {
-      that.debug("invite:", "invite user: " + tc.user + " success");
-      that.request["invite_success"]++;
-    }, function() {
-      that.debug("invite:", "invite user: " + tc.user + " failed");
-      that.request["invite_failed"]++;
-    });
-  },
-  publish: function(tc) {
-    var that = this;
-    this.request["publish_success"] = this.request["publish_success"] || 0;
-    this.request["publish_failed"] = this.request["publish_failed"] || 0;
-    this.peerClient.publish(this.localStream, tc.user, function() {
-      that.debug("publish:", "publish to user: " + tc.user + " success");
-      that.request["publish_success"]++;
-    }, function() {
-      that.debug("publish:", "publish to user: " + tc.user + " failed");
+    this.peerClient.publish(peerId,this.localStream).then(publication=>{
+      that.publication = publication;
+      if(publication.stop!==undefined){
+        that.request["publish_success"]++;
+      }else{
+        that.request["publish_failed"]++
+      }
+      that.publication.addEventListener("ended", ()=>{
+        that.request["publication_end_success"]++
+      });
+    },err=>{
+      console.log(err)
       that.request["publish_failed"]++;
     });
   },
-  unpublish: function(tc) {
+
+  unpublish: function() {
     var that = this;
-    this.request["unpublish_success"] = this.request["unpublish_success"] || 0;
-    this.request["unpublish_failed"] = this.request["unpublish_failed"] || 0;
-    this.peerClient.unpublish(this.localStream, tc.user, function() {
-      that.debug("unpublish:", "unpublish to user: " + tc.user + " success");
-      that.request["unpublish_success"]++;
-    }, function() {
-      that.debug("unpublish:", "unpublish to user: " + tc.user + " failed");
-      that.request["unpublish_failed"]++;
+    this.publication.stop()
+  },
+
+  send: function(peerid, msg) {
+    var that = this;
+    this.peerClient.send(peerid, msg).then(()=>{
+        that.debug("Send success:", "send to user: " + peerid + " success");
+        that.request["send_success"]++;
+    },err=>{
+        that.debug("Send fail:", "send to user: " + peerid + " failed");
+        that.request["send_failed"]++;
     });
   },
-  send: function(tc, msg) {
+
+  stop: function(id) {
     var that = this;
-    this.request["send_success"] = this.request["send_success"] || 0;
-    this.request["send_failed"] = this.request["send_failed"] || 0;
-    console.log("*********send","tc.user is", tc.user, " msg is ", msg);
-    this.peerClient.send(msg, tc.user, function() {
-      that.debug("send success:", "send to user: " + tc.user + " success");
-      that.request["send_success"]++;
-    }, function() {
-      that.debug("send fail:", "send to user: " + tc.user + " failed");
-      that.request["send_failed"]++;
-    });
+    this.peerClient.stop(id);
   },
-  stop: function(tc) {
+
+  close: function() {
+      for(const track of localStream.mediaStream.getTracks()){
+          track.stop();
+      }
+  },
+
+  hasVideo: function(stream){
+    var result = false;
+    if(stream.mediaStream.getVideoTracks().length != 0){
+      result = true
+    }
+    return result
+  },
+
+  hasAudio: function(stream){
+    var result = false;
+    if(stream.mediaStream.getAudioTracks().length != 0){
+      result = true
+    }
+    return result
+  },
+
+  showInPage: function(stream) {
     var that = this;
-    this.request["stop_success"] = this.request["stop_success"] || 0;
-    this.request["stop_failed"] = this.request["stop_failed"] || 0;
-    this.peerClient.stop(tc.user, function() {
-      that.debug("stop:", "stop to user: " + tc.user + " success");
-      that.request["stop_success"]++;
-    }, function() {
-      that.debug("stop:", "stop to user: " + tc.user + " failed");
-      that.request["stop_failed"]++;
-    });
-  },
-  enableVideo: function(tc) {
-    tc = tc || this;
-    var stream = tc.localStream;
-    return stream.enableVideo();
-  },
-  disableVideo: function(tc) {
-    tc = tc || this;
-    var stream = tc.localStream;
-    return stream.disableVideo();
-  },
-  enableAudio: function(tc) {
-    tc = tc || this;
-    var stream = tc.localStream;
-    return stream.enableAudio();
-  },
-  disableAudio: function(tc) {
-    tc = tc || this;
-    var stream = tc.localStream;
-    return stream.disableAudio();
-  },
-  hasVideo: function(tc) {
-    tc = tc || this;
-    var stream = tc.localStream;
-    return stream.hasVideo();
-  },
-  hasAudio: function(tc) {
-    tc = tc || this;
-    var stream = tc.localStream;
-    return stream.hasAudio();
-  },
-  close: function(tc) {
-    tc = tc || this;
-    var stream = tc.localStream;
-    stream.close();
-  },
-  showInPage: function(stream, type) {
     var video = document.createElement("video"),
-      videoId = type;
+    videoId = "stream" + stream.id;
     video.setAttribute("id", videoId);
     video.setAttribute("width", "320px");
     video.setAttribute("height", "240px");
     video.setAttribute("class", "video");
     video.setAttribute("autoplay", "autoplay");
+    console.log('added video:'+stream.mediaStream);
     document.body.appendChild(video);
-    Woogeen.UI.attachMediaStream(video, stream.mediaStream);
-    this.request[videoId] = startDetection(videoId, "320", "240");
+    var para = document.createElement("p");
+    document.body.appendChild(para);
+    video.srcObject = stream.mediaStream
   },
-  removeVideo: function(stream, type) {
+
+  removeVideo: function(stream) {
     var videos = document.getElementsByClassName("video");
     if (stream) {
-      videos = [document.getElementById(type)]
+      videos = [document.getElementById("stream" + stream.id)]
     };
     for (var i = 0; i < videos.length; i++) {
       document.body.removeChild(videos[i]);
     };
   },
-  videoPlaying: function() {
-    return isVideoPlaying();
-  },
-  getRequest: function() {
-    return this.request;
-  },
-  clearClient: function() {
-    if (this.peerClient) {
-      this.peerClient.disconnect();
-    }
-    this.peerClient = undefined;
-    this.request = undefined;
-    this.user = undefined;
-    if (this.localStream) {
-      this.localStream.close();
-    }
-    this.localStream = undefined;
-    this.removeVideo();
-  },
-  recreateTestClient: function(user, serverURL, config) {
-    if (user && user.indexOf("http") > -1 && !serverURL && !config) {
-      serverURL = user;
-      user = undefined;
-    } else if (typeof user === "object") {
-      config = user;
-      user = undefined;
-    } else if (typeof user === "string" && user.indexOf("http") < 0 && typeof serverURL === "object") {
-      config = serverURL;
-      serverURL = undefined;
-    } else if (user && user.indexOf("http") > -1 && typeof serverURL === "object") {
-      config = serverURL;
-      serverURL = user;
-      user = undefined;
-    }
-    if (!config) {
-      config = {};
-    }
-    this.peerClient = new Woogeen.PeerClient(config);
-    this.serverURL = serverURL || "http://localhost:8095/";
-    this.user = user || "user" + new Date().getTime();
-    this.request = {};
-  }
+
 };
 
 TestClient.prototype.constructor = TestClient;

@@ -16,30 +16,20 @@ module.exports = function (config){
     files : [
     //  JASMINE,
     //  JASMINE_ADAPTER,
-    './src/samples/p2p/js/jquery-1.10.2.min.js',
-    './src/samples/p2p/js/utils.js',
-    './src/samples/p2p/js/sc.websocket.js',
-    './src/sdk/base/property.js',
-    './src/sdk/base/adapter.js',
-    './src/sdk/base/common.js',
-    './src/sdk/base/socket.io.js',
-    './src/sdk/base/events.js',
-    './src/sdk/base/L.Base64.js',
-    './src/sdk/base/L.Logger.js',
-    './src/sdk/base/stream.js',
-    './src/sdk/base/strophe.js',
-    './src/sdk/p2p/errors.js',
-    './src/sdk/p2p/gab.proxy.js',
-    './src/sdk/p2p/peer.js',
-    './src/sdk/ui/ui.js',
-    './test/p2ptest/errorHandler.js',
+    './dist/samples/p2p/js/jquery-1.10.2.min.js',
+    './dist/samples/p2p/js/sc.websocket.js',
+    './dist/samples/p2p/js/socket.io.js',
+    './dist/samples/p2p/js/adapter.js',
+    './dist/samples/p2p/js/utils.js',
+    './dist/sdk/ics.js',
+    './test/p2ptest/js/errorHandler.js',
     './test/p2ptest/js/test_functions.js',
     './test/p2ptest/js/video_detector.js',
-    './test/p2ptest/js/videoframechecker.js',
+    './test/p2ptest/js/videoFrameChecker.js',
     './test/p2ptest/js/test.js',
     './test/p2ptest/js/qq.js',
-    './test/p2ptest/js/MediaStreamTest.js',
-    './test/p2ptest/test-peer.js',
+    './test/p2ptest/test-ci.js',
+    './test/p2ptest/js/config.js',
     ],
 
     // list of files to exclude
@@ -53,7 +43,7 @@ module.exports = function (config){
 
     jenkinsReporter : {
       useBrowserName:false,
-      outputFile:'./test/p2ptest/full-test-results.xml',
+      outputFile:'./test/p2ptest/full-test-firefox-results.xml',
       suite:''
     },
 
@@ -92,8 +82,17 @@ module.exports = function (config){
     // - PhantomJS
     // - IE (only Windows)
     // CLI --browsers Chrome,Firefox,Safari
-    browsers : [".travis/chrome-start.sh"],
-   // browsers : ["Chrome"],
+    //browsers : [".travis/chrome-start.sh"],
+    browsers: ['FirefoxAutoAllowGUM'],
+    customLaunchers: {
+       FirefoxAutoAllowGUM: {
+           base: 'Firefox',
+           prefs: {
+                'media.navigator.permission.disabled': true
+           }
+        }
+    },
+    // browsers : ["Chrome"],
     browserDisconnectTimeout : 60000,
     browserNoActivityTimeout : 60000,
 

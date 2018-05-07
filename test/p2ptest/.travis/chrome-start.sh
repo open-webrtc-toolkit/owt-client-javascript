@@ -21,4 +21,4 @@ cp .travis/Preferences $USER_DIR"/Default/"
 
 # Execute the command
 export DISPLAY=:0
-exec "$CMD" --no-sandbox --user-data-dir="$USER_DIR"  --no-proxy-server --use-fake-ui-for-media-stream --disable-user-media-security --no-default-browser-check --no-first-run --disable-default-apps --use-fake-device-for-media-stream "$@"
+exec "$CMD" --user-data-dir="$USER_DIR" --no-proxy-server --window-size=950,450 --use-fake-ui-for-media-stream --disable-user-media-security --no-default-browser-check --no-first-run --disable-default-apps --use-fake-device-for-media-stream  "$@"
