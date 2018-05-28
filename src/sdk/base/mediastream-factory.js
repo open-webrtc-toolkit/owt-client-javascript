@@ -88,6 +88,7 @@ export class VideoTrackConstraints {
  * @constructor
  * @param {?Ics.Base.AudioTrackConstraints} audioConstraints
  * @param {?Ics.Base.VideoTrackConstraints} videoConstraints
+ * @param {?string} extensionId The ID of Chrome screen sharing extension.
  */
 export class StreamConstraints {
   constructor(audioConstraints = false, videoConstraints = false) {
@@ -134,7 +135,7 @@ export class MediaStreamFactory {
    * - Cannot obtain necessary permission or operation is canceled by user.
    * - Video source is screen cast, while audio source is not.
    * - Audio source is screen cast, while video source is disabled.
-   * @param {Ics.Base.MediaStreamDeviceConstraints|Ics.Base.MediaStreamScreenCastConstraints} constraints
+   * @param {Ics.Base.StreamConstraints} constraints
    */
   static createMediaStream(constraints) {
     if (typeof constraints !== 'object' || (!constraints.audio && !
