@@ -253,8 +253,8 @@ export class MediaStreamFactory {
           mediaConstraints.video.height = Object.create({});
           mediaConstraints.video.height.exact = constraints.video.resolution.height;
         }
-        if (constraints.video.deviceId instanceof String) {
-          mediaConstraints.video.deviceId = constraints.video.deviceId;
+        if (typeof constraints.video.deviceId === 'string') {
+          mediaConstraints.video.deviceId = { exact: constraints.video.deviceId };
         }
         if (utils.isFirefox() && constraints.video.source ===
           MediaFormatModule.VideoSourceInfo.SCREENCAST) {
