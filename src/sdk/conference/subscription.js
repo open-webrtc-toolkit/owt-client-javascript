@@ -130,21 +130,21 @@ export class VideoSubscriptionConstraints {
      */
     this.resolution = resolution;
     /**
-     * @member {?number} frameRates
+     * @member {?number} frameRate
      * @instance
      * @memberof Ics.Conference.VideoSubscriptionConstraints
      * @desc Only frameRates listed in VideoSubscriptionCapabilities are allowed.
      */
     this.frameRate = frameRate;
     /**
-     * @member {?number} bitrateMultipliers
+     * @member {?number} bitrateMultiplier
      * @instance
      * @memberof Ics.Conference.VideoSubscriptionConstraints
      * @desc Only bitrateMultipliers listed in VideoSubscriptionCapabilities are allowed.
      */
     this.bitrateMultiplier = bitrateMultiplier;
     /**
-     * @member {?number} keyFrameIntervals
+     * @member {?number} keyFrameInterval
      * @instance
      * @memberof Ics.Conference.VideoSubscriptionConstraints
      * @desc Only keyFrameIntervals listed in VideoSubscriptionCapabilities are allowed.
