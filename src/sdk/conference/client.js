@@ -22,8 +22,20 @@ const SignalingState = {
 
 const protocolVersion = '1.0';
 
+/**
+ * @class ParticipantEvent
+ * @classDesc Class ParticipantEvent represents a participant event.
+   @extends Ics.Base.IcsEvent
+ * @memberof Ics.Conference
+ * @hideconstructor
+ */
 const ParticipantEvent = function(type, init) {
   const that = new EventModule.IcsEvent(type, init);
+  /**
+   * @member {Ics.Conference.Participant} participant
+   * @instance
+   * @memberof Ics.Conference.ParticipantEvent
+   */
   that.participant = init.participant;
   return that;
 };
@@ -66,12 +78,12 @@ class ConferenceClientConfiguration {
  * @classdesc The ConferenceClient handles PeerConnections between client and server. For conference controlling, please refer to REST API guide.
  * Events:
  *
- * | Event Name            | Argument Type    | Fired when       |
- * | --------------------- | ---------------- | ---------------- |
- * | streamadded           | StreamEvent      | A new stream is available in the conference. |
- * | participantjoined     | ParticipantEvent | A new participant joined the conference. |
- * | messagereceived       | MessageEvent     | A new message is received. |
- * | serverdisconnected    | IcsEvent         | Disconnected from conference server. |
+ * | Event Name            | Argument Type                    | Fired when       |
+ * | --------------------- | ---------------------------------| ---------------- |
+ * | streamadded           | Ics.Base.StreamEvent             | A new stream is available in the conference. |
+ * | participantjoined     | Ics.Conference.ParticipantEvent  | A new participant joined the conference. |
+ * | messagereceived       | Ics.Base.MessageEvent            | A new message is received. |
+ * | serverdisconnected    | Ics.Base.IcsEvent                | Disconnected from conference server. |
  *
  * @memberof Ics.Conference
  * @extends Ics.Base.EventDispatcher

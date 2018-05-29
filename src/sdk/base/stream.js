@@ -180,6 +180,11 @@ export class RemoteStream extends Stream {
 export class StreamEvent extends IcsEvent {
   constructor(type, init) {
     super(type);
+    /**
+     * @member {Ics.Base.Stream} stream
+     * @instance
+     * @memberof Ics.Base.StreamEvent
+     */
     this.stream = init.stream;
   }
 }

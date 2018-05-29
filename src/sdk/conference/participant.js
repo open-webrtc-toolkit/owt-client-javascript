@@ -10,9 +10,9 @@ import * as EventModule from '../base/event.js';
  * @classDesc The Participant defines a participant in a conference.
  * Events:
  *
- * | Event Name      | Argument Type    | Fired when       |
- * | ----------------| ---------------- | ---------------- |
- * | left            | Event            | The participant left the conference. |
+ * | Event Name      | Argument Type      | Fired when       |
+ * | ----------------| ------------------ | ---------------- |
+ * | left            | Ics.Base.IcsEvent  | The participant left the conference. |
  *
  * @extends Ics.Base.EventDispatcher
  * @hideconstructor
