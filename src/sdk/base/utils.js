@@ -1,6 +1,6 @@
 // Copyright © 2017 Intel Corporation. All Rights Reserved.
 "use strict";
-const sdkVersion = '4.0';
+const sdkVersion = '4.0.1';
 
 export function isFirefox() {
   return window.navigator.userAgent.match("Firefox") !== null;
