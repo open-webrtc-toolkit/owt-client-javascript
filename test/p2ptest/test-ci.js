@@ -162,10 +162,6 @@ describe('P2P JS SDK', function() {
                 expect(audio_rsult).toBeTruthy();
                 expect(video_result).toBeFalsy();
             })
-            .waits('wait check stream ',2000)
-            .runs(function() {
-                expect(detection).toBeFalsy();
-            })
             .waits('test end',2000)
             .runs(function() {
                 console.log('test end');

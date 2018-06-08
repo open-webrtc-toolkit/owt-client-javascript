@@ -1,23 +1,25 @@
 #!/bin/bash
-
+sysOS=`uname -s`
 #Variables
 USER_DIR=/tmp/testacular
-MAC_CMD="/Applications/Google Chrome Canary.app/Contents/MacOS/Google Chrome Canary"
+MAC_CMD="/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
 #UBUNTU_CMD="/usr/bin/chromium-browser"
 UBUNTU_CMD="/usr/bin/google-chrome"
 
 # Test OS
-if [ -f "$MAC_CMD" ]
-then
+if [ $sysOS == "Darwin" ];then
 	CMD="$MAC_CMD"
-else
+	USER_DIR=/Users/webrtc
+elif [ $sysOS == "Linux" ];then
 	CMD="$UBUNTU_CMD"
+else
+	echo "Other OS: $sysOS"
 fi
 
 # Prepare profile to use webrtc
 #rm -rf $USER_DIR
 #mkdir -p $USER_DIR"/Default/"
-cp .travis/Preferences $USER_DIR"/Default/"
+#cp .travis/Preferences $USER_DIR"/Default/"
 
 # Execute the command
 export DISPLAY=:0
