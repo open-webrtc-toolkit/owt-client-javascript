@@ -3519,7 +3519,7 @@ tbody.collapse.in {
 .dropdown-menu {
   position: absolute;
   top: 100%;
-  left: 0;
+  right: 0;
   z-index: 1000;
   display: none;
   float: left;
@@ -4188,7 +4188,7 @@ select[multiple].input-group-sm > .input-group-btn > .btn {
 .navbar-collapse.in {
   overflow-y: auto;
 }
-@media (min-width: 768px) {
+@media (min-width: 100px) {
   .navbar-collapse {
     width: auto;
     border-top: 0;
@@ -4326,13 +4326,9 @@ select[multiple].input-group-sm > .input-group-btn > .btn {
 }
 @media (max-width: 767px) {
   .navbar-nav .open .dropdown-menu {
-    position: static;
-    float: none;
     width: auto;
     margin-top: 0;
-    background-color: transparent;
-    border: 0;
-    box-shadow: none;
+    background-color: #fff;
   }
   .navbar-nav .open .dropdown-menu > li > a,
   .navbar-nav .open .dropdown-menu .dropdown-header {
@@ -4544,14 +4540,13 @@ select[multiple].input-group-sm > .input-group-btn > .btn {
 }
 @media (max-width: 767px) {
   .navbar-default .navbar-nav .open .dropdown-menu > li > a {
-    color: #fff;
+    color: #333333;
   }
   .navbar-default .navbar-nav .open .dropdown-menu > li > a:hover,
   .navbar-default .navbar-nav .open .dropdown-menu > li > a:focus {
     color: #fff;
     background-color: #090909;
   }
-  .navbar-default .navbar-nav .open .dropdown-menu > .active > a,
   .navbar-default .navbar-nav .open .dropdown-menu > .active > a:hover,
   .navbar-default .navbar-nav .open .dropdown-menu > .active > a:focus {
     color: #fff;
@@ -4647,7 +4642,7 @@ fieldset[disabled] .navbar-default .btn-link:focus {
     background-color: #1967be;
   }
   .navbar-inverse .navbar-nav .open .dropdown-menu > li > a {
-    color: #fff;
+    color: #333333;
   }
   .navbar-inverse .navbar-nav .open .dropdown-menu > li > a:hover,
   .navbar-inverse .navbar-nav .open .dropdown-menu > li > a:focus {
@@ -7072,15 +7067,27 @@ code {
 .dropdown-menu {
   max-height: calc(100vh - 62px);
 }
-@media (max-width: 768px) {
-  .dropdown-menu {
-    max-height: none;
-  }
-}
+
 #test{
   table-layout: fixed;
 }
 #test tr td{
-  text-overflow: clip;
+  text-overflow: ellipsis;
   white-space: nowrap;
+  overflow: hidden;
+}
+
+@media (min-width:768px){
+  .navbar-nameclass{
+  position: fixed;
+  right: 0;
+  top: 46px;
+  }
+}
+@media (max-width:768px){
+  .navbar-nameclass{
+  position: fixed;
+  right: 0;
+  top: 8px;
+  }
 }
