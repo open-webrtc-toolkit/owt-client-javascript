@@ -43,7 +43,7 @@ module.exports = function (config){
 
     jenkinsReporter : {
       useBrowserName:false,
-      outputFile:'./test/p2ptest/full-test-chrome-results.xml',
+      outputFile:'./test/p2ptest/full-test-safari-results.xml',
       suite:''
     },
 

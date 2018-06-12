@@ -88,7 +88,9 @@ module.exports = function (config){
        FirefoxAutoAllowGUM: {
            base: 'Firefox',
            prefs: {
-                'media.navigator.permission.disabled': true
+                'media.navigator.permission.disabled': true,
+                'media.navigator.streams.fake' : true,
+                'network.proxy.type' : 0
            }
         }
     },
