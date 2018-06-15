@@ -88,6 +88,9 @@ function VideoFrameChecker(videoElement) {
   this.nonBlackPixelLumaThreshold = 20;
   this.previousFrame_ = [];
   this.identicalFrameSsimThreshold = 0.985;
+  if (navigator.userAgent.indexOf('Safari') >= 0 && navigator.userAgent.indexOf('Chrome') == -1){
+    this.identicalFrameSsimThreshold = 0.987;
+  }
   this.differenceThreshold = 0;
   this.frameComparator = new Ssim();
 
