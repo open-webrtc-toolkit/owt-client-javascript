@@ -92,6 +92,7 @@ class ConferenceClientConfiguration {
  * @param {?Ics.Conference.SioSignaling } signalingImpl Signaling channel implementation for ConferenceClient. SDK uses default signaling channel implementation if this parameter is undefined. Currently, a Socket.IO signaling channel implementation was provided as ics.conference.SioSignaling. However, it is not recommended to directly access signaling channel or customize signaling channel for ConferenceClient as this time.
  */
 export const ConferenceClient = function(config, signalingImpl) {
+  Object.setPrototypeOf(this, new EventModule.EventDispatcher());
   config = config || {};
   const self = this;
   let signalingState = SignalingState.READY;
@@ -403,5 +404,3 @@ export const ConferenceClient = function(config, signalingImpl) {
     });
   };
 };
-
-ConferenceClient.prototype = new EventModule.EventDispatcher();
