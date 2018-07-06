@@ -163,7 +163,9 @@ window.L = L;\n\
           {expand: true,cwd:'src/extension/',src:['**'],dest:'dist/',flatten:false},
           {expand: true,cwd:'dist/sdk/',src:['ics.js'],dest:'dist/samples/conference/public/scripts/',flatten:false},
           {expand: true,cwd:'dist/samples/conference/public/scripts',src:['rest.js'],dest:'dist/samples/conference/',flatten:false},
-          {expand: true,cwd:'dist/sdk/',src:['ics.js'],dest:'dist/samples/p2p/js',flatten:false},
+          {expand: true,cwd:'dist/sdk/',src:['ics.js'],dest:'dist/samples/p2p/js/',flatten:false},
+          {expand: true,cwd:'src/dependencies',src:['adapter.js','socket.io.js'],dest:'dist/samples/p2p/js/',flatten:false},
+          {expand: true,cwd:'src/dependencies',src:['adapter.js','socket.io.js'],dest:'dist/samples/conference/public/scripts/',flatten:false}
         ]
       }
     },

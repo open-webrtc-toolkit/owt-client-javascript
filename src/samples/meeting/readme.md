@@ -15,9 +15,9 @@
     - 如果需要添加多个房间，请在数组中添加如下格式的json数据：
 ```
 {
-  “id”: “value”,
-  “key”: “serverId”,
-  “title”: “Room TItle”
+  “id”: “value or room name”,
+  “key”: “RoomId”,
+  “title”: “Room Description”
 }
 ```
 
