@@ -1,17 +1,15 @@
 // Copyright © 2018 Intel Corporation. All Rights Reserved.
 // REST samples. It sends HTTP requests to sample server, and sample server sends requests to conference server.
 // Both this file and sample server are samples.
-var send = function (method, entity, body, onRes) {
+var send = function (method, path, body, onRes, host) {
     var req = new XMLHttpRequest()
-    if (serverAddress !== undefined) {
-        entity = serverAddress + entity;
-    }
     req.onreadystatechange = function () {
         if (req.readyState === 4) {
             onRes(req.responseText);
         }
     };
-    req.open(method, entity, true);
+    let url = generateUrl(host, path);
+    req.open(method, url, true);
     req.setRequestHeader('Content-Type', 'application/json');
     if (body !== undefined) {
         req.send(JSON.stringify(body));
@@ -19,6 +17,17 @@ var send = function (method, entity, body, onRes) {
         req.send();
     }
 };
+
+var generateUrl = function(host, path) {
+    let url;
+    if (host !== undefined) {
+        url = host + path;  // Use the host user set.
+    }else {
+        let index = document.URL.lastIndexOf('\/');
+        url = document.URL.substring(0, index) + path;  // Get the string before last '/'.
+    }
+    return url;
+}
 
 var onResponse = function (result) {
     if (result) {
@@ -32,40 +41,40 @@ var onResponse = function (result) {
     }
 };
 
-var listRooms = function () {
-    send('GET', '/rooms/', undefined, onResponse);
+var listRooms = function (host) {
+    send('GET', '/rooms/', undefined, onResponse, host);
 };
 
-var getRoom = function (room) {
-    send('GET', '/rooms/' + room + '/', undefined, onResponse);
+var getRoom = function (room, host) {
+    send('GET', '/rooms/' + room + '/', undefined, onResponse, host);
 };
 
-var createRoom = function () {
+var createRoom = function (host) {
     send('POST', '/rooms/', {
         name: 'testNewRoom',
         options: undefined
     },
-        onResponse);
+        onResponse, host);
 };
 
-var deleteRoom = function (room) {
-    send('DELETE', '/rooms/' + room + '/', undefined, onResponse);
+var deleteRoom = function (room, host) {
+    send('DELETE', '/rooms/' + room + '/', undefined, onResponse, host);
 };
 
-var updateRoom = function (room, config) {
-    send('PUT', '/rooms/' + room + '/', config, onResponse);
+var updateRoom = function (room, config, host) {
+    send('PUT', '/rooms/' + room + '/', config, onResponse, host);
 };
 
-var listParticipants = function (room) {
-    send('GET', '/rooms/' + room + '/participants/', undefined, onResponse);
+var listParticipants = function (room, host) {
+    send('GET', '/rooms/' + room + '/participants/', undefined, onResponse, host);
 };
 
-var getParticipant = function (room, participant) {
+var getParticipant = function (room, participant, host) {
     send('GET', '/rooms/' + room + '/participants/' + participant + '/',
-        undefined, onResponse);
+        undefined, onResponse, host);
 };
 
-var forbidSub = function (room, participant) {
+var forbidSub = function (room, participant, host) {
     var jsonPatch = [{
         op: 'replace',
         path: '/permission/subscribe',
@@ -75,10 +84,10 @@ var forbidSub = function (room, participant) {
         }
     }];
     send('PATCH', '/rooms/' + room + '/participants/' + participant + '/',
-        jsonPatch, onResponse);
+        jsonPatch, onResponse, host);
 };
 
-var forbidPub = function (room, participant) {
+var forbidPub = function (room, participant, host) {
     var jsonPatch = [{
         op: 'replace',
         path: '/permission/publish',
@@ -88,44 +97,44 @@ var forbidPub = function (room, participant) {
         }
     }];
     send('PATCH', '/rooms/' + room + '/participants/' + participant + '/',
-        jsonPatch, onResponse);
+        jsonPatch, onResponse, host);
 };
 
-var dropParticipant = function (room, participant) {
+var dropParticipant = function (room, participant, host) {
     send('DELETE', '/rooms/' + room + '/participants/' + participant + '/',
-        undefined, onResponse);
+        undefined, onResponse, host);
 };
 
-var listStreams = function (room) {
-    send('GET', '/rooms/' + room + '/streams/', undefined, onResponse);
+var listStreams = function (room, host) {
+    send('GET', '/rooms/' + room + '/streams/', undefined, onResponse, host);
 };
 
-var getStream = function (room, stream) {
+var getStream = function (room, stream, host) {
     send('GET', '/rooms/' + room + '/streams/' + stream, undefined,
-        onResponse);
+        onResponse, host);
 };
 
-var mixStream = function (room, stream, view) {
+var mixStream = function (room, stream, view, host) {
     var jsonPatch = [{
         op: 'add',
         path: '/info/inViews',
         value: view
     }];
     send('PATCH', '/rooms/' + room + '/streams/' + stream, jsonPatch,
-        onResponse);
+        onResponse, host);
 };
 
-var unmixStream = function (room, stream, view) {
+var unmixStream = function (room, stream, view, host) {
     var jsonPatch = [{
         op: 'remove',
         path: '/info/inViews',
         value: view
     }];
     send('PATCH', '/rooms/' + room + '/streams/' + stream, jsonPatch,
-        onResponse);
+        onResponse, host);
 };
 
-var setRegion = function (room, stream, region, subStream) {
+var setRegion = function (room, stream, region, subStream, host) {
     send('GET', '/rooms/' + room + '/streams/' + stream, undefined, function (stJSON) {
         var st = JSON.parse(stJSON);
 
@@ -147,14 +156,14 @@ var setRegion = function (room, stream, region, subStream) {
                 value: subStream
             }];
             send('PATCH', '/rooms/' + room + '/streams/' + stream, jsonPatch,
-                onResponse);
+                onResponse, host);
         } else {
             console.info('Invalid region');
         }
-    });
+    }, host);
 };
 
-var pauseStream = function (room, stream, track) {
+var pauseStream = function (room, stream, track, host) {
     var jsonPatch = [];
     if (track === 'audio' || track === 'av') {
         jsonPatch.push({
@@ -172,10 +181,10 @@ var pauseStream = function (room, stream, track) {
         });
     }
     send('PATCH', '/rooms/' + room + '/streams/' + stream, jsonPatch,
-        onResponse);
+        onResponse, host);
 };
 
-var playStream = function (room, stream, track) {
+var playStream = function (room, stream, track, host) {
     var jsonPatch = [];
     if (track === 'audio' || track === 'av') {
         jsonPatch.push({
@@ -193,17 +202,17 @@ var playStream = function (room, stream, track) {
         });
     }
     send('PATCH', '/rooms/' + room + '/streams/' + stream, jsonPatch,
-        onResponse);
+        onResponse, host);
 };
 
-var dropStream = function (room, stream) {
+var dropStream = function (room, stream, host) {
     send('DELETE', '/rooms/' + room + '/streams/' + stream, undefined,
-        onResponse);
+        onResponse, host);
 };
 
-var startStreamingIn = function (room, url) {
+var startStreamingIn = function (room, inUrl, host) {
     var options = {
-        url: url,
+        url: inUrl,
         media: {
             audio: 'auto',
             video: true
@@ -213,19 +222,19 @@ var startStreamingIn = function (room, url) {
             bufferSize: 2048
         }
     };
-    send('POST', '/rooms/' + room + '/streaming-ins', options, onResponse);
+    send('POST', '/rooms/' + room + '/streaming-ins', options, onResponse, host);
 };
 
-var stopStreamingIn = function (room, stream) {
+var stopStreamingIn = function (room, stream, host) {
     send('DELETE', '/rooms/' + room + '/streaming-ins/' + stream, undefined,
-        onResponse);
+        onResponse, host);
 };
 
-var listRecordings = function (room) {
-    send('GET', '/rooms/' + room + '/recordings/', undefined, onResponse);
+var listRecordings = function (room, host) {
+    send('GET', '/rooms/' + room + '/recordings/', undefined, onResponse, host);
 };
 
-var startRecording = function (room, audioFrom, videoFrom, container) {
+var startRecording = function (room, audioFrom, videoFrom, container, host) {
     var options = {
         media: {
             audio: {
@@ -237,15 +246,15 @@ var startRecording = function (room, audioFrom, videoFrom, container) {
         },
         container: (container ? container : 'auto')
     };
-    send('POST', '/rooms/' + room + '/recordings', options, onResponse);
+    send('POST', '/rooms/' + room + '/recordings', options, onResponse, host);
 };
 
-var stopRecording = function (room, id) {
+var stopRecording = function (room, id, host) {
     send('DELETE', '/rooms/' + room + '/recordings/' + id, undefined,
-        onResponse);
+        onResponse, host);
 };
 
-var updateRecording = function (room, id, audioFrom, videoFrom) {
+var updateRecording = function (room, id, audioFrom, videoFrom, host) {
     var jsonPatch = [{
         op: 'replace',
         path: '/media/audio/from',
@@ -256,14 +265,14 @@ var updateRecording = function (room, id, audioFrom, videoFrom) {
         value: videoFrom
     }];
     send('PATCH', '/rooms/' + room + '/recordings/' + id, jsonPatch,
-        onResponse);
+        onResponse, host);
 };
 
-var listStreamingOuts = function (room) {
-    send('GET', '/rooms/' + room + '/streaming-outs/', undefined, onResponse);
+var listStreamingOuts = function (room, host) {
+    send('GET', '/rooms/' + room + '/streaming-outs/', undefined, onResponse, host);
 };
 
-var startStreamingOut = function (room, url, audioFrom, videoFrom) {
+var startStreamingOut = function (room, outUrl, audioFrom, videoFrom, host) {
     var options = {
         media: {
             audio: {
@@ -273,17 +282,17 @@ var startStreamingOut = function (room, url, audioFrom, videoFrom) {
                 from: videoFrom
             }
         },
-        url: url
+        url: outUrl
     };
-    send('POST', '/rooms/' + room + '/streaming-outs', options, onResponse);
+    send('POST', '/rooms/' + room + '/streaming-outs', options, onResponse, host);
 };
 
-var stopStreamingOut = function (room, id) {
+var stopStreamingOut = function (room, id, host) {
     send('DELETE', '/rooms/' + room + '/streaming-outs/' + id, undefined,
-        onResponse);
+        onResponse, host);
 };
 
-var updateStreamingOut = function (room, id, audioFrom, videoFrom) {
+var updateStreamingOut = function (room, id, audioFrom, videoFrom, host) {
     var jsonPatch = [{
         op: 'replace',
         path: '/media/audio/from',
@@ -294,15 +303,15 @@ var updateStreamingOut = function (room, id, audioFrom, videoFrom) {
         value: videoFrom
     }];
     send('PATCH', '/rooms/' + room + '/streaming-outs/' + id, jsonPatch,
-        onResponse);
+        onResponse, host);
 };
 
 
-var createToken = function (room, user, role, callback) {
+var createToken = function (room, user, role, callback, host) {
     var body = {
         room: room,
         user: user,
         role: role
     };
-    send('POST', '/tokens/', body, callback);
+    send('POST', '/tokens/', body, callback, host);
 };

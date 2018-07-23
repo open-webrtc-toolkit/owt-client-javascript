@@ -351,7 +351,7 @@ function initConference() {
             }, err => {
               console.error('mute failed');
             });
-          mixStream(serviceKey, localPublication.id, 'common');
+          mixStream(serviceKey, localPublication.id, 'common',serverAddress);
           console.info('publish success');
           streamObj[localStream.id] = localStream;
           publication.addEventListener('error', (err) => {
