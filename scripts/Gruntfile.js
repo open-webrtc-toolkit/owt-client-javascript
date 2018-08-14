@@ -177,6 +177,14 @@ window.L = L;\n\
         options: {
         replacements: [
           {
+            pattern: '<script src="../../dependencies/socket.io.js" type="text/javascript"></script>',
+            replacement: '<script src="js/socket.io.js" type="text/javascript"></script>'
+          },
+          {
+            pattern: '<script src="../../dependencies/adapter.js" type="text/javascript"></script>',
+            replacement: '<script src="js/adapter.js" type="text/javascript"></script>'
+          },
+          {
             pattern: /<!-- SDK Starts -->[\w\W]+<!-- SDK Stops -->/gm,
             replacement: '<script src="js/ics.js" type="text/javascript"></script>'
           },
@@ -194,8 +202,16 @@ window.L = L;\n\
         options: {
         replacements: [
           {
-            pattern: '<script src="sdk/base/socket.io.js" type="text/javascript"></script>',
-            replacement: '<script src="socket.io.js" type="text/javascript"></script>'
+            pattern: '<script src="../../../dependencies/socket.io.js" type="text/javascript"></script>',
+            replacement: '<script src="scripts/socket.io.js" type="text/javascript"></script>'
+          },
+          {
+            pattern: '<script src="../../../dependencies/adapter.js" type="text/javascript"></script>',
+            replacement: '<script src="scripts/adapter.js" type="text/javascript"></script>'
+          },
+          {
+            pattern: '<script src="../../../../dist/sdk-debug/ics.js" type="text/javascript"></script>',
+            replacement: '<script src="scripts/ics.js" type="text/javascript"></script>'
           },
           {
             pattern: '<script src="sdk/base/adapter.js" type="text/javascript"></script>\n    <script src="sdk/conference/property.js" type="text/javascript"></script>\n    <script src="sdk/base/events.js" type="text/javascript"></script>\n    <script src="sdk/base/L.Base64.js" type="text/javascript"></script>\n    <script src="sdk/base/L.Logger.js" type="text/javascript"></script>\n    <script src="sdk/base/stream.js" type="text/javascript"></script>\n    <script src="sdk/conference/conference.js" type="text/javascript"></script>\n    <script src="sdk/conference/webrtc-stacks/ChromeStableStack.js" type="text/javascript"></script>\n    <script src="sdk/conference/webrtc-stacks/FirefoxStack.js" type="text/javascript"></script>\n    <script src="sdk/conference/webrtc-stacks/IEStableStack.js" type="text/javascript"></script>\n    <script src="sdk/conference/webrtc-stacks/EdgeORTCStack.js" type="text/javascript"></script>',
