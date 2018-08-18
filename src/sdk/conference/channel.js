@@ -156,7 +156,7 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
         offerToReceiveAudio: false,
         offerToReceiveVideo: false
       };
-      if (typeof this._pc.addTransceiver === 'function') {
+      if (this._isAddTransceiverSupported()) {
         // |direction| seems not working on Safari.
         if (mediaOptions.audio && stream.mediaStream.getAudioTracks() > 0) {
           const audioTransceiver = this._pc.addTransceiver('audio', { direction: 'sendonly' });
@@ -263,7 +263,7 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
         offerToReceiveAudio: !!options.audio,
         offerToReceiveVideo: !!options.video
       };
-      if (typeof this._pc.addTransceiver === 'function') {
+      if (this._isAddTransceiverSupported()) {
         // |direction| seems not working on Safari.
         if (mediaOptions.audio) {
           const audioTransceiver = this._pc.addTransceiver('audio', { direction: 'recvonly' });
@@ -431,7 +431,11 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
   }
 
   _createPeerConnection() {
-    this._pc = new RTCPeerConnection(this._config.rtcConfiguration);
+    const pcConfiguration = this._config.rtcConfiguration || {};
+    if (Utils.isChrome()) {
+      pcConfiguration.sdpSemantics = 'plan-b';
+    }
+    this._pc = new RTCPeerConnection(pcConfiguration);
     this._pc.onicecandidate = (event) => {
       this._onLocalIceCandidate.apply(this, [event]);
     };
@@ -594,5 +598,11 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
     } else {
       Logger.warning('Invalid data value for stream update info.');
     }
+  }
+
+  _isAddTransceiverSupported() {
+    const sysInfo = Utils.sysInfo();
+    return (typeof this._pc.addTransceiver === 'function' && ((sysInfo.runtime
+      .name !== 'Chrome') || sysInfo.runtime.version <= 68));
   }
 }

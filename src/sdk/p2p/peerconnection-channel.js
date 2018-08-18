@@ -548,8 +548,12 @@ class P2PPeerConnectionChannel extends EventDispatcher {
     Logger.debug('Data Channel is closed.');
   };
 
-  _createPeerConnection(){
-    this._pc = new RTCPeerConnection(this._config.rtcConfiguration);
+  _createPeerConnection() {
+    const pcConfiguration = this._config.rtcConfiguration || {};
+    if (Utils.isChrome()) {
+      pcConfiguration.sdpSemantics = 'plan-b';
+    }
+    this._pc = new RTCPeerConnection(pcConfiguration);
     // Firefox 59 implemented addTransceiver. However, mid in SDP will differ from track's ID in this case. And transceiver's mid is null.
     if (typeof this._pc.addTransceiver === 'function' && Utils.isSafari()) {
       this._pc.addTransceiver('audio');
