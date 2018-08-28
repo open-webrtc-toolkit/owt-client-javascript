@@ -116,8 +116,8 @@ export const ConferenceClient = function(config, signalingImpl) {
         fireStreamAdded(data.data);
       } else if (data.status === 'remove') {
         fireStreamRemoved(data);
-      } else if(data.status === 'update') {
-        // Boardcast audio/video update status to channel so specific events can be fired on publication or subscription.
+      } else if (data.status === 'update') {
+        // Broadcast audio/video update status to channel so specific events can be fired on publication or subscription.
         if (data.data.field === 'audio.status' || data.data.field ===
           'video.status') {
           channels.forEach(c => {
@@ -127,6 +127,8 @@ export const ConferenceClient = function(config, signalingImpl) {
           fireActiveAudioInputChange(data);
         } else if (data.data.field === 'video.layout') {
           fireLayoutChange(data);
+        } else if (data.data.field === '.') {
+          updateRemoteStream(data.data.value);
         } else {
           Logger.warning('Unknown stream event from MCU.');
         }
@@ -221,6 +223,19 @@ export const ConferenceClient = function(config, signalingImpl) {
     stream.dispatchEvent(streamEvent);
   }
 
+  function updateRemoteStream(streamInfo) {
+    if (!remoteStreams.has(streamInfo.id)) {
+      Logger.warning('Cannot find specific remote stream.');
+      return;
+    }
+    const stream = remoteStreams.get(streamInfo.id);
+    stream.settings = StreamUtilsModule.convertToPublicationSettings(streamInfo
+      .media);
+    stream.capabilities = StreamUtilsModule.convertToSubscriptionCapabilities(
+      streamInfo.media);
+    const streamEvent = new EventModule.IcsEvent('update');
+    stream.dispatchEvent(streamEvent);
+  }
 
   function createRemoteStream(streamInfo) {
     if (streamInfo.type === 'mixed') {
@@ -238,7 +253,7 @@ export const ConferenceClient = function(config, signalingImpl) {
           videoSourceInfo), streamInfo.info.attributes);
       stream.settings = StreamUtilsModule.convertToPublicationSettings(
         streamInfo.media);
-      stream.capabilities = new StreamUtilsModule.convertToSubscriptionCapabilities(
+      stream.capabilities = StreamUtilsModule.convertToSubscriptionCapabilities(
         streamInfo.media);
       return stream;
     }
