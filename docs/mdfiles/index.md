@@ -18,8 +18,8 @@ Conference Mode:
 
 |                                 | Windows* | Ubuntu* | macOS* |
 | ------------------------------- | -------- | ------- |------- |
-| Chrome* 67                      | √        | √       | √      |
-| Firefox* 60                     | √        | √       | √      |
+| Chrome* 68                      | √        | √       | √      |
+| Firefox* 61                     | √        | √       | √      |
 | Safari* 11                      |          |         | √      |
 | Microsoft Edge* 42.17134.1.0    | √        |         |        |    |
 
@@ -30,8 +30,8 @@ P2P Mode:
 
 |                                 | Windows* | Ubuntu* | macOS* |
 | ------------------------------- | -------- | ------- |------- |
-| Chrome* 67                      | √        | √       | √      |
-| Firefox* 60                     | √        | √       | √      |
+| Chrome* 68                      | √        | √       | √      |
+| Firefox* 61                     | √        | √       | √      |
 | Safari* 11                      |          |         | √      |
 
 *Table 2: Browser requirements for P2P Mode*
