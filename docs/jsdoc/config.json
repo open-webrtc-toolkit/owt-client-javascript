@@ -19,6 +19,7 @@
         ]
       }
     },
+    "version": "4.1",
     "logoFile": "./intellogo.png",
     "cleverLinks": false,
     "monospaceLinks": false,
