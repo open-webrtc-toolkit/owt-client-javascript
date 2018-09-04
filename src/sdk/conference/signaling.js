@@ -14,6 +14,7 @@ function handleResponse(status, data, resolve, reject) {
   }
 };
 
+const MAX_TRIALS = 5;
 /**
  * @class SioSignaling
  * @classdesc Socket.IO signaling channel for ConferenceClient. It is not recommended to directly access this class.
@@ -24,19 +25,22 @@ function handleResponse(status, data, resolve, reject) {
  * @see https://socket.io/docs/client-api/#io-url-options
  */
 export class SioSignaling extends EventModule.EventDispatcher {
-  constructor(sioConfig) {
+  constructor() {
     super();
     this._socket = null;
-    this._sioConfig = sioConfig || {};
+    this._loggedIn = false;
+    this._reconnectTimes = 0;
+    this._reconnectionTicket = null;
   }
 
   connect(host, isSecured, loginInfo) {
-    this._sioConfig.secure = isSecured;
-    if (this._sioConfig['force new connection'] === undefined) {
-      this._sioConfig['force new connection'] = true;
-    }
     return new Promise((resolve, reject) => {
-      this._socket = io.connect(host, this._sioConfig);
+      var opts = {
+        'reconnection': true,
+        'reconnectionAttempts': MAX_TRIALS,
+        'force new connection': true
+      };
+      this._socket = io(host, opts);
       ['drop', 'participant', 'text', 'stream', 'progress'].forEach((
         notification) => {
         this._socket.on(notification, (data) => {
@@ -48,10 +52,36 @@ export class SioSignaling extends EventModule.EventDispatcher {
           }));
         });
       });
+      this._socket.on('reconnecting', () => {
+        this._reconnectTimes++;
+      });
+      this._socket.on('reconnect_failed', () => {
+        if (this._reconnectTimes >= MAX_TRIALS) {
+          this.dispatchEvent(new EventModule.IcsEvent('disconnect'));
+        }
+      })
       this._socket.on('disconnect', () => {
-        this.dispatchEvent(new EventModule.IcsEvent('disconnect'));
+        if (this._reconnectTimes >= MAX_TRIALS) {
+          this._loggedIn = false;
+          this.dispatchEvent(new EventModule.IcsEvent('disconnect'));
+        }
       });
       this._socket.emit('login', loginInfo, (status, data) => {
+        if (status === 'ok') {
+          this._loggedIn = true;
+          this._reconnectionTicket = data.reconnectionTicket;
+          this._socket.on('connect', () => {
+            // re-login with reconnection ticket.
+            this._socket.emit('relogin', this._reconnectionTicket, (status, data) => {
+              if (status === 'ok') {
+                this._reconnectTimes = 0;
+                this._reconnectionTicket = data.reconnectionTicket;
+              } else {
+                this.dispatchEvent(new EventModule.IcsEvent('disconnect'));
+              }
+            })
+          });
+        }
         handleResponse(status, data, resolve, reject);
       });
     });
@@ -60,6 +90,8 @@ export class SioSignaling extends EventModule.EventDispatcher {
   disconnect() {
     return new Promise((resolve, reject) => {
       this._socket.emit('logout', (status, data) => {
+        // Maximise the reconnect times to disable reconnectiong.
+        this._reconnectTimes = MAX_TRIALS;
         this._socket.disconnect();
         handleResponse(status, data, resolve, reject);
       });
