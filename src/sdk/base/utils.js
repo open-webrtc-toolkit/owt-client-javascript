@@ -104,5 +104,10 @@ export function sysInfo() {
       version: 'Unknown'
     };
   }
+  info.capabilities = {
+    iceContinualGathering: false,
+    unifiedPlan: false,
+    streamRemovable: info.runtime.name !== 'Firefox'
+  };
   return info;
 };
