@@ -28,7 +28,7 @@ export class StreamSourceInfo {
       throw new TypeError('Incorrect value for audioSourceInfo');
     }
     if (!isAllowedValue(videoSourceInfo, [undefined, 'camera', 'screen-cast',
-        'file', 'mixed'
+        'file', 'encoded-file', 'raw-file', 'mixed'
       ])) {
       throw new TypeError('Incorrect value for videoSourceInfo');
     }
