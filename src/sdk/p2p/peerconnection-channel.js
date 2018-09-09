@@ -342,6 +342,13 @@ class P2PPeerConnectionChannel extends EventDispatcher {
     Logger.debug('About to set remote description. Signaling state: ' +
       this._pc.signalingState);
     sdp.sdp = this._setRtpSenderOptions(sdp.sdp, this._config);
+    // Firefox only has one codec in answer, which does not truly reflect its
+    // decoding capability. So we set codec preference to remote offer, and let
+    // Firefox choose its preferred codec.
+    // Reference: https://bugzilla.mozilla.org/show_bug.cgi?id=814227.
+    if (Utils.isFirefox()) {
+      sdp.sdp = this._setCodecOrder(sdp.sdp);
+    }
     const sessionDescription = new RTCSessionDescription(sdp);
     this._pc.setRemoteDescription(sessionDescription).then(() => {
       this._createAndSendAnswer();
