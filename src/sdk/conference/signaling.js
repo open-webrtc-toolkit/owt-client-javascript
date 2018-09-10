@@ -75,7 +75,7 @@ export class SioSignaling extends EventModule.EventDispatcher {
             this._socket.emit('relogin', this._reconnectionTicket, (status, data) => {
               if (status === 'ok') {
                 this._reconnectTimes = 0;
-                this._reconnectionTicket = data.reconnectionTicket;
+                this._reconnectionTicket = data;
               } else {
                 this.dispatchEvent(new EventModule.IcsEvent('disconnect'));
               }
