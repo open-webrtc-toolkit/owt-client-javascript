@@ -225,7 +225,7 @@ const P2PClient = function(configuration, signalingChannel) {
     if (this.allowedRemoteIds.indexOf(remoteId) < 0) {
       return Promise.reject(new ErrorModule.P2PError(ErrorModule.errors.P2P_CLIENT_NOT_ALLOWED));
     }
-    return getOrCreateChannel(remoteId).publish(stream);
+    return Promise.resolve(getOrCreateChannel(remoteId).publish(stream));
   };
 
   /**
@@ -245,7 +245,7 @@ const P2PClient = function(configuration, signalingChannel) {
     if (this.allowedRemoteIds.indexOf(remoteId) < 0) {
       return Promise.reject(new ErrorModule.P2PError(ErrorModule.errors.P2P_CLIENT_NOT_ALLOWED));
     }
-    return getOrCreateChannel(remoteId).send(message);
+    return Promise.resolve(getOrCreateChannel(remoteId).send(message));
   };
 
   /**

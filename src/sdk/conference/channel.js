@@ -182,9 +182,14 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
         });
       }).catch(e => {
         Logger.error('Failed to create offer or set SDP. Message: ' + e.message);
+        this._unpublish();
         this._rejectPromise(e);
         this._fireEndedEventOnPublicationOrSubscription();
       });
+    }).catch(e => {
+      this._unpublish();
+      this._rejectPromise(e);
+      this._fireEndedEventOnPublicationOrSubscription();
     });
     return new Promise((resolve, reject) => {
       this._publishPromise = { resolve: resolve, reject: reject };
@@ -290,6 +295,10 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
         Logger.error('Create offer failed. Error info: ' + JSON.stringify(
           error));
       });
+    }).catch(e => {
+      this._unsubscribe();
+      this._rejectPromise(e);
+      this._fireEndedEventOnPublicationOrSubscription();
     });
     return new Promise((resolve, reject) => {
       this._subscribePromise = { resolve: resolve, reject: reject };
