@@ -192,9 +192,6 @@ class P2PPeerConnectionChannel extends EventDispatcher {
   _SignalingMesssageHandler(message) {
     Logger.debug('Channel received message: ' + message);
     switch (message.type) {
-      case SignalingType.DENIED:
-        this._chatDeniedHandler();
-        break;
       case SignalingType.UA:
         this._handleRemoteCapability(message.data);
         this._sendSysInfoIfNecessary();
@@ -218,7 +215,7 @@ class P2PPeerConnectionChannel extends EventDispatcher {
         this._dataReceivedHandler(message.data);
         break;
       case SignalingType.CLOSED:
-        this._chatClosedHandler();
+        this._chatClosedHandler(message.data);
         break;
       case SignalingType.NEGOTIATION_NEEDED:
         this._doNegotiate();
@@ -332,10 +329,6 @@ class P2PPeerConnectionChannel extends EventDispatcher {
 
   _chatClosedHandler(data) {
     this._stop(data, false);
-  }
-
-  _chatDeniedHandler() {
-    this._stop();
   }
 
   _onOffer(sdp) {

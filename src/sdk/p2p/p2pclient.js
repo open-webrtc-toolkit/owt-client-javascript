@@ -146,8 +146,8 @@ const P2PClient = function(configuration, signalingChannel) {
     }
     if (self.allowedRemoteIds.indexOf(origin) >= 0) {
       getOrCreateChannel(origin).onMessage(data);
-    } else if (data.type !== 'chat-denied') {
-      sendSignalingMessage(origin, 'chat-denied');
+    } else if (data.type !== 'chat-closed') {
+      sendSignalingMessage(origin, 'chat-closed', ErrorModule.errors.P2P_CLIENT_DENIED);
     }
   };
 

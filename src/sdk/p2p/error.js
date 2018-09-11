@@ -41,6 +41,10 @@ export const errors = {
     code: 2201,
     message: 'Remote user cannot be reached.'
   },
+  P2P_CLIENT_DENIED: {
+    code: 2202,
+    message: 'User is denied.'
+  },
   // 2301-2399 for chat room errors
   // 2401-2499 for client errors
   P2P_CLIENT_UNKNOWN: {
