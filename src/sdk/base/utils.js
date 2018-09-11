@@ -105,7 +105,7 @@ export function sysInfo() {
     };
   }
   info.capabilities = {
-    iceContinualGathering: false,
+    continualIceGathering: false,
     unifiedPlan: false,
     streamRemovable: info.runtime.name !== 'Firefox'
   };
