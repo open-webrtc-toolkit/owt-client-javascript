@@ -323,7 +323,7 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
       .catch(e => {
         Logger.warning('MCU returns negative ack for unsubscribing, ' + e);
       });
-    if (this._pc.signalingState !== 'closed') {
+    if (this._pc && this._pc.signalingState !== 'closed') {
       this._pc.close();
     }
   }
