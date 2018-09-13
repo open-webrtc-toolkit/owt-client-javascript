@@ -474,7 +474,6 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
     if (this._subscribePromise) {
       this._subscription = new Subscription(this._internalId, () => {
           this._unsubscribe();
-          return Promise.resolve();
         }, () => this._getStats(),
         trackKind => this._muteOrUnmute(true, false, trackKind),
         trackKind => this._muteOrUnmute(false, false, trackKind),
