@@ -141,12 +141,16 @@ const P2PClient = function(configuration, signalingChannel) {
   signaling.onMessage = function(origin, message) {
     Logger.debug('Received signaling message from ' + origin + ': ' + message);
     const data = JSON.parse(message);
-    if (data.type === 'chat-closed' && !channels.has(origin)) {
+    if (data.type === 'chat-closed') {
+      if (channels.has(origin)) {
+        getOrCreateChannel(origin).onMessage(data);
+        channels.delete(origin);
+      }
       return;
     }
     if (self.allowedRemoteIds.indexOf(origin) >= 0) {
       getOrCreateChannel(origin).onMessage(data);
-    } else if (data.type !== 'chat-closed') {
+    } else {
       sendSignalingMessage(origin, 'chat-closed', ErrorModule.errors.P2P_CLIENT_DENIED);
     }
   };

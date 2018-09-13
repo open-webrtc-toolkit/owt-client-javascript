@@ -80,6 +80,7 @@ class P2PPeerConnectionChannel extends EventDispatcher {
     this._addedTrackIds = []; // Tracks that have been added after receiving remote SDP but before connection is established. Draining these messages when ICE connection state is connected.
     this._isCaller = true;
     this._infoSent = false;
+    this._disposed = false;
     this._createPeerConnection();
   }
 
@@ -134,6 +135,10 @@ class P2PPeerConnectionChannel extends EventDispatcher {
     if (!this._dataChannels.has(DataChannelLabel.MESSAGE)) {
       this._createDataChannel(DataChannelLabel.MESSAGE);
     }
+
+    this._sendClosedMsgIfNecessary().catch(err => {
+        Logger.debug('Failed to send closed message.' + err.message);
+    });
 
     this._sendSysInfoIfNecessary().catch(err => {
         Logger.debug('Failed to send sysInfo.' + err.message);
@@ -328,6 +333,7 @@ class P2PPeerConnectionChannel extends EventDispatcher {
   }
 
   _chatClosedHandler(data) {
+    this._disposed = true;
     this._stop(data, false);
   }
 
@@ -911,18 +917,20 @@ class P2PPeerConnectionChannel extends EventDispatcher {
       stream.dispatchEvent(new IcsEvent('ended'));
     });
     this._remoteStreams = [];
-    if (notifyRemote) {
-      let sendError;
-      if (error) {
-        sendError = JSON.parse(JSON.stringify(error));
-        // Avoid to leak detailed error to remote side.
-        sendError.message = 'Error happened at remote side.';
+    if(!this._disposed) {
+      if (notifyRemote) {
+        let sendError;
+        if (error) {
+          sendError = JSON.parse(JSON.stringify(error));
+          // Avoid to leak detailed error to remote side.
+          sendError.message = 'Error happened at remote side.';
+        }
+        this._sendSignalingMessage(SignalingType.CLOSED, sendError).catch(err => {
+          Logger.debug('Failed to send close.' + err.message);
+        });
       }
-      this._sendSignalingMessage(SignalingType.CLOSED, sendError).catch(err => {
-        Logger.debug('Failed to send close.' + err.message);
-      });
+      this.dispatchEvent(new Event('ended'));
     }
-    this.dispatchEvent(new Event('ended'));
   }
 }
 
