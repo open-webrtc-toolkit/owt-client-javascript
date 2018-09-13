@@ -19,7 +19,7 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
     this._options = null;
     this._signaling = signaling;
     this._pc = null;
-    this._internalId = null; // It's publication ID or subscription ID.
+    this._internalId = null;  // It's publication ID or subscription ID.
     this._pendingCandidates = [];
     this._subscribePromise = null;
     this._publishPromise = null;
@@ -28,6 +28,7 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
     this._publication = null;
     this._subscription = null;
     this._disconnectTimer = null;  // Timer for PeerConnection disconnected. Will stop connection after timer.
+    this._ended = false;
   }
 
   onMessage(notification, message) {
@@ -388,6 +389,10 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
   }
 
   _fireEndedEventOnPublicationOrSubscription() {
+    if (this._ended) {
+      return;
+    }
+    this._ended = true;
     const event = new IcsEvent('ended')
     if (this._publication) {
       this._publication.dispatchEvent(event);
