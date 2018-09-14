@@ -239,12 +239,24 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
     this._options = options;
     const mediaOptions = {};
     if (options.audio) {
+      if (typeof options.audio === 'object' && Array.isArray(options.audio.codecs)) {
+        if (options.audio.codecs.length === 0) {
+          return Promise.reject(new TypeError(
+            'Audio codec cannot be an empty array.'));
+        }
+      }
       mediaOptions.audio = {};
       mediaOptions.audio.from = stream.id;
     } else {
       mediaOptions.audio = false;
     }
     if (options.video) {
+      if (typeof options.video === 'object' && Array.isArray(options.video.codecs)) {
+        if (options.video.codecs.length === 0) {
+          return Promise.reject(new TypeError(
+            'Video codec cannot be an empty array.'));
+        }
+      }
       mediaOptions.video = {};
       mediaOptions.video.from = stream.id;
       if (options.video.resolution || options.video.frameRate || (options.video
@@ -302,6 +314,11 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
       }, function(error) {
         Logger.error('Create offer failed. Error info: ' + JSON.stringify(
           error));
+      }).catch(e=>{
+        Logger.error('Failed to create offer or set SDP. Message: ' + e.message);
+        this._unsubscribe();
+        this._rejectPromise(e);
+        this._fireEndedEventOnPublicationOrSubscription();
       });
     }).catch(e => {
       this._unsubscribe();
