@@ -172,7 +172,8 @@ export const ConferenceClient = function(config, signalingImpl) {
   function fireMessageReceived(data) {
     const messageEvent = new EventModule.MessageEvent('messagereceived', {
       message: data.message,
-      origin: data.from
+      origin: data.from,
+      to: data.to
     });
     self.dispatchEvent(messageEvent);
   }

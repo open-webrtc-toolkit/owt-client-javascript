@@ -104,6 +104,13 @@ export class MessageEvent extends IcsEvent {
      * @memberof Ics.Base.MessageEvent
      */
     this.message = init.message;
+    /**
+     * @member {string} to
+     * @instance
+     * @memberof Ics.Base.MessageEvent
+     * @desc Values could be "all", "me" in conference mode, or undefined in P2P mode..
+     */
+    this.to = init.to;
   }
 }
 
