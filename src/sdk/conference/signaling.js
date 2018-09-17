@@ -1,6 +1,7 @@
 /* global io */
 import Logger from '../base/logger.js'
 import * as EventModule from '../base/event.js'
+import { ConferenceError } from './error.js'
 
 'use strict';
 
@@ -88,9 +89,13 @@ export class SioSignaling extends EventModule.EventDispatcher {
   }
 
   disconnect() {
+    if (!this._socket || this._socket.disconnected) {
+      return Promise.reject(new ConferenceError(
+        'Portal is not connected.'));
+    }
     return new Promise((resolve, reject) => {
       this._socket.emit('logout', (status, data) => {
-        // Maximise the reconnect times to disable reconnectiong.
+        // Maximize the reconnect times to disable reconnection.
         this._reconnectTimes = MAX_TRIALS;
         this._socket.disconnect();
         handleResponse(status, data, resolve, reject);
