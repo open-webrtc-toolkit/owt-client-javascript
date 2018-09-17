@@ -63,13 +63,14 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
     if (options.video === undefined) {
       options.video = !!stream.mediaStream.getVideoTracks();
     }
-    if (options.audio && !stream.mediaStream.getAudioTracks() || (options.video &&
-        !stream.mediaStream.getVideoTracks())) {
+    if (!!options.audio === !stream.mediaStream.getAudioTracks().length || !!
+      options.video === !stream.mediaStream.getVideoTracks().length) {
       return Promise.reject(new ConferenceError(
         'options.audio/video cannot be true or an object if there is no audio/video track present in the MediaStream.'
       ));
     }
-    if (options.audio === false && options.video === false) {
+    if ((options.audio === false || options.audio === null) &&
+      (options.video === false || options.video === null)) {
       return Promise.reject(new ConferenceError(
         'Cannot publish a stream without audio and video.'));
     }
