@@ -121,9 +121,10 @@ export class LocalStream extends Stream {
  * @classDesc Stream sent from a remote endpoint.
  * Events:
  *
- * | Event Name      | Argument Type    | Fired when       |
- * | ----------------| ---------------- | ---------------- |
- * | ended           | Event            | Stream is ended. |
+ * | Event Name      | Argument Type    | Fired when         |
+ * | ----------------| ---------------- | ------------------ |
+ * | ended           | Event            | Stream is ended.   |
+ * | updated         | Event            | Stream is updated. |
  *
  * @memberOf Ics.Base
  * @extends Ics.Base.Stream

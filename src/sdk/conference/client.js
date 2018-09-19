@@ -234,7 +234,7 @@ export const ConferenceClient = function(config, signalingImpl) {
       .media);
     stream.capabilities = StreamUtilsModule.convertToSubscriptionCapabilities(
       streamInfo.media);
-    const streamEvent = new EventModule.IcsEvent('update');
+    const streamEvent = new EventModule.IcsEvent('updated');
     stream.dispatchEvent(streamEvent);
   }
 
