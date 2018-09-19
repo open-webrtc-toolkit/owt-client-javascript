@@ -42,7 +42,7 @@ export class SioSignaling extends EventModule.EventDispatcher {
         'force new connection': true
       };
       this._socket = io(host, opts);
-      ['drop', 'participant', 'text', 'stream', 'progress'].forEach((
+      ['participant', 'text', 'stream', 'progress'].forEach((
         notification) => {
         this._socket.on(notification, (data) => {
           this.dispatchEvent(new EventModule.MessageEvent('data', {
@@ -60,6 +60,9 @@ export class SioSignaling extends EventModule.EventDispatcher {
         if (this._reconnectTimes >= MAX_TRIALS) {
           this.dispatchEvent(new EventModule.IcsEvent('disconnect'));
         }
+      })
+      this._socket.on('drop', () => {
+        this._reconnectTimes = MAX_TRIALS;
       })
       this._socket.on('disconnect', () => {
         if (this._reconnectTimes >= MAX_TRIALS) {
