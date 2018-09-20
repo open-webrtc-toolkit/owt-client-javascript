@@ -122,7 +122,7 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
       mediaOptions.audio = {};
       mediaOptions.audio.source = stream.source.audio;
       for(const track of stream.mediaStream.getAudioTracks()){
-        this._pc.addTrack(track);
+        this._pc.addTrack(track, stream.mediaStream);
       }
     } else {
       mediaOptions.audio = false;
@@ -145,7 +145,7 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
         framerate: trackSettings.frameRate
       };
       for(const track of stream.mediaStream.getVideoTracks()){
-        this._pc.addTrack(track);
+        this._pc.addTrack(track, stream.mediaStream);
       }
     } else {
       mediaOptions.video = false;
