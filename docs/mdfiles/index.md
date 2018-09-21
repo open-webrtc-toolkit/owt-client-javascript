@@ -18,7 +18,7 @@ Conference Mode:
 
 |                                 | Windows* | Ubuntu* | macOS* |
 | ------------------------------- | -------- | ------- |------- |
-| Chrome* 68                      | √        | √       | √      |
+| Chrome* 69                      | √        | √       | √      |
 | Firefox* 61                     | √        | √       | √      |
 | Safari* 11                      |          |         | √      |
 | Microsoft Edge* 42.17134.1.0    | √        |         |        |    |
@@ -30,7 +30,7 @@ P2P Mode:
 
 |                                 | Windows* | Ubuntu* | macOS* |
 | ------------------------------- | -------- | ------- |------- |
-| Chrome* 68                      | √        | √       | √      |
+| Chrome* 69                      | √        | √       | √      |
 | Firefox* 61                     | √        | √       | √      |
 | Safari* 11                      |          |         | √      |
 
