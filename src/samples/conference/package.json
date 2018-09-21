@@ -2,7 +2,7 @@
   "name": "ics.conference.sample",
   "title": "Intel WebRTC Conference Sample",
   "description": "Intel CS for WebRTC JavaScript Conference Sample",
-  "version": "4.0.0",
+  "version": "4.1.0",
   "homepage": "http://webrtc.intel.com",
   "author": "Intel WebRTC team",
   "keywords": [
