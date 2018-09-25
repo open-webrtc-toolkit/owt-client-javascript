@@ -231,9 +231,13 @@ export class MediaStreamFactory {
       if (typeof constraints.audio === 'object' && constraints.audio.source ===
         MediaFormatModule.AudioSourceInfo.MIC) {
         mediaConstraints.audio = Object.create({});
-        mediaConstraints.audio.deviceId = {
-          exact: constraints.audio.deviceId
-        };
+        if (utils.isEdge()) {
+          mediaConstraints.audio.deviceId = constraints.audio.deviceId;
+        } else {
+          mediaConstraints.audio.deviceId = {
+            exact: constraints.audio.deviceId
+          };
+        }
       } else {
         mediaConstraints.audio = constraints.audio;
       }

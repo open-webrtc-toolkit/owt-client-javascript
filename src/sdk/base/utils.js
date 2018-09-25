@@ -11,6 +11,9 @@ export function isChrome() {
 export function isSafari() {
   return /^((?!chrome|android).)*safari/i.test(window.navigator.userAgent);
 }
+export function isEdge() {
+  return window.navigator.userAgent.match(/Edge\/(\d+).(\d+)$/) !== null;
+}
 export function createUuid() {
   return 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
     var r = Math.random() * 16 | 0,
