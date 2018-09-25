@@ -618,7 +618,6 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
       eventTarget = this._subscription;
     }
     if (!eventTarget) {
-      Logger.debug('Cannot find valid event target.');
       return;
     }
     let trackKind;
