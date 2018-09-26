@@ -66,7 +66,7 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
     if (!!options.audio === !stream.mediaStream.getAudioTracks().length || !!
       options.video === !stream.mediaStream.getVideoTracks().length) {
       return Promise.reject(new ConferenceError(
-        'options.audio/video cannot be true or an object if there is no audio/video track present in the MediaStream.'
+        'options.audio/video is inconsistent with tracks presented in the MediaStream.'
       ));
     }
     if ((options.audio === false || options.audio === null) &&
