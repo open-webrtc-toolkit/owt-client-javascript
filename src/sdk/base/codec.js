@@ -117,7 +117,7 @@ export class VideoEncodingParameters {
      * @member {?number} maxBitrate
      * @instance
      * @memberof Ics.Base.VideoEncodingParameters
-     * @desc Max bitrate expressed in bps.
+     * @desc Max bitrate expressed in kbps.
      */
     this.maxBitrate = maxBitrate;
   }
