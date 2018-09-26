@@ -1,7 +1,7 @@
 // Copyright © 2017 Intel Corporation. All Rights Reserved.
 'use strict';
 var conference;
-
+var publicationGlobal;
 const runSocketIOSample = function() {
 
     let localStream;
@@ -24,11 +24,17 @@ const runSocketIOSample = function() {
     function renderVideo(stream){
         conference.subscribe(stream)
         .then((subscriptions)=>{
-           let $video = $('<video controls autoplay width="320" height="240">this browser does not supported video tag</video>');
+           let $video = $(`<video controls autoplay id=${stream.id} width="320" height="240">this browser does not supported video tag</video>`);
            $video.get(0).srcObject = stream.mediaStream;
            $('body').append($video);
         }, (err)=>{ console.log('subscribe failed', err);
         });
+        stream.addEventListener('ended', () => {
+            removeUi(stream.id);
+        });
+    }
+    function removeUi(id){
+        $(`#${id}`).remove();
     }
     function subscribeDifferentResolution(stream, resolution) {
         subscriptionForMixedStream.stop();
@@ -85,6 +91,7 @@ const runSocketIOSample = function() {
                                 'mic', 'camera'));
                         $('.local video').get(0).srcObject = stream;
                         conference.publish(localStream).then(publication => {
+                            publicationGlobal = publication;
                             mixStream(myRoom, publication.id, 'common')
                             publication.addEventListener('error', (err) => {
                                 console.log('Publication error: ' + err.error.message);
@@ -133,5 +140,8 @@ const runSocketIOSample = function() {
             });
         });
     };
-
 };
+window.onbeforeunload = function(event){
+    conference.leave()
+    publicationGlobal.stop();
+}
