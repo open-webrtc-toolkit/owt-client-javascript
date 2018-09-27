@@ -92,9 +92,9 @@ The JavaScript objects fires events using `Ics.Base.EventDispatchers`. For more 
 # 7 Migrating from 3.x
 
 There are significant API changes since 3.x.
-- Client SDKs are focus on WebRTC connections. Please refer to REST API guide for other conference features, e.g. external input/output, recording.
-- Publication was introduced for both conference and P2P mode. You'll get a publication when publish successfully.
-- Subscription was introduced for conference mode. You'll get a subscription when subscribe a stream successfully. P2P mode does not have subscription at this time since remote stream will be added to PeerConnection automatically.
+- Client SDKs focuses on WebRTC connections. Please refer to REST API guide for other conference features, e.g. external input/output and recording.
+- Publication was introduced for both conference and P2P mode. You'll get a publication after publishing a stream successfully.
+- Subscription was introduced for conference mode. You'll get a subscription after subscribing a stream successfully. P2P mode does not have subscription at this time since remote stream will be added to PeerConnection automatically.
 - Callbacks were changed to promises.
 
 **Note:** \* Other names and brands may be claimed as the property of others.
