@@ -13,7 +13,7 @@ podTemplate(label: 'jenkins-pipeline', containers: [
 
           container ('build1') {
             sh "ls /home/jenkins/workspace"
-            sh "cd /home/jenkins/workspace/pipeline* & git log"
+            sh "cat"
           }
         }
     }
