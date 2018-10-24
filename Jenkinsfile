@@ -12,7 +12,7 @@ podTemplate(label: 'jenkins-pipeline', containers: [
         stage ('Maven Build & Tests') {
 
           container ('build1') {
-            sh "ls /var/jenkins_home/workspace/"
+            sh "ls /home/jenkins/"
           }
         }
     }
