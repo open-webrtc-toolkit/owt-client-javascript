@@ -1,3 +1,5 @@
+#!/usr/bin/env groovy
+
 pipeline {
   stages{
     def label = "mypod-${UUID.randomUUID().toString()}"
