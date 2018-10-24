@@ -1,4 +1,4 @@
-pipeline {}
+pipeline {
   def label = "mypod-${UUID.randomUUID().toString()}"
   stage('Build MCU') {
       podTemplate(label: label, runAsUser: 0, fsGroup: 0, cloud: 'kubernetes', containers: [
@@ -30,7 +30,7 @@ pipeline {}
                       stage('Test MCU 1') {
                          sh '/root/start.sh 10.244.0.121 10.244.0.122 $GIT_COMMIT"1" ConferenceClient_api'
                          sh 'ls -l /root/'
-  }
+                      }
                     }
                   }
               }
