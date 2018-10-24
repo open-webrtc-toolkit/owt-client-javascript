@@ -5,7 +5,7 @@ pipeline {
         stage('Build') {
             steps {
                 echo 'Building..'
-                sh 'ls /var/jenkins_home/workspace/'
+                sh 'cd /var/jenkins_home/workspace/pipeline* & git log'
             }
         }
         stage('Test') {
