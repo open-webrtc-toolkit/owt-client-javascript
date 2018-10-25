@@ -6,9 +6,11 @@ pipeline {
     stages {
         stage('Check') {
             steps {
-                commitid = sh 'git rev-parse HEAD^'
-                sh 'printenv'
-                echo $commitid
+                script {
+                    commitid = sh 'git rev-parse HEAD^'
+                    sh 'printenv'
+                    echo $commitid
+                }
             }
         }
         stage('Build package') {
