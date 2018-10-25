@@ -35,7 +35,8 @@ pipeline {
                       }
                     }
                 }
-            },
+            }
+            
             stage('Subscribe') {
                 podTemplate(name:'Subtest', label: 'test2', runAsUser: 0, fsGroup: 0, cloud: 'kubernetes', containers: [
                     containerTemplate(name: 'test2', image: 'webrtctest1.sh.intel.com/library/karma-mcu:base',  ttyEnabled: true, alwaysPullImage: true, privileged: true, network: 'host', command: 'cat'),
