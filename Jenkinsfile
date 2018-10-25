@@ -11,6 +11,10 @@ pipeline {
                     node ('jenkins-pipeline') {
                       container ('build1') {
                         sh "echo ${env.GIT_COMMIT}"
+                        sh "echo ${env.GIT_BRANCH}"
+                        sh 'git rev-parse HEAD > commit'
+                        def commit = readFile('commit').trim()
+                        println commit
                         sh "ls /home/jenkins/workspace"
                       }
                     }
