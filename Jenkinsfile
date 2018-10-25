@@ -11,7 +11,6 @@ pipeline {
                     node ('jenkins-pipeline') {
                       container ('build1') {
                         sh "ls /home/jenkins/workspace"
-                        sh "cat"
                       }
                     }
                 }
