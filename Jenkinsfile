@@ -5,8 +5,8 @@ pipeline {
     stages {
         stage('Check') {
             steps {
+                sh 'git rev-parse HEAD'
                 sh 'printenv'
-                sh 'git branch'
                 sh 'git log'
             }
         }
