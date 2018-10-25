@@ -2,6 +2,7 @@
 
 pipeline {
     agent any
+    git rev-parse HEAD
     stages {
         stage('Build package') {
             steps {
@@ -12,7 +13,6 @@ pipeline {
                       container ('build1') {
                         sh "echo ${env.GIT_COMMIT}"
                         sh "echo ${env.GIT_BRANCH}"
-                        sh 'git rev-parse HEAD '
                         sh "ls /home/jenkins/workspace"
                       }
                     }
