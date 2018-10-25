@@ -10,7 +10,7 @@ pipeline {
                 ]){
                     node ('jenkins-pipeline') {
                       container ('build1') {
-                        sh "echo env.GIT_COMMIT"
+                        sh "echo ${env.GIT_COMMIT}"
                         sh "ls /home/jenkins/workspace"
                       }
                     }
