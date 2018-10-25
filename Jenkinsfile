@@ -2,7 +2,6 @@
 
 pipeline {
     agent any
-    sh 'ls'
     stages {
         stage('Build package') {
             steps {
@@ -11,6 +10,7 @@ pipeline {
                 ]){
                     node ('jenkins-pipeline') {
                       container ('build1') {
+                        sh "echo env.GIT_COMMIT"
                         sh "ls /home/jenkins/workspace"
                       }
                     }
