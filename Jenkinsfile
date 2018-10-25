@@ -6,7 +6,8 @@ pipeline {
         stage('Check') {
             steps {
                 sh 'printenv'
-                sh 'ls'
+                sh 'git branch'
+                sh 'git log'
             }
         }
         stage('Build package') {
