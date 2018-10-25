@@ -1,13 +1,14 @@
 #!/usr/bin/groovy
+def commitid='unknown'
 
 pipeline {
     agent any
     stages {
         stage('Check') {
             steps {
-                sh 'git rev-parse HEAD'
+                commitid = sh 'git rev-parse HEAD^'
                 sh 'printenv'
-                sh 'git log'
+                echo $commitid
             }
         }
         stage('Build package') {
@@ -17,7 +18,7 @@ pipeline {
                 ]){
                     node ('jenkins-pipeline') {
                       container ('build1') {
-                        sh "printenv"
+                        echo $commitid
                         sh "ls "
                       }
                     }
