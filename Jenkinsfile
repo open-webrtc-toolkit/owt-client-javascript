@@ -2,6 +2,7 @@
 
 pipeline {
     agent any
+    sh 'ls'
     stages {
         stage('Build package') {
             steps {
