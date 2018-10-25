@@ -2,7 +2,7 @@
 
 pipeline {
     agent any
-    git rev-parse HEAD
+    println env.GIT_COMMIT
     stages {
         stage('Build package') {
             steps {
