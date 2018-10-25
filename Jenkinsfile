@@ -3,7 +3,7 @@
 pipeline {
     agent any
     stages {
-        stage {
+        stage('Check') {
             steps {
                 sh 'printenv'
                 sh 'ls'
