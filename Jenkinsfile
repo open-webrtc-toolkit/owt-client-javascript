@@ -3,6 +3,12 @@
 pipeline {
     agent any
     stages {
+        stage {
+            steps {
+                sh 'printenv'
+                sh 'ls'
+            }
+        }
         stage('Build package') {
             steps {
                 podTemplate(name: 'pack', label: 'jenkins-pipeline', containers: [
@@ -11,7 +17,7 @@ pipeline {
                     node ('jenkins-pipeline') {
                       container ('build1') {
                         sh "printenv"
-                        sh "ls /home/jenkins/workspace"
+                        sh "ls "
                       }
                     }
                 }
