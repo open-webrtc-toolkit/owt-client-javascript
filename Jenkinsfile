@@ -2,7 +2,6 @@
 
 pipeline {
     agent any
-    println env.GIT_COMMIT
     stages {
         stage('Build package') {
             steps {
@@ -11,8 +10,7 @@ pipeline {
                 ]){
                     node ('jenkins-pipeline') {
                       container ('build1') {
-                        sh "echo ${env.GIT_COMMIT}"
-                        sh "echo ${env.GIT_BRANCH}"
+                        sh "printenv"
                         sh "ls /home/jenkins/workspace"
                       }
                     }
