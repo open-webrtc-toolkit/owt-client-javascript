@@ -1,10 +1,5 @@
 #!/usr/bin/groovy
 
-// load pipeline functions
-// Requires pipeline-github-lib plugin to load library from github
-@Library('github.com/lachie83/jenkins-pipeline@master')
-def pipeline = new io.estrado.Pipeline()
-
 pipeline {
     agent any
     stages {
