@@ -22,7 +22,7 @@ pipeline {
             parallel {
                 stage('API') {
                     steps {
-                        podTemplate(name: 'APItest', label: 'test1', runAsUser: 0, fsGroup: 0, cloud: 'kubernetes', containers: [
+                        podTemplate(name: 'APItest', label: 'test1', cloud: 'kubernetes', containers: [
                             containerTemplate(name: 'test1', image: 'webrtctest1.sh.intel.com/library/karma-mcu:base',  ttyEnabled: true, alwaysPullImage: true, privileged: true, network: 'host', command: 'cat'),
                             ]) {
                         
@@ -38,7 +38,7 @@ pipeline {
 
                 stage('Subscribe') {
                     steps {
-                        podTemplate(name:'Subtest', label: 'test2', runAsUser: 0, fsGroup: 0, cloud: 'kubernetes', containers: [
+                        podTemplate(name:'Subtest', label: 'test2', cloud: 'kubernetes', containers: [
                             containerTemplate(name: 'test2', image: 'webrtctest1.sh.intel.com/library/karma-mcu:base',  ttyEnabled: true, alwaysPullImage: true, privileged: true, network: 'host', command: 'cat'),
                             ]) {
                         
