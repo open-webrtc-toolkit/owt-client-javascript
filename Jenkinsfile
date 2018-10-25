@@ -13,6 +13,11 @@ pipeline {
                 }
             }
         }
+
+        environment {
+            GITHUB_COMMITID = $commitid
+        }
+
         stage('Build package') {
             steps {
                 podTemplate(name: 'pack', label: 'jenkins-pipeline', containers: [
@@ -20,7 +25,7 @@ pipeline {
                 ]){
                     node ('jenkins-pipeline') {
                       container ('build1') {
-                        echo $commitid
+                        echo ${env.GITHUB_COMMITID}
                         sh "ls "
                       }
                     }
