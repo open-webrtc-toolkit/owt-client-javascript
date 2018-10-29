@@ -17,7 +17,7 @@ pipeline {
         stage('Build package') {
             steps {
                 podTemplate(name: 'pack', label: 'jenkins-pipeline', containers: [
-                    containerTemplate(name: 'build1', image: $MCU_IMAGE,  ttyEnabled: true, alwaysPullImage: true, privileged: true, network: 'host', command: 'cat')
+                    containerTemplate(name: 'build1', image: $env.MCU_IMAGE,  ttyEnabled: true, alwaysPullImage: true, privileged: true, network: 'host', command: 'cat')
                 ]){
                     node ('jenkins-pipeline') {
                       container ('build1') {
