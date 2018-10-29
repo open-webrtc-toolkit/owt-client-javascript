@@ -19,8 +19,8 @@ pipeline {
                 ]){
                     node ('jenkins-pipeline') {
                       container ('build1') {
-                        sh "echo xxxxxxxxxxx ${env}"
-                        sh "ls "
+                        sh "/root/packSDKInDocker.sh software $env.GIT_COMMIT $env.CHANGE_BRANCH $env.GIT_BRANCH $env.CHANGE_ID"
+                        sh "ls /root/scripts/dist/webrtc_agent/node_modules"
                       }
                     }
                 }
@@ -37,7 +37,7 @@ pipeline {
                         
                             node('test1') {
                               container('test1') {
-                                   sh "/root/start.sh 10.244.0.121 10.244.0.122 ${GIT_COMMIT}1 ConferenceClient_api"
+                                   sh "/root/start.sh 10.244.0.121 10.244.0.122 ${env.GIT_COMMIT}1 ConferenceClient_api"
                                    sh 'ls -l /root/'
                               }
                             }
@@ -53,7 +53,7 @@ pipeline {
                         
                             node('test2') {
                               container('test2') {
-                                    sh "/root/start.sh 10.244.0.121 10.244.0.122 ${GIT_COMMIT}2 ConferenceClient_subscribe"
+                                    sh "/root/start.sh 10.244.0.121 10.244.0.122 ${env.GIT_COMMIT}2 ConferenceClient_subscribe"
                                     sh 'ls'
                               }
                             }
