@@ -10,7 +10,7 @@ pipeline {
                 script {
                     commitid = sh 'git rev-parse HEAD^'
                     sh 'printenv'
-                    echo $commitid
+                    echo 'xxxxxxxxxxx'$commitid
                 }
             }
         }
