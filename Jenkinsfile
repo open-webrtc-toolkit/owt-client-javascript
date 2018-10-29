@@ -1,8 +1,10 @@
-#!/usr/bin/groovy
 
 pipeline {
     agent any
-
+    environment {
+        MCU_IMAGE = 'webrtctest1.sh.intel.com/library/mcu-build-centos:update'
+        KARMA_IMAGE = 'webrtctest1.sh.intel.com/library/karma-mcu:base'
+    }
     stages {
         stage('Check') {
             steps {
@@ -15,7 +17,7 @@ pipeline {
         stage('Build package') {
             steps {
                 podTemplate(name: 'pack', label: 'jenkins-pipeline', containers: [
-                    containerTemplate(name: 'build1', image: 'webrtctest1.sh.intel.com/library/mcu-build-centos:7.4',  ttyEnabled: true, alwaysPullImage: true, privileged: true, network: 'host', command: 'cat')
+                    containerTemplate(name: 'build1', image: $MCU_IMAGE,  ttyEnabled: true, alwaysPullImage: true, privileged: true, network: 'host', command: 'cat')
                 ]){
                     node ('jenkins-pipeline') {
                       container ('build1') {
