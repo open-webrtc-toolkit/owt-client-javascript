@@ -15,9 +15,9 @@ pipeline {
             }
         }
 
-        environment {
+     //   environment {
             //GITHUB_COMMITID = $commitid
-        }
+      //  }
 
         stage('Build package') {
             steps {
