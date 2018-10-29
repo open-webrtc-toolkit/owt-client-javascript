@@ -10,7 +10,6 @@ pipeline {
                 script {
                     commitid = sh 'git rev-parse HEAD^'
                     sh 'printenv'
-                    echo 'xxxxxxxxxxx'$commitid
                 }
             }
         }
@@ -26,7 +25,7 @@ pipeline {
                 ]){
                     node ('jenkins-pipeline') {
                       container ('build1') {
-                        //echo ${env.GITHUB_COMMITID}
+                        echo 'xxxxxxxxxxx'env.GIT_COMMIT
                         sh "ls "
                       }
                     }
