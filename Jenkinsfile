@@ -19,7 +19,7 @@ pipeline {
                 ]){
                     node ('jenkins-pipeline') {
                       container ('build1') {
-                        sh "echo xxxxxxxxxxx ${env.GIT_COMMIT}"
+                        sh "echo xxxxxxxxxxx ${env}"
                         sh "ls "
                       }
                     }
