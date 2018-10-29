@@ -1,5 +1,4 @@
 #!/usr/bin/groovy
-def commitid='unknown'
 
 pipeline {
     agent any
@@ -8,15 +7,10 @@ pipeline {
         stage('Check') {
             steps {
                 script {
-                    commitid = sh 'git rev-parse HEAD^'
                     sh 'printenv'
                 }
             }
         }
-
-     //   environment {
-            //GITHUB_COMMITID = $commitid
-      //  }
 
         stage('Build package') {
             steps {
@@ -43,7 +37,7 @@ pipeline {
                         
                             node('test1') {
                               container('test1') {
-                                   //sh '/root/start.sh 10.244.0.121 10.244.0.122 $GIT_COMMIT"1" ConferenceClient_api'
+                                   sh "/root/start.sh 10.244.0.121 10.244.0.122 ${GIT_COMMIT}1 ConferenceClient_api"
                                    sh 'ls -l /root/'
                               }
                             }
@@ -59,7 +53,7 @@ pipeline {
                         
                             node('test2') {
                               container('test2') {
-                                    //sh '/root/start.sh 10.244.0.121 10.244.0.122 $GIT_COMMIT"2" ConferenceClient_subscribe'
+                                    sh "/root/start.sh 10.244.0.121 10.244.0.122 ${GIT_COMMIT}2 ConferenceClient_subscribe"
                                     sh 'ls'
                               }
                             }
