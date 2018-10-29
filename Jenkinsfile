@@ -3,6 +3,7 @@ def commitid='unknown'
 
 pipeline {
     agent any
+
     stages {
         stage('Check') {
             steps {
