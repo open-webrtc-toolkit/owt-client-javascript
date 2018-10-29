@@ -16,7 +16,7 @@ pipeline {
         }
 
         environment {
-            GITHUB_COMMITID = $commitid
+            //GITHUB_COMMITID = $commitid
         }
 
         stage('Build package') {
@@ -26,7 +26,7 @@ pipeline {
                 ]){
                     node ('jenkins-pipeline') {
                       container ('build1') {
-                        echo ${env.GITHUB_COMMITID}
+                        //echo ${env.GITHUB_COMMITID}
                         sh "ls "
                       }
                     }
