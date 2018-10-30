@@ -1,15 +1,15 @@
 /*global require, CryptoJS, XMLHttpRequest, Buffer*/
-var ICS_REST = ICS_REST || {};
+var OMS_REST = OMS_REST || {};
 
-/**@namespace ICS_REST
- * @classDesc Namespace for ICS(Intel Collaboration Suite) REST API definition.
+/**@namespace OMS_REST
+ * @classDesc Namespace for OMS(Intel Collaboration Suite) REST API definition.
  */
 /**
- * @class ICS_REST.API
- * @classDesc Server-side APIs should be called by RTC service integrators, as demostrated in sampleRTCService.js. Server-side APIs are RESTful, provided as a Node.js module. All APIs, except ICS_REST.API.init(), should not be called too frequently. These API calls carry local timestamps and are grouped by serviceID. Once the server is handling an API call from a certain serviceID, all other API calls from the same serviceID, whose timestamps are behind, would be expired or treated as invalid.<br>
+ * @class OMS_REST.API
+ * @classDesc Server-side APIs should be called by RTC service integrators, as demostrated in sampleRTCService.js. Server-side APIs are RESTful, provided as a Node.js module. All APIs, except OMS_REST.API.init(), should not be called too frequently. These API calls carry local timestamps and are grouped by serviceID. Once the server is handling an API call from a certain serviceID, all other API calls from the same serviceID, whose timestamps are behind, would be expired or treated as invalid.<br>
 We recommend that API calls against serviceID should have interval of at least 100ms. Also, it is better to retry the logic if it fails with an unexpected timestamp error.
  */
-ICS_REST.API = (function(ICS_REST) {
+OMS_REST.API = (function(OMS_REST) {
   'use strict';
   var version = 'v1';
   var params = {
@@ -23,14 +23,14 @@ ICS_REST.API = (function(ICS_REST) {
     var hash, hex, signed;
     hash = CryptoJS.HmacSHA256(toSign, key);
     hex = hash.toString(CryptoJS.enc.Hex);
-    signed = ICS_REST.Base64.encodeBase64(hex);
+    signed = OMS_REST.Base64.encodeBase64(hex);
     return signed;
   };
 
   function send(method, resource, body, onOK, onError) {
     if (!params.service) {
       if (typeof onError === 'function') {
-        onError(401, 'ICS REST API is not initialized!!');
+        onError(401, 'OMS REST API is not initialized!!');
       }
       return;
     }
@@ -94,14 +94,14 @@ ICS_REST.API = (function(ICS_REST) {
      * @function init
      * @desc This function completes the essential configuration.
   <br><b>Remarks:</b><br>
-  Make sure you use the correct ICS_REST server url, according to the ICS_REST ssl configuration.
-     * @memberOf ICS_REST.API
+  Make sure you use the correct OMS_REST server url, according to the OMS_REST ssl configuration.
+     * @memberOf OMS_REST.API
      * @param {string} service                       -The ID of your service.
      * @param {string} key                           -The key of your service.
-     * @param {string} url                           -The URL of ICS service.
+     * @param {string} url                           -The URL of OMS service.
      * @param {boolean} rejectUnauthorizedCert       -Flag to determine whether reject unauthorized certificates, with value being true or false, true by default.
      * @example
-  ICS_REST.API.init('5188b9af6e53c84ffd600413', '21989', 'http://61.129.90.140:3000/', true)
+  OMS_REST.API.init('5188b9af6e53c84ffd600413', '21989', 'http://61.129.90.140:3000/', true)
      */
   var init = function(service, key, url, rejectUnauthorizedCert) {
     if (typeof service !== 'string' || service === '') {
@@ -236,13 +236,13 @@ ICS_REST.API = (function(ICS_REST) {
       </tbody>
   </table>
   @endhtmlonly
-     * @memberOf ICS_REST.API
+     * @memberOf OMS_REST.API
      * @param {string} name                          -Room name.
      * @param {json} options                         -Room configuration.
      * @param {function} callback                    -Callback function on success.
      * @param {function} callbackError               -Callback function on error.
      * @example
-  ICS_REST.API.createRoom('myRoom', {
+  OMS_REST.API.createRoom('myRoom', {
     mode: 'hybrid',
     publishLimit: -1,
     userLimit: 30,
@@ -310,11 +310,11 @@ ICS_REST.API = (function(ICS_REST) {
   /**
      * @function getRooms
      * @desc This function lists the rooms in your service.
-     * @memberOf ICS_REST.API
+     * @memberOf OMS_REST.API
      * @param {function} callback                    -Callback function on success
      * @param {function} callbackError               -Callback function on error
      * @example
-  ICS_REST.API.getRooms(function(rooms) {
+  OMS_REST.API.getRooms(function(rooms) {
     for(var i in rooms) {
       console.log('Room', i, ':', rooms[i].name);
     }
@@ -337,13 +337,13 @@ ICS_REST.API = (function(ICS_REST) {
   /**
      * @function getRoom
      * @desc This function returns information on the specified room.
-     * @memberOf ICS_REST.API
+     * @memberOf OMS_REST.API
      * @param {string} room                          -Room ID
      * @param {function} callback                    -Callback function on success
      * @param {function} callbackError               -Callback function on error
      * @example
   var roomID = '51c10d86909ad1f939000001';
-  ICS_REST.API.getRoom(roomID, function(room) {
+  OMS_REST.API.getRoom(roomID, function(room) {
     console.log('Room name:', room.name);
   }, function(status, error) {
     // HTTP status and error
@@ -368,13 +368,13 @@ ICS_REST.API = (function(ICS_REST) {
   /**
      * @function deleteRoom
      * @desc This function deletes the specified room.
-     * @memberOf ICS_REST.API
+     * @memberOf OMS_REST.API
      * @param {string} room                          -Room ID to be deleted
      * @param {function} callback                    -Callback function on success
      * @param {function} callbackError               -Callback function on error
      * @example
   var room = '51c10d86909ad1f939000001';
-  ICS_REST.API.deleteRoom(room, function(result) {
+  OMS_REST.API.deleteRoom(room, function(result) {
     console.log ('Result:' result);
   }, function(status, error) {
     // HTTP status and error
@@ -390,13 +390,13 @@ ICS_REST.API = (function(ICS_REST) {
   /**
      * @function updateRoom
      * @desc This function updates a room's configuration entirely.
-     * @memberOf ICS_REST.API
+     * @memberOf OMS_REST.API
      * @param {string} room                          -Room ID.
-     * @param {json} options                         -Room configuration. See details about options in {@link ICS_REST.API#createRoom createRoom(name, options, callback, callbackError)}.
+     * @param {json} options                         -Room configuration. See details about options in {@link OMS_REST.API#createRoom createRoom(name, options, callback, callbackError)}.
      * @param {function} callback                    -Callback function on success
      * @param {function} callbackError               -Callback function on error
      * @example
-  ICS_REST.API.updateRoom(XXXXXXXXXX, {
+  OMS_REST.API.updateRoom(XXXXXXXXXX, {
     publishLimit: -1,
     userLimit: -1,
     enableMixing: 1,
@@ -457,13 +457,13 @@ ICS_REST.API = (function(ICS_REST) {
   /**
      * @function updateRoomPartially
      * @desc This function updates a room's configuration partially.
-     * @memberOf ICS_REST.API
+     * @memberOf OMS_REST.API
      * @param {string} room                          -Room ID.
      * @param {Array.<{op: string, path: string, value: json}>} items  -Configuration item list to be updated, with format following RFC6902(https://tools.ietf.org/html/rfc6902).
      * @param {function} callback                    -Callback function on success
      * @param {function} callbackError               -Callback function on error
      * @example
-  ICS_REST.API.updateRoomPartially(XXXXXXXXXX, [
+  OMS_REST.API.updateRoomPartially(XXXXXXXXXX, [
     {op: 'replace', path: '/enableMixing', value: 0},
     {op: 'replace', path: '/viewports/0/mediaMixing/video/avCoordinated', value: 1}
   ], function (res) {
@@ -487,13 +487,13 @@ ICS_REST.API = (function(ICS_REST) {
   /**
      * @function getParticipants
      * @desc This function lists participants currently in the specified room.
-     * @memberOf ICS_REST.API
+     * @memberOf OMS_REST.API
      * @param {string} room                          -Room ID
      * @param {onParticipantList} callback           -Callback function on success
      * @param {function} callbackError               -Callback function on error
      * @example
   var roomID = '51c10d86909ad1f939000001';
-  ICS_REST.API.getParticipants(roomID, function(participants) {
+  OMS_REST.API.getParticipants(roomID, function(participants) {
     var l = JSON.parse(participants);
     console.log ('This room has ', l.length, 'participants');
     for (var i in l) {
@@ -524,7 +524,7 @@ ICS_REST.API = (function(ICS_REST) {
   /**
      * @function getParticipant
      * @desc This function gets a participant's information from the specified room.
-     * @memberOf ICS_REST.API
+     * @memberOf OMS_REST.API
      * @param {string} room                          -Room ID
      * @param {string} participant                   -Participant ID
      * @param {onParticipantDetail} callback         -Callback function on success
@@ -532,7 +532,7 @@ ICS_REST.API = (function(ICS_REST) {
      * @example
   var roomID = '51c10d86909ad1f939000001';
   var participantID = 'JdlUI29yjfVY6O4yAAAB';
-  ICS_REST.API.getParticipant(roomID, participantID, function(participant) {
+  OMS_REST.API.getParticipant(roomID, participantID, function(participant) {
     console.log('Participant:', participant);
   }, function(status, error) {
     // HTTP status and error
@@ -556,7 +556,7 @@ ICS_REST.API = (function(ICS_REST) {
   /**
      * @function updateParticipant
      * @desc This function updates the permission of a participant in the specified room.
-     * @memberOf ICS_REST.API
+     * @memberOf OMS_REST.API
      * @param {string} room                          -Room ID
      * @param {string} participant                   -Participant ID
      * @param {Array.<{op: string, path: string, value: json}>} items   -Permission item list to be updated, with format following RFC6902(https://tools.ietf.org/html/rfc6902).
@@ -565,7 +565,7 @@ ICS_REST.API = (function(ICS_REST) {
      * @example
   var roomID = '51c10d86909ad1f939000001';
   var participantID = 'JdlUI29yjfVY6O4yAAAB';
-  ICS_REST.API.getParticipant(roomID, participantID, function(participant) {
+  OMS_REST.API.getParticipant(roomID, participantID, function(participant) {
     console.log('Participant:', participant);
   }, function(status, error) {
     // HTTP status and error
@@ -588,7 +588,7 @@ ICS_REST.API = (function(ICS_REST) {
   /**
      * @function dropParticipant
      * @desc This function drops a participant from a room.
-     * @memberOf ICS_REST.API
+     * @memberOf OMS_REST.API
      * @param {string} room                          -Room ID
      * @param {string} participant                   -Participant ID
      * @param {function} callback                    -Callback function on success
@@ -596,7 +596,7 @@ ICS_REST.API = (function(ICS_REST) {
      * @example
   var roomID = '51c10d86909ad1f939000001';
   var participantID = 'JdlUI29yjfVY6O4yAAAB';
-  ICS_REST.API.dropParticipant(roomID, participantID, function(res) {
+  OMS_REST.API.dropParticipant(roomID, participantID, function(res) {
     console.log('Participant', participantID, 'in room', roomID, 'deleted');
   }, function(status, error) {
     // HTTP status and error
@@ -620,13 +620,13 @@ ICS_REST.API = (function(ICS_REST) {
   /**
      * @function getStreams
      * @desc This function lists streams currently in the specified room.
-     * @memberOf ICS_REST.API
+     * @memberOf OMS_REST.API
      * @param {string} room                          -Room ID
      * @param {onStreamList} callback                -Callback function on success
      * @param {function} callbackError               -Callback function on error
      * @example
   var roomID = '51c10d86909ad1f939000001';
-  ICS_REST.API.getStreams(roomID, function(streams) {
+  OMS_REST.API.getStreams(roomID, function(streams) {
     var l = JSON.parse(streams);
     console.log ('This room has ', l.length, 'streams');
     for (var i in l) {
@@ -651,7 +651,7 @@ ICS_REST.API = (function(ICS_REST) {
   /**
      * @function getStream
      * @desc This function gets a stream's information from the specified room.
-     * @memberOf ICS_REST.API
+     * @memberOf OMS_REST.API
      * @param {string} room                          -Room ID
      * @param {string} stream                        -Stream ID
      * @param {onStreamInfo} callback                -Callback function on success
@@ -659,7 +659,7 @@ ICS_REST.API = (function(ICS_REST) {
      * @example
   var roomID = '51c10d86909ad1f939000001';
   var streamID = '878889273471677';
-  ICS_REST.API.getStream(roomID, streamID, function(stream) {
+  OMS_REST.API.getStream(roomID, streamID, function(stream) {
     console.log('Stream:', stream);
   }, function(status, error) {
     // HTTP status and error
@@ -683,7 +683,7 @@ ICS_REST.API = (function(ICS_REST) {
   /**
      * @function updateStream
      * @desc This function updates a stream's given attributes in the specified room.
-     * @memberOf ICS_REST.API
+     * @memberOf OMS_REST.API
      * @param {string} room                          -Room ID
      * @param {string} stream                        -Stream ID
      * @param {Array.<{op: string, path: string, value: json}>} items   -Attributes to be updated, with format following RFC6902(https://tools.ietf.org/html/rfc6902).
@@ -692,7 +692,7 @@ ICS_REST.API = (function(ICS_REST) {
      * @example
   var roomID = '51c10d86909ad1f939000001';
   var streamID = '878889273471677';
-  ICS_REST.API.updateStream(roomID, streamID, [{op: 'replace', path: '/media/audio/status', value: 'inactive'}], function(stream) {
+  OMS_REST.API.updateStream(roomID, streamID, [{op: 'replace', path: '/media/audio/status', value: 'inactive'}], function(stream) {
     console.log('Stream:', stream);
   }, function(status, error) {
     // HTTP status and error
@@ -715,7 +715,7 @@ ICS_REST.API = (function(ICS_REST) {
   /**
      * @function deleteStream
      * @desc This function deletes the specified stream from the specified room.
-     * @memberOf ICS_REST.API
+     * @memberOf OMS_REST.API
      * @param {string} room                          -Room ID
      * @param {string} stream                        -Stream ID
      * @param {function} callback                    -Callback function on success
@@ -723,7 +723,7 @@ ICS_REST.API = (function(ICS_REST) {
      * @example
   var roomID = '51c10d86909ad1f939000001';
   var streamID = '878889273471677';
-  ICS_REST.API.deleteStream(roomID, streamID, function(result) {
+  OMS_REST.API.deleteStream(roomID, streamID, function(result) {
     console.log('Stream:', streamID, 'in room:', roomID, 'deleted');
   }, function(status, error) {
     // HTTP status and error
@@ -747,7 +747,7 @@ ICS_REST.API = (function(ICS_REST) {
    ***
      * @function startStreamingIn
      * @desc This function adds an external RTSP/RTMP stream to the specified room.
-     * @memberOf ICS_REST.API
+     * @memberOf OMS_REST.API
      * @param {string} room                          -Room ID
      * @param {string} url                           -URL of the streaming source, e.g. the source URL of IPCamera.
      * @param {Object} transport                     -Transport parameters.
@@ -770,7 +770,7 @@ ICS_REST.API = (function(ICS_REST) {
     video: true
   };
 
-  ICS_REST.API.startStreamingIn(roomID, url, transport, media, function(stream) {
+  OMS_REST.API.startStreamingIn(roomID, url, transport, media, function(stream) {
     console.log('Streaming-In:', stream);
   }, function(status, error) {
     // HTTP status and error
@@ -795,7 +795,7 @@ ICS_REST.API = (function(ICS_REST) {
   /**
      * @function stopStreamingIn
      * @desc This function stops the specified external streaming-in in the specified room.
-     * @memberOf ICS_REST.API
+     * @memberOf OMS_REST.API
      * @param {string} room                          -Room ID
      * @param {string} stream                        -Stream ID
      * @param {function} callback                    -Callback function on success
@@ -803,7 +803,7 @@ ICS_REST.API = (function(ICS_REST) {
      * @example
   var roomID = '51c10d86909ad1f939000001';
   var streamID = '878889273471677';
-  ICS_REST.API.stopStreamingIn(roomID, streamID, function(result) {
+  OMS_REST.API.stopStreamingIn(roomID, streamID, function(result) {
     console.log('External streaming-in:', streamID, 'in room:', roomID, 'stopped');
   }, function(status, error) {
     // HTTP status and error
@@ -827,13 +827,13 @@ ICS_REST.API = (function(ICS_REST) {
   /**
      * @function getStreamingOuts
      * @desc This function gets all the ongoing streaming-outs in the specified room.
-     * @memberOf ICS_REST.API
+     * @memberOf OMS_REST.API
      * @param {string} room                          -Room ID.
      * @param {onStreamingOutList} callback          -Callback function on success
      * @param {function} callbackError               -Callback function on error
      * @example
   var roomID = '51c10d86909ad1f939000001';
-  ICS_REST.API.getStreamingOuts(roomID, function(streamingOuts) {
+  OMS_REST.API.getStreamingOuts(roomID, function(streamingOuts) {
     console.log('Streaming-outs:', streamingOuts);
   }, function(status, error) {
     // HTTP status and error
@@ -857,7 +857,7 @@ ICS_REST.API = (function(ICS_REST) {
   /**
      * @function startStreamingOut
      * @desc This function starts a streaming-out to the specified room.
-     * @memberOf ICS_REST.API
+     * @memberOf OMS_REST.API
      * @param {string} room                          -Room ID.
      * @param {string} url                           -The URL of the target streaming-out.
      * @param {Object} media                         -The media description of the streaming-out, which must follow the definition of object "MediaSubOptions" in section "3.3.11 Participant Starts a Subscription" in "Client-Portal Protocol.md" doc.
@@ -877,7 +877,7 @@ ICS_REST.API = (function(ICS_REST) {
       }
     }
   };
-  ICS_REST.API.startStreamingOut(roomID, url, media, function(streamingOut) {
+  OMS_REST.API.startStreamingOut(roomID, url, media, function(streamingOut) {
     console.log('Streaming-out:', streamingOut);
   }, function(status, error) {
     // HTTP status and error
@@ -903,7 +903,7 @@ ICS_REST.API = (function(ICS_REST) {
   /**
      * @function updateStreamingOut
      * @desc This function updates a streaming-out's given attributes in the specified room.
-     * @memberOf ICS_REST.API
+     * @memberOf OMS_REST.API
      * @param {string} room                          -Room ID
      * @param {string} id                            -Streaming-out ID
      * @param {Array.<{op: string, path: string, value: json}>} items -Attributes to be updated, with format following RFC6902(https://tools.ietf.org/html/rfc6902).
@@ -912,7 +912,7 @@ ICS_REST.API = (function(ICS_REST) {
      * @example
   var roomID = '51c10d86909ad1f939000001';
   var id = '878889273471677';
-  ICS_REST.API.updateStreamingOut(roomID, id, [{op: 'replace', path: '/media/audio/from', value: '9836636255531'}], function(subscription) {
+  OMS_REST.API.updateStreamingOut(roomID, id, [{op: 'replace', path: '/media/audio/from', value: '9836636255531'}], function(subscription) {
     console.log('Subscription:', subscription);
   }, function(status, error) {
     // HTTP status and error
@@ -935,7 +935,7 @@ ICS_REST.API = (function(ICS_REST) {
   /**
      * @function stopStreamingOut
      * @desc This function stops the specified streaming-out in the specified room.
-     * @memberOf ICS_REST.API
+     * @memberOf OMS_REST.API
      * @param {string} room                          -Room ID
      * @param {string} id                            -Streaming-out ID
      * @param {function} callback                    -Callback function on success
@@ -943,7 +943,7 @@ ICS_REST.API = (function(ICS_REST) {
      * @example
   var roomID = '51c10d86909ad1f939000001';
   var id = '878889273471677';
-  ICS_REST.API.stopStreamingOut(roomID, id, function(result) {
+  OMS_REST.API.stopStreamingOut(roomID, id, function(result) {
     console.log('Streaming-out:', id, 'in room:', roomID, 'stopped');
   }, function(status, error) {
     // HTTP status and error
@@ -970,13 +970,13 @@ ICS_REST.API = (function(ICS_REST) {
   /**
      * @function getRecordings
      * @desc This function gets the all the ongoing recordings in the specified room.
-     * @memberOf ICS_REST.API
+     * @memberOf OMS_REST.API
      * @param {string} room                          -Room ID.
      * @param {onStreamingOutList} callback          -Callback function on success
      * @param {function} callbackError               -Callback function on error
      * @example
   var roomID = '51c10d86909ad1f939000001';
-  ICS_REST.API.getRecordings(roomID, function(recordings) {
+  OMS_REST.API.getRecordings(roomID, function(recordings) {
     console.log('Recordings:', recordings);
   }, function(status, error) {
     // HTTP status and error
@@ -1002,7 +1002,7 @@ ICS_REST.API = (function(ICS_REST) {
   /**
      * @function startRecording
      * @desc This function starts a recording in the specified room.
-     * @memberOf ICS_REST.API
+     * @memberOf OMS_REST.API
      * @param {string} room                          -Room ID.
      * @param {string='mp4' | 'mkv' | 'auto'} container -The container type of the recording file, 'auto' by default.
      * @param {Object} media                         -The media description of the recording, which must follow the definition of object "MediaSubOptions" in section "3.3.11 Participant Starts a Subscription" in "Client-Portal Protocol.md" doc.
@@ -1022,7 +1022,7 @@ ICS_REST.API = (function(ICS_REST) {
       }
     }
   };
-  ICS_REST.API.startRecording(roomID, container, media, function(recording) {
+  OMS_REST.API.startRecording(roomID, container, media, function(recording) {
     console.log('recording:', recording);
   }, function(status, error) {
     // HTTP status and error
@@ -1048,7 +1048,7 @@ ICS_REST.API = (function(ICS_REST) {
   /**
      * @function updateRecording
      * @desc This function updates a recording's given attributes in the specified room.
-     * @memberOf ICS_REST.API
+     * @memberOf OMS_REST.API
      * @param {string} room                          -Room ID
      * @param {string} id                            -Recording ID
      * @param {Array.<{op: string, path: string, value: json}>} items -Attributes to be updated, with format following RFC6902(https://tools.ietf.org/html/rfc6902).
@@ -1057,7 +1057,7 @@ ICS_REST.API = (function(ICS_REST) {
      * @example
   var roomID = '51c10d86909ad1f939000001';
   var id = '878889273471677';
-  ICS_REST.API.updateRecording(roomID, id, [{op: 'replace', path: '/media/audio/from', value: '9836636255531'}], function(subscription) {
+  OMS_REST.API.updateRecording(roomID, id, [{op: 'replace', path: '/media/audio/from', value: '9836636255531'}], function(subscription) {
     console.log('Subscription:', subscription);
   }, function(status, error) {
     // HTTP status and error
@@ -1080,7 +1080,7 @@ ICS_REST.API = (function(ICS_REST) {
   /**
      * @function stopRecording
      * @desc This function stops the specified recording in the specified room.
-     * @memberOf ICS_REST.API
+     * @memberOf OMS_REST.API
      * @param {string} room                          -Room ID
      * @param {string} id                            -Recording ID
      * @param {function} callback                    -Callback function on success
@@ -1088,7 +1088,7 @@ ICS_REST.API = (function(ICS_REST) {
      * @example
   var roomID = '51c10d86909ad1f939000001';
   var id = '878889273471677';
-  ICS_REST.API.stopRecording(roomID, id, function(result) {
+  OMS_REST.API.stopRecording(roomID, id, function(result) {
     console.log('Recording:', id, 'in room:', roomID, 'stopped');
   }, function(status, error) {
     // HTTP status and error
@@ -1107,7 +1107,7 @@ ICS_REST.API = (function(ICS_REST) {
   /**
      * @function createToken
      * @desc This function creates a new token when a new participant to a room needs to be added.
-     * @memberOf ICS_REST.API
+     * @memberOf OMS_REST.API
      * @param {string} room                          -Room ID
      * @param {string} user                          -Participant's user ID
      * @param {string} role                          -Participant's role
@@ -1120,7 +1120,7 @@ ICS_REST.API = (function(ICS_REST) {
   var role = 'guest';
   // Only isp and region are supported in preference currently, please see server's document for details.
   var preference = {isp: 'isp', region: 'region'};
-  ICS_REST.API.createToken(roomID, user, role, preference, function(token) {
+  OMS_REST.API.createToken(roomID, user, role, preference, function(token) {
     console.log ('Token created:' token);
   }, function(status, error) {
     // HTTP status and error
@@ -1178,4 +1178,4 @@ ICS_REST.API = (function(ICS_REST) {
     //Tokens management.
     createToken: createToken
   };
-}(ICS_REST));
+}(OMS_REST));

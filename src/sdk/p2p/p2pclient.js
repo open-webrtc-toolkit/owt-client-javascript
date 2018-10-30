@@ -1,7 +1,7 @@
 // Copyright © 2017 Intel Corporation. All Rights Reserved.
 'use strict';
 import Logger from '../base/logger.js';
-import {EventDispatcher, IcsEvent} from '../base/event.js';
+import {EventDispatcher, OmsEvent} from '../base/event.js';
 import * as Utils from '../base/utils.js';
 import * as ErrorModule from './error.js';
 import P2PPeerConnectionChannel from './peerconnection-channel.js';
@@ -71,28 +71,28 @@ var stopChatLocally = function(peer, originatorId) {
 /**
  * @class P2PClientConfiguration
  * @classDesc Configuration for P2PClient.
- * @memberOf Ics.P2P
+ * @memberOf Oms.P2P
  * @hideconstructor
  */
 const P2PClientConfiguration = function() {
   /**
-   * @member {?Array<Ics.Base.AudioEncodingParameters>} audioEncoding
+   * @member {?Array<Oms.Base.AudioEncodingParameters>} audioEncoding
    * @instance
    * @desc Encoding parameters for publishing audio tracks.
-   * @memberof Ics.P2P.P2PClientConfiguration
+   * @memberof Oms.P2P.P2PClientConfiguration
    */
   this.audioEncoding = undefined;
   /**
-   * @member {?Array<Ics.Base.VideoEncodingParameters>} videoEncoding
+   * @member {?Array<Oms.Base.VideoEncodingParameters>} videoEncoding
    * @instance
    * @desc Encoding parameters for publishing video tracks.
-   * @memberof Ics.P2P.P2PClientConfiguration
+   * @memberof Oms.P2P.P2PClientConfiguration
    */
   this.videoEncoding = undefined;
   /**
    * @member {?RTCConfiguration} rtcConfiguration
    * @instance
-   * @memberof Ics.P2P.P2PClientConfiguration
+   * @memberof Oms.P2P.P2PClientConfiguration
    * @desc It will be used for creating PeerConnection.
    * @see {@link https://www.w3.org/TR/webrtc/#rtcconfiguration-dictionary|RTCConfiguration Dictionary of WebRTC 1.0}.
    * @example
@@ -122,12 +122,12 @@ const P2PClientConfiguration = function() {
  * | --------------------- | ---------------- | ---------------- |
  * | streamadded           | StreamEvent      | A new stream is sent from remote endpoint. |
  * | messagereceived       | MessageEvent     | A new message is received. |
- * | serverdisconnected    | IcsEvent         | Disconnected from signaling server. |
+ * | serverdisconnected    | OmsEvent         | Disconnected from signaling server. |
  *
- * @memberof Ics.P2P
- * @extends Ics.Base.EventDispatcher
+ * @memberof Oms.P2P
+ * @extends Oms.Base.EventDispatcher
  * @constructor
- * @param {?Ics.P2P.P2PClientConfiguration } config Configuration for P2PClient.
+ * @param {?Oms.P2P.P2PClientConfiguration } config Configuration for P2PClient.
  */
 const P2PClient = function(configuration, signalingChannel) {
   Object.setPrototypeOf(this, new EventDispatcher());
@@ -157,12 +157,12 @@ const P2PClient = function(configuration, signalingChannel) {
 
   signaling.onServerDisconnected = function() {
     state = ConnectionState.READY;
-    self.dispatchEvent(new IcsEvent('serverdisconnected'));
+    self.dispatchEvent(new OmsEvent('serverdisconnected'));
   };
 
   /**
    * @member {array} allowedRemoteIds
-   * @memberof Ics.P2P.P2PClient
+   * @memberof Oms.P2P.P2PClient
    * @instance
    * @desc Only allowed remote endpoint IDs are able to publish stream or send message to current endpoint. Removing an ID from allowedRemoteIds does stop existing connection with certain endpoint. Please call stop to stop the PeerConnection.
    */
@@ -172,7 +172,7 @@ const P2PClient = function(configuration, signalingChannel) {
    * @function connect
    * @instance
    * @desc Connect to signaling server. Since signaling can be customized, this method does not define how a token looks like. SDK passes token to signaling channel without changes.
-   * @memberof Ics.P2P.P2PClient
+   * @memberof Oms.P2P.P2PClient
    * @returns {Promise<object, Error>} It returns a promise resolved with an object returned by signaling channel once signaling channel reports connection has been established.
    */
   this.connect = function(token) {
@@ -198,7 +198,7 @@ const P2PClient = function(configuration, signalingChannel) {
    * @function disconnect
    * @instance
    * @desc Disconnect from the signaling channel. It stops all existing sessions with remote endpoints.
-   * @memberof Ics.P2P.P2PClient
+   * @memberof Oms.P2P.P2PClient
    * @returns {Promise<undefined, Error>}
    */
   this.disconnect = function() {
@@ -216,7 +216,7 @@ const P2PClient = function(configuration, signalingChannel) {
    * @function publish
    * @instance
    * @desc Publish a stream to a remote endpoint.
-   * @memberof Ics.P2P.P2PClient
+   * @memberof Oms.P2P.P2PClient
    * @param {string} remoteId Remote endpoint's ID.
    * @param {LocalStream} stream A LocalStream to be published.
    * @returns {Promise<Publication, Error>} A promised resolved when remote side received the certain stream. However, remote endpoint may not display this stream, or ignore it.
@@ -236,7 +236,7 @@ const P2PClient = function(configuration, signalingChannel) {
    * @function send
    * @instance
    * @desc Send a message to remote endpoint.
-   * @memberof Ics.P2P.P2PClient
+   * @memberof Oms.P2P.P2PClient
    * @param {string} remoteId Remote endpoint's ID.
    * @param {string} message Message to be sent. It should be a string.
    * @returns {Promise<undefined, Error>} It returns a promise resolved when remote endpoint received certain message.
@@ -256,7 +256,7 @@ const P2PClient = function(configuration, signalingChannel) {
    * @function stop
    * @instance
    * @desc Clean all resources associated with given remote endpoint. It may include RTCPeerConnection, RTCRtpTransceiver and RTCDataChannel. It still possible to publish a stream, or send a message to given remote endpoint after stop.
-   * @memberof Ics.P2P.P2PClient
+   * @memberof Oms.P2P.P2PClient
    * @param {string} remoteId Remote endpoint's ID.
    * @returns {undefined}
    */
@@ -275,7 +275,7 @@ const P2PClient = function(configuration, signalingChannel) {
    * @function getStats
    * @instance
    * @desc Get stats of underlying PeerConnection.
-   * @memberof Ics.P2P.P2PClient
+   * @memberof Oms.P2P.P2PClient
    * @param {string} remoteId Remote endpoint's ID.
    * @returns {Promise<RTCStatsReport, Error>} It returns a promise resolved with an RTCStatsReport or reject with an Error if there is no connection with specific user.
    */

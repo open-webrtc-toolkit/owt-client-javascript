@@ -3,7 +3,7 @@
 
 import * as StreamModule from '../base/stream.js'
 import * as StreamUtilsModule from './streamutils.js'
-import { IcsEvent } from '../base/event.js'
+import { OmsEvent } from '../base/event.js'
 
 /**
  * @class RemoteMixedStream
@@ -15,8 +15,8 @@ import { IcsEvent } from '../base/event.js'
  * | activeaudioinputchange | Event            | Audio activeness of input stream(of the mixed stream) is changed. |
  * | layoutchange           | Event            | Video's layout has been changed. It usually happens when a new video is mixed into the target mixed stream or an existing video has been removed from mixed stream. |
  *
- * @memberOf Ics.Conference
- * @extends Ics.Base.RemoteStream
+ * @memberOf Oms.Conference
+ * @extends Oms.Base.RemoteStream
  * @hideconstructor
  */
 export class RemoteMixedStream extends StreamModule.RemoteStream {
@@ -37,16 +37,16 @@ export class RemoteMixedStream extends StreamModule.RemoteStream {
 /**
  * @class ActiveAudioInputChangeEvent
  * @classDesc Class ActiveInputChangeEvent represents an active audio input change event.
- * @memberof Ics.Conference
+ * @memberof Oms.Conference
  * @hideconstructor
  */
-export class ActiveAudioInputChangeEvent extends IcsEvent {
+export class ActiveAudioInputChangeEvent extends OmsEvent {
   constructor(type, init) {
     super(type);
     /**
      * @member {string} activeAudioInputStreamId
      * @instance
-     * @memberof Ics.Conference.ActiveAudioInputChangeEvent
+     * @memberof Oms.Conference.ActiveAudioInputChangeEvent
      * @desc The ID of input stream(of the mixed stream) whose audio is active.
      */
     this.activeAudioInputStreamId = init.activeAudioInputStreamId;
@@ -56,16 +56,16 @@ export class ActiveAudioInputChangeEvent extends IcsEvent {
 /**
  * @class LayoutChangeEvent
  * @classDesc Class LayoutChangeEvent represents an video layout change event.
- * @memberof Ics.Conference
+ * @memberof Oms.Conference
  * @hideconstructor
  */
-export class LayoutChangeEvent extends IcsEvent{
+export class LayoutChangeEvent extends OmsEvent{
   constructor(type, init) {
     super(type);
     /**
      * @member {object} layout
      * @instance
-     * @memberof Ics.Conference.LayoutChangeEvent
+     * @memberof Oms.Conference.LayoutChangeEvent
      * @desc Current video's layout. It's an array of map which maps each stream to a region.
      */
     this.layout = init.layout;

@@ -2,7 +2,7 @@
 'use strict';
 
 import Logger from '../base/logger.js';
-import {EventDispatcher, MessageEvent, IcsEvent} from '../base/event.js';
+import {EventDispatcher, MessageEvent, OmsEvent} from '../base/event.js';
 import {Publication} from '../base/publication.js';
 import * as Utils from '../base/utils.js';
 import * as ErrorModule from './error.js';
@@ -259,7 +259,7 @@ class P2PPeerConnectionChannel extends EventDispatcher {
             const publication = new Publication(
               id, () => {
                 this._unpublish(targetStream).then(() => {
-                  publication.dispatchEvent(new IcsEvent('ended'));
+                  publication.dispatchEvent(new OmsEvent('ended'));
                 }, (err) => {
                   // Use debug mode because this error usually doesn't block stopping a publication.
                   Logger.debug(
@@ -465,7 +465,7 @@ class P2PPeerConnectionChannel extends EventDispatcher {
     });
     if (i !== -1) {
       const stream = this._remoteStreams[i];
-      const event = new IcsEvent('ended');
+      const event = new OmsEvent('ended');
       stream.dispatchEvent(event);
       this._remoteStreams.splice(i, 1);
     }
@@ -910,11 +910,11 @@ class P2PPeerConnectionChannel extends EventDispatcher {
     this._sendDataPromises.clear();
     // Fire ended event if publication or remote stream exists.
     this._publishedStreams.forEach(publication => {
-      publication.dispatchEvent(new IcsEvent('ended'));
+      publication.dispatchEvent(new OmsEvent('ended'));
     });
     this._publishedStreams.clear();
     this._remoteStreams.forEach(stream => {
-      stream.dispatchEvent(new IcsEvent('ended'));
+      stream.dispatchEvent(new OmsEvent('ended'));
     });
     this._remoteStreams = [];
     if(!this._disposed) {

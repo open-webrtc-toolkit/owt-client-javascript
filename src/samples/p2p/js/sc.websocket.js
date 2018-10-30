@@ -1,6 +1,6 @@
 /**
  * @class SignalingChannel
- * @classDesc Signaling module for Intel CS for WebRTC P2P chat
+ * @classDesc Signaling module for Open Media Streamer P2P chat
  */
 function SignalingChannel() {
 

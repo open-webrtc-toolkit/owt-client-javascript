@@ -8,9 +8,9 @@ import * as MediaFormatModule from './mediaformat.js'
 /**
  * @class AudioTrackConstraints
  * @classDesc Constraints for creating an audio MediaStreamTrack.
- * @memberof Ics.Base
+ * @memberof Oms.Base
  * @constructor
- * @param {Ics.Base.AudioSourceInfo} source Source info of this audio track.
+ * @param {Oms.Base.AudioSourceInfo} source Source info of this audio track.
  */
 export class AudioTrackConstraints {
   constructor(source) {
@@ -20,14 +20,14 @@ export class AudioTrackConstraints {
     }
     /**
      * @member {string} source
-     * @memberof Ics.Base.AudioTrackConstraints
+     * @memberof Oms.Base.AudioTrackConstraints
      * @desc Values could be "mic", "screen-cast", "file" or "mixed".
      * @instance
      */
     this.source = source;
     /**
      * @member {string} deviceId
-     * @memberof Ics.Base.AudioTrackConstraints
+     * @memberof Oms.Base.AudioTrackConstraints
      * @desc Do not provide deviceId if source is not "mic".
      * @instance
      * @see https://w3c.github.io/mediacapture-main/#def-constraint-deviceId
@@ -39,9 +39,9 @@ export class AudioTrackConstraints {
 /**
  * @class VideoTrackConstraints
  * @classDesc Constraints for creating a video MediaStreamTrack.
- * @memberof Ics.Base
+ * @memberof Oms.Base
  * @constructor
- * @param {Ics.Base.VideoSourceInfo} source Source info of this video track.
+ * @param {Oms.Base.VideoSourceInfo} source Source info of this video track.
  */
 export class VideoTrackConstraints {
   constructor(source) {
@@ -51,14 +51,14 @@ export class VideoTrackConstraints {
     }
     /**
      * @member {string} source
-     * @memberof Ics.Base.VideoTrackConstraints
+     * @memberof Oms.Base.VideoTrackConstraints
      * @desc Values could be "camera", "screen-cast", "file" or "mixed".
      * @instance
      */
     this.source = source;
     /**
      * @member {string} deviceId
-     * @memberof Ics.Base.VideoTrackConstraints
+     * @memberof Oms.Base.VideoTrackConstraints
      * @desc Do not provide deviceId if source is not "camera".
      * @instance
      * @see https://w3c.github.io/mediacapture-main/#def-constraint-deviceId
@@ -67,15 +67,15 @@ export class VideoTrackConstraints {
     this.deviceId = undefined;
 
     /**
-     * @member {Ics.Base.Resolution} resolution
-     * @memberof Ics.Base.VideoTrackConstraints
+     * @member {Oms.Base.Resolution} resolution
+     * @memberof Oms.Base.VideoTrackConstraints
      * @instance
      */
     this.resolution = undefined;
 
     /**
      * @member {number} frameRate
-     * @memberof Ics.Base.VideoTrackConstraints
+     * @memberof Oms.Base.VideoTrackConstraints
      * @instance
      */
     this.frameRate = undefined;
@@ -84,29 +84,29 @@ export class VideoTrackConstraints {
 /**
  * @class StreamConstraints
  * @classDesc Constraints for creating a MediaStream from screen mic and camera.
- * @memberof Ics.Base
+ * @memberof Oms.Base
  * @constructor
- * @param {?Ics.Base.AudioTrackConstraints} audioConstraints
- * @param {?Ics.Base.VideoTrackConstraints} videoConstraints
+ * @param {?Oms.Base.AudioTrackConstraints} audioConstraints
+ * @param {?Oms.Base.VideoTrackConstraints} videoConstraints
  * @param {?string} extensionId The ID of Chrome screen sharing extension.
  */
 export class StreamConstraints {
   constructor(audioConstraints = false, videoConstraints = false) {
     /**
-     * @member {Ics.Base.MediaStreamTrackDeviceConstraintsForAudio} audio
-     * @memberof Ics.Base.MediaStreamDeviceConstraints
+     * @member {Oms.Base.MediaStreamTrackDeviceConstraintsForAudio} audio
+     * @memberof Oms.Base.MediaStreamDeviceConstraints
      * @instance
      */
     this.audio = audioConstraints;
     /**
-     * @member {Ics.Base.MediaStreamTrackDeviceConstraintsForVideo} Video
-     * @memberof Ics.Base.MediaStreamDeviceConstraints
+     * @member {Oms.Base.MediaStreamTrackDeviceConstraintsForVideo} Video
+     * @memberof Oms.Base.MediaStreamDeviceConstraints
      * @instance
      */
     this.video = videoConstraints;
     /**
      * @member {string} extensionId
-     * @memberof Ics.Base.MediaStreamDeviceConstraints
+     * @memberof Oms.Base.MediaStreamDeviceConstraints
      * @desc The ID of Chrome Extension for screen sharing.
      * @instance
      */
@@ -121,21 +121,21 @@ function isVideoConstrainsForScreenCast(constraints) {
 /**
  * @class MediaStreamFactory
  * @classDesc A factory to create MediaStream. You can also create MediaStream by yourself.
- * @memberof Ics.Base
+ * @memberof Oms.Base
  */
 export class MediaStreamFactory {
   /**
    * @function createMediaStream
    * @static
    * @desc Create a MediaStream with given constraints. If you want to create a MediaStream for screen cast, please make sure both audio and video's source are "screen-cast".
-   * @memberof Ics.Base.MediaStreamFactory
+   * @memberof Oms.Base.MediaStreamFactory
    * @returns {Promise<MediaStream, Error>} Return a promise that is resolved when stream is successfully created, or rejected if one of the following error happened:
    * - One or more parameters cannot be satisfied.
    * - Specified device is busy.
    * - Cannot obtain necessary permission or operation is canceled by user.
    * - Video source is screen cast, while audio source is not.
    * - Audio source is screen cast, while video source is disabled.
-   * @param {Ics.Base.StreamConstraints} constraints
+   * @param {Oms.Base.StreamConstraints} constraints
    */
   static createMediaStream(constraints) {
     if (typeof constraints !== 'object' || (!constraints.audio && !

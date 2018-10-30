@@ -1,7 +1,7 @@
 'use strict';
 /**
  * Source info about an audio track. Values: 'mic', 'screen-cast', 'file', 'mixed'.
- * @memberOf Ics.Base
+ * @memberOf Oms.Base
  * @readonly
  * @enum {string}
  */
@@ -14,7 +14,7 @@ export const AudioSourceInfo = {
 
 /**
  * Source info about a video track. Values: 'camera', 'screen-cast', 'file', 'mixed'.
- * @memberOf Ics.Base
+ * @memberOf Oms.Base
  * @readonly
  * @enum {string}
  */
@@ -27,7 +27,7 @@ export const VideoSourceInfo = {
 
 /**
  * Kind of a track. Values: 'audio' for audio track, 'video' for video track, 'av' for both audio and video tracks.
- * @memberOf Ics.Base
+ * @memberOf Oms.Base
  * @readonly
  * @enum {string}
  */
@@ -50,7 +50,7 @@ export const TrackKind = {
 };
 /**
  * @class Resolution
- * @memberOf Ics.Base
+ * @memberOf Oms.Base
  * @classDesc The Resolution defines the size of a rectangle.
  * @constructor
  * @param {number} width
@@ -61,13 +61,13 @@ export class Resolution {
     /**
      * @member {number} width
      * @instance
-     * @memberof Ics.Base.Resolution
+     * @memberof Oms.Base.Resolution
      */
     this.width = width;
     /**
      * @member {number} height
      * @instance
-     * @memberof Ics.Base.Resolution
+     * @memberof Oms.Base.Resolution
      */
     this.height = height;
   }
