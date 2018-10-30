@@ -15,10 +15,9 @@ pipeline {
                 podTemplate(name: 'pack', label: 'jenkins-pipeline', containers: [
                     containerTemplate(name: 'CentOSPack', image: "$env.PACK_IMAGE",  ttyEnabled: true, alwaysPullImage: true, privileged: true, network: 'host', command: 'cat')
                 ]){
-                    node ('jenkins-pipeline') {
-                      container ('build1') {
+                    node ('CentOSPack') {
+                      container ('CentOSPack') {
                         sh "/root/packSDKInDocker.sh software $env.GIT_COMMIT $env.CHANGE_BRANCH $env.GIT_BRANCH $env.CHANGE_ID"
-                        sh "ls /root/scripts/dist/webrtc_agent/node_modules"
                       }
                     }
                 }
@@ -33,10 +32,9 @@ pipeline {
                             containerTemplate(name: 'APITest', image: "$env.TEST_IMAGE",  ttyEnabled: true, alwaysPullImage: true, privileged: true, network: 'host', command: 'cat'),
                             ]) {
                         
-                            node('test1') {
-                              container('test1') {
+                            node('APITest') {
+                              container('APITest') {
                                    sh "/root/start.sh $env.RABBITMQ $env.MONGODB ${env.GIT_COMMIT}1 ConferenceClient_api"
-                                   sh 'ls -l /root/'
                               }
                             }
                         }
@@ -49,10 +47,9 @@ pipeline {
                             containerTemplate(name: 'SubscribeTest', image: "$env.TEST_IMAGE",  ttyEnabled: true, alwaysPullImage: true, privileged: true, network: 'host', command: 'cat'),
                             ]) {
                         
-                            node('test2') {
-                              container('test2') {
+                            node('SubscribeTest') {
+                              container('SubscribeTest') {
                                     sh "/root/start.sh $RABBITMQ $env.MONGODB ${env.GIT_COMMIT}2 ConferenceClient_subscribe"
-                                    sh 'ls'
                               }
                             }
                         }
