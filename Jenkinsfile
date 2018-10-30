@@ -1,10 +1,6 @@
 
 pipeline {
     agent any
-    environment {
-        MCU_IMAGE = 'webrtctest1.sh.intel.com/library/mcu-build-centos:update'
-        KARMA_IMAGE = 'webrtctest1.sh.intel.com/library/karma-mcu:base'
-    }
     stages {
         stage('Check') {
             steps {
@@ -17,7 +13,7 @@ pipeline {
         stage('Build package') {
             steps {
                 podTemplate(name: 'pack', label: 'jenkins-pipeline', containers: [
-                    containerTemplate(name: 'build1', image: 'webrtctest1.sh.intel.com/library/mcu-build-centos:update',  ttyEnabled: true, alwaysPullImage: true, privileged: true, network: 'host', command: 'cat')
+                    containerTemplate(name: 'build1', image: "$env.PACK_IMAGE",  ttyEnabled: true, alwaysPullImage: true, privileged: true, network: 'host', command: 'cat')
                 ]){
                     node ('jenkins-pipeline') {
                       container ('build1') {
@@ -34,7 +30,7 @@ pipeline {
                 stage('API') {
                     steps {
                         podTemplate(name: 'APItest', label: 'test1', cloud: 'kubernetes', containers: [
-                            containerTemplate(name: 'test1', image: 'webrtctest1.sh.intel.com/library/karma-mcu:base',  ttyEnabled: true, alwaysPullImage: true, privileged: true, network: 'host', command: 'cat'),
+                            containerTemplate(name: 'test1', image: "$env.KARMA_IMAGE",  ttyEnabled: true, alwaysPullImage: true, privileged: true, network: 'host', command: 'cat'),
                             ]) {
                         
                             node('test1') {
@@ -50,7 +46,7 @@ pipeline {
                 stage('Subscribe') {
                     steps {
                         podTemplate(name:'Subtest', label: 'test2', cloud: 'kubernetes', containers: [
-                            containerTemplate(name: 'test2', image: 'webrtctest1.sh.intel.com/library/karma-mcu:base',  ttyEnabled: true, alwaysPullImage: true, privileged: true, network: 'host', command: 'cat'),
+                            containerTemplate(name: 'test2', image: "$env.KARMA_IMAGE",  ttyEnabled: true, alwaysPullImage: true, privileged: true, network: 'host', command: 'cat'),
                             ]) {
                         
                             node('test2') {
