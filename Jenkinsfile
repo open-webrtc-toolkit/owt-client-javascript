@@ -13,7 +13,7 @@ pipeline {
         stage('Build package') {
             steps {
                 podTemplate(name: 'pack', label: 'jenkins-pipeline', containers: [
-                    containerTemplate(name: 'build1', image: "$env.PACK_IMAGE",  ttyEnabled: true, alwaysPullImage: true, privileged: true, network: 'host', command: 'cat')
+                    containerTemplate(name: 'CentOSPack', image: "$env.PACK_IMAGE",  ttyEnabled: true, alwaysPullImage: true, privileged: true, network: 'host', command: 'cat')
                 ]){
                     node ('jenkins-pipeline') {
                       container ('build1') {
@@ -27,15 +27,15 @@ pipeline {
 
         stage('Start test') {
             parallel {
-                stage('API') {
+                stage('APITest') {
                     steps {
-                        podTemplate(name: 'APItest', label: 'test1', cloud: 'kubernetes', containers: [
-                            containerTemplate(name: 'test1', image: "$env.TEST_IMAGE",  ttyEnabled: true, alwaysPullImage: true, privileged: true, network: 'host', command: 'cat'),
+                        podTemplate(name: 'APITest', label: 'ConferenceTest', cloud: 'kubernetes', containers: [
+                            containerTemplate(name: 'APITest', image: "$env.TEST_IMAGE",  ttyEnabled: true, alwaysPullImage: true, privileged: true, network: 'host', command: 'cat'),
                             ]) {
                         
                             node('test1') {
                               container('test1') {
-                                   sh "/root/start.sh 10.244.0.121 10.244.0.122 ${env.GIT_COMMIT}1 ConferenceClient_api"
+                                   sh "/root/start.sh $env.RABBITMQ $env.MONGODB ${env.GIT_COMMIT}1 ConferenceClient_api"
                                    sh 'ls -l /root/'
                               }
                             }
@@ -43,15 +43,15 @@ pipeline {
                     }
                 }
 
-                stage('Subscribe') {
+                stage('SubscribeTest') {
                     steps {
-                        podTemplate(name:'Subtest', label: 'test2', cloud: 'kubernetes', containers: [
-                            containerTemplate(name: 'test2', image: "$env.TEST_IMAGE",  ttyEnabled: true, alwaysPullImage: true, privileged: true, network: 'host', command: 'cat'),
+                        podTemplate(name:'SubscribeTest', label: 'COnferenceTest', cloud: 'kubernetes', containers: [
+                            containerTemplate(name: 'SubscribeTest', image: "$env.TEST_IMAGE",  ttyEnabled: true, alwaysPullImage: true, privileged: true, network: 'host', command: 'cat'),
                             ]) {
                         
                             node('test2') {
                               container('test2') {
-                                    sh "/root/start.sh 10.244.0.121 10.244.0.122 ${env.GIT_COMMIT}2 ConferenceClient_subscribe"
+                                    sh "/root/start.sh $RABBITMQ $env.MONGODB ${env.GIT_COMMIT}2 ConferenceClient_subscribe"
                                     sh 'ls'
                               }
                             }
