@@ -44,7 +44,7 @@ pipeline {
                 stage('SubscribeTest') {
                     steps {
                         podTemplate(name:'subscribetest', label: 'subscribetest', cloud: 'kubernetes', containers: [
-                            containerTemplate(name: 'SubscribeTest', image: "$env.TEST_IMAGE",  ttyEnabled: true, alwaysPullImage: true, privileged: true, network: 'host', command: 'cat'),
+                            containerTemplate(name: 'subscribetest', image: "$env.TEST_IMAGE",  ttyEnabled: true, alwaysPullImage: true, privileged: true, network: 'host', command: 'cat'),
                             ]) {
                         
                             node('subscribetest') {
