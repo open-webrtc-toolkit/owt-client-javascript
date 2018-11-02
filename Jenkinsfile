@@ -30,11 +30,11 @@ pipeline {
                                       env.RABBITMQ = sh(
                                           script: "/root/getpodip.sh rabbit",
                                           returnStdout: true
-                                      )
+                                      ).trim()
                                       env.MONGODB = sh(
                                           script: "/root/getpodip.sh mongo",
                                           returnStdout: true
-                                      )
+                                      ).trim()
                                    }
                                    echo "rabbitmq ip is: $env.RABBITMQ , mongo is : $env.MONGODB"
                                    sh "/root/start.sh $env.RABBITMQ $env.MONGODB ${env.GIT_COMMIT}1 ConferenceClient_api"
@@ -56,11 +56,11 @@ pipeline {
                                       env.RABBITMQ = sh(
                                           script: "/root/getpodip.sh rabbit",
                                           returnStdout: true
-                                      )
+                                      ).trim()
                                       env.MONGODB = sh(
                                           script: "/root/getpodip.sh mongo",
                                           returnStdout: true
-                                      )
+                                      ).trim()
                                   }
                                   echo "rabbitmq ip is: $env.RABBITMQ , mongo is : $env.MONGODB"
                                   sh "/root/start.sh $RABBITMQ $env.MONGODB ${env.GIT_COMMIT}2 ConferenceClient_subscribe"
