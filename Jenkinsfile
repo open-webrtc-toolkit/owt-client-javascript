@@ -2,21 +2,13 @@
 pipeline {
     agent any
     stages {
-        stage('Check') {
-            steps {
-                script {
-                    sh 'printenv'
-                }
-            }
-        }
-
         stage('Build package') {
             steps {
-                podTemplate(name: 'pack', label: 'jenkins-pipeline', containers: [
-                    containerTemplate(name: 'centospack', image: "$env.PACK_IMAGE",  ttyEnabled: true, alwaysPullImage: true, privileged: true, network: 'host', command: 'cat')
+                podTemplate(name: 'pack', label: 'pack-mcu', containers: [
+                    containerTemplate(name: 'pack-on-centos', image: "$env.PACK_IMAGE",  ttyEnabled: true, alwaysPullImage: true, privileged: true, network: 'host', command: 'cat')
                 ]){
-                    node ('jenkins-pipeline') {
-                      container ('centospack') {
+                    node ('pack-mcu') {
+                      container ('pack-on-centos') {
                         sh "/root/packSDKInDocker.sh software $env.GIT_COMMIT $env.CHANGE_BRANCH $env.GIT_BRANCH $env.CHANGE_ID"
                       }
                     }
@@ -26,14 +18,25 @@ pipeline {
 
         stage('Start test') {
             parallel {
-                stage('APITest') {
+                stage('API test') {
                     steps {
-                        podTemplate(name: 'apitest', label: 'apitest', cloud: 'kubernetes', containers: [
-                            containerTemplate(name: 'apitest', image: "$env.TEST_IMAGE",  ttyEnabled: true, alwaysPullImage: true, privileged: true, network: 'host', command: 'cat'),
+                        podTemplate(name: 'api-test', label: 'api-test', cloud: 'kubernetes', containers: [
+                            containerTemplate(name: 'api-test', image: "$env.TEST_IMAGE",  ttyEnabled: true, alwaysPullImage: true, privileged: true, network: 'host', command: 'cat'),
                             ]) {
                         
-                            node('apitest') {
-                              container('apitest') {
+                            node('api-test') {
+                              container('api-test') {
+                                  script {
+                                      env.RABBITMQ = sh(
+                                          script: "/root/getpodip.sh rabbit",
+                                          returnStdout: true
+                                      )
+                                      env.MONGODB = sh(
+                                          script: "/root/getpodip.sh mongo",
+                                          returnStdout: true
+                                      )
+                                   }
+                                   echo "rabbitmq ip is: $env.RABBITMQ , mongo is : $env.MONGODB"
                                    sh "/root/start.sh $env.RABBITMQ $env.MONGODB ${env.GIT_COMMIT}1 ConferenceClient_api"
                               }
                             }
@@ -41,15 +44,26 @@ pipeline {
                     }
                 }
 
-                stage('SubscribeTest') {
+                stage('Subscribe test') {
                     steps {
-                        podTemplate(name:'subscribetest', label: 'subscribetest', cloud: 'kubernetes', containers: [
-                            containerTemplate(name: 'subscribetest', image: "$env.TEST_IMAGE",  ttyEnabled: true, alwaysPullImage: true, privileged: true, network: 'host', command: 'cat'),
+                        podTemplate(name:'subscribe-test', label: 'subscribe-test', cloud: 'kubernetes', containers: [
+                            containerTemplate(name: 'subscribe-test', image: "$env.TEST_IMAGE",  ttyEnabled: true, alwaysPullImage: true, privileged: true, network: 'host', command: 'cat'),
                             ]) {
                         
-                            node('subscribetest') {
-                              container('subscribetest') {
-                                    sh "/root/start.sh $RABBITMQ $env.MONGODB ${env.GIT_COMMIT}2 ConferenceClient_subscribe"
+                            node('subscribe-test') {
+                              container('subscribe-test') {
+                                  script {
+                                      env.RABBITMQ = sh(
+                                          script: "/root/getpodip.sh rabbit",
+                                          returnStdout: true
+                                      )
+                                      env.MONGODB = sh(
+                                          script: "/root/getpodip.sh mongo",
+                                          returnStdout: true
+                                      )
+                                  }
+                                  echo "rabbitmq ip is: $env.RABBITMQ , mongo is : $env.MONGODB"
+                                  sh "/root/start.sh $RABBITMQ $env.MONGODB ${env.GIT_COMMIT}2 ConferenceClient_subscribe"
                               }
                             }
                         }
