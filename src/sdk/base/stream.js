@@ -2,7 +2,7 @@
 
 'use strict';
 import Logger from './logger.js'
-import {IcsEvent} from './event.js'
+import {OmsEvent} from './event.js'
 import * as Utils from './utils.js'
 import { EventDispatcher} from './event.js';
 
@@ -13,7 +13,7 @@ function isAllowedValue(obj, allowedValues) {
 }
 /**
  * @class StreamSourceInfo
- * @memberOf Ics.Base
+ * @memberOf Oms.Base
  * @classDesc Information of a stream's source.
  * @constructor
  * @description Audio source info or video source info could be undefined if a stream does not have audio/video track.
@@ -38,9 +38,9 @@ export class StreamSourceInfo {
 }
 /**
  * @class Stream
- * @memberOf Ics.Base
+ * @memberOf Oms.Base
  * @classDesc Base class of streams.
- * @extends Ics.Base.EventDispatcher
+ * @extends Oms.Base.EventDispatcher
  * @hideconstructor
  */
 export class Stream extends EventDispatcher {
@@ -56,7 +56,7 @@ export class Stream extends EventDispatcher {
     /**
      * @member {?MediaStream} mediaStream
      * @instance
-     * @memberof Ics.Base.Stream
+     * @memberof Oms.Base.Stream
      * @see {@link https://www.w3.org/TR/mediacapture-streams/#mediastream|MediaStream API of Media Capture and Streams}.
      */
     Object.defineProperty(this, 'mediaStream', {
@@ -65,9 +65,9 @@ export class Stream extends EventDispatcher {
       value: stream
     });
     /**
-     * @member {Ics.Base.StreamSourceInfo} source
+     * @member {Oms.Base.StreamSourceInfo} source
      * @instance
-     * @memberof Ics.Base.Stream
+     * @memberof Oms.Base.Stream
      * @desc Source info of a stream.
      */
     Object.defineProperty(this, 'source', {
@@ -78,7 +78,7 @@ export class Stream extends EventDispatcher {
     /**
      * @member {object} attributes
      * @instance
-     * @memberof Ics.Base.Stream
+     * @memberof Oms.Base.Stream
      * @desc Custom attributes of a stream.
      */
     Object.defineProperty(this, 'attributes', {
@@ -91,11 +91,11 @@ export class Stream extends EventDispatcher {
 /**
  * @class LocalStream
  * @classDesc Stream captured from current endpoint.
- * @memberOf Ics.Base
- * @extends Ics.Base.Stream
+ * @memberOf Oms.Base
+ * @extends Oms.Base.Stream
  * @constructor
  * @param {MediaStream} stream Underlying MediaStream.
- * @param {Ics.Base.StreamSourceInfo} sourceInfo Information about stream's source.
+ * @param {Oms.Base.StreamSourceInfo} sourceInfo Information about stream's source.
  * @param {object} attributes Custom attributes of the stream.
  */
 export class LocalStream extends Stream {
@@ -107,7 +107,7 @@ export class LocalStream extends Stream {
     /**
      * @member {string} id
      * @instance
-     * @memberof Ics.Base.LocalStream
+     * @memberof Oms.Base.LocalStream
      */
     Object.defineProperty(this, 'id', {
       configurable: false,
@@ -126,8 +126,8 @@ export class LocalStream extends Stream {
  * | ended           | Event            | Stream is ended.   |
  * | updated         | Event            | Stream is updated. |
  *
- * @memberOf Ics.Base
- * @extends Ics.Base.Stream
+ * @memberOf Oms.Base
+ * @extends Oms.Base.Stream
  * @hideconstructor
  */
 export class RemoteStream extends Stream {
@@ -136,7 +136,7 @@ export class RemoteStream extends Stream {
     /**
      * @member {string} id
      * @instance
-     * @memberof Ics.Base.RemoteStream
+     * @memberof Oms.Base.RemoteStream
      */
     Object.defineProperty(this, 'id', {
       configurable: false,
@@ -146,7 +146,7 @@ export class RemoteStream extends Stream {
     /**
      * @member {string} origin
      * @instance
-     * @memberof Ics.Base.RemoteStream
+     * @memberof Oms.Base.RemoteStream
      * @desc ID of the remote endpoint who published this stream.
      */
     Object.defineProperty(this, 'origin', {
@@ -155,16 +155,16 @@ export class RemoteStream extends Stream {
       value: origin
     });
     /**
-     * @member {Ics.Base.PublicationSettings} settings
+     * @member {Oms.Base.PublicationSettings} settings
      * @instance
-     * @memberof Ics.Base.RemoteStream
+     * @memberof Oms.Base.RemoteStream
      * @desc Original settings for publishing this stream. This property is only valid in conference mode.
      */
     this.settings = undefined;
     /**
-     * @member {Ics.Conference.SubscriptionCapabilities} capabilities
+     * @member {Oms.Conference.SubscriptionCapabilities} capabilities
      * @instance
-     * @memberof Ics.Base.RemoteStream
+     * @memberof Oms.Base.RemoteStream
      * @desc Capabilities remote endpoint provides for subscription. This property is only valid in conference mode.
      */
     this.capabilities = undefined;
@@ -174,17 +174,17 @@ export class RemoteStream extends Stream {
 /**
  * @class StreamEvent
  * @classDesc Event for Stream.
- * @extends Ics.Base.IcsEvent
- * @memberof Ics.Base
+ * @extends Oms.Base.OmsEvent
+ * @memberof Oms.Base
  * @hideconstructor
  */
-export class StreamEvent extends IcsEvent {
+export class StreamEvent extends OmsEvent {
   constructor(type, init) {
     super(type);
     /**
-     * @member {Ics.Base.Stream} stream
+     * @member {Oms.Base.Stream} stream
      * @instance
-     * @memberof Ics.Base.StreamEvent
+     * @memberof Oms.Base.StreamEvent
      */
     this.stream = init.stream;
   }

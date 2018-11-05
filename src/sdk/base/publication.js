@@ -8,16 +8,16 @@ import { EventDispatcher} from '../base/event.js'
 
 /**
  * @class AudioPublicationSettings
- * @memberOf Ics.Base
+ * @memberOf Oms.Base
  * @classDesc The audio settings of a publication.
  * @hideconstructor
  */
 export class AudioPublicationSettings {
   constructor(codec) {
     /**
-     * @member {?Ics.Base.AudioCodecParameters} codec
+     * @member {?Oms.Base.AudioCodecParameters} codec
      * @instance
-     * @memberof Ics.Base.AudioPublicationSettings
+     * @memberof Oms.Base.AudioPublicationSettings
      */
     this.codec = codec;
   }
@@ -25,40 +25,40 @@ export class AudioPublicationSettings {
 
 /**
  * @class VideoPublicationSettings
- * @memberOf Ics.Base
+ * @memberOf Oms.Base
  * @classDesc The video settings of a publication.
  * @hideconstructor
  */
 export class VideoPublicationSettings {
   constructor(codec, resolution, frameRate, bitrate, keyFrameInterval){
     /**
-     * @member {?Ics.Base.VideoCodecParameters} codec
+     * @member {?Oms.Base.VideoCodecParameters} codec
      * @instance
-     * @memberof Ics.Base.VideoPublicationSettings
+     * @memberof Oms.Base.VideoPublicationSettings
      */
     this.codec=codec,
     /**
-     * @member {?Ics.Base.Resolution} resolution
+     * @member {?Oms.Base.Resolution} resolution
      * @instance
-     * @memberof Ics.Base.VideoPublicationSettings
+     * @memberof Oms.Base.VideoPublicationSettings
      */
     this.resolution=resolution;
     /**
      * @member {?number} frameRates
      * @instance
-     * @memberof Ics.Base.VideoPublicationSettings
+     * @memberof Oms.Base.VideoPublicationSettings
      */
     this.frameRate=frameRate;
     /**
      * @member {?number} bitrate
      * @instance
-     * @memberof Ics.Base.VideoPublicationSettings
+     * @memberof Oms.Base.VideoPublicationSettings
      */
     this.bitrate=bitrate;
     /**
      * @member {?number} keyFrameIntervals
      * @instance
-     * @memberof Ics.Base.VideoPublicationSettings
+     * @memberof Oms.Base.VideoPublicationSettings
      */
     this.keyFrameInterval=keyFrameInterval;
   }
@@ -66,22 +66,22 @@ export class VideoPublicationSettings {
 
 /**
  * @class PublicationSettings
- * @memberOf Ics.Base
+ * @memberOf Oms.Base
  * @classDesc The settings of a publication.
  * @hideconstructor
  */
 export class PublicationSettings {
   constructor(audio, video){
     /**
-     * @member {Ics.Base.AudioPublicationSettings} audio
+     * @member {Oms.Base.AudioPublicationSettings} audio
      * @instance
-     * @memberof Ics.Base.PublicationSettings
+     * @memberof Oms.Base.PublicationSettings
      */
     this.audio=audio;
     /**
-     * @member {Ics.Base.VideoPublicationSettings} video
+     * @member {Oms.Base.VideoPublicationSettings} video
      * @instance
-     * @memberof Ics.Base.PublicationSettings
+     * @memberof Oms.Base.PublicationSettings
      */
     this.video=video;
   }
@@ -89,7 +89,7 @@ export class PublicationSettings {
 
 /**
  * @class Publication
- * @memberOf Ics.Base
+ * @memberOf Oms.Base
  * @classDesc Publication represents a sender for publishing a stream. It handles the actions on a LocalStream published to a conference.
  * Events:
  *
@@ -107,7 +107,7 @@ export class Publication extends EventDispatcher {
     /**
      * @member {string} id
      * @instance
-     * @memberof Ics.Base.Publication
+     * @memberof Oms.Base.Publication
      */
     Object.defineProperty(this, 'id', {
       configurable: false,
@@ -118,7 +118,7 @@ export class Publication extends EventDispatcher {
      * @function stop
      * @instance
      * @desc Stop certain publication. Once a subscription is stopped, it cannot be recovered.
-     * @memberof Ics.Base.Publication
+     * @memberof Oms.Base.Publication
      * @returns {undefined}
      */
     this.stop = stop;
@@ -126,7 +126,7 @@ export class Publication extends EventDispatcher {
      * @function getStats
      * @instance
      * @desc Get stats of underlying PeerConnection.
-     * @memberof Ics.Base.Publication
+     * @memberof Oms.Base.Publication
      * @returns {Promise<RTCStatsReport, Error>}
      */
     this.getStats = getStats;
@@ -134,8 +134,8 @@ export class Publication extends EventDispatcher {
      * @function mute
      * @instance
      * @desc Stop sending data to remote endpoint.
-     * @memberof Ics.Base.Publication
-     * @param {Ics.Base.TrackKind } kind Kind of tracks to be muted.
+     * @memberof Oms.Base.Publication
+     * @param {Oms.Base.TrackKind } kind Kind of tracks to be muted.
      * @returns {Promise<undefined, Error>}
      */
     this.mute = mute;
@@ -143,8 +143,8 @@ export class Publication extends EventDispatcher {
      * @function unmute
      * @instance
      * @desc Continue sending data to remote endpoint.
-     * @memberof Ics.Base.Publication
-     * @param {Ics.Base.TrackKind } kind Kind of tracks to be unmuted.
+     * @memberof Oms.Base.Publication
+     * @param {Oms.Base.TrackKind } kind Kind of tracks to be unmuted.
      * @returns {Promise<undefined, Error>}
      */
     this.unmute = unmute;
@@ -153,21 +153,21 @@ export class Publication extends EventDispatcher {
 
 /**
  * @class PublishOptions
- * @memberOf Ics.Base
- * @classDesc PublishOptions defines options for publishing a Ics.Base.LocalStream.
+ * @memberOf Oms.Base
+ * @classDesc PublishOptions defines options for publishing a Oms.Base.LocalStream.
  */
 export class PublishOptions {
   constructor(audio, video) {
     /**
-     * @member {?Array<Ics.Base.AudioEncodingParameters>} audio
+     * @member {?Array<Oms.Base.AudioEncodingParameters>} audio
      * @instance
-     * @memberof Ics.Base.PublishOptions
+     * @memberof Oms.Base.PublishOptions
      */
     this.audio = audio;
     /**
-     * @member {?Array<Ics.Base.VideoEncodingParameters>} video
+     * @member {?Array<Oms.Base.VideoEncodingParameters>} video
      * @instance
-     * @memberof Ics.Base.PublishOptions
+     * @memberof Oms.Base.PublishOptions
      */
     this.video = video;
   }

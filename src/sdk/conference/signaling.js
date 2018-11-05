@@ -19,8 +19,8 @@ const MAX_TRIALS = 5;
 /**
  * @class SioSignaling
  * @classdesc Socket.IO signaling channel for ConferenceClient. It is not recommended to directly access this class.
- * @memberof Ics.Conference
- * @extends Ics.Base.EventDispatcher
+ * @memberof Oms.Conference
+ * @extends Oms.Base.EventDispatcher
  * @constructor
  * @param {?Object } sioConfig Configuration for Socket.IO options.
  * @see https://socket.io/docs/client-api/#io-url-options
@@ -58,7 +58,7 @@ export class SioSignaling extends EventModule.EventDispatcher {
       });
       this._socket.on('reconnect_failed', () => {
         if (this._reconnectTimes >= MAX_TRIALS) {
-          this.dispatchEvent(new EventModule.IcsEvent('disconnect'));
+          this.dispatchEvent(new EventModule.OmsEvent('disconnect'));
         }
       })
       this._socket.on('drop', () => {
@@ -67,7 +67,7 @@ export class SioSignaling extends EventModule.EventDispatcher {
       this._socket.on('disconnect', () => {
         if (this._reconnectTimes >= MAX_TRIALS) {
           this._loggedIn = false;
-          this.dispatchEvent(new EventModule.IcsEvent('disconnect'));
+          this.dispatchEvent(new EventModule.OmsEvent('disconnect'));
         }
       });
       this._socket.emit('login', loginInfo, (status, data) => {
@@ -81,7 +81,7 @@ export class SioSignaling extends EventModule.EventDispatcher {
                 this._reconnectTimes = 0;
                 this._reconnectionTicket = data;
               } else {
-                this.dispatchEvent(new EventModule.IcsEvent('disconnect'));
+                this.dispatchEvent(new EventModule.OmsEvent('disconnect'));
               }
             })
           });

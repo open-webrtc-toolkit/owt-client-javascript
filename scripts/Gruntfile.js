@@ -2,7 +2,7 @@
 module.exports = function(grunt) {
 
   const sdkEntry = 'src/sdk/export.js';
-  const sdkOutput = 'dist/sdk/ics.js';
+  const sdkOutput = 'dist/sdk/oms.js';
 
   var srcFiles = [
     'src/sdk/base/**',
@@ -58,7 +58,7 @@ window.L = L;\n\
       },
       dev: {
         src: [sdkEntry],
-        dest: 'dist/sdk-debug/ics.js',
+        dest: 'dist/sdk-debug/oms.js',
         options: {
           browserifyOptions: {
             standalone: 'Ics',
@@ -144,7 +144,7 @@ window.L = L;\n\
     uglify: {
       dist: {
         files: {
-          'dist/sdk/ics.js': ['dist/sdk/ics.js']
+          'dist/sdk/oms.js': ['dist/sdk/oms.js']
         },
         options: {
           banner: '<%= meta.banner %>',
@@ -161,9 +161,9 @@ window.L = L;\n\
           {expand: true,cwd:'src/samples/conference/',src:['initcert.js'],dest:'dist/samples/conference/',flatten:false,mode:true},
           {expand: true,cwd:'src/samples/conference/cert/',src:['.woogeen.keystore'],dest:'dist/samples/conference/cert/',flatten:false,mode:true},
           {expand: true,cwd:'src/extension/',src:['**'],dest:'dist/',flatten:false},
-          {expand: true,cwd:'dist/sdk/',src:['ics.js'],dest:'dist/samples/conference/public/scripts/',flatten:false},
+          {expand: true,cwd:'dist/sdk/',src:['oms.js'],dest:'dist/samples/conference/public/scripts/',flatten:false},
           {expand: true,cwd:'dist/samples/conference/public/scripts',src:['rest.js'],dest:'dist/samples/conference/',flatten:false},
-          {expand: true,cwd:'dist/sdk/',src:['ics.js'],dest:'dist/samples/p2p/js/',flatten:false},
+          {expand: true,cwd:'dist/sdk/',src:['oms.js'],dest:'dist/samples/p2p/js/',flatten:false},
           {expand: true,cwd:'src/dependencies',src:['adapter.js','socket.io.js'],dest:'dist/samples/p2p/js/',flatten:false},
           {expand: true,cwd:'src/dependencies',src:['adapter.js','socket.io.js'],dest:'dist/samples/conference/public/scripts/',flatten:false}
         ]
@@ -186,7 +186,7 @@ window.L = L;\n\
           },
           {
             pattern: /<!-- SDK Starts -->[\w\W]+<!-- SDK Stops -->/gm,
-            replacement: '<script src="js/ics.js" type="text/javascript"></script>'
+            replacement: '<script src="js/oms.js" type="text/javascript"></script>'
           },
           {
             pattern: /var serverAddress.*/g,
@@ -210,8 +210,8 @@ window.L = L;\n\
             replacement: '<script src="scripts/adapter.js" type="text/javascript"></script>'
           },
           {
-            pattern: '<script src="../../../../dist/sdk-debug/ics.js" type="text/javascript"></script>',
-            replacement: '<script src="scripts/ics.js" type="text/javascript"></script>'
+            pattern: '<script src="../../../../dist/sdk-debug/oms.js" type="text/javascript"></script>',
+            replacement: '<script src="scripts/oms.js" type="text/javascript"></script>'
           },
           {
             pattern: '<script src="sdk/base/adapter.js" type="text/javascript"></script>\n    <script src="sdk/conference/property.js" type="text/javascript"></script>\n    <script src="sdk/base/events.js" type="text/javascript"></script>\n    <script src="sdk/base/L.Base64.js" type="text/javascript"></script>\n    <script src="sdk/base/L.Logger.js" type="text/javascript"></script>\n    <script src="sdk/base/stream.js" type="text/javascript"></script>\n    <script src="sdk/conference/conference.js" type="text/javascript"></script>\n    <script src="sdk/conference/webrtc-stacks/ChromeStableStack.js" type="text/javascript"></script>\n    <script src="sdk/conference/webrtc-stacks/FirefoxStack.js" type="text/javascript"></script>\n    <script src="sdk/conference/webrtc-stacks/IEStableStack.js" type="text/javascript"></script>\n    <script src="sdk/conference/webrtc-stacks/EdgeORTCStack.js" type="text/javascript"></script>',

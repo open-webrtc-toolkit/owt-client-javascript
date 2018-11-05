@@ -4,7 +4,7 @@
 /**
  * @class ConferenceInfo
  * @classDesc Information for a conference.
- * @memberOf Ics.Conference
+ * @memberOf Oms.Conference
  * @hideconstructor
  */
 export class ConferenceInfo {
@@ -12,28 +12,28 @@ export class ConferenceInfo {
     /**
      * @member {string} id
      * @instance
-     * @memberof Ics.Conference.ConferenceInfo
+     * @memberof Oms.Conference.ConferenceInfo
      * @desc Conference ID.
      */
     this.id = id;
     /**
-     * @member {Array<Ics.Conference.Participant>} participants
+     * @member {Array<Oms.Conference.Participant>} participants
      * @instance
-     * @memberof Ics.Conference.ConferenceInfo
+     * @memberof Oms.Conference.ConferenceInfo
      * @desc Participants in the conference.
      */
     this.participants = participants;
     /**
-     * @member {Array<Ics.Base.RemoteStream>} remoteStreams
+     * @member {Array<Oms.Base.RemoteStream>} remoteStreams
      * @instance
-     * @memberof Ics.Conference.ConferenceInfo
+     * @memberof Oms.Conference.ConferenceInfo
      * @desc Streams published by participants. It also includes streams published by current user.
      */
     this.remoteStreams = remoteStreams;
     /**
-     * @member {Ics.Base.Participant} self
+     * @member {Oms.Base.Participant} self
      * @instance
-     * @memberof Ics.Conference.ConferenceInfo
+     * @memberof Oms.Conference.ConferenceInfo
      */
     this.self = myInfo;
   }

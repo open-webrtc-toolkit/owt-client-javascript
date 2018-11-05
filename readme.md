@@ -1,4 +1,4 @@
-# Intel® Collaboration Suite for WebRTC JavaScript SDK
+# Open Media Streamer JavaScript SDK
 
 ## How to build release package
 1. run `npm install -g grunt-cli` to install grunt.
