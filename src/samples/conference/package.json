@@ -11,17 +11,14 @@
     "sdk",
     "gateway",
     "mcu"
-   ],
-  "scripts": {
-    "postinstall": "node ./quickfix2spdybug47.js"
-   },
+  ],
   "dependencies": {
     "body-parser": "~1.14.1",
     "express": "",
     "errorhandler": "",
     "morgan": "",
     "socket.io": "",
-    "spdy":"^3.4.7"
+    "spdy":""
   },
   "engines": {
     "node": ">=0.10"
