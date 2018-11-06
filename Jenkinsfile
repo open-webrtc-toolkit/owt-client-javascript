@@ -36,7 +36,7 @@ pipeline {
                                           returnStdout: true
                                       ).trim()
                                    }
-                                   echo "rabbitmq ip is: $env.RABBITMQ , mongo is : $env.MONGODB"
+                                   echo "rabbitmq ip is: $env.RABBITMQ , mongo ip is : $env.MONGODB"
                                    sh "/root/start.sh $env.RABBITMQ $env.MONGODB ${env.GIT_COMMIT}1 ConferenceClient_api"
                               }
                             }
@@ -62,7 +62,7 @@ pipeline {
                                           returnStdout: true
                                       ).trim()
                                   }
-                                  echo "rabbitmq ip is: $env.RABBITMQ , mongo is : $env.MONGODB"
+                                  echo "rabbitmq ip is: $env.RABBITMQ , mongo ip is : $env.MONGODB"
                                   sh "/root/start.sh $RABBITMQ $env.MONGODB ${env.GIT_COMMIT}2 ConferenceClient_subscribe"
                               }
                             }
