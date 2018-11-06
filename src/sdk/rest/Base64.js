@@ -1,6 +1,6 @@
 /*global unescape*/
-var ICS_REST = ICS_REST || {};
-ICS_REST.Base64 = (function(ICS_REST) {
+var OMS_REST = OMS_REST || {};
+OMS_REST.Base64 = (function(OMS_REST) {
   "use strict";
   var END_OF_INPUT, base64Chars, reverseBase64Chars, base64Str, base64Count,
     i, setBase64Str, readBase64, encodeBase64, readReverseBase64, ntos,
@@ -134,4 +134,4 @@ ICS_REST.Base64 = (function(ICS_REST) {
     encodeBase64: encodeBase64,
     decodeBase64: decodeBase64
   };
-}(ICS_REST));
+}(OMS_REST));

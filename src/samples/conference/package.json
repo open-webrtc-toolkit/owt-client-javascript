@@ -1,7 +1,7 @@
 {
-  "name": "ics.conference.sample",
-  "title": "Intel WebRTC Conference Sample",
-  "description": "Intel CS for WebRTC JavaScript Conference Sample",
+  "name": "oms-sample-conference",
+  "title": "Open Media Streamer Conference Sample",
+  "description": "Open Media Streamer JavaScript Conference Sample",
   "version": "4.1.0",
   "homepage": "http://webrtc.intel.com",
   "author": "Intel WebRTC team",
@@ -11,17 +11,14 @@
     "sdk",
     "gateway",
     "mcu"
-   ],
-  "scripts": {
-    "postinstall": "node ./quickfix2spdybug47.js"
-   },
+  ],
   "dependencies": {
     "body-parser": "~1.14.1",
     "express": "",
     "errorhandler": "",
     "morgan": "",
     "socket.io": "",
-    "spdy":"^3.4.7"
+    "spdy":""
   },
   "engines": {
     "node": ">=0.10"

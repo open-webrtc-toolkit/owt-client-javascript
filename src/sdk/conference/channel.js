@@ -2,7 +2,7 @@
 'use strict';
 
 import Logger from '../base/logger.js';
-import { EventDispatcher, MessageEvent, IcsEvent, ErrorEvent, MuteEvent } from '../base/event.js';
+import { EventDispatcher, MessageEvent, OmsEvent, ErrorEvent, MuteEvent } from '../base/event.js';
 import { TrackKind } from '../base/mediaformat.js'
 import { Publication } from '../base/publication.js';
 import { Subscription } from './subscription.js'
@@ -418,7 +418,7 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
       return;
     }
     this._ended = true;
-    const event = new IcsEvent('ended')
+    const event = new OmsEvent('ended')
     if (this._publication) {
       this._publication.dispatchEvent(event);
       this._publication.stop();
@@ -505,7 +505,7 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
         options => this._applyOptions(options));
       // Fire subscription's ended event when associated stream is ended.
       this._subscribedStream.addEventListener('ended', () => {
-        this._subscription.dispatchEvent('ended', new IcsEvent('ended'));
+        this._subscription.dispatchEvent('ended', new OmsEvent('ended'));
       });
       this._subscribePromise.resolve(this._subscription);
     } else if (this._publishPromise) {

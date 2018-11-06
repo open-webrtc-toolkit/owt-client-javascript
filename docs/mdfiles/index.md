@@ -1,18 +1,18 @@
-Intel CS for WebRTC Client SDK for JavaScript
+Open Media Streamer Client SDK for JavaScript
 ------------------
 
 # 1 Introduction
-The Intel CS for WebRTC Client SDK for JavaScript provides tools to help you develop Web applications. The SDK is distributed in the `CS_WebRTC_Client_SDK_JavaScript.<ver>.zip`  release package.
+The Open Media Streamer Client SDK for JavaScript provides tools to help you develop Web applications. The SDK is distributed in the `CS_WebRTC_Client_SDK_JavaScript.<ver>.zip`  release package.
 
 Refer to the SDK release notes for the latest information on the SDK release package, including features, supported browsers, bug fixes, and known issues.
 
-Please include `adapter.js` before `ics.js` in HTML files. `adapter.js` is an open source project hosted on [Github](https://github.com/webrtc/adapter). The revision we depend on is `4.0.2`.
+Please include `adapter.js` before `oms.js` in HTML files. `adapter.js` is an open source project hosted on [Github](https://github.com/webrtc/adapter). The revision we depend on is `4.0.2`.
 
-If you want to use conference SDK, please also include `socket.io.js` before `ics.js`.
+If you want to use conference SDK, please also include `socket.io.js` before `oms.js`.
 
 # 2 Browser requirement
 
-The Intel CS for WebRTC Client SDK for JavaScript has been tested on the following browsers and operating systems:
+The Open Media Streamer Client SDK for JavaScript has been tested on the following browsers and operating systems:
 
 Conference Mode:
 
@@ -63,7 +63,7 @@ Developers can help end users to make these changes by Firefox extension.
 > **Note:** End users need to visit your site with https if they want to use screen sharing.
 
 # 4 NAT and firewall traversal
-Intel CS for WebRTC Client SDK for JavaScript fully supports NAT and firewall traversal with STUN / TURN / ICE. The Coturn TURN server from https://github.com/coturn/coturn can be one choice.
+Open Media Streamer Client SDK for JavaScript fully supports NAT and firewall traversal with STUN / TURN / ICE. The Coturn TURN server from https://github.com/coturn/coturn can be one choice.
 
 # 5 Peer-to-peer (P2P) mode
 To enable P2P chat, copy and paste the following code into the head section of your HTML document:
@@ -71,7 +71,7 @@ To enable P2P chat, copy and paste the following code into the head section of y
 <script type="text/JavaScript" src="socket.io.js"></script>
 <script type="text/JavaScript" src="sc.websocket.js"></script>
 <script type="text/JavaScript" src="adapter.js"></script>
-<script type="text/JavaScript" src="ics.js"></script>
+<script type="text/JavaScript" src="oms.js"></script>
 ~~~~~~
 If you're using customized signling channel, please replace `socket.io.js` and `sc.websocket.js` with your own signaling channel implementation.
 

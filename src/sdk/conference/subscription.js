@@ -8,16 +8,16 @@ import { EventDispatcher} from '../base/event.js'
 
 /**
  * @class AudioSubscriptionCapabilities
- * @memberOf Ics.Conference
+ * @memberOf Oms.Conference
  * @classDesc Represents the audio capability for subscription.
  * @hideconstructor
  */
 export class AudioSubscriptionCapabilities {
   constructor(codecs) {
     /**
-     * @member {Array.<Ics.Base.AudioCodecParameters>} codecs
+     * @member {Array.<Oms.Base.AudioCodecParameters>} codecs
      * @instance
-     * @memberof Ics.Conference.AudioSubscriptionCapabilities
+     * @memberof Oms.Conference.AudioSubscriptionCapabilities
      */
     this.codecs = codecs;
   }
@@ -25,7 +25,7 @@ export class AudioSubscriptionCapabilities {
 
 /**
  * @class VideoSubscriptionCapabilities
- * @memberOf Ics.Conference
+ * @memberOf Oms.Conference
  * @classDesc Represents the video capability for subscription.
  * @hideconstructor
  */
@@ -33,33 +33,33 @@ export class VideoSubscriptionCapabilities {
   constructor(codecs, resolutions, frameRates, bitrateMultipliers,
     keyFrameIntervals) {
     /**
-     * @member {Array.<Ics.Base.VideoCodecParameters>} codecs
+     * @member {Array.<Oms.Base.VideoCodecParameters>} codecs
      * @instance
-     * @memberof Ics.Conference.VideoSubscriptionCapabilities
+     * @memberof Oms.Conference.VideoSubscriptionCapabilities
      */
     this.codecs = codecs;
     /**
-     * @member {Array.<Ics.Base.Resolution>} resolution
+     * @member {Array.<Oms.Base.Resolution>} resolution
      * @instance
-     * @memberof Ics.Conference.VideoSubscriptionCapabilities
+     * @memberof Oms.Conference.VideoSubscriptionCapabilities
      */
     this.resolutions = resolutions;
     /**
      * @member {Array.<number>} frameRates
      * @instance
-     * @memberof Ics.Conference.VideoSubscriptionCapabilities
+     * @memberof Oms.Conference.VideoSubscriptionCapabilities
      */
     this.frameRates = frameRates;
     /**
      * @member {Array.<number>} bitrateMultipliers
      * @instance
-     * @memberof Ics.Conference.VideoSubscriptionCapabilities
+     * @memberof Oms.Conference.VideoSubscriptionCapabilities
      */
     this.bitrateMultipliers = bitrateMultipliers;
     /**
      * @member {Array.<number>} keyFrameIntervals
      * @instance
-     * @memberof Ics.Conference.VideoSubscriptionCapabilities
+     * @memberof Oms.Conference.VideoSubscriptionCapabilities
      */
     this.keyFrameIntervals = keyFrameIntervals;
   }
@@ -67,7 +67,7 @@ export class VideoSubscriptionCapabilities {
 
 /**
  * @class SubscriptionCapabilities
- * @memberOf Ics.Conference
+ * @memberOf Oms.Conference
  * @classDesc Represents the capability for subscription.
  * @hideconstructor
  */
@@ -76,13 +76,13 @@ export class SubscriptionCapabilities {
     /**
      * @member {?AudioSubscriptionCapabilities} audio
      * @instance
-     * @memberof Ics.Conference.SubscriptionCapabilities
+     * @memberof Oms.Conference.SubscriptionCapabilities
      */
     this.audio = audio;
     /**
      * @member {?VideoSubscriptionCapabilities} video
      * @instance
-     * @memberof Ics.Conference.SubscriptionCapabilities
+     * @memberof Oms.Conference.SubscriptionCapabilities
      */
     this.video = video;
   }
@@ -90,16 +90,16 @@ export class SubscriptionCapabilities {
 
 /**
  * @class AudioSubscriptionConstraints
- * @memberOf Ics.Conference
+ * @memberOf Oms.Conference
  * @classDesc Represents the audio constraints for subscription.
  * @hideconstructor
  */
 export class AudioSubscriptionConstraints {
   constructor(codecs) {
     /**
-     * @member {?Array.<Ics.Base.AudioCodecParameters>} codecs
+     * @member {?Array.<Oms.Base.AudioCodecParameters>} codecs
      * @instance
-     * @memberof Ics.Conference.AudioSubscriptionConstraints
+     * @memberof Oms.Conference.AudioSubscriptionConstraints
      * @desc Codecs accepted. If none of `codecs` supported by both sides, connection fails. Leave it undefined will use all possible codecs.
      */
     this.codecs = codecs;
@@ -108,7 +108,7 @@ export class AudioSubscriptionConstraints {
 
 /**
  * @class VideoSubscriptionConstraints
- * @memberOf Ics.Conference
+ * @memberOf Oms.Conference
  * @classDesc Represents the video constraints for subscription.
  * @hideconstructor
  */
@@ -116,37 +116,37 @@ export class VideoSubscriptionConstraints {
   constructor(codecs, resolution, frameRate, bitrateMultiplier,
     keyFrameInterval) {
     /**
-     * @member {?Array.<Ics.Base.VideoCodecParameters>} codecs
+     * @member {?Array.<Oms.Base.VideoCodecParameters>} codecs
      * @instance
-     * @memberof Ics.Conference.VideoSubscriptionConstraints
+     * @memberof Oms.Conference.VideoSubscriptionConstraints
      * @desc Codecs accepted. If none of `codecs` supported by both sides, connection fails. Leave it undefined will use all possible codecs.
      */
     this.codecs = codecs;
     /**
-     * @member {?Ics.Base.Resolution} resolution
+     * @member {?Oms.Base.Resolution} resolution
      * @instance
-     * @memberof Ics.Conference.VideoSubscriptionConstraints
+     * @memberof Oms.Conference.VideoSubscriptionConstraints
      * @desc Only resolutions listed in VideoSubscriptionCapabilities are allowed.
      */
     this.resolution = resolution;
     /**
      * @member {?number} frameRate
      * @instance
-     * @memberof Ics.Conference.VideoSubscriptionConstraints
+     * @memberof Oms.Conference.VideoSubscriptionConstraints
      * @desc Only frameRates listed in VideoSubscriptionCapabilities are allowed.
      */
     this.frameRate = frameRate;
     /**
      * @member {?number} bitrateMultiplier
      * @instance
-     * @memberof Ics.Conference.VideoSubscriptionConstraints
+     * @memberof Oms.Conference.VideoSubscriptionConstraints
      * @desc Only bitrateMultipliers listed in VideoSubscriptionCapabilities are allowed.
      */
     this.bitrateMultiplier = bitrateMultiplier;
     /**
      * @member {?number} keyFrameInterval
      * @instance
-     * @memberof Ics.Conference.VideoSubscriptionConstraints
+     * @memberof Oms.Conference.VideoSubscriptionConstraints
      * @desc Only keyFrameIntervals listed in VideoSubscriptionCapabilities are allowed.
      */
     this.keyFrameInterval = keyFrameInterval;
@@ -155,21 +155,21 @@ export class VideoSubscriptionConstraints {
 
 /**
  * @class SubscribeOptions
- * @memberOf Ics.Conference
- * @classDesc SubscribeOptions defines options for subscribing a Ics.Base.RemoteStream.
+ * @memberOf Oms.Conference
+ * @classDesc SubscribeOptions defines options for subscribing a Oms.Base.RemoteStream.
  */
 export class SubscribeOptions {
   constructor(audio, video) {
     /**
      * @member {?AudioSubscriptionConstraints} audio
      * @instance
-     * @memberof Ics.Conference.SubscribeOptions
+     * @memberof Oms.Conference.SubscribeOptions
      */
     this.audio = audio;
     /**
      * @member {?VideoSubscriptionConstraints} video
      * @instance
-     * @memberof Ics.Conference.SubscribeOptions
+     * @memberof Oms.Conference.SubscribeOptions
      */
     this.video = video;
   }
@@ -177,37 +177,37 @@ export class SubscribeOptions {
 
 /**
  * @class VideoSubscriptionUpdateOptions
- * @memberOf Ics.Conference
+ * @memberOf Oms.Conference
  * @classDesc VideoSubscriptionUpdateOptions defines options for updating a subscription's video part.
  * @hideconstructor
  */
 export class VideoSubscriptionUpdateOptions {
   constructor() {
     /**
-     * @member {?Ics.Base.Resolution} resolution
+     * @member {?Oms.Base.Resolution} resolution
      * @instance
-     * @memberof Ics.Conference.VideoSubscriptionUpdateOptions
+     * @memberof Oms.Conference.VideoSubscriptionUpdateOptions
      * @desc Only resolutions listed in VideoSubscriptionCapabilities are allowed.
      */
     this.resolution = undefined;
     /**
      * @member {?number} frameRates
      * @instance
-     * @memberof Ics.Conference.VideoSubscriptionUpdateOptions
+     * @memberof Oms.Conference.VideoSubscriptionUpdateOptions
      * @desc Only frameRates listed in VideoSubscriptionCapabilities are allowed.
      */
     this.frameRate = undefined;
     /**
      * @member {?number} bitrateMultipliers
      * @instance
-     * @memberof Ics.Conference.VideoSubscriptionUpdateOptions
+     * @memberof Oms.Conference.VideoSubscriptionUpdateOptions
      * @desc Only bitrateMultipliers listed in VideoSubscriptionCapabilities are allowed.
      */
     this.bitrateMultipliers = undefined;
     /**
      * @member {?number} keyFrameIntervals
      * @instance
-     * @memberof Ics.Conference.VideoSubscriptionUpdateOptions
+     * @memberof Oms.Conference.VideoSubscriptionUpdateOptions
      * @desc Only keyFrameIntervals listed in VideoSubscriptionCapabilities are allowed.
      */
     this.keyFrameInterval = undefined;
@@ -216,7 +216,7 @@ export class VideoSubscriptionUpdateOptions {
 
 /**
  * @class SubscriptionUpdateOptions
- * @memberOf Ics.Conference
+ * @memberOf Oms.Conference
  * @classDesc SubscriptionUpdateOptions defines options for updating a subscription.
  * @hideconstructor
  */
@@ -225,7 +225,7 @@ export class SubscriptionUpdateOptions {
     /**
      * @member {?VideoSubscriptionUpdateOptions} video
      * @instance
-     * @memberof Ics.Conference.SubscriptionUpdateOptions
+     * @memberof Oms.Conference.SubscriptionUpdateOptions
      */
     this.video = undefined;
   }
@@ -233,7 +233,7 @@ export class SubscriptionUpdateOptions {
 
 /**
  * @class Subscription
- * @memberof Ics.Conference
+ * @memberof Oms.Conference
  * @classDesc Subscription is a receiver for receiving a stream.
  * Events:
  *
@@ -243,7 +243,7 @@ export class SubscriptionUpdateOptions {
  * | mute            | MuteEvent        | Publication is muted. Remote side stopped sending audio and/or video data. |
  * | unmute          | MuteEvent        | Publication is unmuted. Remote side continued sending audio and/or video data. |
  *
- * @extends Ics.Base.EventDispatcher
+ * @extends Oms.Base.EventDispatcher
  * @hideconstructor
  */
 export class Subscription extends EventDispatcher {
@@ -255,7 +255,7 @@ export class Subscription extends EventDispatcher {
     /**
      * @member {string} id
      * @instance
-     * @memberof Ics.Conference.Subscription
+     * @memberof Oms.Conference.Subscription
      */
     Object.defineProperty(this, 'id', {
       configurable: false,
@@ -266,7 +266,7 @@ export class Subscription extends EventDispatcher {
      * @function stop
      * @instance
      * @desc Stop certain subscription. Once a subscription is stopped, it cannot be recovered.
-     * @memberof Ics.Conference.Subscription
+     * @memberof Oms.Conference.Subscription
      * @returns {undefined}
      */
     this.stop = stop;
@@ -274,7 +274,7 @@ export class Subscription extends EventDispatcher {
      * @function getStats
      * @instance
      * @desc Get stats of underlying PeerConnection.
-     * @memberof Ics.Conference.Subscription
+     * @memberof Oms.Conference.Subscription
      * @returns {Promise<RTCStatsReport, Error>}
      */
     this.getStats = getStats;
@@ -282,8 +282,8 @@ export class Subscription extends EventDispatcher {
      * @function mute
      * @instance
      * @desc Stop reeving data from remote endpoint.
-     * @memberof Ics.Conference.Subscription
-     * @param {Ics.Base.TrackKind } kind Kind of tracks to be muted.
+     * @memberof Oms.Conference.Subscription
+     * @param {Oms.Base.TrackKind } kind Kind of tracks to be muted.
      * @returns {Promise<undefined, Error>}
      */
     this.mute = mute;
@@ -291,8 +291,8 @@ export class Subscription extends EventDispatcher {
      * @function unmute
      * @instance
      * @desc Continue reeving data from remote endpoint.
-     * @memberof Ics.Conference.Subscription
-     * @param {Ics.Base.TrackKind } kind Kind of tracks to be unmuted.
+     * @memberof Oms.Conference.Subscription
+     * @param {Oms.Base.TrackKind } kind Kind of tracks to be unmuted.
      * @returns {Promise<undefined, Error>}
      */
     this.unmute = unmute;
@@ -300,8 +300,8 @@ export class Subscription extends EventDispatcher {
      * @function applyOptions
      * @instance
      * @desc Update subscription with given options.
-     * @memberof Ics.Conference.Subscription
-     * @param {Ics.Conference.SubscriptionUpdateOptions } options Subscription update options.
+     * @memberof Oms.Conference.Subscription
+     * @param {Oms.Conference.SubscriptionUpdateOptions } options Subscription update options.
      * @returns {Promise<undefined, Error>}
      */
     this.applyOptions = applyOptions;
