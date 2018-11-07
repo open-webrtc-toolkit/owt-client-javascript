@@ -48,7 +48,7 @@ window.L = L;\n\
         dest: sdkOutput,
         options: {
           browserifyOptions: {
-            standalone: 'Ics',
+            standalone: 'Oms',
             debug: false
           },
           transform: [
@@ -61,7 +61,7 @@ window.L = L;\n\
         dest: 'dist/sdk-debug/oms.js',
         options: {
           browserifyOptions: {
-            standalone: 'Ics',
+            standalone: 'Oms',
             debug: true
           },
           transform: [
@@ -107,7 +107,7 @@ window.L = L;\n\
         src: restFiles,
         dest: 'dist/samples/conference/public/scripts/rest.js',
         options:{
-           footer:'module.exports = ICS_REST;',
+           footer:'module.exports = OMS_REST;',
            process: true
         },
         nonull: true

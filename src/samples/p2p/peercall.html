@@ -131,7 +131,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     const signaling = new SignalingChannel();
     let publicationForCamera;
     let publicationForScreen;
-    var p2p = new Ics.P2P.P2PClient({
+    var p2p = new Oms.P2P.P2PClient({
       audioEncodings: true,
       videoEncodings: [{codec:{name: 'h264'}}, {codec: {name: 'vp9'}}, {codec: {name: 'vp8'}}],
       rtcConfiguration:{
@@ -174,9 +174,9 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
             extensionId:'pndohhifhheefbpeljcmnhnkphepimhe'
           }
           let mediaStream;
-          Ics.Base.MediaStreamFactory.createMediaStream(config).then(stream => {
+          Oms.Base.MediaStreamFactory.createMediaStream(config).then(stream => {
             mediaStream = stream;
-            ScreenStream = new Ics.Base.LocalStream(mediaStream, new Ics.Base.StreamSourceInfo('screen-cast', 'screen-cast'));
+            ScreenStream = new Oms.Base.LocalStream(mediaStream, new Oms.Base.StreamSourceInfo('screen-cast', 'screen-cast'));
             $('#local').children('video').get(0).srcObject = ScreenStream.mediaStream;
             p2p.publish(getTargetId(), ScreenStream).then(publication=>{
               publicationForScreen = publication;
@@ -204,12 +204,12 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
             publicationForCamera = publication;
           }); // Publish local stream to remote client
         } else {
-          const audioConstraintsForMic = new Ics.Base.AudioTrackConstraints(Ics.Base.AudioSourceInfo.MIC);
-          const videoConstraintsForCamera = new Ics.Base.VideoTrackConstraints(Ics.Base.VideoSourceInfo.CAMERA);
+          const audioConstraintsForMic = new Oms.Base.AudioTrackConstraints(Oms.Base.AudioSourceInfo.MIC);
+          const videoConstraintsForCamera = new Oms.Base.VideoTrackConstraints(Oms.Base.VideoSourceInfo.CAMERA);
           let mediaStream;
-          Ics.Base.MediaStreamFactory.createMediaStream(new Ics.Base.StreamConstraints(audioConstraintsForMic, videoConstraintsForCamera)).then(stream=>{
+          Oms.Base.MediaStreamFactory.createMediaStream(new Oms.Base.StreamConstraints(audioConstraintsForMic, videoConstraintsForCamera)).then(stream=>{
             mediaStream=stream;
-            localStream = new Ics.Base.LocalStream(mediaStream, new Ics.Base.StreamSourceInfo('mic', 'camera'));
+            localStream = new Oms.Base.LocalStream(mediaStream, new Oms.Base.StreamSourceInfo('mic', 'camera'));
             $('#local').children('video').get(0).srcObject = localStream.mediaStream;
             p2p.publish(getTargetId(), localStream).then(publication=>{
               publicationForCamera = publication;
