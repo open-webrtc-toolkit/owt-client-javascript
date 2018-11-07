@@ -20,7 +20,7 @@ const runSocketIOSample = function() {
 
     var subscribeForward = getParameterByName('forward') === 'true'?true:false;
 
-    conference = new Ics.Conference.ConferenceClient();
+    conference = new Oms.Conference.ConferenceClient();
     function renderVideo(stream){
         conference.subscribe(stream)
         .then((subscriptions)=>{
@@ -80,14 +80,14 @@ const runSocketIOSample = function() {
                      startStreamingIn(myRoom, mediaUrl);
                 }
                 if (isPublish !== 'false') {
-                    const audioConstraintsForMic = new Ics.Base.AudioTrackConstraints(Ics.Base.AudioSourceInfo.MIC);
-                    const videoConstraintsForCamera = new Ics.Base.VideoTrackConstraints(Ics.Base.VideoSourceInfo.CAMERA);
+                    const audioConstraintsForMic = new Oms.Base.AudioTrackConstraints(Oms.Base.AudioSourceInfo.MIC);
+                    const videoConstraintsForCamera = new Oms.Base.VideoTrackConstraints(Oms.Base.VideoSourceInfo.CAMERA);
                     let mediaStream;
-                    Ics.Base.MediaStreamFactory.createMediaStream(new Ics.Base.StreamConstraints(
+                    Oms.Base.MediaStreamFactory.createMediaStream(new Oms.Base.StreamConstraints(
                         audioConstraintsForMic, videoConstraintsForCamera)).then(stream => {
                         mediaStream = stream;
-                        localStream = new Ics.Base.LocalStream(
-                            mediaStream, new Ics.Base.StreamSourceInfo(
+                        localStream = new Oms.Base.LocalStream(
+                            mediaStream, new Oms.Base.StreamSourceInfo(
                                 'mic', 'camera'));
                         $('.local video').get(0).srcObject = stream;
                         conference.publish(localStream).then(publication => {
