@@ -41,7 +41,7 @@ pipeline {
                         
                             node('subscribe-test') {
                               container('subscribe-test') {
-                                  sh "/root/start.sh $RABBITMQ $env.MONGODB ${env.GIT_COMMIT}2 ConferenceClient_subscribe"
+                                  sh "/root/start.sh ${env.GIT_COMMIT}2 ConferenceClient_subscribe"
                               }
                             }
                         }
