@@ -19,8 +19,8 @@ const offerOptions = {
   'offerToReceiveVideo': true
 };
 const sysInfo = Utils.sysInfo();
-const supportsPlanB = navigator.mozGetUserMedia ? false : true;
-const supportsUnifiedPlan = navigator.mozGetUserMedia ? true : false;
+const supportsPlanB = Utils.isSafari() ? true : false;
+const supportsUnifiedPlan = Utils.isSafari() ? false : true;
 /**
  * @function isArray
  * @desc Test if an object is an array.
