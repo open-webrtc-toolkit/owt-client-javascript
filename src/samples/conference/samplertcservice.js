@@ -50,9 +50,9 @@ var pageOption = { page: 1, per_page: 100 };
     }
     var tryCreate = function(room, callback) {
       var options = {};
-      icsREST.API.createRoom(room.name, options, function(roomID) {
-        console.log('Created room:', roomID._id);
-        callback(roomID._id);
+      icsREST.API.createRoom(room.name, options, function(roomId) {
+        console.log('Created room:', roomId._id);
+        callback(roomId._id);
       }, function(status, err) {
         console.log('Error in creating room:', err, '[Retry]');
         setTimeout(function() {
@@ -434,6 +434,7 @@ app.delete('/rooms/:room/recordings/:id', function(req, res) {
   });
 });
 
+//Sip call management.
 app.get('/rooms/:room/sipcalls', function(req, res) {
   'use strict';
   var room = req.params.room;
@@ -447,10 +448,10 @@ app.get('/rooms/:room/sipcalls', function(req, res) {
 app.post('/rooms/:room/sipcalls', function(req, res) {
   'use strict';
   var room = req.params.room,
-    peerURI = req.body.peerURI,
+    peerUri = req.body.peerURI,
     mediaIn = req.body.mediaIn,
     mediaOut = req.body.mediaOut;
-  icsREST.API.makeSipCall(room, peerURI, mediaIn, mediaOut, function(info) {
+  icsREST.API.makeSipCall(room, peerUri, mediaIn, mediaOut, function(info) {
     res.send(info);
   }, function(err) {
     res.send(err);

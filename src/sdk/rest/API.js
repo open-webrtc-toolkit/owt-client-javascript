@@ -342,8 +342,8 @@ OMS_REST.API = (function(OMS_REST) {
      * @param {function} callback                    -Callback function on success
      * @param {function} callbackError               -Callback function on error
      * @example
-  var roomID = '51c10d86909ad1f939000001';
-  OMS_REST.API.getRoom(roomID, function(room) {
+  var roomId = '51c10d86909ad1f939000001';
+  OMS_REST.API.getRoom(roomId, function(room) {
     console.log('Room name:', room.name);
   }, function(status, error) {
     // HTTP status and error
@@ -491,8 +491,8 @@ OMS_REST.API = (function(OMS_REST) {
      * @param {onParticipantList} callback           -Callback function on success
      * @param {function} callbackError               -Callback function on error
      * @example
-  var roomID = '51c10d86909ad1f939000001';
-  OMS_REST.API.getParticipants(roomID, function(participants) {
+  var roomId = '51c10d86909ad1f939000001';
+  OMS_REST.API.getParticipants(roomId, function(participants) {
     var l = JSON.parse(participants);
     console.log ('This room has ', l.length, 'participants');
     for (var i in l) {
@@ -527,9 +527,9 @@ OMS_REST.API = (function(OMS_REST) {
      * @param {onParticipantDetail} callback         -Callback function on success
      * @param {function} callbackError               -Callback function on error
      * @example
-  var roomID = '51c10d86909ad1f939000001';
+  var roomId = '51c10d86909ad1f939000001';
   var participantID = 'JdlUI29yjfVY6O4yAAAB';
-  OMS_REST.API.getParticipant(roomID, participantID, function(participant) {
+  OMS_REST.API.getParticipant(roomId, participantID, function(participant) {
     console.log('Participant:', participant);
   }, function(status, error) {
     // HTTP status and error
@@ -560,9 +560,9 @@ OMS_REST.API = (function(OMS_REST) {
      * @param {onParticipantDetail} callback         -Callback function on success
      * @param {function} callbackError               -Callback function on error
      * @example
-  var roomID = '51c10d86909ad1f939000001';
+  var roomId = '51c10d86909ad1f939000001';
   var participantID = 'JdlUI29yjfVY6O4yAAAB';
-  OMS_REST.API.getParticipant(roomID, participantID, function(participant) {
+  OMS_REST.API.getParticipant(roomId, participantID, function(participant) {
     console.log('Participant:', participant);
   }, function(status, error) {
     // HTTP status and error
@@ -591,10 +591,10 @@ OMS_REST.API = (function(OMS_REST) {
      * @param {function} callback                    -Callback function on success
      * @param {function} callbackError               -Callback function on error
      * @example
-  var roomID = '51c10d86909ad1f939000001';
+  var roomId = '51c10d86909ad1f939000001';
   var participantID = 'JdlUI29yjfVY6O4yAAAB';
-  OMS_REST.API.dropParticipant(roomID, participantID, function(res) {
-    console.log('Participant', participantID, 'in room', roomID, 'deleted');
+  OMS_REST.API.dropParticipant(roomId, participantID, function(res) {
+    console.log('Participant', participantID, 'in room', roomId, 'deleted');
   }, function(status, error) {
     // HTTP status and error
     console.log(status, error);
@@ -622,8 +622,8 @@ OMS_REST.API = (function(OMS_REST) {
      * @param {onStreamList} callback                -Callback function on success
      * @param {function} callbackError               -Callback function on error
      * @example
-  var roomID = '51c10d86909ad1f939000001';
-  OMS_REST.API.getStreams(roomID, function(streams) {
+  var roomId = '51c10d86909ad1f939000001';
+  OMS_REST.API.getStreams(roomId, function(streams) {
     var l = JSON.parse(streams);
     console.log ('This room has ', l.length, 'streams');
     for (var i in l) {
@@ -654,9 +654,9 @@ OMS_REST.API = (function(OMS_REST) {
      * @param {onStreamInfo} callback                -Callback function on success
      * @param {function} callbackError               -Callback function on error
      * @example
-  var roomID = '51c10d86909ad1f939000001';
+  var roomId = '51c10d86909ad1f939000001';
   var streamID = '878889273471677';
-  OMS_REST.API.getStream(roomID, streamID, function(stream) {
+  OMS_REST.API.getStream(roomId, streamID, function(stream) {
     console.log('Stream:', stream);
   }, function(status, error) {
     // HTTP status and error
@@ -687,9 +687,9 @@ OMS_REST.API = (function(OMS_REST) {
      * @param {onStreamInfo} callback                -Callback function on success
      * @param {function} callbackError               -Callback function on error
      * @example
-  var roomID = '51c10d86909ad1f939000001';
+  var roomId = '51c10d86909ad1f939000001';
   var streamID = '878889273471677';
-  OMS_REST.API.updateStream(roomID, streamID, [{op: 'replace', path: '/media/audio/status', value: 'inactive'}], function(stream) {
+  OMS_REST.API.updateStream(roomId, streamID, [{op: 'replace', path: '/media/audio/status', value: 'inactive'}], function(stream) {
     console.log('Stream:', stream);
   }, function(status, error) {
     // HTTP status and error
@@ -718,10 +718,10 @@ OMS_REST.API = (function(OMS_REST) {
      * @param {function} callback                    -Callback function on success
      * @param {function} callbackError               -Callback function on error
      * @example
-  var roomID = '51c10d86909ad1f939000001';
+  var roomId = '51c10d86909ad1f939000001';
   var streamID = '878889273471677';
-  OMS_REST.API.deleteStream(roomID, streamID, function(result) {
-    console.log('Stream:', streamID, 'in room:', roomID, 'deleted');
+  OMS_REST.API.deleteStream(roomId, streamID, function(result) {
+    console.log('Stream:', streamID, 'in room:', roomId, 'deleted');
   }, function(status, error) {
     // HTTP status and error
     console.log(status, error);
@@ -756,7 +756,7 @@ OMS_REST.API = (function(OMS_REST) {
      * @param {onStartingStreamingInOK} callback     -Callback function on success
      * @param {function} callbackError               -Callback function on error
      * @example
-  var roomID = '51c10d86909ad1f939000001';
+  var roomId = '51c10d86909ad1f939000001';
   var url = 'rtsp://10.239.44.7:554/rtsp_tunnel%3Fh26x=4%26line=1';
   var transport = {
     protocol: 'udp',
@@ -767,7 +767,7 @@ OMS_REST.API = (function(OMS_REST) {
     video: true
   };
 
-  OMS_REST.API.startStreamingIn(roomID, url, transport, media, function(stream) {
+  OMS_REST.API.startStreamingIn(roomId, url, transport, media, function(stream) {
     console.log('Streaming-In:', stream);
   }, function(status, error) {
     // HTTP status and error
@@ -798,10 +798,10 @@ OMS_REST.API = (function(OMS_REST) {
      * @param {function} callback                    -Callback function on success
      * @param {function} callbackError               -Callback function on error
      * @example
-  var roomID = '51c10d86909ad1f939000001';
+  var roomId = '51c10d86909ad1f939000001';
   var streamID = '878889273471677';
-  OMS_REST.API.stopStreamingIn(roomID, streamID, function(result) {
-    console.log('External streaming-in:', streamID, 'in room:', roomID, 'stopped');
+  OMS_REST.API.stopStreamingIn(roomId, streamID, function(result) {
+    console.log('External streaming-in:', streamID, 'in room:', roomId, 'stopped');
   }, function(status, error) {
     // HTTP status and error
     console.log(status, error);
@@ -829,8 +829,8 @@ OMS_REST.API = (function(OMS_REST) {
      * @param {onStreamingOutList} callback          -Callback function on success
      * @param {function} callbackError               -Callback function on error
      * @example
-  var roomID = '51c10d86909ad1f939000001';
-  OMS_REST.API.getStreamingOuts(roomID, function(streamingOuts) {
+  var roomId = '51c10d86909ad1f939000001';
+  OMS_REST.API.getStreamingOuts(roomId, function(streamingOuts) {
     console.log('Streaming-outs:', streamingOuts);
   }, function(status, error) {
     // HTTP status and error
@@ -861,7 +861,7 @@ OMS_REST.API = (function(OMS_REST) {
      * @param {onStartingStreamingOutOK} callback    -Callback function on success
      * @param {function} callbackError               -Callback function on error
      * @example
-  var roomID = '51c10d86909ad1f939000001';
+  var roomId = '51c10d86909ad1f939000001';
   var url = 'rtmp://USER:PASS@localhost:1935/live';
   var media = {
     audio: {
@@ -874,7 +874,7 @@ OMS_REST.API = (function(OMS_REST) {
       }
     }
   };
-  OMS_REST.API.startStreamingOut(roomID, url, media, function(streamingOut) {
+  OMS_REST.API.startStreamingOut(roomId, url, media, function(streamingOut) {
     console.log('Streaming-out:', streamingOut);
   }, function(status, error) {
     // HTTP status and error
@@ -907,9 +907,9 @@ OMS_REST.API = (function(OMS_REST) {
      * @param {onUpdatingStreamingOutOk} callback    -Callback function on success
      * @param {function} callbackError               -Callback function on error
      * @example
-  var roomID = '51c10d86909ad1f939000001';
+  var roomId = '51c10d86909ad1f939000001';
   var id = '878889273471677';
-  OMS_REST.API.updateStreamingOut(roomID, id, [{op: 'replace', path: '/media/audio/from', value: '9836636255531'}], function(subscription) {
+  OMS_REST.API.updateStreamingOut(roomId, id, [{op: 'replace', path: '/media/audio/from', value: '9836636255531'}], function(subscription) {
     console.log('Subscription:', subscription);
   }, function(status, error) {
     // HTTP status and error
@@ -938,10 +938,10 @@ OMS_REST.API = (function(OMS_REST) {
      * @param {function} callback                    -Callback function on success
      * @param {function} callbackError               -Callback function on error
      * @example
-  var roomID = '51c10d86909ad1f939000001';
+  var roomId = '51c10d86909ad1f939000001';
   var id = '878889273471677';
-  OMS_REST.API.stopStreamingOut(roomID, id, function(result) {
-    console.log('Streaming-out:', id, 'in room:', roomID, 'stopped');
+  OMS_REST.API.stopStreamingOut(roomId, id, function(result) {
+    console.log('Streaming-out:', id, 'in room:', roomId, 'stopped');
   }, function(status, error) {
     // HTTP status and error
     console.log(status, error);
@@ -969,11 +969,11 @@ OMS_REST.API = (function(OMS_REST) {
      * @desc This function gets the all the ongoing recordings in the specified room.
      * @memberOf OMS_REST.API
      * @param {string} room                          -Room ID.
-     * @param {function} callback          -Callback function on success
+     * @param {function} callback                    -Callback function on success
      * @param {function} callbackError               -Callback function on error
      * @example
-  var roomID = '51c10d86909ad1f939000001';
-  OMS_REST.API.getRecordings(roomID, function(recordings) {
+  var roomId = '51c10d86909ad1f939000001';
+  OMS_REST.API.getRecordings(roomId, function(recordings) {
     console.log('Recordings:', recordings);
   }, function(status, error) {
     // HTTP status and error
@@ -1006,7 +1006,7 @@ OMS_REST.API = (function(OMS_REST) {
      * @param {onStartingRecordingOK} callback       -Callback function on success
      * @param {function} callbackError               -Callback function on error
      * @example
-  var roomID = '51c10d86909ad1f939000001';
+  var roomId = '51c10d86909ad1f939000001';
   var container = 'mkv';
   var media = {
     audio: {
@@ -1019,7 +1019,7 @@ OMS_REST.API = (function(OMS_REST) {
       }
     }
   };
-  OMS_REST.API.startRecording(roomID, container, media, function(recording) {
+  OMS_REST.API.startRecording(roomId, container, media, function(recording) {
     console.log('recording:', recording);
   }, function(status, error) {
     // HTTP status and error
@@ -1052,9 +1052,9 @@ OMS_REST.API = (function(OMS_REST) {
      * @param {onUpdatingRecordingOk} callback       -Callback function on success
      * @param {function} callbackError               -Callback function on error
      * @example
-  var roomID = '51c10d86909ad1f939000001';
+  var roomId = '51c10d86909ad1f939000001';
   var id = '878889273471677';
-  OMS_REST.API.updateRecording(roomID, id, [{op: 'replace', path: '/media/audio/from', value: '9836636255531'}], function(subscription) {
+  OMS_REST.API.updateRecording(roomId, id, [{op: 'replace', path: '/media/audio/from', value: '9836636255531'}], function(subscription) {
     console.log('Subscription:', subscription);
   }, function(status, error) {
     // HTTP status and error
@@ -1083,10 +1083,10 @@ OMS_REST.API = (function(OMS_REST) {
      * @param {function} callback                    -Callback function on success
      * @param {function} callbackError               -Callback function on error
      * @example
-  var roomID = '51c10d86909ad1f939000001';
+  var roomId = '51c10d86909ad1f939000001';
   var id = '878889273471677';
-  OMS_REST.API.stopRecording(roomID, id, function(result) {
-    console.log('Recording:', id, 'in room:', roomID, 'stopped');
+  OMS_REST.API.stopRecording(roomId, id, function(result) {
+    console.log('Recording:', id, 'in room:', roomId, 'stopped');
   }, function(status, error) {
     // HTTP status and error
     console.log(status, error);
@@ -1113,8 +1113,8 @@ OMS_REST.API = (function(OMS_REST) {
      * @param {onSipCallList} callback               -Callback function on success
      * @param {function} callbackError               -Callback function on error
      * @example
-  var roomID = '51c10d86909ad1f939000001';
-  OMS_REST.API.getSipCalls(roomID, function(sipCalls) {
+  var roomId = '51c10d86909ad1f939000001';
+  OMS_REST.API.getSipCalls(roomId, function(sipCalls) {
     console.log('SipCalls:', sipCalls);
   }, function(status, error) {
     // HTTP status and error
@@ -1144,7 +1144,7 @@ OMS_REST.API = (function(OMS_REST) {
      * @desc This function makes a SIP call to the specified peer in the specified room.
      * @memberOf OMS_REST.API
      * @param {string} room                          -Room ID.
-     * @param {string} peerURI                       -The the peer URI to call.
+     * @param {string} peerUri                       -The the peer URI to call.
      * @param {Object} mediaIn                       -The media requirements from peer sip endpoint to room.
      * @param {boolean} mediaIn.audio                -The if audio is required.
      * @param {boolean} mediaIn.video                -The if video is required.
@@ -1152,8 +1152,8 @@ OMS_REST.API = (function(OMS_REST) {
      * @param {function} callback                    -Callback function on success
      * @param {function} callbackError               -Callback function on error
      * @example
-  var roomID = '51c10d86909ad1f939000001';
-  var peerURI = 'alice@company.com';
+  var roomId = '51c10d86909ad1f939000001';
+  var peerUri = 'alice@company.com';
   var mediaIn = {
     audio: true,
     video: true
@@ -1172,16 +1172,16 @@ OMS_REST.API = (function(OMS_REST) {
       }
     }
   };
-  OMS_REST.API.makeSipCall(roomID, peerURI, mediaIn, mediaOut, function(sipCallInfo) {
+  OMS_REST.API.makeSipCall(roomId, peerUri, mediaIn, mediaOut, function(sipCallInfo) {
     console.log('initiate sip call OK', sipCallInfo);
   }, function(status, error) {
     // HTTP status and error
     console.log(status, error);
   });
      */
-  var makeSipCall = function(room, peerURI, mediaIn, mediaOut, callback, callbackError) {
+  var makeSipCall = function(room, peerUri, mediaIn, mediaOut, callback, callbackError) {
     var options = {
-      peerURI: peerURI,
+      peerURI: peerUri,
       mediaIn: mediaIn,
       mediaOut: mediaOut
     };
@@ -1201,14 +1201,14 @@ OMS_REST.API = (function(OMS_REST) {
      * @desc This function updates a sip call's specified output attributes in the specified room.
      * @memberOf OMS_REST.API
      * @param {string} room                          -Room ID
-     * @param {string} id                            -Recording ID
+     * @param {string} id                            -Sip call ID
      * @param {Array.<{op: string, path: string, value: json}>} items -Attributes to be updated, with format following RFC6902(https://tools.ietf.org/html/rfc6902).
      * @param {onUpdatingSipCallOk} callback         -Callback function on success
      * @param {function} callbackError               -Callback function on error
      * @example
-  var roomID = '51c10d86909ad1f939000001';
+  var roomId = '51c10d86909ad1f939000001';
   var id = '878889273471677';
-  OMS_REST.API.updateSipCall(roomID, id, [{op: 'replace', path: '/media/audio/from', value: '9836636255531'}], function(sipCallInfo) {
+  OMS_REST.API.updateSipCall(roomId, id, [{op: 'replace', path: '/media/audio/from', value: '9836636255531'}], function(sipCallInfo) {
     console.log('updated sip call infor:', sipCallInfo);
   }, function(status, error) {
     // HTTP status and error
@@ -1237,10 +1237,10 @@ OMS_REST.API = (function(OMS_REST) {
      * @param {function} callback                    -Callback function on success
      * @param {function} callbackError               -Callback function on error
      * @example
-  var roomID = '51c10d86909ad1f939000001';
+  var roomId = '51c10d86909ad1f939000001';
   var id = '878889273471677';
-  OMS_REST.API.endSipCall(roomID, id, function(result) {
-    console.log('Sip call:', id, 'in room:', roomID, 'ended');
+  OMS_REST.API.endSipCall(roomId, id, function(result) {
+    console.log('Sip call:', id, 'in room:', roomId, 'ended');
   }, function(status, error) {
     // HTTP status and error
     console.log(status, error);
@@ -1266,12 +1266,12 @@ OMS_REST.API = (function(OMS_REST) {
      * @param {function} callback                    -Callback function on success
      * @param {function} callbackError               -Callback function on error
      * @example
-  var roomID = '51c10d86909ad1f939000001';
+  var roomId = '51c10d86909ad1f939000001';
   var user = 'user-id@company.com';
   var role = 'guest';
   // Only isp and region are supported in preference currently, please see server's document for details.
   var preference = {isp: 'isp', region: 'region'};
-  OMS_REST.API.createToken(roomID, user, role, preference, function(token) {
+  OMS_REST.API.createToken(roomId, user, role, preference, function(token) {
     console.log ('Token created:' token);
   }, function(status, error) {
     // HTTP status and error
