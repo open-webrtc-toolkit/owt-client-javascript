@@ -434,6 +434,7 @@ app.delete('/rooms/:room/recordings/:id', function(req, res) {
   });
 });
 
+//Sip call management.
 app.get('/rooms/:room/sipcalls', function(req, res) {
   'use strict';
   var room = req.params.room;
