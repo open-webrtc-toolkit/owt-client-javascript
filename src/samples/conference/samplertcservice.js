@@ -392,8 +392,8 @@ app.delete('/rooms/:room/streaming-outs/:id', function(req, res) {
 app.get('/rooms/:room/recordings', function(req, res) {
   'use strict';
   var room = req.params.room;
-  icsREST.API.getRecordings(room, function(streamingOuts) {
-    res.send(streamingOuts);
+  icsREST.API.getRecordings(room, function(recordings) {
+    res.send(recordings);
   }, function(err) {
     res.send(err);
   });
@@ -428,6 +428,52 @@ app.delete('/rooms/:room/recordings/:id', function(req, res) {
   var room = req.params.room,
     id = req.params.id;
   icsREST.API.stopRecording(room, id, function(result) {
+    res.send(result);
+  }, function(err) {
+    res.send(err);
+  });
+});
+
+app.get('/rooms/:room/sipcalls', function(req, res) {
+  'use strict';
+  var room = req.params.room;
+  icsREST.API.getSipCalls(room, function(sipCalls) {
+    res.send(sipCalls);
+  }, function(err) {
+    res.send(err);
+  });
+});
+
+app.post('/rooms/:room/sipcalls', function(req, res) {
+  'use strict';
+  var room = req.params.room,
+    peerURI = req.body.peerURI,
+    mediaIn = req.body.mediaIn,
+    mediaOut = req.body.mediaOut;
+  icsREST.API.makeSipCall(room, peerURI, mediaIn, mediaOut, function(info) {
+    res.send(info);
+  }, function(err) {
+    res.send(err);
+  });
+});
+
+app.patch('/rooms/:room/sipcalls/:id', function(req, res) {
+  'use strict';
+  var room = req.params.room,
+    id = req.params.id,
+    commands = req.body;
+  icsREST.API.updateSipCall(room, id, commands, function(result) {
+    res.send(result);
+  }, function(err) {
+    res.send(err);
+  });
+});
+
+app.delete('/rooms/:room/sipcalls/:id', function(req, res) {
+  'use strict';
+  var room = req.params.room,
+    id = req.params.id;
+  icsREST.API.endSipCall(room, id, function(result) {
     res.send(result);
   }, function(err) {
     res.send(err);
