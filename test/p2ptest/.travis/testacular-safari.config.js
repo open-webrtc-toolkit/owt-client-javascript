@@ -21,7 +21,7 @@ module.exports = function (config){
     './dist/samples/p2p/js/socket.io.js',
     './dist/samples/p2p/js/adapter.js',
     './dist/samples/p2p/js/utils.js',
-    './dist/sdk/ics.js',
+    './dist/sdk/oms.js',
     './test/p2ptest/js/errorHandler.js',
     './test/p2ptest/js/test_functions.js',
     './test/p2ptest/js/video_detector.js',
