@@ -1,0 +1,16 @@
+pipeline {
+	agent any
+     stages {
+        stage('runJsCI'){
+            agent{
+                node {
+                    label "${env.jsRunCaseServer}"
+                    customWorkspace "${env.jsSourcePath}"
+                }
+            }
+            steps {
+                sh "${env.jsCiScriptPath}/start.sh ${GIT_COMMIT}"
+            }
+        }
+	}
+}
