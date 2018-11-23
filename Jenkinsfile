@@ -9,7 +9,7 @@ pipeline {
                 ]){
                     node ('pack-mcu') {
                       container ('pack-on-centos') {
-                        sh "/root/packSDKInDocker.sh software $env.GIT_COMMIT $env.CHANGE_BRANCH $env.GIT_BRANCH $env.CHANGE_ID"
+                        sh "/root/packSDKInDocker.sh software $env.CHANGE_BRANCH $env.GIT_BRANCH $env.CHANGE_ID"
                       }
                     }
                 }
