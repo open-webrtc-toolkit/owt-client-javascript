@@ -26,7 +26,7 @@ pipeline {
                         
                             node('api-test') {
                               container('api-test') {
-                                   sh "/root/start.sh ${env.GIT_COMMIT}1 ConferenceClient_api"
+                                   sh "/root/start.sh ${env.GIT_BRANCH}1 ConferenceClient_api"
                               }
                             }
                         }
@@ -41,7 +41,7 @@ pipeline {
                         
                             node('subscribe-test') {
                               container('subscribe-test') {
-                                  sh "/root/start.sh ${env.GIT_COMMIT}2 ConferenceClient_subscribe"
+                                  sh "/root/start.sh ${env.GIT_BRANCH}2 ConferenceClient_subscribe"
                               }
                             }
                         }
