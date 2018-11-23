@@ -9,7 +9,7 @@ pipeline {
                 ]){
                     node ('pack-mcu') {
                       container ('pack-on-centos') {
-                        sh "/root/packSDKInDocker.sh software $env.GIT_COMMIT $env.CHANGE_BRANCH $env.GIT_BRANCH $env.CHANGE_ID"
+                        sh "/root/packSDKInDocker.sh software $env.CHANGE_BRANCH $env.GIT_BRANCH $env.CHANGE_ID"
                       }
                     }
                 }
@@ -26,7 +26,7 @@ pipeline {
                         
                             node('api-test') {
                               container('api-test') {
-                                   sh "/root/start.sh ${env.GIT_COMMIT}1 ConferenceClient_api"
+                                   sh "/root/start.sh ${env.GIT_BRANCH}1 ConferenceClient_api"
                               }
                             }
                         }
@@ -41,7 +41,7 @@ pipeline {
                         
                             node('subscribe-test') {
                               container('subscribe-test') {
-                                  sh "/root/start.sh ${env.GIT_COMMIT}2 ConferenceClient_subscribe"
+                                  sh "/root/start.sh ${env.GIT_BRANCH}2 ConferenceClient_subscribe"
                               }
                             }
                         }
