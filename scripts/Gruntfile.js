@@ -11,6 +11,7 @@ module.exports = function(grunt) {
   ];
 
   var restFiles = [
+    'src/sdk/rest/xmlhttprequest.js',
     'src/sdk/rest/hmac-sha256.js',
     'src/sdk/rest/Base64.js',
     'src/sdk/rest/API.js'
