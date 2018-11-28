@@ -50,9 +50,9 @@ var pageOption = { page: 1, per_page: 100 };
     }
     var tryCreate = function(room, callback) {
       var options = {};
-      icsREST.API.createRoom(room.name, options, function(roomID) {
-        console.log('Created room:', roomID._id);
-        callback(roomID._id);
+      icsREST.API.createRoom(room.name, options, function(roomId) {
+        console.log('Created room:', roomId._id);
+        callback(roomId._id);
       }, function(status, err) {
         console.log('Error in creating room:', err, '[Retry]');
         setTimeout(function() {
@@ -392,8 +392,8 @@ app.delete('/rooms/:room/streaming-outs/:id', function(req, res) {
 app.get('/rooms/:room/recordings', function(req, res) {
   'use strict';
   var room = req.params.room;
-  icsREST.API.getRecordings(room, function(streamingOuts) {
-    res.send(streamingOuts);
+  icsREST.API.getRecordings(room, function(recordings) {
+    res.send(recordings);
   }, function(err) {
     res.send(err);
   });
@@ -428,6 +428,53 @@ app.delete('/rooms/:room/recordings/:id', function(req, res) {
   var room = req.params.room,
     id = req.params.id;
   icsREST.API.stopRecording(room, id, function(result) {
+    res.send(result);
+  }, function(err) {
+    res.send(err);
+  });
+});
+
+//Sip call management.
+app.get('/rooms/:room/sipcalls', function(req, res) {
+  'use strict';
+  var room = req.params.room;
+  icsREST.API.getSipCalls(room, function(sipCalls) {
+    res.send(sipCalls);
+  }, function(err) {
+    res.send(err);
+  });
+});
+
+app.post('/rooms/:room/sipcalls', function(req, res) {
+  'use strict';
+  var room = req.params.room,
+    peerUri = req.body.peerURI,
+    mediaIn = req.body.mediaIn,
+    mediaOut = req.body.mediaOut;
+  icsREST.API.makeSipCall(room, peerUri, mediaIn, mediaOut, function(info) {
+    res.send(info);
+  }, function(err) {
+    res.send(err);
+  });
+});
+
+app.patch('/rooms/:room/sipcalls/:id', function(req, res) {
+  'use strict';
+  var room = req.params.room,
+    id = req.params.id,
+    commands = req.body;
+  icsREST.API.updateSipCall(room, id, commands, function(result) {
+    res.send(result);
+  }, function(err) {
+    res.send(err);
+  });
+});
+
+app.delete('/rooms/:room/sipcalls/:id', function(req, res) {
+  'use strict';
+  var room = req.params.room,
+    id = req.params.id;
+  icsREST.API.endSipCall(room, id, function(result) {
     res.send(result);
   }, function(err) {
     res.send(err);
