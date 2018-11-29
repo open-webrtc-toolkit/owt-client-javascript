@@ -1,4 +1,6 @@
-/*global require, CryptoJS, XMLHttpRequest, Buffer*/
+/*global require, CryptoJS, Buffer, url, http, https*/
+var Url = require("url");
+
 var OMS_REST = OMS_REST || {};
 
 /**@namespace OMS_REST
@@ -27,21 +29,13 @@ OMS_REST.API = (function(OMS_REST) {
     return signed;
   };
 
-  function send(method, resource, body, onOK, onError) {
-    if (!params.service) {
-      if (typeof onError === 'function') {
-        onError(401, 'OMS REST API is not initialized!!');
-      }
-      return;
-    }
-
+  function send (method, resource, body, onOK, onError) {
+    var url = Url.parse(params.url + resource);
+    var ssl = (url.protocol === 'https' ? true : false);
     var timestamp = new Date().getTime();
     var cnounce = require('crypto').randomBytes(8).toString('hex');
-
     var toSign = timestamp + ',' + cnounce;
     var header = 'MAuth realm=http://marte3.dit.upm.es,mauth_signature_method=HMAC_SHA256';
-
-    var signed = calculateSignature(toSign, params.key);
 
     header += ',mauth_serviceid=';
     header += params.service;
@@ -50,44 +44,59 @@ OMS_REST.API = (function(OMS_REST) {
     header += ',mauth_timestamp=';
     header += timestamp;
     header += ',mauth_signature=';
-    header += signed;
+    header += calculateSignature(toSign, params.key);
 
-    var req = new XMLHttpRequest({
-      rejectUnauthorized: params.rejectUnauthorizedCert
-    });
-
-    req.onreadystatechange = function() {
-      if (req.readyState === 4) {
-        switch (req.status) {
-          case 100:
-          case 200:
-          case 201:
-          case 202:
-          case 203:
-          case 204:
-          case 205:
-            if (typeof onOK === 'function') {
-              onOK(req.responseText);
-            }
-            break;
-          default:
-            if (typeof onError === 'function') {
-              onError(req.status, req.responseText);
-            }
-        }
+    var options = {
+      hostname: url.hostname,
+      port: url.port || (ssl ? 443 : 80),
+      path: url.pathname + (url.search ? url.search : ''),
+      method: method,
+      headers: {
+        'Host': url.hostname,
+        'Authorization': header
       }
     };
+    ssl && (params.rejectUnauthorizedCert !== undefined) && (options.rejectUnauthorized = params.rejectUnauthorizedCert);
 
-    req.open(method, params.url + resource, true);
-
-    req.setRequestHeader('Authorization', header);
-
-    if (body !== undefined) {
-      req.setRequestHeader('Content-Type', 'application/json');
-      req.send(JSON.stringify(body));
+    var bodyJSON;
+    if (body) {
+      bodyJSON = JSON.stringify(body);
+      options.headers['Content-Type'] = 'application/json';
+      options.headers['Content-Length'] = Buffer.byteLength(bodyJSON);
     } else {
-      req.send();
+      options.headers['Content-Type'] = 'text/plain;charset=UTF-8';
     }
+
+    var doRequest = (ssl ? require('https').request : require('http').request);
+    var req = doRequest(options, (res) => {
+      res.setEncoding("utf8");
+      var resTxt = '';
+      var status = res.statusCode;
+
+      res.on('data', (chunk) => {
+        resTxt += chunk;
+      });
+
+      res.on('end', () => {
+        if (status === 100 || (status >= 200 && status <= 205)) {
+          onOK(resTxt);
+        } else {
+          onError(status, resTxt);
+        }
+      });
+
+      req.on('error', (err) => {
+        console.error('Send http(s) error:', err);
+        onError(503, err);
+      });
+    }).on('error', (err) => {
+      console.error('Build http(s) req error:', err);
+      onError(503, err);
+    });
+
+    bodyJSON && req.write(bodyJSON);
+
+    req.end();
   };
 
   /**
