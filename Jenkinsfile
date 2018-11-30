@@ -49,5 +49,11 @@ pipeline {
                 }
             }
         }
+
+        stage('Send status') {
+            steps {
+                githubNotify credentialsId: "labwebrtctest", repo: 'oms-client-javascript', account: "${GITHUB_PR_SOURCE_REPO_OWNER}", sha: "${GITHUB_PR_HEAD_SHA}", description: 'This is an example', status: 'PENDING'
+            }
+        }
     }
 }
