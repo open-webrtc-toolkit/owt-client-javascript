@@ -14,8 +14,6 @@ module.exports = function (config){
     frameworks : ["jasmine"],
     // list of files / patterns to load in the browser
     files : [
-    //  JASMINE,
-    //  JASMINE_ADAPTER,
     './dist/samples/p2p/js/jquery-1.10.2.min.js',
     './dist/samples/p2p/js/sc.websocket.js',
     './dist/samples/p2p/js/socket.io.js',
@@ -35,16 +33,12 @@ module.exports = function (config){
     // list of files to exclude
     exclude : [],
 
-    // use dots reporter, as travis terminal does not support escaping sequences
-    // possible values: 'dots', 'progress', 'junit'
-    // CLI --reporters progress
-    //reporters : ['dots','junit','coverage'],
-    reporters : ['progress','jenkins', 'coverage'],
+    reporters : ['progress','junit', 'coverage'],
 
-    jenkinsReporter : {
-      useBrowserName:false,
-      outputFile:'./test/p2ptest/full-test-firefox-results.xml',
-      suite:''
+    junitReporter: {
+        outputDir: './test/p2ptest',
+        outputFile: 'full-test-firefox-results.xml',
+        useBrowserName: false
     },
 
     coverageReporter : {
@@ -74,15 +68,6 @@ module.exports = function (config){
     autoWatch : false,
 
     // Start these browsers, currently available:
-    // - Chrome
-    // - ChromeCanary
-    // - Firefox
-    // - Opera
-    // - Safari (only Mac)
-    // - PhantomJS
-    // - IE (only Windows)
-    // CLI --browsers Chrome,Firefox,Safari
-    //browsers : [".travis/chrome-start.sh"],
     browsers: ['FirefoxAutoAllowGUM'],
     customLaunchers: {
        FirefoxAutoAllowGUM: {
@@ -94,7 +79,6 @@ module.exports = function (config){
            }
         }
     },
-    // browsers : ["Chrome"],
     browserDisconnectTimeout : 60000,
     browserNoActivityTimeout : 60000,
 
@@ -105,32 +89,24 @@ module.exports = function (config){
     // Auto run tests on start (when browsers are captured) and exit
     // CLI --single-run --no-single-run
     singleRun : true,
-    /*
-    protocol: 'https',
-    httpsServerOptions: {
-        key: fs.readFileSync('/home/yanbin/workspace/Test/2.8test/p2pserver/dist/server/cert/key.pem', 'utf8'),
-        cert: fs.readFileSync('/home/yanbin/workspace/Test/2.8test/p2pserver/dist/server/cert/cert.pem', 'utf8')
-    },*/
-    //hostname : 'yanbin-12.sh.intel.com',
-    // report which specs are slower than 500ms
+
     // CLI --report-slower-than 500
     reportSlowerThan : 500,
 
     // compile coffee scripts
     preprocessors : {
-      '**/*.coffee': 'coffee',
-    './src/sdk/woogeen.js':'coverage',
-    './src/sdk/events.js':'coverage',
-    './src/sdk/errors.js':'coverage',
-    './src/sdk/gab.websocket.js':'coverage',
-    './src/sdk/peer.js':'coverage'
+    '**/*.coffee': 'coffee',
+    './src/sdk/p2p/p2pclient.js':'coverage'
     },
 
     plugins:[
-      'karma-*',
-      'karma-junit-reporter',
-      'karma-jenkins-reporter',
-      'requirejs'
+      require('karma-coffee-preprocessor'),
+      require('karma-firefox-launcher'),
+      require('karma-coverage'),
+      require('karma-jasmine'),
+      require('karma-script-launcher'),
+      require('karma-junit-reporter'),
+      require('requirejs')
     ]
   });
 };
