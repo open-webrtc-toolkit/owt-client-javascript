@@ -1,4 +1,4 @@
-var serverIP = "http://10.239.44.117:8095/";
+var serverIP = "place_holder";
 var userName1 = "User1";
 var userName2 = "User2";
 var userNameInChinese = "用户1";
