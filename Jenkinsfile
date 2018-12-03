@@ -1,16 +1,17 @@
 
-void setBuildStatus() {
-    step([
-          $class: "GitHubCommitStatusSetter",
-          reposSource: [$class: "ManuallyEnteredRepositorySource", url: "https://github.com/open-media-streamer/oms-client-javascript"],
-          contextSource: [$class: "ManuallyEnteredCommitContextSource", context: "ci/conference/build-status"]
-      ]);
-    }
+void setBuildStatus(String message, String state) {
+  step([
+      $class: "GitHubCommitStatusSetter",
+      reposSource: [$class: "ManuallyEnteredRepositorySource", url: "https://github.com/open-media-streamer/oms-client-javascript"],
+      contextSource: [$class: "ManuallyEnteredCommitContextSource", context: "ci/jenkins/conference"],
+      errorHandlers: [[$class: "ChangingBuildStatusErrorHandler", result: "UNSTABLE"]],
+      statusResultSource: [ $class: "ConditionalStatusResultSource", results: [[$class: "AnyBuildResult", message: message, state: state]] ]
+  ]);
+}
 
 pipeline {
     agent any
 
-    setBuildStatus()
     stages {
         stage('Build package') {
             steps {
@@ -57,6 +58,15 @@ pipeline {
                         }
                     }
                 }
+            }
+        }
+
+        post {
+            success {
+                setBuildStatus("Build succeeded", "SUCCESS");
+            }
+            failure {
+                setBuildStatus("Build failed", "FAILURE");
             }
         }
     }
