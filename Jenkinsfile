@@ -1,6 +1,17 @@
 
+void setBuildStatus() {
+    step([
+          $class: "GitHubCommitStatusSetter",
+          reposSource: [$class: "ManuallyEnteredRepositorySource", url: "https://github.com/open-media-streamer/oms-client-javascript"],
+          contextSource: [$class: "ManuallyEnteredCommitContextSource", context: "ci/conference/build-status"]
+      ]);
+    }
+
+ setBuildStatus()
+
 pipeline {
     agent any
+
     stages {
         stage('Build package') {
             steps {
