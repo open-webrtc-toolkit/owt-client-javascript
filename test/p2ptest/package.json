@@ -13,11 +13,11 @@
     "karma-coverage": "*",
     "karma-firefox-launcher": "*",
     "karma-jasmine": "*",
-    "karma-jenkins-reporter": "*",
     "karma-junit-reporter": "*",
     "karma-requirejs": "*",
     "karma-safari-launcher": "*",
     "karma-script-launcher": "*",
-    "requirejs": "*"
+    "requirejs": "*",
+    "socketio": "*"
   }
 }
