@@ -7,11 +7,10 @@ void setBuildStatus() {
       ]);
     }
 
- setBuildStatus()
-
 pipeline {
     agent any
 
+    setBuildStatus()
     stages {
         stage('Build package') {
             steps {
