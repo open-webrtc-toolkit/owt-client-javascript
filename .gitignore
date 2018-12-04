@@ -3,3 +3,5 @@ release*.zip
 node_modules/
 src/samples/conference/nuve.js
 src/samples/conference/icsREST.js
+/test/p2ptest/node_modules
+/test/p2ptest/log
