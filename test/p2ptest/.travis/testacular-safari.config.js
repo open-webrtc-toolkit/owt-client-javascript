@@ -36,7 +36,7 @@ module.exports = function (config){
     reporters : ['progress','junit', 'coverage'],
 
     junitReporter: {
-        outputDir: './test/p2ptest',
+        outputDir: './test/p2ptest/log',
         outputFile: 'full-test-safari-results.xml',
         useBrowserName: false
     },
