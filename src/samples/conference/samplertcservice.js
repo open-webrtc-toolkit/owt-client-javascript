@@ -71,6 +71,8 @@ var pageOption = { page: 1, per_page: 100 };
         console.log('sampleRoom Id:', sampleRoom);
       });
     }
+  }, function(stCode, msg) {
+    console.log('getRooms failed(', stCode, '):', msg);
   });
 })();
 
