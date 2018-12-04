@@ -165,7 +165,7 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
         offerToReceiveAudio: false,
         offerToReceiveVideo: false
       };
-      if (this._isAddTransceiverSupported()) {
+      if (typeof this._pc.addTransceiver === 'function') {
         // |direction| seems not working on Safari.
         if (mediaOptions.audio && stream.mediaStream.getAudioTracks() > 0) {
           const audioTransceiver = this._pc.addTransceiver('audio', { direction: 'sendonly' });
@@ -289,7 +289,7 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
         offerToReceiveAudio: !!options.audio,
         offerToReceiveVideo: !!options.video
       };
-      if (this._isAddTransceiverSupported()) {
+      if (typeof this._pc.addTransceiver === 'function') {
         // |direction| seems not working on Safari.
         if (mediaOptions.audio) {
           const audioTransceiver = this._pc.addTransceiver('audio', { direction: 'recvonly' });
@@ -393,7 +393,7 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
   _onRemoteStreamAdded(event) {
     Logger.debug('Remote stream added.');
     if (this._subscribedStream) {
-      this._subscribedStream.mediaStream = event.stream;
+      this._subscribedStream.mediaStream = event.streams[0];
     } else {
       // This is not expected path. However, this is going to happen on Safari
       // because it does not support setting direction of transceiver.
@@ -472,13 +472,13 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
   _createPeerConnection() {
     const pcConfiguration = this._config.rtcConfiguration || {};
     if (Utils.isChrome()) {
-      pcConfiguration.sdpSemantics = 'plan-b';
+      pcConfiguration.sdpSemantics = 'unified-plan';
     }
     this._pc = new RTCPeerConnection(pcConfiguration);
     this._pc.onicecandidate = (event) => {
       this._onLocalIceCandidate.apply(this, [event]);
     };
-    this._pc.onaddstream = (event) => {
+    this._pc.ontrack = (event) => {
       this._onRemoteStreamAdded.apply(this, [event]);
     };
     this._pc.oniceconnectionstatechange = (event) => {
@@ -635,11 +635,5 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
     } else {
       Logger.warning('Invalid data value for stream update info.');
     }
-  }
-
-  _isAddTransceiverSupported() {
-    const sysInfo = Utils.sysInfo();
-    return (typeof this._pc.addTransceiver === 'function' && ((sysInfo.runtime
-      .name !== 'Chrome') || sysInfo.runtime.version <= 68));
   }
 }
