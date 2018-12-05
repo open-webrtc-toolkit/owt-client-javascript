@@ -68,7 +68,27 @@ window.L = L;\n\
           ],
           watch: true
         },
-      }
+      },
+      sinon: {
+          src: ['node_modules/sinon/lib/sinon.js'],
+          dest: 'test/unit/resources/scripts/gen/sinon-browserified.js',
+          options: {
+            browserifyOptions: {
+              standalone: 'sinon',
+              debug: false
+            },
+          },
+        },
+        chai_as_promised: {
+          src: ['node_modules/chai-as-promised/lib/chai-as-promised.js'],
+          dest: 'test/unit/resources/scripts/gen/chai-as-promised-browserified.js',
+          options: {
+            browserifyOptions: {
+              standalone: 'chaiAsPromised',
+              debug: false
+            },
+          },
+        }
     },
     connect: {
       server: {
@@ -237,6 +257,7 @@ window.L = L;\n\
   grunt.loadNpmTasks('grunt-contrib-connect');
   grunt.loadNpmTasks('grunt-jsdoc');
 
+  grunt.registerTask('prepare', ['browserify:sinon', 'browserify:chai_as_promised']);
   grunt.registerTask('pack', ['browserify:dist', 'concat:rest', 'uglify:dist', 'copy:dist', 'string-replace', 'compress:dist', 'jsdoc:dist']);
   grunt.registerTask('dev', ['browserify:dev', 'connect:server']);
   grunt.registerTask('default', ['pack']);
