@@ -162,9 +162,7 @@ window.L = L;\n\
           {expand: true,cwd:'src/extension/',src:['**'],dest:'dist/',flatten:false},
           {expand: true,cwd:'dist/sdk/',src:['oms.js'],dest:'dist/samples/conference/public/scripts/',flatten:false},
           {expand: true,cwd:'dist/samples/conference/public/scripts',src:['rest.js'],dest:'dist/samples/conference/',flatten:false},
-          {expand: true,cwd:'dist/sdk/',src:['oms.js'],dest:'dist/samples/p2p/js/',flatten:false},
-          {expand: true,cwd:'src/dependencies',src:['adapter.js','socket.io.js'],dest:'dist/samples/p2p/js/',flatten:false},
-          {expand: true,cwd:'src/dependencies',src:['adapter.js','socket.io.js'],dest:'dist/samples/conference/public/scripts/',flatten:false}
+          {expand: true,cwd:'dist/sdk/',src:['oms.js'],dest:'dist/samples/p2p/js/',flatten:false}
         ]
       }
     },
@@ -175,14 +173,6 @@ window.L = L;\n\
         },
         options: {
         replacements: [
-          {
-            pattern: '<script src="../../dependencies/socket.io.js" type="text/javascript"></script>',
-            replacement: '<script src="js/socket.io.js" type="text/javascript"></script>'
-          },
-          {
-            pattern: '<script src="../../dependencies/adapter.js" type="text/javascript"></script>',
-            replacement: '<script src="js/adapter.js" type="text/javascript"></script>'
-          },
           {
             pattern: /<!-- SDK Starts -->[\w\W]+<!-- SDK Stops -->/gm,
             replacement: '<script src="js/oms.js" type="text/javascript"></script>'
@@ -201,25 +191,9 @@ window.L = L;\n\
         options: {
         replacements: [
           {
-            pattern: '<script src="../../../dependencies/socket.io.js" type="text/javascript"></script>',
-            replacement: '<script src="scripts/socket.io.js" type="text/javascript"></script>'
-          },
-          {
-            pattern: '<script src="../../../dependencies/adapter.js" type="text/javascript"></script>',
-            replacement: '<script src="scripts/adapter.js" type="text/javascript"></script>'
-          },
-          {
             pattern: '<script src="../../../../dist/sdk-debug/oms.js" type="text/javascript"></script>',
             replacement: '<script src="scripts/oms.js" type="text/javascript"></script>'
           },
-          {
-            pattern: '<script src="sdk/base/adapter.js" type="text/javascript"></script>\n    <script src="sdk/conference/property.js" type="text/javascript"></script>\n    <script src="sdk/base/events.js" type="text/javascript"></script>\n    <script src="sdk/base/L.Base64.js" type="text/javascript"></script>\n    <script src="sdk/base/L.Logger.js" type="text/javascript"></script>\n    <script src="sdk/base/stream.js" type="text/javascript"></script>\n    <script src="sdk/conference/conference.js" type="text/javascript"></script>\n    <script src="sdk/conference/webrtc-stacks/ChromeStableStack.js" type="text/javascript"></script>\n    <script src="sdk/conference/webrtc-stacks/FirefoxStack.js" type="text/javascript"></script>\n    <script src="sdk/conference/webrtc-stacks/IEStableStack.js" type="text/javascript"></script>\n    <script src="sdk/conference/webrtc-stacks/EdgeORTCStack.js" type="text/javascript"></script>',
-            replacement:'<script src="adapter.js" type="text/javascript"></script>\n    <script src="woogeen.sdk.js" type="text/javascript"></script>'
-          },
-          {
-            pattern: '<script src="sdk/ui/AudioPlayer.js" type="text/javascript"></script>\n    <script src="sdk/ui/Bar.js" type="text/javascript"></script>\n    <script src="sdk/ui/L.Resizer.js" type="text/javascript"></script>\n    <script src="sdk/ui/View.js" type="text/javascript"></script>\n    <script src="sdk/ui/Speaker.js" type="text/javascript"></script>\n    <script src="sdk/ui/VideoPlayer.js" type="text/javascript"></script>\n    <script src="sdk/ui/ui.js" type="text/javascript"></script>',
-            replacement: '<script src="woogeen.sdk.ui.js" type="text/javascript"></script>'
-          }
          ]
         }
       }
