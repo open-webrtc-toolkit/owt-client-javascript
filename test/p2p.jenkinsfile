@@ -1,0 +1,39 @@
+void setBuildStatus(String message, String state) {
+    step([
+        $class: "GitHubCommitStatusSetter",
+        reposSource: [$class: "ManuallyEnteredRepositorySource", url: "https://github.com/open-media-streamer/oms-client-javascript"],
+        contextSource: [$class: "ManuallyEnteredCommitContextSource", context: "ci/jenkins/p2p"],
+        errorHandlers: [[$class: "ChangingBuildStatusErrorHandler", result: "UNSTABLE"]],
+        statusResultSource: [ $class: "ConditionalStatusResultSource", results: [[$class: "AnyBuildResult", message: message, state: state]] ]
+    ]);
+}
+
+pipeline {
+    agent any
+    options {
+        buildDiscarder(logRotator(numToKeepStr:'20'))
+        timeout(time: 30, unit: 'MINUTES')
+    }
+    stages {
+        stage('runJsCI'){
+            agent{
+                node {
+                    label "${env.jsRunCaseServer}"
+                    customWorkspace "${env.jsSourcePath}"
+                }
+            }
+            steps {
+                sh "${env.jsCiScriptPath}/start.sh ${GIT_COMMIT}"
+            }
+        }
+    }
+
+    post {
+        success {
+            setBuildStatus("Build succeeded", "SUCCESS");
+        }
+        failure {
+            setBuildStatus("Build failed", "FAILURE");
+        }
+    }
+}
