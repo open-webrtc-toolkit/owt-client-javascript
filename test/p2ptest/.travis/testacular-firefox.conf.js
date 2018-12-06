@@ -74,7 +74,7 @@ module.exports = function (config){
            prefs: {
                 'media.navigator.permission.disabled': true,
                 'media.navigator.streams.fake' : true,
-                'network.proxy.type' : 0
+                'network.proxy.type' : 5
            }
         }
     },
