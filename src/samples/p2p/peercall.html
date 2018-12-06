@@ -179,7 +179,9 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
             $('#local').children('video').get(0).srcObject = ScreenStream.mediaStream;
             p2p.publish(getTargetId(), ScreenStream).then(publication=>{
               publicationForScreen = publication;
-            });
+            }), error => {
+              console.log('Failed to share screen.');
+            };
           }, err=>{
             console.error('Failed to create MediaStream, '+ err);
           });
@@ -201,6 +203,8 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
         if (localStream) {
           p2p.publish(getTargetId(), localStream).then(publication=>{
             publicationForCamera = publication;
+          }, error => {
+            console.log('Failed to share video.');
           }); // Publish local stream to remote client
         } else {
           const audioConstraintsForMic = new Oms.Base.AudioTrackConstraints(Oms.Base.AudioSourceInfo.MIC);
@@ -212,6 +216,8 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
             $('#local').children('video').get(0).srcObject = localStream.mediaStream;
             p2p.publish(getTargetId(), localStream).then(publication=>{
               publicationForCamera = publication;
+            }, error => {
+              console.log('Failed to share video.');
             });
           }, err=>{
             console.error('Failed to create MediaStream, '+err);
@@ -229,6 +235,8 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
           token: $('#uid').val()
         }).then(()=>{
           $('#uid').prop('disabled', true);
+        }, error => {
+          console.log('Failed to connect to the signaling server.');
         }); // Connect to signaling server.
       });
 
