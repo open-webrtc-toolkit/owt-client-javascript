@@ -23,14 +23,18 @@ export default class FakeP2PSignalingChannel {
   };
 
   send(targetId, message) {
-    Logger.debug(this.userId+' -> '+targetId+': '+message);
-    if (onMessageHandlers.has(targetId)) {
-      setTimeout(() => {
-        onMessageHandlers.get(targetId)(this.userId, message)
-      }, 0);;
-    } else {
-      console.error('Cannot send to message to ' + targetId);
-    }
+    Logger.debug(this.userId + ' -> ' + targetId + ': ' + message);
+    return new Promise((resolve, reject) => {
+      if (onMessageHandlers.has(targetId)) {
+        setTimeout(() => {
+          onMessageHandlers.get(targetId)(this.userId, message)
+          return resolve();
+        }, 0);;
+      } else {
+        console.error('Cannot send to message to ' + targetId);
+        return reject();
+      }
+    })
   };
 
   connect(loginInfo) {

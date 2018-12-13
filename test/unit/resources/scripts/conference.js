@@ -12,10 +12,10 @@ describe('Unit tests for ConferenceClient', function() {
     it(
       'Create a ConferenceClient with or without configuration should success.',
       done => {
-        let confclient = new ConferenceClient({}, {});
-        expect(confclient).to.be.an.instanceof(ConferenceClient);
-        confclient = new ConferenceClient({},{});
-        expect(confclient).to.be.an.instanceof(ConferenceClient);
+        let confclient = new ConferenceClient({});
+        expect(confclient).to.be.an.instanceof(EventModule.EventDispatcher);
+        confclient = new ConferenceClient({});
+        expect(confclient).to.be.an.instanceof(EventModule.EventDispatcher);
         done();
       });
 
@@ -28,7 +28,7 @@ describe('Unit tests for ConferenceClient', function() {
       conf2.addEventListener('test', () => {
         done();
       });
-      conf2.dispatchEvent(new EventModule.IcsEvent('test'));
+      conf2.dispatchEvent(new EventModule.OmsEvent('test'));
     });
   });
 });

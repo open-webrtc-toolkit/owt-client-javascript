@@ -2,6 +2,7 @@
 import P2PClient from '../../../../src/sdk/p2p/p2pclient.js';
 import SignalingChannel from './fake-p2p-signaling.js';
 import * as StreamModule from '../../../../src/sdk/base/stream.js';
+import * as EventModule from '../../../../src/sdk/base/event.js'
 
 const expect = chai.expect;
 const screenSharingExtensionId = 'jniliohjdiikfjjdlpapmngebedgigjn';
@@ -12,9 +13,9 @@ describe('Unit tests for P2PClient', function() {
       'Create a P2PClient with or without configuration should success.',
       done => {
         let p2pclient = new P2PClient({}, {});
-        expect(p2pclient).to.be.an.instanceof(P2PClient);
+        expect(p2pclient).to.be.an.instanceof(EventModule.EventDispatcher);
         p2pclient = new P2PClient({},{});
-        expect(p2pclient).to.be.an.instanceof(P2PClient);
+        expect(p2pclient).to.be.an.instanceof(EventModule.EventDispatcher);
         done();
       });
   });
@@ -56,7 +57,8 @@ describe('Unit tests for P2PClient', function() {
     it(
       'Disconnect from signaling server before connected should be rejected.',
       done => {
-        expect(p2pclient.disconnect()).to.be.rejected.and.notify(done);
+        expect(p2pclient.disconnect()).to.be.undefined;
+        done();
       });
   });
   describe('Interop with remote endpoints', function(){
@@ -103,7 +105,8 @@ describe('Unit tests for P2PClient', function() {
         p2pclient1.getStats('user2').then((stats)=>{
           console.info('Stats: '+JSON.stringify(stats));
         });
-        expect(publication.stop()).to.be.fulfilled.and.notify(done);
+        expect(publication.stop()).to.be.undefined;
+        done();
       });
     });
     it(
