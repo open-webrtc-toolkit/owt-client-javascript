@@ -329,7 +329,8 @@ class P2PPeerConnectionChannel extends EventDispatcher {
       source: data.source,
       attributes: data.attributes,
       stream: null,
-      mediaStream: null
+      mediaStream: null,
+      trackIds: data.tracks  // Track IDs may not match at sender and receiver sides. Keep it for legacy porposes.
     });
   }
 
@@ -401,7 +402,6 @@ class P2PPeerConnectionChannel extends EventDispatcher {
     }
     if (this._pc.iceConnectionState === 'connected' || this._pc.iceConnectionState ===
       'completed') {
-      this._sendSignalingMessage(SignalingType.TRACKS_ADDED, [event.track.id]);
       this._checkIceConnectionStateAndFireEvent();
     } else {
       this._addedTrackIds.concat(event.track.id);
@@ -410,34 +410,19 @@ class P2PPeerConnectionChannel extends EventDispatcher {
 
   _onRemoteStreamAdded(event) {
     Logger.debug('Remote stream added.');
-    this._remoteStreamTracks.set(event.stream.id, []);
-    // Ack track added when onaddstream/onaddtrack is fired for a specific track. It's better to check the state of PeerConnection before acknowledge since media data will not flow if ICE fails.
-    let tracksInfo=[];
-    event.stream.getTracks().forEach((track)=>{
-      tracksInfo.push(track.id);
-      this._remoteStreamTracks.get(event.stream.id).push(track.id);
-    });
-    tracksInfo = tracksInfo.concat(this._remoteStreamOriginalTrackIds.get(event
-      .stream.id));
+    if (!this._remoteStreamInfo.has(event.stream.id)) {
+      Logger.warning('Cannot find source info for stream ' + event.stream.id);
+      return;
+    }
     if (this._pc.iceConnectionState === 'connected' || this._pc.iceConnectionState ===
       'completed') {
       this._sendSignalingMessage(SignalingType.TRACKS_ADDED, tracksInfo);
     } else {
-      this._addedTrackIds = this._addedTrackIds.concat(tracksInfo);
+      this._addedTrackIds = this._addedTrackIds.concat(this._remoteStreamInfo.get(
+        event.stream.id).trackIds);
     }
-    let audioTrackSource, videoTrackSource;
-    // Safari and Firefox generates new ID for remote tracks.
-    if (Utils.isSafari() || Utils.isFirefox()) {
-      if (!this._remoteStreamInfo.has(event.stream.id)) {
-        Logger.warning('Cannot find source info for stream ' + event.stream.id);
-      }
-      audioTrackSource = this._remoteStreamInfo.get(event.stream.id).source.audio;
-      videoTrackSource = this._remoteStreamInfo.get(event.stream.id).source.video;
-    } else {
-      audioTrackSource = this._getAndDeleteTrackSourceInfo(
-        event.stream.getAudioTracks());
-      videoTrackSource = this._getAndDeleteTrackSourceInfo(event.stream.getVideoTracks());
-    }
+    const audioTrackSource = this._remoteStreamInfo.get(event.stream.id).source.audio;
+    const videoTrackSource = this._remoteStreamInfo.get(event.stream.id).source.video;
     const sourceInfo = new StreamModule.StreamSourceInfo(audioTrackSource,
       videoTrackSource);
     if (Utils.isSafari()) {
@@ -466,23 +451,12 @@ class P2PPeerConnectionChannel extends EventDispatcher {
 
   _onRemoteStreamRemoved(event) {
     Logger.debug('Remote stream removed.');
-    if (!this._remoteStreamTracks.has(event.stream.id)) {
-      Logger.warning('Cannot find stream info when it is being removed.');
-      return;
-    }
-    const trackIds = [];
-    this._remoteStreamTracks.get(event.stream.id).forEach((trackId) => {
-      trackIds.push(trackId);
-    });
-    this._sendSignalingMessage(SignalingType.TRACKS_REMOVED, trackIds);
-    this._remoteStreamTracks.delete(event.stream.id);
-    const i=this._remoteStreams.findIndex((s)=>{
-      return s.mediaStream.id===event.stream.id;
+    const i = this._remoteStreams.findIndex((s) => {
+      return s.mediaStream.id === event.stream.id;
     });
     if (i !== -1) {
       const stream = this._remoteStreams[i];
-      const event = new OmsEvent('ended');
-      stream.dispatchEvent(event);
+      this._streamRemoved(stream);
       this._remoteStreams.splice(i, 1);
     }
   }
@@ -570,6 +544,27 @@ class P2PPeerConnectionChannel extends EventDispatcher {
     Logger.debug('Data Channel is closed.');
   };
 
+  _streamRemoved(stream) {
+    if (!this._remoteStreamInfo.has(stream.mediaStream.id)) {
+      Logger.warning('Cannot find stream info.');
+    }
+    this._sendSignalingMessage(SignalingType.TRACKS_REMOVED, this._remoteStreamInfo
+      .get(stream.mediaStream.id).trackIds);
+    const event = new OmsEvent('ended');
+    stream.dispatchEvent(event);
+  }
+
+  _isUnifiedPlan() {
+    if (Utils.isFirefox()) {
+      return true;
+    }
+    const pc = new RTCPeerConnection({
+      sdpSemantics: 'unified-plan'
+    });
+    return (pc.getConfiguration() && pc.getConfiguration().sdpSemantics ===
+      'plan-b');
+  }
+
   _createPeerConnection() {
     const pcConfiguration = this._config.rtcConfiguration || {};
     if (Utils.isChrome()) {
@@ -581,16 +576,19 @@ class P2PPeerConnectionChannel extends EventDispatcher {
       this._pc.addTransceiver('audio');
       this._pc.addTransceiver('video');
     }
-    this._pc.onaddstream = (event) => {
-      // TODO: Legacy API, should be removed when all UA implemented WebRTC 1.0.
-      this._onRemoteStreamAdded.apply(this, [event]);
-    };
-    this._pc.ontrack = (event) => {
-      this._onRemoteTrackAdded.apply(this, [event]);
-    };
-    this._pc.onremovestream = (event) => {
-      this._onRemoteStreamRemoved.apply(this, [event]);
-    };
+    if (!this._isUnifiedPlan()) {
+      this._pc.onaddstream = (event) => {
+        // TODO: Legacy API, should be removed when all UAs implemented WebRTC 1.0.
+        this._onRemoteStreamAdded.apply(this, [event]);
+      };
+      this._pc.onremovestream = (event) => {
+        this._onRemoteStreamRemoved.apply(this, [event]);
+      };
+    } else {
+      this._pc.ontrack = (event) => {
+        this._onRemoteTrackAdded.apply(this, [event]);
+      };
+    }
     this._pc.onnegotiationneeded = (event)=>{
       this._onNegotiationneeded.apply(this, [event]);
     };
@@ -706,7 +704,7 @@ class P2PPeerConnectionChannel extends EventDispatcher {
       this._sendSignalingMessage(SignalingType.STREAM_INFO, {
         id: stream.mediaStream.id,
         attributes: stream.attributes,
-        // Track IDs may be useful in the future when onaddstream is removed. It maintains the relationship of tracks and streams.
+        // Track IDs may not match at sender and receiver sides.
         tracks: Array.from(info, item => item.id),
         // This is a workaround for Safari. Please use track-sources if possible.
         source: stream.source
@@ -977,8 +975,18 @@ class P2PPeerConnectionChannel extends EventDispatcher {
           const streamEvent = new StreamModule.StreamEvent('streamadded', {
             stream: info.stream
           });
-          this.dispatchEvent(streamEvent);
+          if (this._isUnifiedPlan()) {
+            for (const track of info.mediaStream.getTracks()) {
+              track.addEventListener('ended', () => {
+                if (self._areAllTracksEnded(info.mediaStream)) {
+                  self._onRemoteStreamRemoved(info.stream);
+                }
+              });
+            }
+          }
+          this._sendSignalingMessage(SignalingType.TRACKS_ADDED, info.trackIds);
           this._remoteStreamInfo.get(info.mediaStream.id).mediaStream = null;
+          this.dispatchEvent(streamEvent);
         }
       }
     }

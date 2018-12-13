@@ -14,11 +14,10 @@ module.exports = function (config){
     frameworks : ["jasmine"],
     // list of files / patterns to load in the browser
     files : [
-    './dist/samples/p2p/js/jquery-1.10.2.min.js',
+    'https://code.jquery.com/jquery-1.10.2.min.js',
+    'https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.4.5/socket.io.min.js',
+    'https://webrtc.github.io/adapter/adapter-7.0.0.js',
     './dist/samples/p2p/js/sc.websocket.js',
-    './dist/samples/p2p/js/socket.io.js',
-    './dist/samples/p2p/js/adapter.js',
-    './dist/samples/p2p/js/utils.js',
     './dist/sdk/oms.js',
     './test/p2ptest/js/errorHandler.js',
     './test/p2ptest/js/test_functions.js',
@@ -75,7 +74,7 @@ module.exports = function (config){
            prefs: {
                 'media.navigator.permission.disabled': true,
                 'media.navigator.streams.fake' : true,
-                'network.proxy.type' : 0
+                'network.proxy.type' : 5
            }
         }
     },

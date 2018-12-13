@@ -11,10 +11,26 @@ void setBuildStatus(String message, String state) {
 pipeline {
     agent any
     options {
+        disableConcurrentBuilds()
         buildDiscarder(logRotator(numToKeepStr:'20'))
         timeout(time: 30, unit: 'MINUTES')
     }
     stages {
+        stage('startP2PServer'){
+            agent{
+                node {
+                    label "${env.p2pServer}"
+                }
+            }
+            steps{
+                script{
+                    withEnv(['JENKINS_NODE_COOKIE=dontkill']) {
+                        sh "${env.p2pScriptPath}/startP2PServer.sh"
+                        }    
+                }
+            }
+        }
+
         stage('runJsCI'){
             agent{
                 node {
@@ -23,7 +39,7 @@ pipeline {
                 }
             }
             steps {
-                sh "${env.jsCiScriptPath}/start.sh ${GIT_COMMIT}"
+                sh "python ${env.jsCiScriptPath}/runTest.py --mode ci --source-path ${env.jsSourcePath} --browsers chrome"
             }
         }
     }
