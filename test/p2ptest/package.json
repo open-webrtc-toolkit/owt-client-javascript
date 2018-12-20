@@ -3,21 +3,24 @@
   "version": "0.1.0",
   "description": "karma enviroment",
   "devDependencies": {
-    "jasmine-core": "*",
-    "jasmine-node": "*",
-    "jasmine-node-karma": "*",
-    "karma": "*",
-    "karma-chrome-launcher": "*",
-    "karma-cli": "*",
-    "karma-coffee-preprocessor": "*",
-    "karma-coverage": "*",
-    "karma-firefox-launcher": "*",
-    "karma-jasmine": "*",
-    "karma-junit-reporter": "*",
-    "karma-requirejs": "*",
-    "karma-safari-launcher": "*",
-    "karma-script-launcher": "*",
-    "requirejs": "*",
-    "socketio": "*"
+    "jasmine-core": "^3.3.0",
+    "jasmine-node": "^1.16.2",
+    "jasmine-node-karma": "^1.6.1",
+    "karma": "^3.1.4",
+    "karma-chrome-launcher": "^2.2.0",
+    "karma-cli": "^2.0.0",
+    "karma-coffee-preprocessor": "^1.0.1",
+    "karma-coverage": "^1.1.2",
+    "karma-firefox-launcher": "^1.1.0",
+    "karma-jasmine": "^2.0.1",
+    "karma-junit-reporter": "^1.2.0",
+    "karma-requirejs": "^1.1.0",
+    "karma-safari-launcher": "^1.0.0",
+    "karma-script-launcher": "^1.0.0",
+    "requirejs": "^2.3.6",
+    "socketio": "^1.0.0"
+  },
+  "scripts": {
+    "postinstall": "python fetchq.py"
   }
 }

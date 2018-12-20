@@ -10,7 +10,7 @@
  * Prints a debug message.
  */
 function debug(txt) {
-  console.log(txt);
+    console.log(txt);
 }
 
 /**
@@ -19,7 +19,7 @@ function debug(txt) {
  * @param {string} message The message to return.
  */
 function silentReturnToTest(message) {
-  window.domAutomationController.send(message);
+    window.domAutomationController.send(message);
 }
 
 /**
@@ -28,8 +28,8 @@ function silentReturnToTest(message) {
  * @param {string} message The message to return.
  */
 function returnToTest(message) {
-  debug('Returning ' + message + ' to test.');
-  silentReturnToTest(message);
+    debug('Returning ' + message + ' to test.');
+    silentReturnToTest(message);
 }
 
 
@@ -43,8 +43,8 @@ function returnToTest(message) {
  * @return {!Error}
  */
 function failTest(reason) {
-  var error = new Error(reason);
-  returnToTest('Test failed: ' + error.stack);
-  return error;
+    var error = new Error(reason);
+    returnToTest('Test failed: ' + error.stack);
+    return error;
 }
 
