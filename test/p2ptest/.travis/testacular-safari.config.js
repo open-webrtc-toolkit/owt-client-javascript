@@ -16,7 +16,7 @@ module.exports = function (config){
     files : [
     'https://code.jquery.com/jquery-1.10.2.min.js',
     'https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.4.5/socket.io.min.js',
-    'https://webrtc.github.io/adapter/adapter-7.0.0.js',
+    'https://webrtchacks.github.io/adapter/adapter-7.0.0.js',
     './dist/samples/p2p/js/sc.websocket.js',
     './dist/sdk/oms.js',
     './test/p2ptest/js/errorHandler.js',
