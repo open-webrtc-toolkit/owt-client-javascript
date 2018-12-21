@@ -1,4 +1,7 @@
-// Copyright © 2018 Intel Corporation. All Rights Reserved.
+// Copyright (C) <2018> Intel Corporation
+//
+// SPDX-License-Identifier: Apache-2.0
+
 // REST samples. It sends HTTP requests to sample server, and sample server sends requests to conference server.
 // Both this file and sample server are samples.
 var send = function (method, path, body, onRes, host) {

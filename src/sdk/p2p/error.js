@@ -1,3 +1,7 @@
+// Copyright (C) <2018> Intel Corporation
+//
+// SPDX-License-Identifier: Apache-2.0
+
 export const errors = {
   // 2100-2999 for P2P errors
   // 2100-2199 for connection errors

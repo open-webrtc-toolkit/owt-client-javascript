@@ -1,4 +1,6 @@
-// Copyright © 2017 Intel Corporation. All Rights Reserved.
+// Copyright (C) <2018> Intel Corporation
+//
+// SPDX-License-Identifier: Apache-2.0
 
 export {default as P2PClient} from './p2pclient.js'
 export {P2PError} from './error.js'
