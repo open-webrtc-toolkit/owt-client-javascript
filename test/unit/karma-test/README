@@ -1,0 +1,2 @@
+1, 'npm install' command will install all denpendencies.
+2, './start.sh' will run unit test in karma ENV.
