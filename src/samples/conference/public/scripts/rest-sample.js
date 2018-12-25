@@ -215,15 +215,15 @@ var dropStream = function (room, stream, host) {
 
 var startStreamingIn = function (room, inUrl, host) {
     var options = {
-        url: inUrl,
+        connection: {
+            url: inUrl,
+            transportProtocol: 'udp',
+            bufferSize: 2048
+        },
         media: {
             audio: 'auto',
             video: true
         },
-        transport: {
-            protocol: 'udp',
-            bufferSize: 2048
-        }
     };
     send('POST', '/rooms/' + room + '/streaming-ins', options, onResponse, host);
 };

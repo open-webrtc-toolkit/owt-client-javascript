@@ -13,12 +13,9 @@
     "mcu"
   ],
   "dependencies": {
-    "body-parser": "~1.14.1",
-    "express": "",
-    "errorhandler": "",
-    "morgan": "",
-    "socket.io": "",
-    "spdy":""
+    "body-parser": "^1.18.1",
+    "express": "^4.16.4",
+    "socket.io": "^2.2.0"
   },
   "engines": {
     "node": ">=0.10"
