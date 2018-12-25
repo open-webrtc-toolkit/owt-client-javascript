@@ -1,4 +1,7 @@
 // Copyright (C) <2018> Intel Corporation
+//
+// SPDX-License-Identifier: Apache-2.0
+
 'use strict';
 
 const crypto = require('crypto');
@@ -9,7 +12,7 @@ const https = require('https');
 // Properties: service, key, host, port, secure, rejectUnauthorized
 var config = null;
 
-function signWithKey (data, key) {
+function signWithKey(data, key) {
   const hex = crypto.createHmac('sha256', key).update(data).digest('hex')
   return Buffer(hex).toString('base64');
 };
@@ -28,7 +31,7 @@ function init(service, key, url, rejectUnauthorized) {
 
 function request(method, resource, body, onOK, onError) {
   if (!config) {
-    onError(new Error('ICS-REST not initialized'));
+    onError(new Error('REST not initialized'));
     return;
   }
 
@@ -83,29 +86,29 @@ function request(method, resource, body, onOK, onError) {
 
   if (typeof onOK === 'function' && typeof onError === 'function') {
     responseReady
-    .then((res) => {
-      res.setEncoding('utf8');
-      let data = '';
-      res.on('data', (chunk) => {
-        data += chunk;
-      });
-      res.on('end', () => {
-        switch (res.statusCode) {
-          case 100:
-          case 200:
-          case 201:
-          case 202:
-          case 203:
-          case 204:
-          case 205:
-            onOK(data);
-            break;
-          default:
-            onError(data);
-        }
-      });
-    })
-    .catch(onError);
+      .then((res) => {
+        res.setEncoding('utf8');
+        let data = '';
+        res.on('data', (chunk) => {
+          data += chunk;
+        });
+        res.on('end', () => {
+          switch (res.statusCode) {
+            case 100:
+            case 200:
+            case 201:
+            case 202:
+            case 203:
+            case 204:
+            case 205:
+              onOK(data);
+              break;
+            default:
+              onError(data);
+          }
+        });
+      })
+      .catch(onError);
   } else {
     // Return promise
     return responseReady;
