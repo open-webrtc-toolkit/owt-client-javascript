@@ -122,15 +122,6 @@ window.L = L;\n\
         },
         nonull: true
       },
-      rest: {
-        src: restFiles,
-        dest: 'dist/samples/conference/public/scripts/rest.js',
-        options:{
-           footer:'module.exports = OMS_REST;',
-           process: true
-        },
-        nonull: true
-      },
       merge: {
         src: 'dist/sdk/<%= pkg.name %>.js',
         dest: 'dist/sdk/<%= pkg.name %>.js',
@@ -181,7 +172,6 @@ window.L = L;\n\
           {expand: true,cwd:'src/samples/conference/cert/',src:['.woogeen.keystore'],dest:'dist/samples/conference/cert/',flatten:false,mode:true},
           {expand: true,cwd:'src/extension/',src:['**'],dest:'dist/',flatten:false},
           {expand: true,cwd:'dist/sdk/',src:['oms.js'],dest:'dist/samples/conference/public/scripts/',flatten:false},
-          {expand: true,cwd:'dist/samples/conference/public/scripts',src:['rest.js'],dest:'dist/samples/conference/',flatten:false},
           {expand: true,cwd:'dist/sdk/',src:['oms.js'],dest:'dist/samples/p2p/js/',flatten:false}
         ]
       }
@@ -258,7 +248,7 @@ window.L = L;\n\
   grunt.loadNpmTasks('grunt-jsdoc');
 
   grunt.registerTask('prepare', ['browserify:sinon', 'browserify:chai_as_promised']);
-  grunt.registerTask('pack', ['browserify:dist', 'concat:rest', 'uglify:dist', 'copy:dist', 'string-replace', 'compress:dist', 'jsdoc:dist']);
+  grunt.registerTask('pack', ['browserify:dist', 'uglify:dist', 'copy:dist', 'string-replace', 'compress:dist', 'jsdoc:dist']);
   grunt.registerTask('dev', ['browserify:dev', 'connect:server']);
   grunt.registerTask('default', ['pack']);
 };
