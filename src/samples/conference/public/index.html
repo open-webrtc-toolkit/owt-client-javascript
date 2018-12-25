@@ -27,35 +27,187 @@
 -->
 
 <html>
-
-  <head>
+<head>
     <title>Intel&reg; Collaboration Suite for WebRTC Conference Sample</title>
-  </head>
+    <style type="text/css">
+        /* common style */
+        body {
+            font-family: 'Courier New', Courier, monospace;
+            background-color: darkslategray;
+            margin: 0;
+            padding: 0;
+        }
 
-  <body>
-    <div style="width:320px;height:240" class="local">
-      <video playsinline muted autoplay style="width:320px;height:240"></video>
-    </div>
-    <div id="resolutions"><span>Try a different resolution:&nbsp;</span></div>
-    <div class="remote">
-      <video playsinline autoplay controls></video>
+        .header {
+            width: 100%;
+            height: 20%;
+        }
+
+        .main {
+            width: 100%;
+            height: 70%;
+            float: left;
+        }
+
+        .center {
+            display: inline-block;
+            height: 100%;
+            width: 65%;
+            text-align: center;
+            font-size: 2em;
+        }
+
+        .left,
+        .right {
+            width: 15%;
+            height: 100%;
+            margin: 0 1.1%;
+            border: 1px solid forestgreen;
+            display: inline-block;
+            overflow: auto;
+        }
+
+        .left {
+            float: left;
+        }
+
+        .right {
+            float: right;
+        }
+
+        .video {
+            width: 98%;
+            height: 98%;
+            border: 1px solid forestgreen;
+        }
+
+        /* hearder style */
+        .center a {
+            text-decoration: none;
+            color: coral;
+        }
+
+        .center h1 {
+            margin: auto 0;
+        }
+
+        /* main style */
+        .online {
+            text-align: center;
+        }
+
+        .ullist {
+            line-height: 2em;
+        }
+
+        .actions {
+            padding: 0;
+            margin: 5px 0;
+            height: 22%;
+            overflow: auto;
+        }
+
+        .actionlist {
+            list-style: none;
+            height: 95%;
+            margin: 5px 0 0 0;
+            padding: 0;
+        }
+
+        .actionlist a,
+        .actionlist input {
+            text-decoration: none;
+            color: black;
+            display: inline-block;
+            width: 100%;
+            height: 2em;
+            margin: 1px 0;
+            padding: 0;
+            text-align: center;
+            background-color: antiquewhite;
+        }
+
+        #message {
+            height: 73%;
+            margin: 3px 0 0 0;
+        }
+
+        #allcontent {
+            height: 95%;
+            background-color: white;
+            overflow: auto;
+            word-wrap: break-word;
+        }
+
+        .send {
+            height: 5%;
+            line-height: 2em;
+            padding: 6px 0 0 0;
+        }
+
+        #sendcontent {
+            width: 100%;
+        }
+
+        /* footer style */
+
+        .footer {
+            width: 100%;
+            height: 10%;
+            clear: left;
+        }
+    </style>
+</head>
+
+<body>
+    <div>
+        <div class="header">
+            <div class="headerleft left">
+                <video src="" class="localcamera video" controls autoplay muted playsinline></video>
+            </div>
+            <div class="headercenter center">
+                <h1>
+                    <a href="https://github.com/open-media-streamer" target="_blank"><pre>Open  Media  Stream</pre></a>
+                </h1>
+            </div>
+            <div class="headerright right">
+                <video src="" class="screensharing video" controls autoplay playsinline></video>
+            </div>
+        </div>
+        <div class="main">
+            <div class="mainleft left">
+                <h3 class="online">Online</h3>
+                <ul class="userlist ullist">
+                </ul>
+            </div>
+            <div class="maincenter center">
+                <video src="" class="remotemixedstream video" controls autoplay playsinline></video>
+            </div>
+            <div class="mainright right">
+                <div class="actions">
+                    <ul class="actionlist ullist">
+                        <li><a href="javascript:void(0)" id="controlvideo" onclick="controlVideo()">pause video</a></li>
+                        <li><a href="javascript:void(0)" id="controlaudio" onclick="controlAudio()">unmute</a></li>
+                        <li><input type="text" id="extensionid" placeholder="input extension id"></li>
+                        <li><a href="javascript:void(0)" id="screensharing" onclick="screenSharing()">screen sharing</a></li>
+                    </ul>
+                </div>
+
+                <div id="message">
+                    <div id="allcontent"></div>
+                    <div class="send">
+                        <input type="text" id="sendcontent" placeholder="input message">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="footer"></div>
     </div>
     <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.4.5/socket.io.min.js" type="text/javascript"></script>
     <script src="https://webrtchacks.github.io/adapter/adapter-7.0.0.js" type="text/javascript"></script>
     <script src="../../../../dist/sdk-debug/oms.js" type="text/javascript"></script>
     <script src="scripts/index.js" type="text/javascript"></script>
-    <script src="scripts/rest-sample.js" type="text/javascript"></script>
-    <script language="JavaScript">
-      function getParameterByName(name) {
-        name = name.replace(/[\[]/, '\\\[').replace(/[\]]/, '\\\]');
-        var regex = new RegExp('[\\?&]' + name + '=([^&#]*)'),
-          results = regex.exec(location.search);
-        return results === null ? '' : decodeURIComponent(results[1].replace(
-          /\+/g, ' '));
-      }
-      runSocketIOSample();
-    </script>
-  </body>
+</body>
 
 </html>
