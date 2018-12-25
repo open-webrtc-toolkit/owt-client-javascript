@@ -1,3 +1,7 @@
+// Copyright (C) <2018> Intel Corporation
+//
+// SPDX-License-Identifier: Apache-2.0
+
 // Listens for external messages coming from pages that match url pattern defined in manifest.json
 chrome.runtime.onMessageExternal.addListener(
   function(request, sender, sendResponse) {

@@ -1,3 +1,7 @@
+// Copyright (C) <2018> Intel Corporation
+//
+// SPDX-License-Identifier: Apache-2.0
+
 /* global io */
 import Logger from '../base/logger.js'
 import * as EventModule from '../base/event.js'

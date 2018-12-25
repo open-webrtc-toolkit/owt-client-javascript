@@ -1,4 +1,7 @@
-// Copyright © 2017 Intel Corporation. All Rights Reserved.
+// Copyright (C) <2017> Intel Corporation
+//
+// SPDX-License-Identifier: Apache-2.0
+
 import {ConferenceClient} from '../../../../src/sdk/conference/client.js';
 import * as StreamModule from '../../../../src/sdk/base/stream.js';
 import * as EventModule from '../../../../src/sdk/base/event.js'
