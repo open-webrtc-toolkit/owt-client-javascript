@@ -12,6 +12,19 @@ void setBuildStatus(String message, String state) {
 pipeline {
     agent any
     stages {
+        stage('Unit test') {
+            steps {
+                podTemplate(name: 'unit-test', label: 'unit-test', cloud: 'kubernetes', containers: [
+                    containerTemplate(name: 'unit-test', image: "$env.TEST_IMAGE",  ttyEnabled: true, alwaysPullImage: true, privileged: true, network: 'host', command: 'cat')
+                    ]) {
+                    node('unit-test') {
+                        container('unit-test') {
+                           sh "cd /root/oms-client-javascript/test/unit/karma-test/ && ./start.sh"
+                        }
+                    }
+                }
+            }
+        }
         stage('Build package') {
             steps {
                 podTemplate(name: 'pack', label: 'pack-mcu', containers: [
