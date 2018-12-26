@@ -25,8 +25,8 @@
 // SPDX-License-Identifier: Apache-2.0
 
 
-let send = function (method, entity, body, okCallback, errCallback) {
-  let req = new XMLHttpRequest();
+function send(method, entity, body, okCallback, errCallback) {
+  const req = new XMLHttpRequest();
   req.onreadystatechange = function () {
     if (req.readyState === 4) {
       if (req.status === 200) {
@@ -45,15 +45,15 @@ let send = function (method, entity, body, okCallback, errCallback) {
   }
 };
 
-let listRooms = function (okCallback, errCallback) {
+function listRooms(okCallback, errCallback) {
   send('GET', '/rooms/', undefined, okCallback, errCallback);
 };
 
-let getRoom = function (room, okCallback, errCallback) {
+function getRoom(room, okCallback, errCallback) {
   send('GET', '/rooms/' + room + '/', undefined, okCallback, errCallback);
 };
 
-let createRoom = function (name = 'testNewRoom', options, okCallback, errCallback) {
+function createRoom(name = 'testNewRoom', options, okCallback, errCallback) {
   //options.name = name;
   send('POST', '/rooms/', {
     name: name,
@@ -61,66 +61,35 @@ let createRoom = function (name = 'testNewRoom', options, okCallback, errCallbac
   }, okCallback, errCallback);
 };
 
-let deleteRoom = function (room, okCallback, errCallback) {
+function deleteRoom(room, okCallback, errCallback) {
   send('DELETE', '/rooms/' + room + '/', undefined, okCallback, errCallback);
 };
 
-let updateRoom = function (room, config, okCallback, errCallback) {
+function updateRoom(room, config, okCallback, errCallback) {
   send('PUT', '/rooms/' + room + '/', config, okCallback, errCallback);
 };
 
-let listParticipants = function (room, okCallback, errCallback) {
+function listParticipants(room, okCallback, errCallback) {
   send('GET', '/rooms/' + room + '/participants/', undefined, okCallback, errCallback);
 };
 
-let getParticipant = function (room, participant, okCallback, errCallback) {
+function getParticipant(room, participant, okCallback, errCallback) {
   send('GET', '/rooms/' + room + '/participants/' + participant + '/', undefined, okCallback, errCallback);
 };
 
-function getForbidOptions() {
-  let audio = $('#audioforbidoptions').val() === 'false' ? false : true;
-  let video = $('#videoforbidoptions').val() === 'false' ? false : true;
-  return { audio, video }
-}
-let forbidSub = function (room, participant, okCallback, errCallback) {
-  let { audio, video } = getForbidOptions();
-  let jsonPatch = [{
-    op: 'replace',
-    path: '/permission/subscribe',
-    value: {
-      audio: audio,
-      video: video
-    }
-  }];
-  send('PATCH', '/rooms/' + room + '/participants/' + participant + '/', jsonPatch, okCallback, errCallback);
-};
-
-let forbidPub = function (room, participant, okCallback, errCallback) {
-  let { audio, video } = getForbidOptions();
-  let jsonPatch = [{
-    op: 'replace',
-    path: '/permission/publish',
-    value: {
-      audio: audio,
-      video: video
-    }
-  }];
-  send('PATCH', '/rooms/' + room + '/participants/' + participant + '/', jsonPatch, okCallback, errCallback);
-};
-
-let dropParticipant = function (room, participant, okCallback, errCallback) {
+function dropParticipant(room, participant, okCallback, errCallback) {
   send('DELETE', '/rooms/' + room + '/participants/' + participant + '/', undefined, okCallback, errCallback);
 };
 
-let listStreams = function (room, okCallback, errCallback) {
+function listStreams(room, okCallback, errCallback) {
   send('GET', '/rooms/' + room + '/streams/', undefined, okCallback, errCallback, onerror);
 };
 
-let getStream = function (room, stream, okCallback, errCallback) {
+function getStream(room, stream, okCallback, errCallback) {
   send('GET', '/rooms/' + room + '/streams/' + stream, undefined, okCallback, errCallback);
 };
 
-let mixStream = function (room, stream, view, okCallback, errCallback) {
+function mixStream(room, stream, view, okCallback, errCallback) {
   let jsonPatch = [{
     op: 'add',
     path: '/info/inViews',
@@ -129,7 +98,7 @@ let mixStream = function (room, stream, view, okCallback, errCallback) {
   send('PATCH', '/rooms/' + room + '/streams/' + stream, jsonPatch, okCallback, errCallback);
 };
 
-let unmixStream = function (room, stream, view, okCallback, errCallback) {
+function unmixStream(room, stream, view, okCallback, errCallback) {
   let jsonPatch = [{
     op: 'remove',
     path: '/info/inViews',
@@ -138,7 +107,7 @@ let unmixStream = function (room, stream, view, okCallback, errCallback) {
   send('PATCH', '/rooms/' + room + '/streams/' + stream, jsonPatch, okCallback, errCallback);
 };
 
-let setRegion = function (room, stream, region, subStream, okCallback, errCallback) {
+function setRegion(room, stream, region, subStream, okCallback, errCallback) {
   let jsonPatch = [{
     op: 'replace',
     path: `/info/layout/${region}/stream`,
@@ -147,7 +116,7 @@ let setRegion = function (room, stream, region, subStream, okCallback, errCallba
   send('PATCH', '/rooms/' + room + '/streams/' + stream, jsonPatch, okCallback, errCallback);
 };
 
-let pauseStream = function (room, stream, track, okCallback, errCallback) {
+function pauseStream(room, stream, track, okCallback, errCallback) {
   let jsonPatch = [];
   if (track === 'audio' || track === 'av') {
     jsonPatch.push({
@@ -167,7 +136,7 @@ let pauseStream = function (room, stream, track, okCallback, errCallback) {
   send('PATCH', '/rooms/' + room + '/streams/' + stream, jsonPatch, okCallback, errCallback);
 };
 
-let playStream = function (room, stream, track, okCallback, errCallback) {
+function playStream(room, stream, track, okCallback, errCallback) {
   let jsonPatch = [];
   if (track === 'audio' || track === 'av') {
     jsonPatch.push({
@@ -187,11 +156,11 @@ let playStream = function (room, stream, track, okCallback, errCallback) {
   send('PATCH', '/rooms/' + room + '/streams/' + stream, jsonPatch, okCallback, errCallback);
 };
 
-let dropStream = function (room, stream, okCallback, errCallback) {
+function dropStream(room, stream, okCallback, errCallback) {
   send('DELETE', '/rooms/' + room + '/streams/' + stream, undefined, okCallback, errCallback);
 };
 
-let startStreamingIn = function (room, url, okCallback, errCallback) {
+function startStreamingIn(room, url, okCallback, errCallback) {
   let options = {
     url: url,
     media: {
@@ -206,31 +175,30 @@ let startStreamingIn = function (room, url, okCallback, errCallback) {
   send('POST', '/rooms/' + room + '/streaming-ins', options, okCallback, errCallback);
 };
 
-let stopStreamingIn = function (room, stream, okCallback, errCallback) {
+function stopStreamingIn(room, stream, okCallback, errCallback) {
   send('DELETE', '/rooms/' + room + '/streaming-ins/' + stream, undefined, okCallback, errCallback);
 };
 
-let listRecordings = function (room, okCallback, errCallback) {
+function listRecordings(room, okCallback, errCallback) {
   send('GET', '/rooms/' + room + '/recordings/', undefined, okCallback, errCallback);
 };
 
-let startRecording = function (room, options, okCallback, errCallback) {
+function startRecording(room, options, okCallback, errCallback) {
   send('POST', '/rooms/' + room + '/recordings', options, okCallback, errCallback);
 };
-
-let stopRecording = function (room, id, okCallback, errCallback) {
+function stopRecording(room, id, okCallback, errCallback) {
   send('DELETE', '/rooms/' + room + '/recordings/' + id, undefined, okCallback, errCallback);
 };
 
-let updateRecording = function (room, id, updateOptions, okCallback, errCallback) {
+function updateRecording(room, id, updateOptions, okCallback, errCallback) {
   send('PATCH', '/rooms/' + room + '/recordings/' + id, updateOptions, okCallback, errCallback);
 };
 
-let listStreamingOuts = function (room, okCallback, errCallback) {
+function listStreamingOuts(room, okCallback, errCallback) {
   send('GET', '/rooms/' + room + '/streaming-outs/', undefined, okCallback, errCallback);
 };
 
-let startStreamingOut = function (room, url, mediaOptions, okCallback, errCallback) {
+function startStreamingOut(room, url, mediaOptions, okCallback, errCallback) {
   let options = {
     media: mediaOptions,
     url: url
@@ -238,15 +206,15 @@ let startStreamingOut = function (room, url, mediaOptions, okCallback, errCallba
   send('POST', '/rooms/' + room + '/streaming-outs', options, okCallback, errCallback);
 };
 
-let stopStreamingOut = function (room, id, okCallback, errCallback) {
+function stopStreamingOut(room, id, okCallback, errCallback) {
   send('DELETE', '/rooms/' + room + '/streaming-outs/' + id, undefined, okCallback, errCallback);
 };
 
-let updateStreamingOut = function (room, id, updateOptions, okCallback, errCallback) {
+function updateStreamingOut(room, id, updateOptions, okCallback, errCallback) {
   send('PATCH', '/rooms/' + room + '/streaming-outs/' + id, updateOptions, okCallback, errCallback);
 };
 
-let createToken = function (room, user, role, okCallback, errCallback) {
+function createToken(room, user, role, okCallback, errCallback) {
   let body = {
     room: room,
     user: user,
@@ -255,96 +223,33 @@ let createToken = function (room, user, role, okCallback, errCallback) {
   send('POST', '/tokens/', body, okCallback, errCallback);
 };
 
-
-
 function getParameterByName(name) {
   name = name.replace(/[\[]/, "\\\[").replace(/[\]]/, "\\\]");
-  let regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
+  const regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
     results = regex.exec(location.search);
   return results == null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
 }
-let resolutionName2Value = {
-  'cif': {
-    width: 352,
-    height: 288
-  },
-  'vga': {
-    width: 640,
-    height: 480
-  },
-  'svga': {
-    width: 800,
-    height: 600
-  },
-  'xga': {
-    width: 1024,
-    height: 768
-  },
-  'r640x360': {
-    width: 640,
-    height: 360
-  },
-  'hd720p': {
-    width: 1280,
-    height: 720
-  },
-  'sif': {
-    width: 320,
-    height: 240
-  },
-  'hvga': {
-    width: 480,
-    height: 320
-  },
-  'r480x360': {
-    width: 480,
-    height: 360
-  },
-  'qcif': {
-    width: 176,
-    height: 144
-  },
-  'r192x144': {
-    width: 192,
-    height: 144
-  },
-  'hd1080p': {
-    width: 1920,
-    height: 1080
-  },
-  'uhd_4k': {
-    width: 3840,
-    height: 2160
-  },
-  'r360x360': {
-    width: 360,
-    height: 360
-  },
-  'r480x480': {
-    width: 480,
-    height: 480
-  },
-  'r720x720': {
-    width: 720,
-    height: 720
-  },
-  'r1080x1920': {
-    width: 1080,
-    height: 1920
-  },
-  'r720x1280': {
-    width: 720,
-    height: 1280
-  },
-  'invaild': {
-    width: 333,
-    height: 222
-  },
-  'unbelievable': {
-    width: 1111,
-    height: 100,
-  },
-};
+const resolutionName2Value = new Map();
+resolutionName2Value.set('sif', {
+  width: 320,
+  height: 240
+});
+resolutionName2Value.set('cif', {
+  width: 352,
+  height: 288
+});
+resolutionName2Value.set('vga', {
+  width: 640,
+  height: 480
+});
+resolutionName2Value.set('hd720p', {
+  width: 1280,
+  height: 720
+});
+resolutionName2Value.set('hd1080p', {
+  width: 1920,
+  height: 1080
+});
 let defaultRoomId = '',
   role = '',
   isPublish,
@@ -356,7 +261,7 @@ let defaultRoomId = '',
   isJoin,
   isSignaling,
   mix;
-let {
+const {
   LocalStream,
   MediaStreamFactory,
   StreamSourceInfo,
@@ -369,8 +274,8 @@ let {
   ConferenceClient,
   SioSignaling
 } = Oms.Conference;
-let client = new ConferenceClient(),
-  localScreenStream,
+const client = new ConferenceClient();
+let localScreenStream,
   remoteMixedStream,
   remoteScreenStream,
   publicationCamera,
@@ -381,7 +286,7 @@ let client = new ConferenceClient(),
 defaultRoomId = getParameterByName("room") || defaultRoomId;
 role = getParameterByName('role') || 'presenter';
 isPublish = getParameterByName('publish') === 'false' ? false : true;
-resolution = resolutionName2Value[getParameterByName('resolution') || 'hd720p'];
+resolution = resolutionName2Value.get(getParameterByName('resolution') || 'hd720p');
 videoCodec = getParameterByName('videoCodec') || 'h264CB';
 audioCodec = getParameterByName('audioCodec') || 'opus';
 hasVideo = getParameterByName('hasVideo') === 'false' ? false : true;
@@ -488,7 +393,7 @@ function removeUser(participantId) {
 
 }
 (function (client) {
-  let streamaddedListener = (eve) => {
+  const streamaddedListener = (eve) => {
     let remoteStream = eve.stream;
     console.log(`New stream added ${remoteStream.id}.`);
     let source = remoteStream.source.video || remoteStream.source.audio;
@@ -502,14 +407,14 @@ function removeUser(participantId) {
         removeUser(participant.id);
       })
       console.log(`New participant joined: ${participant}.`);
-    }
-  messagereceivedListener = (event) => {
-    console.log(`New message received: ${event}.`);
-    $('#allcontent').append(`${event.origin}: ${event.message} <br/>`);
-  }
-  serverdisconnectedListener = () => {
-    console.log('Server disconnected');
-  };
+    },
+    messagereceivedListener = (event) => {
+      console.log(`New message received: ${event}.`);
+      $('#allcontent').append(`${event.origin}: ${event.message} <br/>`);
+    },
+    serverdisconnectedListener = () => {
+      console.log('Server disconnected');
+    };
   client.addEventListener("streamadded", streamaddedListener);
   client.addEventListener('participantjoined', participantjoinedListener);
   client.addEventListener('messagereceived', messagereceivedListener);
@@ -535,7 +440,7 @@ function subscribeStream(stream, okCallback) {
 
 function controlVideo() {
   $ctrlVdieo = $('#controlvideo');
-  let track = 'video';
+  const track = 'video';
   if ($ctrlVdieo.text() === 'pause video') {
     publicationCamera.mute(track).then(() => {
       subscriptions.forEach(item => {
@@ -558,7 +463,7 @@ function controlVideo() {
 
 function controlAudio() {
   $ctrlAudio = $('#controlaudio');
-  let track = 'audio';
+  const track = 'audio';
   if ($ctrlAudio.text() === 'unmute') {
     publicationCamera.unmute(track).then(() => {
       $ctrlAudio.text('mute');
@@ -582,7 +487,6 @@ function screenSharing() {
       audio: false,
       video: {
         resolution: resolution,
-        frameRate: undefined,
         source: 'screen-cast',
       },
       extensionId: extensionId,
@@ -676,9 +580,9 @@ window.onload = function () {
             //subscribe remote streams.
             remoteStreams.forEach((stream) => {
               let source = stream.source.video || stream.source.audio;
-              if(source === 'mixed'){
+              if (source === 'mixed') {
                 remoteMixedStream = stream;
-              }else if(source === 'screen-cast'){
+              } else if (source === 'screen-cast') {
                 remoteScreenStream = stream;
               }
             })
