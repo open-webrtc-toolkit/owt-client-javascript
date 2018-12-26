@@ -31,8 +31,8 @@ const prepareSampleRoom = new Promise((onOk, onError) => {
     let sampleRoomId = null;
     // Find sample room
     for (let i in rooms) {
-      if (room[i].name === 'sampleRoom') {
-        sampleRoomId = room[i]._id;
+      if (rooms[i].name === 'sampleRoom') {
+        sampleRoomId = rooms[i]._id;
         break;
       }
     }
@@ -73,6 +73,13 @@ prepareSampleRoom
 
     app.post(['/createToken/', '/tokens/'], function(req, res) {
       const room = req.body.room || sampleRoom;
+      const user = req.body.user;
+      const role = req.body.role;
+      if (typeof room !== 'string' || typeof user !== 'string' || typeof role !== 'string') {
+        res.status(400).send('Invalid argument.');
+        return;
+      }
+
       const tokenBody = JSON.stringify({
         //FIXME: The actual *ISP* and *region* info should be retrieved
         // from the *req* object and filled in the following 'preference' data
@@ -80,8 +87,8 @@ prepareSampleRoom
           isp: 'isp',
           region: 'region'
         },
-        user: req.body.user,
-        role: req.body.role
+        user,
+        role
       });
       request('POST', '/v1/rooms/' + room + '/tokens/', tokenBody)
         .then((medRes) => {
