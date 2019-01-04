@@ -5,4 +5,4 @@ src/samples/conference/nuve.js
 src/samples/conference/icsREST.js
 test/unit/resources/scripts/gen/*
 test/p2ptest/node_modules
-test/p2ptest/js/q.js
+test/p2ptest/dependencies
