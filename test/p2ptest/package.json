@@ -21,6 +21,6 @@
     "socketio": "^1.0.0"
   },
   "scripts": {
-    "postinstall": "python fetchq.py"
+    "postinstall": "python fetch_dependencies.py"
   }
 }
