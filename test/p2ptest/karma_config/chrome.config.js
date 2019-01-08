@@ -5,12 +5,12 @@ module.exports = function (config) {
     frameworks: ["jasmine"],
     // list of files / patterns to load in the browser
     files: [
-      'https://code.jquery.com/jquery-1.10.2.min.js',
-      'https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.4.5/socket.io.min.js',
-      'https://webrtc.github.io/adapter/adapter-7.0.0.js',
+      './test/p2ptest/dependencies/jquery.min.js',
+      './test/p2ptest/dependencies/socket.io.min.js',
+      './test/p2ptest/dependencies/adapter.js',
+      './test/p2ptest/dependencies/q.js',
       './dist/samples/p2p/js/sc.websocket.js',
       './dist/sdk/oms.js',
-      './test/p2ptest/js/q.js',
       './test/p2ptest/js/errorHandler.js',
       './test/p2ptest/js/test_functions.js',
       './test/p2ptest/js/video_detector.js',
