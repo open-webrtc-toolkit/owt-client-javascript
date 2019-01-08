@@ -130,7 +130,6 @@ TestClient.prototype = {
       }
       that.request["localStreamId"] = localStream.id;
       that.debug("Create stream id:", localStream.id);
-      that.showInPage(localStream, "LOCAL STREAM");
     }, err=>{
           console.error('Failed to create MediaStream, '+err);
           that.request["createLocal_failed"]++;
@@ -264,16 +263,6 @@ TestClient.prototype = {
     var para = document.createElement("p");
     document.body.appendChild(para);
     video.srcObject = stream.mediaStream
-  },
-
-  removeVideo: function(stream) {
-    var videos = document.getElementsByClassName("video");
-    if (stream) {
-      videos = [document.getElementById("stream" + stream.id)]
-    };
-    for (var i = 0; i < videos.length; i++) {
-      document.body.removeChild(videos[i]);
-    };
   },
 
 };

@@ -2,6 +2,13 @@ describe('P2P JS SDK', function () {
   jasmine.DEFAULT_TIMEOUT_INTERVAL = 20000;
   var detection = '';
 
+  function removeVideo() {
+    var videos = document.getElementsByClassName("video");
+    for (var i = 0; i < videos.length; i++) {
+      document.body.removeChild(videos[i]);
+    };
+  }
+
   function waitsFor(latch, message, tiout) {
     var timeout;
     var TIMEOUT = 5000;
@@ -93,7 +100,7 @@ describe('P2P JS SDK', function () {
 
     afterEach(function () {
       actorUser.close();
-      actorUser.removeVideo(actorUser.localStream);
+      removeVideo();
       detection = '';
     });
 
@@ -560,6 +567,9 @@ describe('P2P JS SDK', function () {
     afterEach(function () {
       Q('afterEach')
         .then(function () {
+          removeVideo()
+        })
+        .then(function () {
           actorUser1.disconnect();
           actorUser1 = undefined
         })
@@ -649,13 +659,8 @@ describe('P2P JS SDK', function () {
           }, userName2 + " remote stream is good", waitInterval)
         })
         .then(function () {
-          actorUser1.close();
-          actorUser1.removeVideo(actorUser1.localStream);
-          actorUser2.removeVideo(User2RemoteStream)
-          detection = '';
-        })
-        .then(function () {
           console.log('test end');
+          actorUser1.close();
           done();
         })
     });
@@ -747,13 +752,8 @@ describe('P2P JS SDK', function () {
           expect(audio_rsult).toBeFalsy();
         })
         .then(function () {
-          actorUser1.close();
-          actorUser1.removeVideo(actorUser1.localStream);
-          actorUser2.removeVideo(User2RemoteStream)
-          detection = '';
-        })
-        .then(function () {
           console.log('test end');
+          actorUser1.close();
           done();
         })
     });
@@ -822,13 +822,8 @@ describe('P2P JS SDK', function () {
           expect(audio_rsult).toBeTruthy();
         })
         .then(function () {
-          actorUser1.close();
-          actorUser1.removeVideo(actorUser1.localStream);
-          actorUser2.removeVideo(User2RemoteStream)
-          detection = '';
-        })
-        .then(function () {
           console.log('test end');
+          actorUser1.close();
           done();
         })
     });
@@ -1001,6 +996,7 @@ describe('P2P JS SDK', function () {
         })
         .then(function () {
           console.log('test end');
+          actorUser1.close()
           done();
         })
     });
@@ -1102,6 +1098,7 @@ describe('P2P JS SDK', function () {
         })
         .then(function () {
           console.log('test end');
+          actorUser1.close()
           done();
         })
     });
