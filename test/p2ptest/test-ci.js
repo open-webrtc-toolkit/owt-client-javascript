@@ -58,32 +58,6 @@ describe('P2P JS SDK', function () {
     console.log(type, msg);
   }
 
-  var videoDetection = function (streamId) {
-    window.setTimeout(function () {
-      var framechecker = new VideoFrameChecker(
-        document.getElementById(streamId));
-      framechecker.checkVideoFrame_();
-      window.setTimeout(function () {
-        framechecker.stop();
-        if (framechecker.frameStats.numFrames > 0) {
-          console.log("Framechecker frames number > 0, is : ", framechecker.frameStats.numFrames);
-          console.log("Framechecker numFrozenFrames number  is : ", framechecker.frameStats.numFrozenFrames);
-          console.log("Framechecker numBlackFrames number  is : ", framechecker.frameStats.numBlackFrames);
-          if ((framechecker.frameStats.numFrozenFrames === 0) && (framechecker.frameStats.numBlackFrames == 0)) {
-            detection = true;
-          } else {
-            console.log("Framechecker numFrozenFrames number  is : ", framechecker.frameStats.numFrozenFrames);
-            console.log("Framechecker numBlackFrames number  is : ", framechecker.frameStats.numBlackFrames);
-            detection = false;
-          }
-        } else {
-          console.log("Framechecker frames number < = 0 , is : ", framechecker.frameStats.numFrames);
-          detection = false;
-        }
-      }, 1000);
-    }, 1000);
-  }
-
   describe('media stream test', function () {
     var actorUser = undefined;
 
@@ -132,17 +106,6 @@ describe('P2P JS SDK', function () {
             }, userName1 + " check action: create localStream ", waitInterval)
           })
           .then(function () {
-            // action
-            detection = "";
-            videoDetection("stream" + actorUser.request["localStreamId"]);
-          })
-          .then(function () {
-            return waitsFor(function () {
-              //wait lock
-              return detection === true;
-            }, userName1 + " create localstream is fail", waitInterval)
-          })
-          .then(function () {
             waits('test end', 2000)
           })
           .then(function () {
@@ -167,17 +130,6 @@ describe('P2P JS SDK', function () {
             // check action
             return actorUser.request["createLocal_success"] === 1
           }, userName1 + " check action: create localStream ", waitInterval)
-        })
-        .then(function () {
-          // action
-          detection = "";
-          videoDetection("stream" + actorUser.request["localStreamId"]);
-        })
-        .then(function () {
-          return waitsFor(function () {
-            //wait lock
-            return detection === true;
-          }, userName1 + " create localstream is fail", waitInterval)
         })
         .then(function () {
           var video_result = actorUser.hasVideo(actorUser.localStream);
@@ -611,17 +563,6 @@ describe('P2P JS SDK', function () {
           }, userName1 + " check action: create localStream ", waitInterval)
         })
         .then(function () {
-          // action
-          detection = "";
-          videoDetection("stream" + actorUser1.request["localStreamId"]);
-        })
-        .then(function () {
-          return waitsFor(function () {
-            //wait lock
-            return detection === true;
-          }, userName1 + " create localstream is fail", waitInterval)
-        })
-        .then(function () {
           //TODO change wrapper of publish
           actorUser1.publish(userName2);
         })
@@ -636,17 +577,6 @@ describe('P2P JS SDK', function () {
             //check wait
             return actorUser2.request["streamadded_success"] === 1;
           }, userName2 + "check wait: stream-added", waitInterval)
-        })
-        .then(function () {
-          // action
-          detection = "";
-          videoDetection("stream" + User2RemoteId);
-        })
-        .then(function () {
-          return waitsFor(function () {
-            //wait lock
-            return detection === true;
-          }, userName2 + " remote stream is good", waitInterval)
         })
         .then(function () {
           actorUser1.close();
@@ -702,17 +632,6 @@ describe('P2P JS SDK', function () {
           }, userName1 + " check action: create localStream ", waitInterval)
         })
         .then(function () {
-          // action
-          detection = "";
-          videoDetection("stream" + actorUser1.request["localStreamId"]);
-        })
-        .then(function () {
-          return waitsFor(function () {
-            //wait lock
-            return detection === true;
-          }, userName1 + " create localstream is fail", waitInterval)
-        })
-        .then(function () {
           //TODO change wrapper of publish
           actorUser1.publish(userName2);
         })
@@ -727,17 +646,6 @@ describe('P2P JS SDK', function () {
             //check wait
             return actorUser2.request["streamadded_success"] === 1;
           }, userName2 + "check wait: stream-added", waitInterval)
-        })
-        .then(function () {
-          // action
-          detection = "";
-          videoDetection("stream" + User2RemoteId);
-        })
-        .then(function () {
-          return waitsFor(function () {
-            //wait lock
-            return detection === true;
-          }, userName2 + " remote stream is good", waitInterval)
         })
         .then(function () {
           //TODO change wrapper of publish
@@ -952,17 +860,6 @@ describe('P2P JS SDK', function () {
           }, userName1 + " check action: create localStream ", waitInterval)
         })
         .then(function () {
-          // action
-          detection = "";
-          videoDetection("stream" + actorUser1.request["localStreamId"]);
-        })
-        .then(function () {
-          return waitsFor(function () {
-            //wait lock
-            return detection === true;
-          }, userName1 + " create localstream is fail", waitInterval)
-        })
-        .then(function () {
           //TODO change wrapper of publish
           actorUser1.publish(userName2);
         })
@@ -977,17 +874,6 @@ describe('P2P JS SDK', function () {
             //check wait
             return actorUser2.request["streamadded_success"] === 1;
           }, userName2 + "check wait: stream-added", waitInterval)
-        })
-        .then(function () {
-          // action
-          detection = "";
-          videoDetection("stream" + User2RemoteId);
-        })
-        .then(function () {
-          return waitsFor(function () {
-            //wait lock
-            return detection === true;
-          }, userName2 + " remote stream is good", waitInterval)
         })
         .then(function () {
           // action
@@ -1047,17 +933,6 @@ describe('P2P JS SDK', function () {
           }, userName1 + " check action: create localStream ", waitInterval)
         })
         .then(function () {
-          // action
-          detection = "";
-          videoDetection("stream" + actorUser1.request["localStreamId"]);
-        })
-        .then(function () {
-          return waitsFor(function () {
-            //wait lock
-            return detection === true;
-          }, userName1 + " create localstream is fail", waitInterval)
-        })
-        .then(function () {
           //TODO change wrapper of publish
           actorUser1.publish(userName2);
         })
@@ -1072,17 +947,6 @@ describe('P2P JS SDK', function () {
             //check wait
             return actorUser2.request["streamadded_success"] === 1;
           }, userName2 + "check wait: stream-added", waitInterval)
-        })
-        .then(function () {
-          // action
-          detection = "";
-          videoDetection("stream" + User2RemoteId);
-        })
-        .then(function () {
-          return waitsFor(function () {
-            //wait lock
-            return detection === true;
-          }, userName2 + " remote stream is good", waitInterval)
         })
         .then(function () {
           // action

@@ -13,8 +13,6 @@ module.exports = function (config) {
       './dist/sdk/oms.js',
       './test/p2ptest/js/errorHandler.js',
       './test/p2ptest/js/test_functions.js',
-      './test/p2ptest/js/video_detector.js',
-      './test/p2ptest/js/videoFrameChecker.js',
       './test/p2ptest/js/test.js',
       './test/p2ptest/test-ci.js',
       './test/p2ptest/js/config.js',
