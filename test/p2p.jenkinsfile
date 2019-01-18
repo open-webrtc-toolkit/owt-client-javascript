@@ -25,8 +25,8 @@ pipeline {
             steps{
                 script{
                     withEnv(['JENKINS_NODE_COOKIE=dontkill']) {
-                        sh "${env.p2pScriptPath}/startP2PServer.sh"
-                        }    
+                        sh "${env.startP2PServerScriptPath} --server-path ${env.p2pServerPath}"
+                    }
                 }
             }
         }
