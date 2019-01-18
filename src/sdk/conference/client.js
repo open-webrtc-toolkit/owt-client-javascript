@@ -6,22 +6,19 @@
 
 'use strict';
 
-import * as EventModule from '../base/event.js';
-import {SioSignaling as Signaling} from './signaling.js';
-import Logger from '../base/logger.js';
-import {Base64} from '../base/base64.js';
-import {ConferenceError} from './error.js';
-import * as Utils from '../base/utils.js';
-import * as StreamModule from '../base/stream.js';
-import {Participant} from './participant.js';
-import {ConferenceInfo} from './info.js';
-import {ConferencePeerConnectionChannel} from './channel.js';
-import {
-  RemoteMixedStream,
-  ActiveAudioInputChangeEvent,
-  LayoutChangeEvent,
-} from './mixedstream.js';
-import * as StreamUtilsModule from './streamutils.js';
+import * as EventModule from '../base/event.js'
+import { SioSignaling as Signaling } from './signaling.js'
+import Logger from '../base/logger.js'
+import { Base64 } from '../base/base64.js'
+import { ConferenceError } from './error.js'
+import * as Utils from '../base/utils.js'
+import * as StreamModule from '../base/stream.js'
+import { Participant } from './participant.js'
+import { ConferenceInfo } from './info.js'
+import { ConferencePeerConnectionChannel, ConferenceQuicChannel } from './channel.js'
+import { RemoteMixedStream, ActiveAudioInputChangeEvent, LayoutChangeEvent } from './mixedstream.js'
+import * as StreamUtilsModule from './streamutils.js'
+import { timingSafeEqual } from 'crypto';
 
 const SignalingState = {
   READY: 1,
@@ -297,16 +294,20 @@ export const ConferenceClient = function(config, signalingImpl) {
   }
 
   // eslint-disable-next-line require-jsdoc
-  function createPeerConnectionChannel() {
+  function createPeerConnectionChannel(transport) {
     // Construct an signaling sender/receiver for ConferencePeerConnection.
     const signalingForChannel = Object.create(EventModule.EventDispatcher);
     signalingForChannel.sendSignalingMessage = sendSignalingMessage;
-    const pcc = new ConferencePeerConnectionChannel(
-        config, signalingForChannel);
-    pcc.addEventListener('id', (messageEvent) => {
-      channels.set(messageEvent.message, pcc);
+    let channel;
+    if (transport && transport.protocol === 'quic') {
+      channel = new ConferenceQuicChannel(config, signalingForChannel);
+    } else {
+      channel = new ConferencePeerConnectionChannel(config, signalingForChannel);
+    }
+    channel.addEventListener('id', (messageEvent) => {
+      channels.set(messageEvent.message, channel);
     });
-    return pcc;
+    return channel;
   }
 
   // eslint-disable-next-line require-jsdoc
@@ -422,7 +423,7 @@ export const ConferenceClient = function(config, signalingImpl) {
     if (!(stream instanceof StreamModule.RemoteStream)) {
       return Promise.reject(new ConferenceError('Invalid stream.'));
     }
-    const channel = createPeerConnectionChannel();
+    const channel = createPeerConnectionChannel(options.transport);
     return channel.subscribe(stream, options);
   };
 

@@ -814,3 +814,100 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
     return !!param.codec;
   }
 }
+export class ConferenceQuicChannel extends EventDispatcher {
+  // TODO: share code with ConferencePeerConnectionChannel.
+
+  constructor(config, signaling) {
+    super();
+    if (typeof RTCIceTransport !== 'function' || typeof RTCQuicTransport !==
+      'function') {
+      throw new TypeError(
+        'RTCIceTransport or RTCQuicTransport is not supported. Please use WebRTC connection.'
+      )
+    }
+    this._signaling = signaling;
+    this._iceTransport = null;
+    this._quicTransport = null;
+    this._subscribedStream = null;
+    this._subscribePromise = null;
+  }
+
+  subscribe(stream, options) {
+    this._subscribedStream = stream;
+    this._iceTransport = new RTCIceTransport();
+    this._iceTransport.onicecandidate=(event)=>{
+      const candidate=event.candidate;
+      this._signaling.sendSignalingMessage('soac', {
+        id: this._internalId,
+        signaling: {
+          type: 'candidate',
+          candidate: {
+            candidate: 'a=' + candidate.candidate,
+            sdpMid: candidate.sdpMid,
+            sdpMLineIndex: candidate.sdpMLineIndex
+          }
+        }
+      });
+    };
+    const mediaOptions=Object.create({});
+    mediaOptions.audio = {};
+    mediaOptions.audio.from = stream.id;
+    mediaOptions.video = {};
+    mediaOptions.video.from = stream.id;
+    this._signaling.sendSignalingMessage('subscribe', {
+      transport: {protocol:'quic'},
+      media:mediaOptions
+    }).then((data) => {
+      const messageEvent = new MessageEvent('id', {
+        message: data.id,
+        origin: this._remoteId
+      });
+      this.dispatchEvent(messageEvent);
+      this._internalId = data.id;
+      this._signaling.sendSignalingMessage('soac', {
+        id: this._internalId,
+        signaling: {
+          type: 'ice-parameters',
+          parameters: this._iceTransport.getLocalParameters()
+        }
+      });
+    });
+    return new Promise((resolve, reject) => {
+      this._subscribePromise = { resolve: resolve, reject: reject };
+    });
+  }
+
+  onMessage(notification, message) {
+    switch (notification) {
+      case 'progress':
+        if (message.status === 'soac')
+          this._soacHandler(message.data);
+        else if (message.status === 'ready')
+          this._readyHandler();
+        else if(message.status === 'error')
+          this._errorHandler(message.data);
+        break;
+      case 'stream':
+        this._onStreamEvent(message);
+        break;
+      default:
+        Logger.warning('Unknown notification from MCU.');
+    }
+  }
+
+  _soacHandler(data) {
+    if (data.type === 'ice-parameters') {
+      Logger.debug('Username: ' + data.parameters.usernameFragment +
+        ', password:' + data.parameters.password);
+      this._iceTransport.start(data.parameters);
+      this._iceTransport.gather({gatherPolicy:'all', iceServers:[]});
+    } else if (data.type === 'candidate') {
+      const candidate=new RTCIceCandidate({
+        candidate: data.candidate.candidate,
+        sdpMid: data.candidate.sdpMid,
+        sdpMLineIndex: data.candidate.sdpMLineIndex
+      });
+      this._iceTransport.addRemoteCandidate(candidate);
+    }
+  }
+}

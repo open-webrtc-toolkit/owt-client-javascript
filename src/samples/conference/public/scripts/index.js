@@ -191,7 +191,33 @@ const runSocketIOSample = function() {
                     if(!subscribeForward){
                       if (stream.source.audio === 'mixed' || stream.source.video ===
                         'mixed') {
+<<<<<<< HEAD
                         subscribeAndRenderVideo(stream);
+=======
+                        conference.subscribe(stream, {
+                            audio: {codecs:[{name:'opus'}]},
+                            video: true,
+                            transport: {protocol:'quic'}
+                        }).then((subscription) => {
+                            subscriptionForMixedStream = subscription;
+                            let $video = $(`<video controls autoplay id=${stream.id} style='display:block'>this browser does not supported video tag</video>`);
+                            $video.get(0).srcObject = stream.mediaStream;
+                            $('body').append($video);
+                            subscription.addEventListener('error', (err) => {
+                                console.log('Subscription error: ' + err.error.message);
+                            })
+                        });
+                        for (const resolution of stream.capabilities.video.resolutions) {
+                            const button = $('<button/>', {
+                                text: resolution.width + 'x' +
+                                    resolution.height,
+                                click: () => {
+                                    subscribeDifferentResolution(stream, resolution);
+                                }
+                            });
+                            button.appendTo($('body'));
+                        };
+>>>>>>> d4a3a3c... Initialize QUIC support.
                       }
                     } else if (stream.source.audio !== 'mixed') {
                         subscribeAndRenderVideo(stream);
