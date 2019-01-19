@@ -3,10 +3,10 @@
 // SPDX-License-Identifier: Apache-2.0
 
 'use strict';
-import * as utils from './utils.js'
-import Logger from './logger.js'
-import { Resolution } from './mediaformat.js'
-import * as MediaFormatModule from './mediaformat.js'
+import * as utils from './utils.js';
+import Logger from './logger.js';
+import {Resolution} from './mediaformat.js';
+import * as MediaFormatModule from './mediaformat.js';
 
 /**
  * @class AudioTrackConstraints
@@ -18,7 +18,7 @@ import * as MediaFormatModule from './mediaformat.js'
 export class AudioTrackConstraints {
   constructor(source) {
     if (!Object.values(MediaFormatModule.AudioSourceInfo)
-             .some(v => v === source)) {
+        .some((v) => v === source)) {
       throw new TypeError('Invalid source.');
     }
     /**
@@ -35,7 +35,7 @@ export class AudioTrackConstraints {
      * @instance
      * @see https://w3c.github.io/mediacapture-main/#def-constraint-deviceId
      */
-     this.deviceId = undefined;
+    this.deviceId = undefined;
   }
 }
 
@@ -49,7 +49,7 @@ export class AudioTrackConstraints {
 export class VideoTrackConstraints {
   constructor(source) {
     if (!Object.values(MediaFormatModule.VideoSourceInfo)
-             .some(v => v === source)) {
+        .some((v) => v === source)) {
       throw new TypeError('Invalid source.');
     }
     /**
@@ -132,7 +132,7 @@ export class MediaStreamFactory {
    * @static
    * @desc Create a MediaStream with given constraints. If you want to create a MediaStream for screen cast, please make sure both audio and video's source are "screen-cast".
    * @memberof Oms.Base.MediaStreamFactory
-   * @returns {Promise<MediaStream, Error>} Return a promise that is resolved when stream is successfully created, or rejected if one of the following error happened:
+   * @return {Promise<MediaStream, Error>} Return a promise that is resolved when stream is successfully created, or rejected if one of the following error happened:
    * - One or more parameters cannot be satisfied.
    * - Specified device is busy.
    * - Cannot obtain necessary permission or operation is canceled by user.
@@ -142,31 +142,31 @@ export class MediaStreamFactory {
    */
   static createMediaStream(constraints) {
     if (typeof constraints !== 'object' || (!constraints.audio && !
-        constraints.video)) {
+    constraints.video)) {
       return Promise.reject(new TypeError('Invalid constrains'));
     }
     if (!isVideoConstrainsForScreenCast(constraints) && (typeof constraints.audio ===
         'object') && constraints.audio.source === MediaFormatModule.AudioSourceInfo
-      .SCREENCAST) {
+        .SCREENCAST) {
       return Promise.reject(new TypeError('Cannot share screen without video.'));
     }
     if (isVideoConstrainsForScreenCast(constraints) && !utils.isChrome() && !utils
-      .isFirefox()) {
+        .isFirefox()) {
       return Promise.reject(new TypeError(
-        'Screen sharing only supports Chrome and Firefox.'));
+          'Screen sharing only supports Chrome and Firefox.'));
     }
     if (isVideoConstrainsForScreenCast(constraints) && typeof constraints.audio ===
       'object' && constraints.audio.source !== MediaFormatModule.AudioSourceInfo
-      .SCREENCAST) {
+        .SCREENCAST) {
       return Promise.reject(new TypeError(
-        'Cannot capture video from screen cast while capture audio from other source.'
+          'Cannot capture video from screen cast while capture audio from other source.'
       ));
-    };
+    }
     // Screen sharing on Chrome does not work with the latest constraints format.
     if (isVideoConstrainsForScreenCast(constraints) && utils.isChrome()) {
       if (!constraints.extensionId) {
         return Promise.reject(new TypeError(
-          'Extension ID must be specified for screen sharing on Chrome.'));
+            'Extension ID must be specified for screen sharing on Chrome.'));
       }
       const desktopCaptureSources = ['screen', 'window', 'tab'];
       if (constraints.audio) {
@@ -174,7 +174,7 @@ export class MediaStreamFactory {
       }
       return new Promise((resolve, reject) => {
         chrome.runtime.sendMessage(constraints.extensionId, {
-          getStream: desktopCaptureSources
+          getStream: desktopCaptureSources,
         }, function(response) {
           if (response === undefined) {
             return reject(new Error(chrome.runtime.lastError.message));
@@ -182,7 +182,7 @@ export class MediaStreamFactory {
           if (constraints.audio && typeof response.options !==
             'object') {
             Logger.warning(
-              'Desktop sharing with audio requires the latest Chrome extension. Your audio constraints will be ignored.'
+                'Desktop sharing with audio requires the latest Chrome extension. Your audio constraints will be ignored.'
             );
           }
           const mediaConstraints = Object.create({});
@@ -192,12 +192,12 @@ export class MediaStreamFactory {
               mediaConstraints.audio = {
                 mandatory: {
                   chromeMediaSource: 'desktop',
-                  chromeMediaSourceId: response.streamId
-                }
-              }
+                  chromeMediaSourceId: response.streamId,
+                },
+              };
             } else {
               Logger.warning(
-                'Sharing screen with audio was not selected by user.'
+                  'Sharing screen with audio was not selected by user.'
               );
             }
           }
@@ -222,13 +222,13 @@ export class MediaStreamFactory {
               constraints.video.frameRate;
           }
           resolve(navigator.mediaDevices.getUserMedia(
-            mediaConstraints));
+              mediaConstraints));
         });
-      })
+      });
     } else {
       if (!constraints.audio && !constraints.video) {
         return Promise.reject(new TypeError(
-          'At least one of audio and video must be requested.'));
+            'At least one of audio and video must be requested.'));
       }
       const mediaConstraints = Object.create({});
       if (typeof constraints.audio === 'object' && constraints.audio.source ===
@@ -238,7 +238,7 @@ export class MediaStreamFactory {
           mediaConstraints.audio.deviceId = constraints.audio.deviceId;
         } else {
           mediaConstraints.audio.deviceId = {
-            exact: constraints.audio.deviceId
+            exact: constraints.audio.deviceId,
           };
         }
       } else {
@@ -247,7 +247,7 @@ export class MediaStreamFactory {
       if (typeof constraints.audio === 'object' && constraints.audio.source ===
         MediaFormatModule.AudioSourceInfo.SCREENCAST) {
         Logger.warning(
-          'Screen sharing with audio is not supported in Firefox.');
+            'Screen sharing with audio is not supported in Firefox.');
         mediaConstraints.audio = false;
       }
       if (typeof constraints.video === 'object') {
@@ -263,7 +263,7 @@ export class MediaStreamFactory {
           mediaConstraints.video.height.exact = constraints.video.resolution.height;
         }
         if (typeof constraints.video.deviceId === 'string') {
-          mediaConstraints.video.deviceId = { exact: constraints.video.deviceId };
+          mediaConstraints.video.deviceId = {exact: constraints.video.deviceId};
         }
         if (utils.isFirefox() && constraints.video.source ===
           MediaFormatModule.VideoSourceInfo.SCREENCAST) {

@@ -13,7 +13,7 @@ export const AudioSourceInfo = {
   MIC: 'mic',
   SCREENCAST: 'screen-cast',
   FILE: 'file',
-  MIXED: 'mixed'
+  MIXED: 'mixed',
 };
 
 /**
@@ -26,7 +26,7 @@ export const VideoSourceInfo = {
   CAMERA: 'camera',
   SCREENCAST: 'screen-cast',
   FILE: 'file',
-  MIXED: 'mixed'
+  MIXED: 'mixed',
 };
 
 /**
@@ -50,7 +50,7 @@ export const TrackKind = {
    * Both audio and video tracks.
    * @type string
    */
-  AUDIO_AND_VIDEO: 'av'
+  AUDIO_AND_VIDEO: 'av',
 };
 /**
  * @class Resolution

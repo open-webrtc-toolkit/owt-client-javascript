@@ -67,7 +67,7 @@ export const EventDispatcher = function() {
     if (!spec.dispatcher.eventListeners[eventType]) {
       return;
     }
-    var index = spec.dispatcher.eventListeners[eventType].indexOf(listener);
+    const index = spec.dispatcher.eventListeners[eventType].indexOf(listener);
     if (index !== -1) {
       spec.dispatcher.eventListeners[eventType].splice(index, 1);
     }
@@ -146,7 +146,7 @@ export class MessageEvent extends OmsEvent {
  * @memberof Oms.Base
  * @hideconstructor
  */
-export class ErrorEvent extends OmsEvent{
+export class ErrorEvent extends OmsEvent {
   constructor(type, init) {
     super(type);
     /**
@@ -165,7 +165,7 @@ export class ErrorEvent extends OmsEvent{
  * @hideconstructor
  */
 export class MuteEvent extends OmsEvent {
-  constructor(type, init){
+  constructor(type, init) {
     super(type);
     /**
      * @member {Oms.Base.TrackKind} kind

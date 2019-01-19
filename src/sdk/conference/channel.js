@@ -5,11 +5,11 @@
 'use strict';
 
 import Logger from '../base/logger.js';
-import { EventDispatcher, MessageEvent, OmsEvent, ErrorEvent, MuteEvent } from '../base/event.js';
-import { TrackKind } from '../base/mediaformat.js'
-import { Publication } from '../base/publication.js';
-import { Subscription } from './subscription.js'
-import { ConferenceError } from './error.js'
+import {EventDispatcher, MessageEvent, OmsEvent, ErrorEvent, MuteEvent} from '../base/event.js';
+import {TrackKind} from '../base/mediaformat.js';
+import {Publication} from '../base/publication.js';
+import {Subscription} from './subscription.js';
+import {ConferenceError} from './error.js';
 import * as Utils from '../base/utils.js';
 import * as ErrorModule from './error.js';
 import * as StreamModule from '../base/stream.js';
@@ -22,7 +22,7 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
     this._options = null;
     this._signaling = signaling;
     this._pc = null;
-    this._internalId = null;  // It's publication ID or subscription ID.
+    this._internalId = null; // It's publication ID or subscription ID.
     this._pendingCandidates = [];
     this._subscribePromise = null;
     this._publishPromise = null;
@@ -30,19 +30,20 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
     this._publishedStream = null;
     this._publication = null;
     this._subscription = null;
-    this._disconnectTimer = null;  // Timer for PeerConnection disconnected. Will stop connection after timer.
+    this._disconnectTimer = null; // Timer for PeerConnection disconnected. Will stop connection after timer.
     this._ended = false;
   }
 
   onMessage(notification, message) {
     switch (notification) {
       case 'progress':
-        if (message.status === 'soac')
+        if (message.status === 'soac') {
           this._sdpHandler(message.data);
-        else if (message.status === 'ready')
+        } else if (message.status === 'ready') {
           this._readyHandler();
-        else if(message.status === 'error')
+        } else if (message.status === 'error') {
           this._errorHandler(message.data);
+        }
         break;
       case 'stream':
         this._onStreamEvent(message);
@@ -54,8 +55,8 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
 
   publish(stream, options) {
     if (options === undefined) {
-      options = { audio: !!stream.mediaStream.getAudioTracks(), video: !!stream
-          .mediaStream.getVideoTracks() };
+      options = {audio: !!stream.mediaStream.getAudioTracks(), video: !!stream
+          .mediaStream.getVideoTracks()};
     }
     if (typeof options !== 'object') {
       return Promise.reject(new TypeError('Options should be an object.'));
@@ -67,42 +68,42 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
       options.video = !!stream.mediaStream.getVideoTracks();
     }
     if (!!options.audio === !stream.mediaStream.getAudioTracks().length || !!
-      options.video === !stream.mediaStream.getVideoTracks().length) {
+    options.video === !stream.mediaStream.getVideoTracks().length) {
       return Promise.reject(new ConferenceError(
-        'options.audio/video is inconsistent with tracks presented in the MediaStream.'
+          'options.audio/video is inconsistent with tracks presented in the MediaStream.'
       ));
     }
     if ((options.audio === false || options.audio === null) &&
       (options.video === false || options.video === null)) {
       return Promise.reject(new ConferenceError(
-        'Cannot publish a stream without audio and video.'));
+          'Cannot publish a stream without audio and video.'));
     }
     if (typeof options.audio === 'object') {
       if (!Array.isArray(options.audio)) {
         return Promise.reject(new TypeError(
-          'options.audio should be a boolean or an array.'));
+            'options.audio should be a boolean or an array.'));
       }
       for (const parameters of options.audio) {
         if (!parameters.codec || typeof parameters.codec.name !== 'string' || (
-            parameters.maxBitrate !== undefined && typeof parameters.maxBitrate !==
+          parameters.maxBitrate !== undefined && typeof parameters.maxBitrate !==
             'number')) {
           return Promise.reject(new TypeError(
-            'options.audio has incorrect parameters.'));
+              'options.audio has incorrect parameters.'));
         }
       }
     }
     if (typeof options.video === 'object') {
       if (!Array.isArray(options.video)) {
         return Promise.reject(new TypeError(
-          'options.video should be a boolean or an array.'));
+            'options.video should be a boolean or an array.'));
       }
       for (const parameters of options.video) {
         if (!parameters.codec || typeof parameters.codec.name !== 'string' || (
-            parameters.maxBitrate !== undefined && typeof parameters.maxBitrate !==
+          parameters.maxBitrate !== undefined && typeof parameters.maxBitrate !==
             'number') || (parameters.codec.profile !== undefined && typeof parameters
             .codec.profile !== 'string')) {
           return Promise.reject(new TypeError(
-            'options.video has incorrect parameters.'));
+              'options.video has incorrect parameters.'));
         }
       }
     }
@@ -113,18 +114,18 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
       false && options.audio !== null) {
       if (stream.mediaStream.getAudioTracks().length > 1) {
         Logger.warning(
-          'Publishing a stream with multiple audio tracks is not fully supported.'
+            'Publishing a stream with multiple audio tracks is not fully supported.'
         );
       }
       if (typeof options.audio !== 'boolean' && typeof options.audio !==
         'object') {
         return Promise.reject(new ConferenceError(
-          'Type of audio options should be boolean or an object.'
+            'Type of audio options should be boolean or an object.'
         ));
       }
       mediaOptions.audio = {};
       mediaOptions.audio.source = stream.source.audio;
-      for(const track of stream.mediaStream.getAudioTracks()){
+      for (const track of stream.mediaStream.getAudioTracks()) {
         this._pc.addTrack(track, stream.mediaStream);
       }
     } else {
@@ -134,7 +135,7 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
       false && options.video !== null) {
       if (stream.mediaStream.getVideoTracks().length > 1) {
         Logger.warning(
-          'Publishing a stream with multiple video tracks is not fully supported.'
+            'Publishing a stream with multiple video tracks is not fully supported.'
         );
       }
       mediaOptions.video = {};
@@ -143,11 +144,11 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
       mediaOptions.video.parameters = {
         resolution: {
           width: trackSettings.width,
-          height: trackSettings.height
+          height: trackSettings.height,
         },
-        framerate: trackSettings.frameRate
+        framerate: trackSettings.frameRate,
       };
-      for(const track of stream.mediaStream.getVideoTracks()){
+      for (const track of stream.mediaStream.getVideoTracks()) {
         this._pc.addTrack(track, stream.mediaStream);
       }
     } else {
@@ -156,55 +157,55 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
     this._publishedStream = stream;
     this._signaling.sendSignalingMessage('publish', {
       media: mediaOptions,
-      attributes: stream.attributes
+      attributes: stream.attributes,
     }).then((data) => {
       const messageEvent = new MessageEvent('id', {
         message: data.id,
-        origin: this._remoteId
+        origin: this._remoteId,
       });
       this.dispatchEvent(messageEvent);
       this._internalId = data.id;
       const offerOptions = {
         offerToReceiveAudio: false,
-        offerToReceiveVideo: false
+        offerToReceiveVideo: false,
       };
       if (typeof this._pc.addTransceiver === 'function') {
         // |direction| seems not working on Safari.
         if (mediaOptions.audio && stream.mediaStream.getAudioTracks() > 0) {
-          const audioTransceiver = this._pc.addTransceiver('audio', { direction: 'sendonly' });
+          const audioTransceiver = this._pc.addTransceiver('audio', {direction: 'sendonly'});
         }
         if (mediaOptions.video && stream.mediaStream.getVideoTracks() > 0) {
-          const videoTransceiver = this._pc.addTransceiver('video', { direction: 'sendonly' });
+          const videoTransceiver = this._pc.addTransceiver('video', {direction: 'sendonly'});
         }
       }
       let localDesc;
-      this._pc.createOffer(offerOptions).then(desc => {
+      this._pc.createOffer(offerOptions).then((desc) => {
         if (options) {
           desc.sdp = this._setRtpReceiverOptions(desc.sdp, options);
         }
         return desc;
-      }).then(desc => {
+      }).then((desc) => {
         localDesc = desc;
         return this._pc.setLocalDescription(desc);
       }).then(() => {
         this._signaling.sendSignalingMessage('soac', {
           id: this
-            ._internalId,
-          signaling: localDesc
+              ._internalId,
+          signaling: localDesc,
         });
-      }).catch(e => {
+      }).catch((e) => {
         Logger.error('Failed to create offer or set SDP. Message: ' + e.message);
         this._unpublish();
         this._rejectPromise(e);
         this._fireEndedEventOnPublicationOrSubscription();
       });
-    }).catch(e => {
+    }).catch((e) => {
       this._unpublish();
       this._rejectPromise(e);
       this._fireEndedEventOnPublicationOrSubscription();
     });
     return new Promise((resolve, reject) => {
-      this._publishPromise = { resolve: resolve, reject: reject };
+      this._publishPromise = {resolve: resolve, reject: reject};
     });
   }
 
@@ -212,33 +213,33 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
     if (options === undefined) {
       options = {
         audio: !!stream.capabilities.audio,
-        video: !!stream.capabilities.video
+        video: !!stream.capabilities.video,
       };
     }
     if (typeof options !== 'object') {
       return Promise.reject(new TypeError('Options should be an object.'));
     }
     if (options.audio === undefined) {
-      options.audio = !!stream.capabilities.audio
+      options.audio = !!stream.capabilities.audio;
     }
     if (options.video === undefined) {
-      options.video = !!stream.capabilities.video
+      options.video = !!stream.capabilities.video;
     }
     if ((options.audio !== undefined && typeof options.audio !== 'object' &&
         typeof options.audio !== 'boolean' && options.audio !== null) || (
-        options.video !== undefined && typeof options.video !== 'object' &&
+      options.video !== undefined && typeof options.video !== 'object' &&
         typeof options.video !== 'boolean' && options.video !== null)) {
-      return Promise.reject(new TypeError('Invalid options type.'))
+      return Promise.reject(new TypeError('Invalid options type.'));
     }
     if (options.audio && !stream.capabilities.audio || (options.video &&
         !stream.capabilities.video)) {
       return Promise.reject(new ConferenceError(
-        'options.audio/video cannot be true or an object if there is no audio/video track in remote stream.'
+          'options.audio/video cannot be true or an object if there is no audio/video track in remote stream.'
       ));
     }
     if (options.audio === false && options.video === false) {
       return Promise.reject(new ConferenceError(
-        'Cannot subscribe a stream without audio and video.'));
+          'Cannot subscribe a stream without audio and video.'));
     }
     this._options = options;
     const mediaOptions = {};
@@ -246,7 +247,7 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
       if (typeof options.audio === 'object' && Array.isArray(options.audio.codecs)) {
         if (options.audio.codecs.length === 0) {
           return Promise.reject(new TypeError(
-            'Audio codec cannot be an empty array.'));
+              'Audio codec cannot be an empty array.'));
         }
       }
       mediaOptions.audio = {};
@@ -258,7 +259,7 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
       if (typeof options.video === 'object' && Array.isArray(options.video.codecs)) {
         if (options.video.codecs.length === 0) {
           return Promise.reject(new TypeError(
-            'Video codec cannot be an empty array.'));
+              'Video codec cannot be an empty array.'));
         }
       }
       mediaOptions.video = {};
@@ -270,75 +271,75 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
           resolution: options.video.resolution,
           framerate: options.video.frameRate,
           bitrate: options.video.bitrateMultiplier ? 'x' + options.video.bitrateMultiplier
-            .toString() : undefined,
-          keyFrameInterval: options.video.keyFrameInterval
-        }
+              .toString() : undefined,
+          keyFrameInterval: options.video.keyFrameInterval,
+        };
       }
     } else {
       mediaOptions.video = false;
     }
     this._subscribedStream = stream;
     this._signaling.sendSignalingMessage('subscribe', {
-      media: mediaOptions
+      media: mediaOptions,
     }).then((data) => {
       const messageEvent = new MessageEvent('id', {
         message: data.id,
-        origin: this._remoteId
+        origin: this._remoteId,
       });
       this.dispatchEvent(messageEvent);
       this._internalId = data.id;
       this._createPeerConnection();
       const offerOptions = {
         offerToReceiveAudio: !!options.audio,
-        offerToReceiveVideo: !!options.video
+        offerToReceiveVideo: !!options.video,
       };
       if (typeof this._pc.addTransceiver === 'function') {
         // |direction| seems not working on Safari.
         if (mediaOptions.audio) {
-          const audioTransceiver = this._pc.addTransceiver('audio', { direction: 'recvonly' });
+          const audioTransceiver = this._pc.addTransceiver('audio', {direction: 'recvonly'});
         }
         if (mediaOptions.video) {
-          const videoTransceiver = this._pc.addTransceiver('video', { direction: 'recvonly' });
+          const videoTransceiver = this._pc.addTransceiver('video', {direction: 'recvonly'});
         }
       }
-      this._pc.createOffer(offerOptions).then(desc => {
+      this._pc.createOffer(offerOptions).then((desc) => {
         if (options) {
           desc.sdp = this._setRtpReceiverOptions(desc.sdp, options);
         }
         this._pc.setLocalDescription(desc).then(() => {
           this._signaling.sendSignalingMessage('soac', {
             id: this
-              ._internalId,
-            signaling: desc
-          })
+                ._internalId,
+            signaling: desc,
+          });
         }, function(errorMessage) {
           Logger.error('Set local description failed. Message: ' +
             JSON.stringify(errorMessage));
         });
       }, function(error) {
         Logger.error('Create offer failed. Error info: ' + JSON.stringify(
-          error));
-      }).catch(e=>{
+            error));
+      }).catch((e)=>{
         Logger.error('Failed to create offer or set SDP. Message: ' + e.message);
         this._unsubscribe();
         this._rejectPromise(e);
         this._fireEndedEventOnPublicationOrSubscription();
       });
-    }).catch(e => {
+    }).catch((e) => {
       this._unsubscribe();
       this._rejectPromise(e);
       this._fireEndedEventOnPublicationOrSubscription();
     });
     return new Promise((resolve, reject) => {
-      this._subscribePromise = { resolve: resolve, reject: reject };
+      this._subscribePromise = {resolve: resolve, reject: reject};
     });
   }
 
   _unpublish() {
-    this._signaling.sendSignalingMessage('unpublish', { id: this._internalId })
-      .catch(e => {
-        Logger.warning('MCU returns negative ack for unpublishing, ' + e);
-      });
+    this._signaling.sendSignalingMessage('unpublish', {id: this._internalId})
+        .catch((e) => {
+          Logger.warning('MCU returns negative ack for unpublishing, ' + e);
+        });
     if (this._pc && this._pc.signalingState !== 'closed') {
       this._pc.close();
     }
@@ -346,11 +347,11 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
 
   _unsubscribe() {
     this._signaling.sendSignalingMessage('unsubscribe', {
-        id: this._internalId
-      })
-      .catch(e => {
-        Logger.warning('MCU returns negative ack for unsubscribing, ' + e);
-      });
+      id: this._internalId,
+    })
+        .catch((e) => {
+          Logger.warning('MCU returns negative ack for unsubscribing, ' + e);
+        });
     if (this._pc && this._pc.signalingState !== 'closed') {
       this._pc.close();
     }
@@ -363,11 +364,11 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
     return this._signaling.sendSignalingMessage(eventName, {
       id: this._internalId,
       operation: operation,
-      data: trackKind
+      data: trackKind,
     }).then(() => {
       if (!isPub) {
         const muteEventName = isMute ? 'mute' : 'unmute';
-        this._subscription.dispatchEvent(new MuteEvent(muteEventName, { kind: trackKind }));
+        this._subscription.dispatchEvent(new MuteEvent(muteEventName, {kind: trackKind}));
       }
     });
   }
@@ -375,21 +376,21 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
   _applyOptions(options) {
     if (typeof options !== 'object' || typeof options.video !== 'object') {
       return Promise.reject(new ConferenceError(
-        'Options should be an object.'));
+          'Options should be an object.'));
     }
     const videoOptions = {};
     videoOptions.resolution = options.video.resolution;
     videoOptions.framerate = options.video.frameRate;
     videoOptions.bitrate = options.video.bitrateMultiplier ? 'x' + options.video
-      .bitrateMultiplier
-      .toString() : undefined;
+        .bitrateMultiplier
+        .toString() : undefined;
     videoOptions.keyFrameInterval = options.video.keyFrameInterval;
     return this._signaling.sendSignalingMessage('subscription-control', {
       id: this._internalId,
       operation: 'update',
       data: {
-        video: { parameters: videoOptions }
-      }
+        video: {parameters: videoOptions},
+      },
     }).then();
   }
 
@@ -421,7 +422,7 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
       return;
     }
     this._ended = true;
-    const event = new OmsEvent('ended')
+    const event = new OmsEvent('ended');
     if (this._publication) {
       this._publication.dispatchEvent(event);
       this._publication.stop();
@@ -446,12 +447,13 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
   }
 
   _onIceConnectionStateChange(event) {
-    if (!event || !event.currentTarget)
+    if (!event || !event.currentTarget) {
       return;
+    }
 
     Logger.debug('ICE connection state changed to ' + event.currentTarget.iceConnectionState);
     if (event.currentTarget.iceConnectionState === 'closed' || event.currentTarget
-      .iceConnectionState === 'failed') {
+        .iceConnectionState === 'failed') {
       this._rejectPromise(new ConferenceError('ICE connection failed or closed.'));
       // Fire ended event if publication or subscription exists.
       this._fireEndedEventOnPublicationOrSubscription();
@@ -466,9 +468,9 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
         candidate: {
           candidate: 'a=' + candidate.candidate,
           sdpMid: candidate.sdpMid,
-          sdpMLineIndex: candidate.sdpMLineIndex
-        }
-      }
+          sdpMLineIndex: candidate.sdpMLineIndex,
+        },
+      },
     });
   }
 
@@ -494,18 +496,18 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
       return this._pc.getStats();
     } else {
       return Promise.reject(new ConferenceError(
-        'PeerConnection is not available.'));
+          'PeerConnection is not available.'));
     }
   }
 
   _readyHandler() {
     if (this._subscribePromise) {
       this._subscription = new Subscription(this._internalId, () => {
-          this._unsubscribe();
-        }, () => this._getStats(),
-        trackKind => this._muteOrUnmute(true, false, trackKind),
-        trackKind => this._muteOrUnmute(false, false, trackKind),
-        options => this._applyOptions(options));
+        this._unsubscribe();
+      }, () => this._getStats(),
+      (trackKind) => this._muteOrUnmute(true, false, trackKind),
+      (trackKind) => this._muteOrUnmute(false, false, trackKind),
+      (options) => this._applyOptions(options));
       // Fire subscription's ended event when associated stream is ended.
       this._subscribedStream.addEventListener('ended', () => {
         this._subscription.dispatchEvent('ended', new OmsEvent('ended'));
@@ -513,11 +515,11 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
       this._subscribePromise.resolve(this._subscription);
     } else if (this._publishPromise) {
       this._publication = new Publication(this._internalId, () => {
-          this._unpublish();
-          return Promise.resolve();
-        }, () => this._getStats(),
-        trackKind => this._muteOrUnmute(true, true, trackKind),
-        trackKind => this._muteOrUnmute(false, true, trackKind));
+        this._unpublish();
+        return Promise.resolve();
+      }, () => this._getStats(),
+      (trackKind) => this._muteOrUnmute(true, true, trackKind),
+      (trackKind) => this._muteOrUnmute(false, true, trackKind));
       this._publishPromise.resolve(this._publication);
       // Do not fire publication's ended event when associated stream is ended.
       // It may still sending silence or black frames.
@@ -559,7 +561,7 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
     }
     const error = new ConferenceError(errorMessage);
     const errorEvent = new ErrorEvent('error', {
-      error: error
+      error: error,
     });
     dispatcher.dispatchEvent(errorEvent);
   }
@@ -568,22 +570,22 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
     if (this._publication || this._publishPromise) {
       if (options.audio) {
         const audioCodecNames = Array.from(options.audio,
-          encodingParameters => encodingParameters.codec.name);
+            (encodingParameters) => encodingParameters.codec.name);
         sdp = SdpUtils.reorderCodecs(sdp, 'audio', audioCodecNames);
       }
       if (options.video) {
         const videoCodecNames = Array.from(options.video,
-          encodingParameters => encodingParameters.codec.name);
+            (encodingParameters) => encodingParameters.codec.name);
         sdp = SdpUtils.reorderCodecs(sdp, 'video', videoCodecNames);
       }
     } else {
       if (options.audio && options.audio.codecs) {
-        const audioCodecNames = Array.from(options.audio.codecs, codec =>
+        const audioCodecNames = Array.from(options.audio.codecs, (codec) =>
           codec.name);
         sdp = SdpUtils.reorderCodecs(sdp, 'audio', audioCodecNames);
       }
       if (options.video && options.video.codecs) {
-        const videoCodecNames = Array.from(options.video.codecs, codec =>
+        const videoCodecNames = Array.from(options.video.codecs, (codec) =>
           codec.name);
         sdp = SdpUtils.reorderCodecs(sdp, 'video', videoCodecNames);
       }
@@ -632,9 +634,9 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
       Logger.warning('Invalid data field for stream update info.');
     }
     if (message.data.value === 'active') {
-      eventTarget.dispatchEvent(new MuteEvent('unmute', { kind: trackKind }));
+      eventTarget.dispatchEvent(new MuteEvent('unmute', {kind: trackKind}));
     } else if (message.data.value === 'inactive') {
-      eventTarget.dispatchEvent(new MuteEvent('mute', { kind: trackKind }));
+      eventTarget.dispatchEvent(new MuteEvent('mute', {kind: trackKind}));
     } else {
       Logger.warning('Invalid data value for stream update info.');
     }

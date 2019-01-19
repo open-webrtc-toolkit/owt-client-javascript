@@ -3,9 +3,9 @@
 // SPDX-License-Identifier: Apache-2.0
 
 /* global io */
-import Logger from '../base/logger.js'
-import * as EventModule from '../base/event.js'
-import { ConferenceError } from './error.js'
+import Logger from '../base/logger.js';
+import * as EventModule from '../base/event.js';
+import {ConferenceError} from './error.js';
 
 'use strict';
 
@@ -17,7 +17,7 @@ function handleResponse(status, data, resolve, reject) {
   } else {
     Logger.error('MCU returns unknown ack.');
   }
-};
+}
 
 const MAX_TRIALS = 5;
 /**
@@ -40,20 +40,20 @@ export class SioSignaling extends EventModule.EventDispatcher {
 
   connect(host, isSecured, loginInfo) {
     return new Promise((resolve, reject) => {
-      var opts = {
+      const opts = {
         'reconnection': true,
         'reconnectionAttempts': MAX_TRIALS,
-        'force new connection': true
+        'force new connection': true,
       };
       this._socket = io(host, opts);
       ['participant', 'text', 'stream', 'progress'].forEach((
-        notification) => {
+          notification) => {
         this._socket.on(notification, (data) => {
           this.dispatchEvent(new EventModule.MessageEvent('data', {
             message: {
               notification: notification,
-              data: data
-            }
+              data: data,
+            },
           }));
         });
       });
@@ -64,10 +64,10 @@ export class SioSignaling extends EventModule.EventDispatcher {
         if (this._reconnectTimes >= MAX_TRIALS) {
           this.dispatchEvent(new EventModule.OmsEvent('disconnect'));
         }
-      })
+      });
       this._socket.on('drop', () => {
         this._reconnectTimes = MAX_TRIALS;
-      })
+      });
       this._socket.on('disconnect', () => {
         if (this._reconnectTimes >= MAX_TRIALS) {
           this._loggedIn = false;
@@ -87,7 +87,7 @@ export class SioSignaling extends EventModule.EventDispatcher {
               } else {
                 this.dispatchEvent(new EventModule.OmsEvent('disconnect'));
               }
-            })
+            });
           });
         }
         handleResponse(status, data, resolve, reject);
@@ -98,7 +98,7 @@ export class SioSignaling extends EventModule.EventDispatcher {
   disconnect() {
     if (!this._socket || this._socket.disconnected) {
       return Promise.reject(new ConferenceError(
-        'Portal is not connected.'));
+          'Portal is not connected.'));
     }
     return new Promise((resolve, reject) => {
       this._socket.emit('logout', (status, data) => {

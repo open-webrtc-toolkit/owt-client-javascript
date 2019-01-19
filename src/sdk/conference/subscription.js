@@ -4,9 +4,9 @@
 
 'use strict';
 
-import * as MediaFormatModule from '../base/mediaformat.js'
-import * as CodecModule from '../base/codec.js'
-import { EventDispatcher} from '../base/event.js'
+import * as MediaFormatModule from '../base/mediaformat.js';
+import * as CodecModule from '../base/codec.js';
+import {EventDispatcher} from '../base/event.js';
 
 /**
  * @class AudioSubscriptionCapabilities
@@ -33,7 +33,7 @@ export class AudioSubscriptionCapabilities {
  */
 export class VideoSubscriptionCapabilities {
   constructor(codecs, resolutions, frameRates, bitrateMultipliers,
-    keyFrameIntervals) {
+      keyFrameIntervals) {
     /**
      * @member {Array.<Oms.Base.VideoCodecParameters>} codecs
      * @instance
@@ -116,7 +116,7 @@ export class AudioSubscriptionConstraints {
  */
 export class VideoSubscriptionConstraints {
   constructor(codecs, resolution, frameRate, bitrateMultiplier,
-    keyFrameInterval) {
+      keyFrameInterval) {
     /**
      * @member {?Array.<Oms.Base.VideoCodecParameters>} codecs
      * @instance
@@ -262,7 +262,7 @@ export class Subscription extends EventDispatcher {
     Object.defineProperty(this, 'id', {
       configurable: false,
       writable: false,
-      value: id
+      value: id,
     });
     /**
      * @function stop

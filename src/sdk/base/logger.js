@@ -26,35 +26,45 @@
 
 // This file is borrowed from lynckia/licode with some modifications.
 
-/*global console*/
+/* global console*/
 
 /*
  * API to write logs based on traditional logging mechanisms: debug, trace, info, warning, error
  */
-var Logger = (function() {
-  "use strict";
-  var DEBUG = 0,
-    TRACE = 1,
-    INFO = 2,
-    WARNING = 3,
-    ERROR = 4,
-    NONE = 5;
+const Logger = (function() {
+  'use strict';
+  const DEBUG = 0;
 
-  var noOp = function() {};
+
+  const TRACE = 1;
+
+
+  const INFO = 2;
+
+
+  const WARNING = 3;
+
+
+  const ERROR = 4;
+
+
+  const NONE = 5;
+
+  const noOp = function() {};
 
   // |that| is the object to be returned.
-  var that = {
+  const that = {
     DEBUG: DEBUG,
     TRACE: TRACE,
     INFO: INFO,
     WARNING: WARNING,
     ERROR: ERROR,
-    NONE: NONE
+    NONE: NONE,
   };
 
   that.log = window.console.log.bind(window.console);
 
-  var bindType = function(type) {
+  const bindType = function(type) {
     if (typeof window.console[type] === 'function') {
       return window.console[type].bind(window.console);
     } else {
@@ -62,7 +72,7 @@ var Logger = (function() {
     }
   };
 
-  var setLogLevel = function(level) {
+  const setLogLevel = function(level) {
     if (level <= DEBUG) {
       that.debug = bindType('log');
     } else {

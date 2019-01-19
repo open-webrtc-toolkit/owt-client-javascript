@@ -31,7 +31,7 @@ export class Participant extends EventModule.EventDispatcher {
     Object.defineProperty(this, 'id', {
       configurable: false,
       writable: false,
-      value: id
+      value: id,
     });
     /**
      * @member {string} role
@@ -41,7 +41,7 @@ export class Participant extends EventModule.EventDispatcher {
     Object.defineProperty(this, 'role', {
       configurable: false,
       writable: false,
-      value: role
+      value: role,
     });
     /**
      * @member {string} userId
@@ -52,7 +52,7 @@ export class Participant extends EventModule.EventDispatcher {
     Object.defineProperty(this, 'userId', {
       configurable: false,
       writable: false,
-      value: userId
+      value: userId,
     });
   }
 }

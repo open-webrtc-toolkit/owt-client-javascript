@@ -4,9 +4,9 @@
 
 'use strict';
 
-import * as Utils from './utils.js'
-import * as MediaFormat from './mediaformat.js'
-import { EventDispatcher} from '../base/event.js'
+import * as Utils from './utils.js';
+import * as MediaFormat from './mediaformat.js';
+import {EventDispatcher} from '../base/event.js';
 
 /**
  * @class AudioPublicationSettings
@@ -32,7 +32,7 @@ export class AudioPublicationSettings {
  * @hideconstructor
  */
 export class VideoPublicationSettings {
-  constructor(codec, resolution, frameRate, bitrate, keyFrameInterval){
+  constructor(codec, resolution, frameRate, bitrate, keyFrameInterval) {
     /**
      * @member {?Oms.Base.VideoCodecParameters} codec
      * @instance
@@ -73,7 +73,7 @@ export class VideoPublicationSettings {
  * @hideconstructor
  */
 export class PublicationSettings {
-  constructor(audio, video){
+  constructor(audio, video) {
     /**
      * @member {Oms.Base.AudioPublicationSettings} audio
      * @instance
@@ -114,7 +114,7 @@ export class Publication extends EventDispatcher {
     Object.defineProperty(this, 'id', {
       configurable: false,
       writable: false,
-      value: id ? id : Utils.createUuid()
+      value: id ? id : Utils.createUuid(),
     });
     /**
      * @function stop

@@ -3,10 +3,10 @@
 // SPDX-License-Identifier: Apache-2.0
 
 'use strict';
-import Logger from './logger.js'
-import {OmsEvent} from './event.js'
-import * as Utils from './utils.js'
-import { EventDispatcher} from './event.js';
+import Logger from './logger.js';
+import {OmsEvent} from './event.js';
+import * as Utils from './utils.js';
+import {EventDispatcher} from './event.js';
 
 function isAllowedValue(obj, allowedValues) {
   return (allowedValues.some((ele) => {
@@ -25,13 +25,13 @@ function isAllowedValue(obj, allowedValues) {
 export class StreamSourceInfo {
   constructor(audioSourceInfo, videoSourceInfo) {
     if (!isAllowedValue(audioSourceInfo, [undefined, 'mic', 'screen-cast',
-        'file', 'mixed'
-      ])) {
+      'file', 'mixed',
+    ])) {
       throw new TypeError('Incorrect value for audioSourceInfo');
     }
     if (!isAllowedValue(videoSourceInfo, [undefined, 'camera', 'screen-cast',
-        'file', 'encoded-file', 'raw-file', 'mixed'
-      ])) {
+      'file', 'encoded-file', 'raw-file', 'mixed',
+    ])) {
       throw new TypeError('Incorrect value for videoSourceInfo');
     }
     this.audio = audioSourceInfo;
@@ -49,8 +49,8 @@ export class Stream extends EventDispatcher {
   constructor(stream, sourceInfo, attributes) {
     super();
     if ((stream && !(stream instanceof MediaStream)) || (typeof sourceInfo !== 'object')) {
-        throw new TypeError('Invalid stream or sourceInfo.');
-      }
+      throw new TypeError('Invalid stream or sourceInfo.');
+    }
     if (stream && ((stream.getAudioTracks().length > 0 && !sourceInfo.audio) ||
         stream.getVideoTracks().length > 0 && !sourceInfo.video)) {
       throw new TypeError('Missing audio source info or video source info.');
@@ -64,7 +64,7 @@ export class Stream extends EventDispatcher {
     Object.defineProperty(this, 'mediaStream', {
       configurable: false,
       writable: true,
-      value: stream
+      value: stream,
     });
     /**
      * @member {Oms.Base.StreamSourceInfo} source
@@ -75,7 +75,7 @@ export class Stream extends EventDispatcher {
     Object.defineProperty(this, 'source', {
       configurable: false,
       writable: false,
-      value: sourceInfo
+      value: sourceInfo,
     });
     /**
      * @member {object} attributes
@@ -86,9 +86,9 @@ export class Stream extends EventDispatcher {
     Object.defineProperty(this, 'attributes', {
       configurable: true,
       writable: false,
-      value: attributes
+      value: attributes,
     });
-  };
+  }
 }
 /**
  * @class LocalStream
@@ -102,7 +102,7 @@ export class Stream extends EventDispatcher {
  */
 export class LocalStream extends Stream {
   constructor(stream, sourceInfo, attributes) {
-    if(!(stream instanceof MediaStream)){
+    if (!(stream instanceof MediaStream)) {
       throw new TypeError('Invalid stream.');
     }
     super(stream, sourceInfo, attributes);
@@ -114,9 +114,9 @@ export class LocalStream extends Stream {
     Object.defineProperty(this, 'id', {
       configurable: false,
       writable: false,
-      value: Utils.createUuid()
+      value: Utils.createUuid(),
     });
-  };
+  }
 }
 /**
  * @class RemoteStream
@@ -143,7 +143,7 @@ export class RemoteStream extends Stream {
     Object.defineProperty(this, 'id', {
       configurable: false,
       writable: false,
-      value: id ? id : Utils.createUuid()
+      value: id ? id : Utils.createUuid(),
     });
     /**
      * @member {string} origin
@@ -154,7 +154,7 @@ export class RemoteStream extends Stream {
     Object.defineProperty(this, 'origin', {
       configurable: false,
       writable: false,
-      value: origin
+      value: origin,
     });
     /**
      * @member {Oms.Base.PublicationSettings} settings

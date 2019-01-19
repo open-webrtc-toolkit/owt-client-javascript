@@ -13,7 +13,7 @@ export const AudioCodec = {
   ILBC: 'iLBC',
   AAC: 'aac',
   AC3: 'ac3',
-  NELLYMOSER: 'nellymoser'
+  NELLYMOSER: 'nellymoser',
 };
 /**
  * @class AudioCodecParameters
@@ -75,7 +75,7 @@ export const VideoCodec = {
   VP8: 'vp8',
   VP9: 'vp9',
   H264: 'h264',
-  H265: 'h265'
+  H265: 'h265',
 };
 
 /**

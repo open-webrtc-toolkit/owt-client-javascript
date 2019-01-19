@@ -13,13 +13,13 @@ import * as StreamModule from '../base/stream.js';
 const ConnectionState = {
   READY: 1,
   CONNECTING: 2,
-  CONNECTED: 3
+  CONNECTED: 3,
 };
 
 const pcDisconnectTimeout = 15000; // Close peerconnection after disconnect 15s.let isConnectedToSignalingChannel = false;
 const offerOptions = {
   'offerToReceiveAudio': true,
-  'offerToReceiveVideo': true
+  'offerToReceiveVideo': true,
 };
 const sysInfo = Utils.sysInfo();
 const supportsPlanB = Utils.isSafari() ? true : false;
@@ -36,18 +36,18 @@ function isArray(obj) {
 /*
  * Return negative value if id1<id2, positive value if id1>id2
  */
-var compareID = function(id1, id2) {
+const compareID = function(id1, id2) {
   return id1.localeCompare(id2);
 };
 // If targetId is peerId, then return targetId.
-var getPeerId = function(targetId) {
+const getPeerId = function(targetId) {
   return targetId;
 };
-var changeNegotiationState = function(peer, state) {
+const changeNegotiationState = function(peer, state) {
   peer.negotiationState = state;
 };
 // Do stop chat locally.
-var stopChatLocally = function(peer, originatorId) {
+const stopChatLocally = function(peer, originatorId) {
   if (peer.state === PeerState.CONNECTED || peer.state === PeerState.CONNECTING) {
     if (peer.sendDataChannel) {
       peer.sendDataChannel.close();
@@ -63,7 +63,7 @@ var stopChatLocally = function(peer, originatorId) {
       that.dispatchEvent(new Woogeen.ChatEvent({
         type: 'chat-stopped',
         peerId: peer.id,
-        senderId: originatorId
+        senderId: originatorId,
       }));
     }
     // Unbind events for the pc, so the old pc will not impact new peerconnections created for the same target later.
@@ -176,7 +176,7 @@ const P2PClient = function(configuration, signalingChannel) {
    * @instance
    * @desc Connect to signaling server. Since signaling can be customized, this method does not define how a token looks like. SDK passes token to signaling channel without changes.
    * @memberof Oms.P2P.P2PClient
-   * @returns {Promise<object, Error>} It returns a promise resolved with an object returned by signaling channel once signaling channel reports connection has been established.
+   * @return {Promise<object, Error>} It returns a promise resolved with an object returned by signaling channel once signaling channel reports connection has been established.
    */
   this.connect = function(token) {
     if (state === ConnectionState.READY) {
@@ -192,7 +192,7 @@ const P2PClient = function(configuration, signalingChannel) {
         resolve(myId);
       }, (errCode) => {
         reject(new ErrorModule.P2PError(ErrorModule.getErrorByCode(
-          errCode)));
+            errCode)));
       });
     });
   };
@@ -202,7 +202,7 @@ const P2PClient = function(configuration, signalingChannel) {
    * @instance
    * @desc Disconnect from the signaling channel. It stops all existing sessions with remote endpoints.
    * @memberof Oms.P2P.P2PClient
-   * @returns {Promise<undefined, Error>}
+   * @return {Promise<undefined, Error>}
    */
   this.disconnect = function() {
     if (state == ConnectionState.READY) {
@@ -222,12 +222,12 @@ const P2PClient = function(configuration, signalingChannel) {
    * @memberof Oms.P2P.P2PClient
    * @param {string} remoteId Remote endpoint's ID.
    * @param {LocalStream} stream A LocalStream to be published.
-   * @returns {Promise<Publication, Error>} A promised resolved when remote side received the certain stream. However, remote endpoint may not display this stream, or ignore it.
+   * @return {Promise<Publication, Error>} A promised resolved when remote side received the certain stream. However, remote endpoint may not display this stream, or ignore it.
    */
   this.publish = function(remoteId, stream) {
     if (state !== ConnectionState.CONNECTED) {
       return Promise.reject(new ErrorModule.P2PError(ErrorModule.errors.P2P_CLIENT_INVALID_STATE,
-        'P2P Client is not connected to signaling channel.'));
+          'P2P Client is not connected to signaling channel.'));
     }
     if (this.allowedRemoteIds.indexOf(remoteId) < 0) {
       return Promise.reject(new ErrorModule.P2PError(ErrorModule.errors.P2P_CLIENT_NOT_ALLOWED));
@@ -242,12 +242,12 @@ const P2PClient = function(configuration, signalingChannel) {
    * @memberof Oms.P2P.P2PClient
    * @param {string} remoteId Remote endpoint's ID.
    * @param {string} message Message to be sent. It should be a string.
-   * @returns {Promise<undefined, Error>} It returns a promise resolved when remote endpoint received certain message.
+   * @return {Promise<undefined, Error>} It returns a promise resolved when remote endpoint received certain message.
    */
-  this.send=function(remoteId, message){
+  this.send=function(remoteId, message) {
     if (state !== ConnectionState.CONNECTED) {
       return Promise.reject(new ErrorModule.P2PError(ErrorModule.errors.P2P_CLIENT_INVALID_STATE,
-        'P2P Client is not connected to signaling channel.'));
+          'P2P Client is not connected to signaling channel.'));
     }
     if (this.allowedRemoteIds.indexOf(remoteId) < 0) {
       return Promise.reject(new ErrorModule.P2PError(ErrorModule.errors.P2P_CLIENT_NOT_ALLOWED));
@@ -261,12 +261,12 @@ const P2PClient = function(configuration, signalingChannel) {
    * @desc Clean all resources associated with given remote endpoint. It may include RTCPeerConnection, RTCRtpTransceiver and RTCDataChannel. It still possible to publish a stream, or send a message to given remote endpoint after stop.
    * @memberof Oms.P2P.P2PClient
    * @param {string} remoteId Remote endpoint's ID.
-   * @returns {undefined}
+   * @return {undefined}
    */
   this.stop = function(remoteId) {
     if (!channels.has(remoteId)) {
       Logger.warning(
-        'No PeerConnection between current endpoint and specific remote endpoint.'
+          'No PeerConnection between current endpoint and specific remote endpoint.'
       );
       return;
     }
@@ -280,23 +280,23 @@ const P2PClient = function(configuration, signalingChannel) {
    * @desc Get stats of underlying PeerConnection.
    * @memberof Oms.P2P.P2PClient
    * @param {string} remoteId Remote endpoint's ID.
-   * @returns {Promise<RTCStatsReport, Error>} It returns a promise resolved with an RTCStatsReport or reject with an Error if there is no connection with specific user.
+   * @return {Promise<RTCStatsReport, Error>} It returns a promise resolved with an RTCStatsReport or reject with an Error if there is no connection with specific user.
    */
-  this.getStats = function(remoteId){
-    if(!channels.has(remoteId)){
-      return Promise.reject(new ErrorModule.P2PError(ErrorModule.errors.P2P_CLIENT_INVALID_STATE,'No PeerConnection between current endpoint and specific remote endpoint.'));
+  this.getStats = function(remoteId) {
+    if (!channels.has(remoteId)) {
+      return Promise.reject(new ErrorModule.P2PError(ErrorModule.errors.P2P_CLIENT_INVALID_STATE, 'No PeerConnection between current endpoint and specific remote endpoint.'));
     }
     return channels.get(remoteId).getStats();
-  }
+  };
 
   const sendSignalingMessage = function(remoteId, type, message) {
     const msg = {
-      type: type
+      type: type,
     };
     if (message) {
       msg.data = message;
     }
-    return signaling.send(remoteId, JSON.stringify(msg)).catch(e => {
+    return signaling.send(remoteId, JSON.stringify(msg)).catch((e) => {
       if (typeof e === 'number') {
         throw ErrorModule.getErrorByCode(e);
       }
@@ -309,7 +309,7 @@ const P2PClient = function(configuration, signalingChannel) {
       const signalingForChannel = Object.create(EventDispatcher);
       signalingForChannel.sendSignalingMessage = sendSignalingMessage;
       const pcc = new P2PPeerConnectionChannel(config, myId, remoteId,
-        signalingForChannel);
+          signalingForChannel);
       pcc.addEventListener('streamadded', (streamEvent)=>{
         self.dispatchEvent(streamEvent);
       });
@@ -318,7 +318,7 @@ const P2PClient = function(configuration, signalingChannel) {
       });
       pcc.addEventListener('ended', ()=>{
         channels.delete(remoteId);
-      })
+      });
       channels.set(remoteId, pcc);
     }
     return channels.get(remoteId);

@@ -4,10 +4,10 @@
 
 'use strict';
 
-import * as PublicationModule from '../base/publication.js'
-import * as MediaFormatModule from '../base/mediaformat.js'
-import * as CodecModule from '../base/codec.js'
-import * as SubscriptionModule from './subscription.js'
+import * as PublicationModule from '../base/publication.js';
+import * as MediaFormatModule from '../base/mediaformat.js';
+import * as CodecModule from '../base/codec.js';
+import * as SubscriptionModule from './subscription.js';
 
 function extractBitrateMultiplier(input) {
   if (typeof input !== 'string' || !input.startsWith('x')) {
@@ -30,12 +30,14 @@ function sortResolutions(x, y) {
 }
 
 export function convertToPublicationSettings(mediaInfo) {
-  let audio, audioCodec, video, videoCodec, resolution, framerate, bitrate,
-    keyFrameInterval;
+  let audio; let audioCodec; let video; let videoCodec; let resolution; let framerate; let bitrate;
+
+
+  let keyFrameInterval;
   if (mediaInfo.audio) {
     if (mediaInfo.audio.format) {
       audioCodec = new CodecModule.AudioCodecParameters(mediaInfo.audio.format
-        .codec, mediaInfo.audio.format.channelNum, mediaInfo.audio.format.sampleRate
+          .codec, mediaInfo.audio.format.channelNum, mediaInfo.audio.format.sampleRate
       );
     }
     audio = new PublicationModule.AudioPublicationSettings(audioCodec);
@@ -43,39 +45,39 @@ export function convertToPublicationSettings(mediaInfo) {
   if (mediaInfo.video) {
     if (mediaInfo.video.format) {
       videoCodec = new CodecModule.VideoCodecParameters(mediaInfo.video
-        .format.codec, mediaInfo.video.format.profile);
+          .format.codec, mediaInfo.video.format.profile);
     }
     if (mediaInfo.video.parameters) {
       if (mediaInfo.video.parameters.resolution) {
         resolution = new MediaFormatModule.Resolution(mediaInfo.video.parameters
-          .resolution.width, mediaInfo.video.parameters.resolution.height);
+            .resolution.width, mediaInfo.video.parameters.resolution.height);
       }
       framerate = mediaInfo.video.parameters.framerate;
       bitrate = mediaInfo.video.parameters.bitrate * 1000;
       keyFrameInterval = mediaInfo.video.parameters.keyFrameInterval;
     }
     video = new PublicationModule.VideoPublicationSettings(videoCodec,
-      resolution, framerate, bitrate, keyFrameInterval
+        resolution, framerate, bitrate, keyFrameInterval
     );
   }
   return new PublicationModule.PublicationSettings(audio, video);
 }
 
 export function convertToSubscriptionCapabilities(mediaInfo) {
-  let audio, video;
+  let audio; let video;
   if (mediaInfo.audio) {
     const audioCodecs = [];
     if (mediaInfo.audio && mediaInfo.audio.format) {
       audioCodecs.push(new CodecModule.AudioCodecParameters(
-        mediaInfo.audio.format.codec, mediaInfo.audio.format.channelNum,
-        mediaInfo.audio.format.sampleRate));
+          mediaInfo.audio.format.codec, mediaInfo.audio.format.channelNum,
+          mediaInfo.audio.format.sampleRate));
     }
     if (mediaInfo.audio && mediaInfo.audio.optional &&
       mediaInfo.audio.optional.format) {
       for (const audioCodecInfo of mediaInfo.audio.optional.format) {
         const audioCodec = new CodecModule.AudioCodecParameters(
-          audioCodecInfo.codec, audioCodecInfo.channelNum,
-          audioCodecInfo.sampleRate);
+            audioCodecInfo.codec, audioCodecInfo.channelNum,
+            audioCodecInfo.sampleRate);
         audioCodecs.push(audioCodec);
       }
     }
@@ -86,48 +88,48 @@ export function convertToSubscriptionCapabilities(mediaInfo) {
     const videoCodecs = [];
     if (mediaInfo.video && mediaInfo.video.format) {
       videoCodecs.push(new CodecModule.VideoCodecParameters(
-        mediaInfo.video.format.codec, mediaInfo.video.format.profile));
+          mediaInfo.video.format.codec, mediaInfo.video.format.profile));
     }
     if (mediaInfo.video && mediaInfo.video.optional &&
       mediaInfo.video.optional.format) {
       for (const videoCodecInfo of mediaInfo.video.optional.format) {
         const videoCodec = new CodecModule.VideoCodecParameters(
-          videoCodecInfo.codec, videoCodecInfo.profile);
+            videoCodecInfo.codec, videoCodecInfo.profile);
         videoCodecs.push(videoCodec);
       }
     }
     videoCodecs.sort();
     const resolutions = Array.from(
-      mediaInfo.video.optional.parameters.resolution,
-      r => new MediaFormatModule.Resolution(r.width, r.height));
+        mediaInfo.video.optional.parameters.resolution,
+        (r) => new MediaFormatModule.Resolution(r.width, r.height));
     if (mediaInfo.video && mediaInfo.video.parameters &&
       mediaInfo.video.parameters.resolution) {
       resolutions.push(new MediaFormatModule.Resolution(
-        mediaInfo.video.parameters.resolution.width,
-        mediaInfo.video.parameters.resolution.height));
+          mediaInfo.video.parameters.resolution.width,
+          mediaInfo.video.parameters.resolution.height));
     }
     resolutions.sort(sortResolutions);
     const bitrates = Array.from(
-      mediaInfo.video.optional.parameters.bitrate,
-      bitrate => extractBitrateMultiplier(bitrate));
+        mediaInfo.video.optional.parameters.bitrate,
+        (bitrate) => extractBitrateMultiplier(bitrate));
     bitrates.push(1.0);
     bitrates.sort(sortNumbers);
     const frameRates = JSON.parse(
-      JSON.stringify(mediaInfo.video.optional.parameters.framerate));
+        JSON.stringify(mediaInfo.video.optional.parameters.framerate));
     if (mediaInfo.video && mediaInfo.video.parameters && mediaInfo.video.parameters
-      .framerate) {
+        .framerate) {
       frameRates.push(mediaInfo.video.parameters.framerate);
     }
     frameRates.sort(sortNumbers);
     const keyFrameIntervals = JSON.parse(
-      JSON.stringify(mediaInfo.video.optional.parameters.keyFrameInterval));
+        JSON.stringify(mediaInfo.video.optional.parameters.keyFrameInterval));
     if (mediaInfo.video && mediaInfo.video.parameters && mediaInfo.video.parameters
-      .keyFrameInterval) {
+        .keyFrameInterval) {
       keyFrameIntervals.push(mediaInfo.video.parameters.keyFrameInterval);
     }
     keyFrameIntervals.sort(sortNumbers);
     video = new SubscriptionModule.VideoSubscriptionCapabilities(
-      videoCodecs, resolutions, frameRates, bitrates, keyFrameIntervals);
+        videoCodecs, resolutions, frameRates, bitrates, keyFrameIntervals);
   }
   return new SubscriptionModule.SubscriptionCapabilities(audio, video);
 }

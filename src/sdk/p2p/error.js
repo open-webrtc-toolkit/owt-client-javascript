@@ -8,78 +8,78 @@ export const errors = {
   // 2100-2109 for server errors
   P2P_CONN_SERVER_UNKNOWN: {
     code: 2100,
-    message: 'Server unknown error.'
+    message: 'Server unknown error.',
   },
   P2P_CONN_SERVER_UNAVAILABLE: {
     code: 2101,
-    message: 'Server is unavaliable.'
+    message: 'Server is unavaliable.',
   },
   P2P_CONN_SERVER_BUSY: {
     code: 2102,
-    message: 'Server is too busy.'
+    message: 'Server is too busy.',
   },
   P2P_CONN_SERVER_NOT_SUPPORTED: {
     code: 2103,
-    message: 'Method has not been supported by server.'
+    message: 'Method has not been supported by server.',
   },
   // 2110-2119 for client errors
   P2P_CONN_CLIENT_UNKNOWN: {
     code: 2110,
-    message: 'Client unknown error.'
+    message: 'Client unknown error.',
   },
   P2P_CONN_CLIENT_NOT_INITIALIZED: {
     code: 2111,
-    message: 'Connection is not initialized.'
+    message: 'Connection is not initialized.',
   },
   // 2120-2129 for authentication errors
   P2P_CONN_AUTH_UNKNOWN: {
     code: 2120,
-    message: 'Authentication unknown error.'
+    message: 'Authentication unknown error.',
   },
   P2P_CONN_AUTH_FAILED: {
     code: 2121,
-    message: 'Wrong username or token.'
+    message: 'Wrong username or token.',
   },
   // 2200-2299 for message transport errors
   P2P_MESSAGING_TARGET_UNREACHABLE: {
     code: 2201,
-    message: 'Remote user cannot be reached.'
+    message: 'Remote user cannot be reached.',
   },
   P2P_CLIENT_DENIED: {
     code: 2202,
-    message: 'User is denied.'
+    message: 'User is denied.',
   },
   // 2301-2399 for chat room errors
   // 2401-2499 for client errors
   P2P_CLIENT_UNKNOWN: {
     code: 2400,
-    message: 'Unknown errors.'
+    message: 'Unknown errors.',
   },
   P2P_CLIENT_UNSUPPORTED_METHOD: {
     code: 2401,
-    message: 'This method is unsupported in current browser.'
+    message: 'This method is unsupported in current browser.',
   },
   P2P_CLIENT_ILLEGAL_ARGUMENT: {
     code: 2402,
-    message: 'Illegal argument.'
+    message: 'Illegal argument.',
   },
   P2P_CLIENT_INVALID_STATE: {
     code: 2403,
-    message: 'Invalid peer state.'
+    message: 'Invalid peer state.',
   },
   P2P_CLIENT_NOT_ALLOWED: {
     code: 2404,
-    message: 'Remote user is not allowed.'
+    message: 'Remote user is not allowed.',
   },
   // 2501-2599 for WebRTC erros.
-  P2P_WEBRTC_UNKNOWN:{
+  P2P_WEBRTC_UNKNOWN: {
     code: 2500,
-    message: 'WebRTC error.'
+    message: 'WebRTC error.',
   },
-  P2P_WEBRTC_SDP:{
-    code:2502,
-    message: 'SDP error.'
-  }
+  P2P_WEBRTC_SDP: {
+    code: 2502,
+    message: 'SDP error.',
+  },
 };
 
 export function getErrorByCode(errorCode) {
@@ -99,7 +99,7 @@ export function getErrorByCode(errorCode) {
     2403: errors.P2P_CLIENT_INVALID_STATE,
     2404: errors.P2P_CLIENT_NOT_ALLOWED,
     2500: errors.P2P_WEBRTC_UNKNOWN,
-    2501: errors.P2P_WEBRTC_SDP
+    2501: errors.P2P_WEBRTC_SDP,
   };
   return codeErrorMap[errorCode];
 }
