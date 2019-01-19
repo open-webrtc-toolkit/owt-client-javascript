@@ -1,25 +1,16 @@
 // Copyright (C) <2018> Intel Corporation
 //
 // SPDX-License-Identifier: Apache-2.0
-
 {
+  "extends": ["eslint:recommended", "google", "webrtc"],
   "parserOptions": {
-    "ecmaVersion": 2017,
+    "ecmaVersion": 2018,
     "sourceType": "module"
   },
   "rules": {
-    "no-trailing-spaces": "error",
-    "no-mixed-spaces-and-tabs": "error",
-    "max-len": ["warn", {
-      "ignoreTrailingComments": true,
-      "ignoreComments": true
-    }],
-    "indent": ["error", 2, {
-      "SwitchCase": 1
-    }],
-    "eol-last": "error",
-    "spaced-comment": ["warn", "always"],
-    "space-before-blocks": ["error", "always"],
-    "space-infix-ops": "error"
+    "max-len": ["error", {
+      // This line is part of the MIT license.
+      "ignorePattern": "The above copyright notice and this permission notice shall be included in all"
+    }]
   }
 }
