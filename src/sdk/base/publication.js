@@ -15,6 +15,7 @@ import {EventDispatcher} from '../base/event.js';
  * @hideconstructor
  */
 export class AudioPublicationSettings {
+  // eslint-disable-next-line require-jsdoc
   constructor(codec) {
     /**
      * @member {?Oms.Base.AudioCodecParameters} codec
@@ -32,6 +33,7 @@ export class AudioPublicationSettings {
  * @hideconstructor
  */
 export class VideoPublicationSettings {
+  // eslint-disable-next-line require-jsdoc
   constructor(codec, resolution, frameRate, bitrate, keyFrameInterval) {
     /**
      * @member {?Oms.Base.VideoCodecParameters} codec
@@ -73,6 +75,7 @@ export class VideoPublicationSettings {
  * @hideconstructor
  */
 export class PublicationSettings {
+  // eslint-disable-next-line require-jsdoc
   constructor(audio, video) {
     /**
      * @member {Oms.Base.AudioPublicationSettings} audio
@@ -92,7 +95,8 @@ export class PublicationSettings {
 /**
  * @class Publication
  * @memberOf Oms.Base
- * @classDesc Publication represents a sender for publishing a stream. It handles the actions on a LocalStream published to a conference.
+ * @classDesc Publication represents a sender for publishing a stream. It
+ * handles the actions on a LocalStream published to a conference.
  * Events:
  *
  * | Event Name      | Argument Type    | Fired when       |
@@ -104,6 +108,7 @@ export class PublicationSettings {
  * @hideconstructor
  */
 export class Publication extends EventDispatcher {
+  // eslint-disable-next-line require-jsdoc
   constructor(id, stop, getStats, mute, unmute) {
     super();
     /**
@@ -159,6 +164,7 @@ export class Publication extends EventDispatcher {
  * @classDesc PublishOptions defines options for publishing a Oms.Base.LocalStream.
  */
 export class PublishOptions {
+  // eslint-disable-next-line require-jsdoc
   constructor(audio, video) {
     /**
      * @member {?Array<Oms.Base.AudioEncodingParameters>} audio

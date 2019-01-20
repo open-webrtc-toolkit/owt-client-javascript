@@ -29,17 +29,13 @@
 /* global unescape*/
 'use strict';
 export const Base64 = (function() {
-  let END_OF_INPUT; let base64Chars; let reverseBase64Chars; let base64Str; let base64Count;
+  const END_OF_INPUT = -1;
+  let base64Str;
+  let base64Count;
 
+  let i;
 
-  let i; let setBase64Str; let readBase64; let encodeBase64; let readReverseBase64; let ntos;
-
-
-  let decodeBase64;
-
-  END_OF_INPUT = -1;
-
-  base64Chars = [
+  const base64Chars = [
     'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H',
     'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P',
     'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X',
@@ -50,35 +46,35 @@ export const Base64 = (function() {
     '4', '5', '6', '7', '8', '9', '+', '/',
   ];
 
-  reverseBase64Chars = [];
+  const reverseBase64Chars = [];
 
   for (i = 0; i < base64Chars.length; i = i + 1) {
     reverseBase64Chars[base64Chars[i]] = i;
   }
 
-  setBase64Str = function(str) {
+  const setBase64Str = function(str) {
     base64Str = str;
     base64Count = 0;
   };
 
-  readBase64 = function() {
-    let c;
+  const readBase64 = function() {
     if (!base64Str) {
       return END_OF_INPUT;
     }
     if (base64Count >= base64Str.length) {
       return END_OF_INPUT;
     }
-    c = base64Str.charCodeAt(base64Count) & 0xff;
+    const c = base64Str.charCodeAt(base64Count) & 0xff;
     base64Count = base64Count + 1;
     return c;
   };
 
-  encodeBase64 = function(str) {
-    let result; let inBuffer; let done;
+  const encodeBase64 = function(str) {
+    let result;
+    let done;
     setBase64Str(str);
     result = '';
-    inBuffer = new Array(3);
+    const inBuffer = new Array(3);
     done = false;
     while (!done && (inBuffer[0] = readBase64()) !== END_OF_INPUT) {
       inBuffer[1] = readBase64();
@@ -106,11 +102,11 @@ export const Base64 = (function() {
     return result;
   };
 
-  readReverseBase64 = function() {
+  const readReverseBase64 = function() {
     if (!base64Str) {
       return END_OF_INPUT;
     }
-    while (true) {
+    while (true) { // eslint-disable-line no-constant-condition
       if (base64Count >= base64Str.length) {
         return END_OF_INPUT;
       }
@@ -125,7 +121,7 @@ export const Base64 = (function() {
     }
   };
 
-  ntos = function(n) {
+  const ntos = function(n) {
     n = n.toString(16);
     if (n.length === 1) {
       n = '0' + n;
@@ -134,11 +130,12 @@ export const Base64 = (function() {
     return unescape(n);
   };
 
-  decodeBase64 = function(str) {
-    let result; let inBuffer; let done;
+  const decodeBase64 = function(str) {
+    let result;
+    let done;
     setBase64Str(str);
     result = '';
-    inBuffer = new Array(4);
+    const inBuffer = new Array(4);
     done = false;
     while (!done && (inBuffer[0] = readReverseBase64()) !== END_OF_INPUT &&
       (inBuffer[1] = readReverseBase64()) !== END_OF_INPUT) {

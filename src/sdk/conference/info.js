@@ -11,6 +11,7 @@
  * @hideconstructor
  */
 export class ConferenceInfo {
+  // eslint-disable-next-line require-jsdoc
   constructor(id, participants, remoteStreams, myInfo) {
     /**
      * @member {string} id

@@ -23,6 +23,7 @@ import {OmsEvent} from '../base/event.js';
  * @hideconstructor
  */
 export class RemoteMixedStream extends StreamModule.RemoteStream {
+  // eslint-disable-next-line require-jsdoc
   constructor(info) {
     if (info.type !== 'mixed') {
       throw new TypeError('Not a mixed stream');
@@ -44,6 +45,7 @@ export class RemoteMixedStream extends StreamModule.RemoteStream {
  * @hideconstructor
  */
 export class ActiveAudioInputChangeEvent extends OmsEvent {
+  // eslint-disable-next-line require-jsdoc
   constructor(type, init) {
     super(type);
     /**
@@ -63,6 +65,7 @@ export class ActiveAudioInputChangeEvent extends OmsEvent {
  * @hideconstructor
  */
 export class LayoutChangeEvent extends OmsEvent {
+  // eslint-disable-next-line require-jsdoc
   constructor(type, init) {
     super(type);
     /**

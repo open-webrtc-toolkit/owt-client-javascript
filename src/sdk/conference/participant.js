@@ -20,6 +20,7 @@ import * as EventModule from '../base/event.js';
  * @hideconstructor
  */
 export class Participant extends EventModule.EventDispatcher {
+  // eslint-disable-next-line require-jsdoc
   constructor(id, role, userId) {
     super();
     /**

@@ -2,20 +2,34 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
+/* eslint-disable require-jsdoc */
+/* global Promise */
+
 'use strict';
 
 import Logger from '../base/logger.js';
-import {EventDispatcher, MessageEvent, OmsEvent, ErrorEvent, MuteEvent} from '../base/event.js';
+import {
+  EventDispatcher,
+  MessageEvent,
+  OmsEvent,
+  ErrorEvent,
+  MuteEvent,
+} from '../base/event.js';
 import {TrackKind} from '../base/mediaformat.js';
 import {Publication} from '../base/publication.js';
 import {Subscription} from './subscription.js';
 import {ConferenceError} from './error.js';
 import * as Utils from '../base/utils.js';
-import * as ErrorModule from './error.js';
-import * as StreamModule from '../base/stream.js';
 import * as SdpUtils from '../base/sdputils.js';
 
+/**
+ * @class ConferencePeerConnectionChannel
+ * @classDesc A channel for a connection between client and conference server. Currently, only one stream could be tranmitted in a channel.
+ * @hideconstructor
+ * @private
+ */
 export class ConferencePeerConnectionChannel extends EventDispatcher {
+  // eslint-disable-next-line require-jsdoc
   constructor(config, signaling) {
     super();
     this._config = config;
@@ -30,10 +44,17 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
     this._publishedStream = null;
     this._publication = null;
     this._subscription = null;
-    this._disconnectTimer = null; // Timer for PeerConnection disconnected. Will stop connection after timer.
+    // Timer for PeerConnection disconnected. Will stop connection after timer.
+    this._disconnectTimer = null;
     this._ended = false;
   }
 
+  /**
+   * @function onMessage
+   * @desc Received a message from conference portal. Defined in client-server protocol.
+   * @param {string} notification Notification type.
+   * @param {object} message Message received.
+   */
   onMessage(notification, message) {
     switch (notification) {
       case 'progress':
@@ -70,7 +91,8 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
     if (!!options.audio === !stream.mediaStream.getAudioTracks().length || !!
     options.video === !stream.mediaStream.getVideoTracks().length) {
       return Promise.reject(new ConferenceError(
-          'options.audio/video is inconsistent with tracks presented in the MediaStream.'
+          'options.audio/video is inconsistent with tracks presented in the ' +
+          'MediaStream.'
       ));
     }
     if ((options.audio === false || options.audio === null) &&
@@ -85,8 +107,8 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
       }
       for (const parameters of options.audio) {
         if (!parameters.codec || typeof parameters.codec.name !== 'string' || (
-          parameters.maxBitrate !== undefined && typeof parameters.maxBitrate !==
-            'number')) {
+          parameters.maxBitrate !== undefined && typeof parameters.maxBitrate
+          !== 'number')) {
           return Promise.reject(new TypeError(
               'options.audio has incorrect parameters.'));
         }
@@ -99,9 +121,9 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
       }
       for (const parameters of options.video) {
         if (!parameters.codec || typeof parameters.codec.name !== 'string' || (
-          parameters.maxBitrate !== undefined && typeof parameters.maxBitrate !==
-            'number') || (parameters.codec.profile !== undefined && typeof parameters
-            .codec.profile !== 'string')) {
+          parameters.maxBitrate !== undefined && typeof parameters.maxBitrate
+          !== 'number') || (parameters.codec.profile !== undefined
+          && typeof parameters.codec.profile !== 'string')) {
           return Promise.reject(new TypeError(
               'options.video has incorrect parameters.'));
         }
@@ -114,7 +136,8 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
       false && options.audio !== null) {
       if (stream.mediaStream.getAudioTracks().length > 1) {
         Logger.warning(
-            'Publishing a stream with multiple audio tracks is not fully supported.'
+            'Publishing a stream with multiple audio tracks is not fully'
+            + ' supported.'
         );
       }
       if (typeof options.audio !== 'boolean' && typeof options.audio !==
@@ -135,12 +158,14 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
       false && options.video !== null) {
       if (stream.mediaStream.getVideoTracks().length > 1) {
         Logger.warning(
-            'Publishing a stream with multiple video tracks is not fully supported.'
+            'Publishing a stream with multiple video tracks is not fully '
+            + 'supported.'
         );
       }
       mediaOptions.video = {};
       mediaOptions.video.source = stream.source.video;
-      const trackSettings = stream.mediaStream.getVideoTracks()[0].getSettings();
+      const trackSettings = stream.mediaStream.getVideoTracks()[0]
+          .getSettings();
       mediaOptions.video.parameters = {
         resolution: {
           width: trackSettings.width,
@@ -172,10 +197,10 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
       if (typeof this._pc.addTransceiver === 'function') {
         // |direction| seems not working on Safari.
         if (mediaOptions.audio && stream.mediaStream.getAudioTracks() > 0) {
-          const audioTransceiver = this._pc.addTransceiver('audio', {direction: 'sendonly'});
+          this._pc.addTransceiver('audio', {direction: 'sendonly'});
         }
         if (mediaOptions.video && stream.mediaStream.getVideoTracks() > 0) {
-          const videoTransceiver = this._pc.addTransceiver('video', {direction: 'sendonly'});
+          this._pc.addTransceiver('video', {direction: 'sendonly'});
         }
       }
       let localDesc;
@@ -194,7 +219,8 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
           signaling: localDesc,
         });
       }).catch((e) => {
-        Logger.error('Failed to create offer or set SDP. Message: ' + e.message);
+        Logger.error('Failed to create offer or set SDP. Message: '
+            + e.message);
         this._unpublish();
         this._rejectPromise(e);
         this._fireEndedEventOnPublicationOrSubscription();
@@ -234,7 +260,8 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
     if (options.audio && !stream.capabilities.audio || (options.video &&
         !stream.capabilities.video)) {
       return Promise.reject(new ConferenceError(
-          'options.audio/video cannot be true or an object if there is no audio/video track in remote stream.'
+          'options.audio/video cannot be true or an object if there is no '
+          + 'audio/video track in remote stream.'
       ));
     }
     if (options.audio === false && options.video === false) {
@@ -244,7 +271,8 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
     this._options = options;
     const mediaOptions = {};
     if (options.audio) {
-      if (typeof options.audio === 'object' && Array.isArray(options.audio.codecs)) {
+      if (typeof options.audio === 'object' &&
+          Array.isArray(options.audio.codecs)) {
         if (options.audio.codecs.length === 0) {
           return Promise.reject(new TypeError(
               'Audio codec cannot be an empty array.'));
@@ -256,7 +284,8 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
       mediaOptions.audio = false;
     }
     if (options.video) {
-      if (typeof options.video === 'object' && Array.isArray(options.video.codecs)) {
+      if (typeof options.video === 'object' &&
+          Array.isArray(options.video.codecs)) {
         if (options.video.codecs.length === 0) {
           return Promise.reject(new TypeError(
               'Video codec cannot be an empty array.'));
@@ -270,8 +299,8 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
         mediaOptions.video.parameters = {
           resolution: options.video.resolution,
           framerate: options.video.frameRate,
-          bitrate: options.video.bitrateMultiplier ? 'x' + options.video.bitrateMultiplier
-              .toString() : undefined,
+          bitrate: options.video.bitrateMultiplier ? 'x'
+              + options.video.bitrateMultiplier.toString() : undefined,
           keyFrameInterval: options.video.keyFrameInterval,
         };
       }
@@ -296,10 +325,10 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
       if (typeof this._pc.addTransceiver === 'function') {
         // |direction| seems not working on Safari.
         if (mediaOptions.audio) {
-          const audioTransceiver = this._pc.addTransceiver('audio', {direction: 'recvonly'});
+          this._pc.addTransceiver('audio', {direction: 'recvonly'});
         }
         if (mediaOptions.video) {
-          const videoTransceiver = this._pc.addTransceiver('video', {direction: 'recvonly'});
+          this._pc.addTransceiver('video', {direction: 'recvonly'});
         }
       }
       this._pc.createOffer(offerOptions).then((desc) => {
@@ -320,7 +349,8 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
         Logger.error('Create offer failed. Error info: ' + JSON.stringify(
             error));
       }).catch((e)=>{
-        Logger.error('Failed to create offer or set SDP. Message: ' + e.message);
+        Logger.error('Failed to create offer or set SDP. Message: '
+            + e.message);
         this._unsubscribe();
         this._rejectPromise(e);
         this._fireEndedEventOnPublicationOrSubscription();
@@ -368,7 +398,8 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
     }).then(() => {
       if (!isPub) {
         const muteEventName = isMute ? 'mute' : 'unmute';
-        this._subscription.dispatchEvent(new MuteEvent(muteEventName, {kind: trackKind}));
+        this._subscription.dispatchEvent(
+            new MuteEvent(muteEventName, {kind: trackKind}));
       }
     });
   }
@@ -451,10 +482,12 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
       return;
     }
 
-    Logger.debug('ICE connection state changed to ' + event.currentTarget.iceConnectionState);
-    if (event.currentTarget.iceConnectionState === 'closed' || event.currentTarget
-        .iceConnectionState === 'failed') {
-      this._rejectPromise(new ConferenceError('ICE connection failed or closed.'));
+    Logger.debug('ICE connection state changed to '
+        + event.currentTarget.iceConnectionState);
+    if (event.currentTarget.iceConnectionState === 'closed'
+        || event.currentTarget.iceConnectionState === 'failed') {
+      this._rejectPromise(
+          new ConferenceError('ICE connection failed or closed.'));
       // Fire ended event if publication or subscription exists.
       this._fireEndedEventOnPublicationOrSubscription();
     }
@@ -613,7 +646,8 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
     return sdp;
   }
 
-  // Handle stream event sent from MCU. Some stream events should be publication event or subscription event. It will be handled here.
+  // Handle stream event sent from MCU. Some stream events should be publication
+  // event or subscription event. It will be handled here.
   _onStreamEvent(message) {
     let eventTarget;
     if (this._publication && message.id === this._publication.id) {

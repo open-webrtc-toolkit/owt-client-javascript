@@ -8,6 +8,8 @@
 
 /* More information about these options at jshint.com/docs/options */
 
+/* eslint-disable */
+
 /* globals  adapter, trace */
 /* exported setCodecParam, iceCandidateType, formatTypePreference,
    maybeSetOpusOptions, maybePreferAudioReceiveCodec,

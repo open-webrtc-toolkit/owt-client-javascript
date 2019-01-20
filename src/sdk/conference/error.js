@@ -4,7 +4,14 @@
 
 'use strict';
 
+/**
+ * @class ConferenceError
+ * @classDesc The ConferenceError object represents an error in conference mode.
+ * @memberOf Oms.Conference
+ * @hideconstructor
+ */
 export class ConferenceError extends Error {
+  // eslint-disable-next-line require-jsdoc
   constructor(message) {
     super(message);
   }

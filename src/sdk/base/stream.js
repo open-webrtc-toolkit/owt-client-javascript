@@ -3,11 +3,11 @@
 // SPDX-License-Identifier: Apache-2.0
 
 'use strict';
-import Logger from './logger.js';
-import {OmsEvent} from './event.js';
 import * as Utils from './utils.js';
 import {EventDispatcher} from './event.js';
+import {OmsEvent} from './event.js';
 
+// eslint-disable-next-line require-jsdoc
 function isAllowedValue(obj, allowedValues) {
   return (allowedValues.some((ele) => {
     return ele === obj;
@@ -23,15 +23,14 @@ function isAllowedValue(obj, allowedValues) {
  * @param {?string} videoSourceInfo Video source info. Accepted values are: "camera", "screen-cast", "file", "mixed" or undefined.
  */
 export class StreamSourceInfo {
+  // eslint-disable-next-line require-jsdoc
   constructor(audioSourceInfo, videoSourceInfo) {
     if (!isAllowedValue(audioSourceInfo, [undefined, 'mic', 'screen-cast',
-      'file', 'mixed',
-    ])) {
+      'file', 'mixed'])) {
       throw new TypeError('Incorrect value for audioSourceInfo');
     }
     if (!isAllowedValue(videoSourceInfo, [undefined, 'camera', 'screen-cast',
-      'file', 'encoded-file', 'raw-file', 'mixed',
-    ])) {
+      'file', 'encoded-file', 'raw-file', 'mixed'])) {
       throw new TypeError('Incorrect value for videoSourceInfo');
     }
     this.audio = audioSourceInfo;
@@ -46,9 +45,11 @@ export class StreamSourceInfo {
  * @hideconstructor
  */
 export class Stream extends EventDispatcher {
+  // eslint-disable-next-line require-jsdoc
   constructor(stream, sourceInfo, attributes) {
     super();
-    if ((stream && !(stream instanceof MediaStream)) || (typeof sourceInfo !== 'object')) {
+    if ((stream && !(stream instanceof MediaStream)) || (typeof sourceInfo !==
+        'object')) {
       throw new TypeError('Invalid stream or sourceInfo.');
     }
     if (stream && ((stream.getAudioTracks().length > 0 && !sourceInfo.audio) ||
@@ -101,6 +102,7 @@ export class Stream extends EventDispatcher {
  * @param {object} attributes Custom attributes of the stream.
  */
 export class LocalStream extends Stream {
+  // eslint-disable-next-line require-jsdoc
   constructor(stream, sourceInfo, attributes) {
     if (!(stream instanceof MediaStream)) {
       throw new TypeError('Invalid stream.');
@@ -133,6 +135,7 @@ export class LocalStream extends Stream {
  * @hideconstructor
  */
 export class RemoteStream extends Stream {
+  // eslint-disable-next-line require-jsdoc
   constructor(id, origin, stream, sourceInfo, attributes) {
     super(stream, sourceInfo, attributes);
     /**
@@ -181,6 +184,7 @@ export class RemoteStream extends Stream {
  * @hideconstructor
  */
 export class StreamEvent extends OmsEvent {
+  // eslint-disable-next-line require-jsdoc
   constructor(type, init) {
     super(type);
     /**

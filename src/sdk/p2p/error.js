@@ -82,6 +82,12 @@ export const errors = {
   },
 };
 
+/**
+ * @function getErrorByCode
+ * @desc Get error object by error code.
+ * @param {string} errorCode Error code.
+ * @return {Oms.P2P.Error} Error object
+ */
 export function getErrorByCode(errorCode) {
   const codeErrorMap = {
     2100: errors.P2P_CONN_SERVER_UNKNOWN,
@@ -103,7 +109,15 @@ export function getErrorByCode(errorCode) {
   };
   return codeErrorMap[errorCode];
 }
+
+/**
+ * @class P2PError
+ * @classDesc The P2PError object represents an error in P2P mode.
+ * @memberOf Oms.P2P
+ * @hideconstructor
+ */
 export class P2PError extends Error {
+  // eslint-disable-next-line require-jsdoc
   constructor(error, message) {
     super(message);
     if (typeof error === 'number') {

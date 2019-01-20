@@ -2,6 +2,8 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
+/* global Map, Promise */
+
 'use strict';
 
 import * as EventModule from '../base/event.js';
@@ -14,7 +16,11 @@ import * as StreamModule from '../base/stream.js';
 import {Participant} from './participant.js';
 import {ConferenceInfo} from './info.js';
 import {ConferencePeerConnectionChannel} from './channel.js';
-import {RemoteMixedStream, ActiveAudioInputChangeEvent, LayoutChangeEvent} from './mixedstream.js';
+import {
+  RemoteMixedStream,
+  ActiveAudioInputChangeEvent,
+  LayoutChangeEvent,
+} from './mixedstream.js';
 import * as StreamUtilsModule from './streamutils.js';
 
 const SignalingState = {
@@ -25,6 +31,7 @@ const SignalingState = {
 
 const protocolVersion = '1.0';
 
+/* eslint-disable valid-jsdoc */
 /**
  * @class ParticipantEvent
  * @classDesc Class ParticipantEvent represents a participant event.
@@ -42,6 +49,7 @@ const ParticipantEvent = function(type, init) {
   that.participant = init.participant;
   return that;
 };
+/* eslint-enable valid-jsdoc */
 
 /**
  * @class ConferenceClientConfiguration
@@ -49,7 +57,8 @@ const ParticipantEvent = function(type, init) {
  * @memberOf Oms.Conference
  * @hideconstructor
  */
-class ConferenceClientConfiguration {
+class ConferenceClientConfiguration { // eslint-disable-line no-unused-vars
+  // eslint-disable-next-line require-jsdoc
   constructor() {
     /**
      * @member {?RTCConfiguration} rtcConfiguration
@@ -107,6 +116,12 @@ export const ConferenceClient = function(config, signalingImpl) {
   const publishChannels = new Map(); // Key is MediaStream's ID, value is pc channel.
   const channels = new Map(); // Key is channel's internal ID, value is channel.
 
+  /**
+   * @function onSignalingMessage
+   * @desc Received a message from conference portal. Defined in client-server protocol.
+   * @param {string} notification Notification type.
+   * @param {object} data Data received.
+   */
   function onSignalingMessage(notification, data) {
     if (notification === 'soac' || notification === 'progress') {
       if (!channels.has(data.id)) {
@@ -153,12 +168,14 @@ export const ConferenceClient = function(config, signalingImpl) {
     self.dispatchEvent(new EventModule.OmsEvent('serverdisconnected'));
   });
 
+  // eslint-disable-next-line require-jsdoc
   function fireParticipantEvent(data) {
     if (data.action === 'join') {
       data = data.data;
       const participant = new Participant(data.id, data.role, data.user);
       participants.set(data.id, participant);
-      const event = new ParticipantEvent('participantjoined', {participant: participant});
+      const event = new ParticipantEvent(
+          'participantjoined', {participant: participant});
       self.dispatchEvent(event);
     } else if (data.action === 'leave') {
       const participantId = data.data;
@@ -173,6 +190,7 @@ export const ConferenceClient = function(config, signalingImpl) {
     }
   }
 
+  // eslint-disable-next-line require-jsdoc
   function fireMessageReceived(data) {
     const messageEvent = new EventModule.MessageEvent('messagereceived', {
       message: data.message,
@@ -182,6 +200,7 @@ export const ConferenceClient = function(config, signalingImpl) {
     self.dispatchEvent(messageEvent);
   }
 
+  // eslint-disable-next-line require-jsdoc
   function fireStreamAdded(info) {
     const stream = createRemoteStream(info);
     remoteStreams.set(stream.id, stream);
@@ -191,6 +210,7 @@ export const ConferenceClient = function(config, signalingImpl) {
     self.dispatchEvent(streamEvent);
   }
 
+  // eslint-disable-next-line require-jsdoc
   function fireStreamRemoved(info) {
     if (!remoteStreams.has(info.id)) {
       Logger.warning('Cannot find specific remote stream.');
@@ -202,6 +222,7 @@ export const ConferenceClient = function(config, signalingImpl) {
     stream.dispatchEvent(streamEvent);
   }
 
+  // eslint-disable-next-line require-jsdoc
   function fireActiveAudioInputChange(info) {
     if (!remoteStreams.has(info.id)) {
       Logger.warning('Cannot find specific remote stream.');
@@ -215,6 +236,7 @@ export const ConferenceClient = function(config, signalingImpl) {
     stream.dispatchEvent(streamEvent);
   }
 
+  // eslint-disable-next-line require-jsdoc
   function fireLayoutChange(info) {
     if (!remoteStreams.has(info.id)) {
       Logger.warning('Cannot find specific remote stream.');
@@ -228,6 +250,7 @@ export const ConferenceClient = function(config, signalingImpl) {
     stream.dispatchEvent(streamEvent);
   }
 
+  // eslint-disable-next-line require-jsdoc
   function updateRemoteStream(streamInfo) {
     if (!remoteStreams.has(streamInfo.id)) {
       Logger.warning('Cannot find specific remote stream.');
@@ -242,6 +265,7 @@ export const ConferenceClient = function(config, signalingImpl) {
     stream.dispatchEvent(streamEvent);
   }
 
+  // eslint-disable-next-line require-jsdoc
   function createRemoteStream(streamInfo) {
     if (streamInfo.type === 'mixed') {
       return new RemoteMixedStream(streamInfo);
@@ -253,9 +277,9 @@ export const ConferenceClient = function(config, signalingImpl) {
       if (streamInfo.media.video) {
         videoSourceInfo = streamInfo.media.video.source;
       }
-      const stream = new StreamModule.RemoteStream(streamInfo.id, streamInfo.info
-          .owner, undefined, new StreamModule.StreamSourceInfo(audioSourceInfo,
-          videoSourceInfo), streamInfo.info.attributes);
+      const stream = new StreamModule.RemoteStream(streamInfo.id,
+          streamInfo.info.owner, undefined, new StreamModule.StreamSourceInfo(
+              audioSourceInfo, videoSourceInfo), streamInfo.info.attributes);
       stream.settings = StreamUtilsModule.convertToPublicationSettings(
           streamInfo.media);
       stream.capabilities = StreamUtilsModule.convertToSubscriptionCapabilities(
@@ -264,21 +288,25 @@ export const ConferenceClient = function(config, signalingImpl) {
     }
   }
 
+  // eslint-disable-next-line require-jsdoc
   function sendSignalingMessage(type, message) {
     return signaling.send(type, message);
   }
 
+  // eslint-disable-next-line require-jsdoc
   function createPeerConnectionChannel() {
     // Construct an signaling sender/receiver for ConferencePeerConnection.
     const signalingForChannel = Object.create(EventModule.EventDispatcher);
     signalingForChannel.sendSignalingMessage = sendSignalingMessage;
-    const pcc = new ConferencePeerConnectionChannel(config, signalingForChannel);
+    const pcc = new ConferencePeerConnectionChannel(
+        config, signalingForChannel);
     pcc.addEventListener('id', (messageEvent) => {
       channels.set(messageEvent.message, pcc);
     });
     return pcc;
   }
 
+  // eslint-disable-next-line require-jsdoc
   function clean() {
     participants.clear();
     remoteStreams.clear();
@@ -301,7 +329,7 @@ export const ConferenceClient = function(config, signalingImpl) {
    * @desc Join a conference.
    * @memberof Oms.Conference.ConferenceClient
    * @return {Promise<ConferenceInfo, Error>} Return a promise resolved with current conference's information if successfully join the conference. Or return a promise rejected with a newly created Oms.Error if failed to join the conference.
-   * @param {string} token Token is issued by conference server(nuve).
+   * @param {string} tokenString Token is issued by conference server(nuve).
    */
   this.join = function(tokenString) {
     return new Promise((resolve, reject) => {

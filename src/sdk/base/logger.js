@@ -26,28 +26,19 @@
 
 // This file is borrowed from lynckia/licode with some modifications.
 
-/* global console*/
+/* global console,window */
 
 /*
- * API to write logs based on traditional logging mechanisms: debug, trace, info, warning, error
+ * API to write logs based on traditional logging mechanisms: debug, trace,
+ * info, warning, error
  */
 const Logger = (function() {
   'use strict';
   const DEBUG = 0;
-
-
   const TRACE = 1;
-
-
   const INFO = 2;
-
-
   const WARNING = 3;
-
-
   const ERROR = 4;
-
-
   const NONE = 5;
 
   const noOp = function() {};

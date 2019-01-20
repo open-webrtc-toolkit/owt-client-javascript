@@ -2,13 +2,13 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
+/* global Map, Promise */
+
 'use strict';
 import Logger from '../base/logger.js';
 import {EventDispatcher, OmsEvent} from '../base/event.js';
-import * as Utils from '../base/utils.js';
 import * as ErrorModule from './error.js';
 import P2PPeerConnectionChannel from './peerconnection-channel.js';
-import * as StreamModule from '../base/stream.js';
 
 const ConnectionState = {
   READY: 1,
@@ -16,61 +16,7 @@ const ConnectionState = {
   CONNECTED: 3,
 };
 
-const pcDisconnectTimeout = 15000; // Close peerconnection after disconnect 15s.let isConnectedToSignalingChannel = false;
-const offerOptions = {
-  'offerToReceiveAudio': true,
-  'offerToReceiveVideo': true,
-};
-const sysInfo = Utils.sysInfo();
-const supportsPlanB = Utils.isSafari() ? true : false;
-const supportsUnifiedPlan = Utils.isSafari() ? false : true;
-/**
- * @function isArray
- * @desc Test if an object is an array.
- * @return {boolean} DESCRIPTION
- * @private
- */
-function isArray(obj) {
-  return (Object.prototype.toString.call(obj) === '[object Array]');
-}
-/*
- * Return negative value if id1<id2, positive value if id1>id2
- */
-const compareID = function(id1, id2) {
-  return id1.localeCompare(id2);
-};
-// If targetId is peerId, then return targetId.
-const getPeerId = function(targetId) {
-  return targetId;
-};
-const changeNegotiationState = function(peer, state) {
-  peer.negotiationState = state;
-};
-// Do stop chat locally.
-const stopChatLocally = function(peer, originatorId) {
-  if (peer.state === PeerState.CONNECTED || peer.state === PeerState.CONNECTING) {
-    if (peer.sendDataChannel) {
-      peer.sendDataChannel.close();
-    }
-    if (peer.receiveDataChannel) {
-      peer.receiveDataChannel.close();
-    }
-    if (peer.connection && peer.connection.iceConnectionState !== 'closed') {
-      peer.connection.close();
-    }
-    if (peer.state !== PeerState.READY) {
-      peer.state = PeerState.READY;
-      that.dispatchEvent(new Woogeen.ChatEvent({
-        type: 'chat-stopped',
-        peerId: peer.id,
-        senderId: originatorId,
-      }));
-    }
-    // Unbind events for the pc, so the old pc will not impact new peerconnections created for the same target later.
-    unbindEvetsToPeerConnection(peer.connection);
-  }
-};
-
+/* eslint-disable no-unused-vars */
 /**
  * @class P2PClientConfiguration
  * @classDesc Configuration for P2PClient.
@@ -115,6 +61,7 @@ const P2PClientConfiguration = function() {
    */
   this.rtcConfiguration = undefined;
 };
+/* eslint-enable no-unused-vars */
 
 /**
  * @class P2PClient
@@ -130,7 +77,8 @@ const P2PClientConfiguration = function() {
  * @memberof Oms.P2P
  * @extends Oms.Base.EventDispatcher
  * @constructor
- * @param {?Oms.P2P.P2PClientConfiguration } config Configuration for P2PClient.
+ * @param {?Oms.P2P.P2PClientConfiguration } configuration Configuration for Oms.P2P.P2PClient.
+ * @param {Object} signalingChannel A channel for sending and receiving signaling messages.
  */
 const P2PClient = function(configuration, signalingChannel) {
   Object.setPrototypeOf(this, new EventDispatcher());
@@ -154,7 +102,8 @@ const P2PClient = function(configuration, signalingChannel) {
     if (self.allowedRemoteIds.indexOf(origin) >= 0) {
       getOrCreateChannel(origin).onMessage(data);
     } else {
-      sendSignalingMessage(origin, 'chat-closed', ErrorModule.errors.P2P_CLIENT_DENIED);
+      sendSignalingMessage(origin, 'chat-closed',
+          ErrorModule.errors.P2P_CLIENT_DENIED);
     }
   };
 
@@ -176,6 +125,7 @@ const P2PClient = function(configuration, signalingChannel) {
    * @instance
    * @desc Connect to signaling server. Since signaling can be customized, this method does not define how a token looks like. SDK passes token to signaling channel without changes.
    * @memberof Oms.P2P.P2PClient
+   * @param {string} token A token for connecting to signaling server. The format of this token depends on signaling server's requirement.
    * @return {Promise<object, Error>} It returns a promise resolved with an object returned by signaling channel once signaling channel reports connection has been established.
    */
   this.connect = function(token) {
@@ -183,7 +133,8 @@ const P2PClient = function(configuration, signalingChannel) {
       state = ConnectionState.CONNECTING;
     } else {
       Logger.warning('Invalid connection state: ' + state);
-      return Promise.reject(new ErrorModule.P2PError(ErrorModule.errors.P2P_CLIENT_INVALID_STATE));
+      return Promise.reject(new ErrorModule.P2PError(
+          ErrorModule.errors.P2P_CLIENT_INVALID_STATE));
     }
     return new Promise((resolve, reject) => {
       signaling.connect(token).then((id) => {
@@ -202,7 +153,7 @@ const P2PClient = function(configuration, signalingChannel) {
    * @instance
    * @desc Disconnect from the signaling channel. It stops all existing sessions with remote endpoints.
    * @memberof Oms.P2P.P2PClient
-   * @return {Promise<undefined, Error>}
+   * @return {undefined}
    */
   this.disconnect = function() {
     if (state == ConnectionState.READY) {
@@ -226,11 +177,13 @@ const P2PClient = function(configuration, signalingChannel) {
    */
   this.publish = function(remoteId, stream) {
     if (state !== ConnectionState.CONNECTED) {
-      return Promise.reject(new ErrorModule.P2PError(ErrorModule.errors.P2P_CLIENT_INVALID_STATE,
+      return Promise.reject(new ErrorModule.P2PError(
+          ErrorModule.errors.P2P_CLIENT_INVALID_STATE,
           'P2P Client is not connected to signaling channel.'));
     }
     if (this.allowedRemoteIds.indexOf(remoteId) < 0) {
-      return Promise.reject(new ErrorModule.P2PError(ErrorModule.errors.P2P_CLIENT_NOT_ALLOWED));
+      return Promise.reject(new ErrorModule.P2PError(
+          ErrorModule.errors.P2P_CLIENT_NOT_ALLOWED));
     }
     return Promise.resolve(getOrCreateChannel(remoteId).publish(stream));
   };
@@ -246,11 +199,13 @@ const P2PClient = function(configuration, signalingChannel) {
    */
   this.send=function(remoteId, message) {
     if (state !== ConnectionState.CONNECTED) {
-      return Promise.reject(new ErrorModule.P2PError(ErrorModule.errors.P2P_CLIENT_INVALID_STATE,
+      return Promise.reject(new ErrorModule.P2PError(
+          ErrorModule.errors.P2P_CLIENT_INVALID_STATE,
           'P2P Client is not connected to signaling channel.'));
     }
     if (this.allowedRemoteIds.indexOf(remoteId) < 0) {
-      return Promise.reject(new ErrorModule.P2PError(ErrorModule.errors.P2P_CLIENT_NOT_ALLOWED));
+      return Promise.reject(new ErrorModule.P2PError(
+          ErrorModule.errors.P2P_CLIENT_NOT_ALLOWED));
     }
     return Promise.resolve(getOrCreateChannel(remoteId).send(message));
   };
@@ -266,7 +221,8 @@ const P2PClient = function(configuration, signalingChannel) {
   this.stop = function(remoteId) {
     if (!channels.has(remoteId)) {
       Logger.warning(
-          'No PeerConnection between current endpoint and specific remote endpoint.'
+          'No PeerConnection between current endpoint and specific remote ' +
+          'endpoint.'
       );
       return;
     }
@@ -284,7 +240,10 @@ const P2PClient = function(configuration, signalingChannel) {
    */
   this.getStats = function(remoteId) {
     if (!channels.has(remoteId)) {
-      return Promise.reject(new ErrorModule.P2PError(ErrorModule.errors.P2P_CLIENT_INVALID_STATE, 'No PeerConnection between current endpoint and specific remote endpoint.'));
+      return Promise.reject(new ErrorModule.P2PError(
+          ErrorModule.errors.P2P_CLIENT_INVALID_STATE,
+          'No PeerConnection between current endpoint and specific remote ' +
+          'endpoint.'));
     }
     return channels.get(remoteId).getStats();
   };

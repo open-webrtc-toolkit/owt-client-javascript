@@ -61,6 +61,7 @@ export const TrackKind = {
  * @param {number} height
  */
 export class Resolution {
+  // eslint-disable-next-line require-jsdoc
   constructor(width, height) {
     /**
      * @member {number} width
