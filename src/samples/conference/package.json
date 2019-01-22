@@ -14,11 +14,11 @@
   ],
   "dependencies": {
     "body-parser": "~1.14.1",
-    "express": "",
     "errorhandler": "",
+    "express": "",
     "morgan": "",
-    "socket.io": "",
-    "spdy":""
+    "socket.io": "^2.2.0",
+    "spdy": ""
   },
   "engines": {
     "node": ">=0.10"
