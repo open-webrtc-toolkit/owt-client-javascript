@@ -29,17 +29,17 @@
 /*global require, CryptoJS, Buffer, url, http, https*/
 var Url = require("url");
 
-var OMS_REST = OMS_REST || {};
+var OWT_REST = OWT_REST || {};
 
-/**@namespace OMS_REST
- * @classDesc Namespace for OMS(Intel Collaboration Suite) REST API definition.
+/**@namespace OWT_REST
+ * @classDesc Namespace for OWT(Intel Collaboration Suite) REST API definition.
  */
 /**
- * @class OMS_REST.API
- * @classDesc Server-side APIs should be called by RTC service integrators, as demostrated in sampleRTCService.js. Server-side APIs are RESTful, provided as a Node.js module. All APIs, except OMS_REST.API.init(), should not be called too frequently. These API calls carry local timestamps and are grouped by serviceID. Once the server is handling an API call from a certain serviceID, all other API calls from the same serviceID, whose timestamps are behind, would be expired or treated as invalid.<br>
+ * @class OWT_REST.API
+ * @classDesc Server-side APIs should be called by RTC service integrators, as demostrated in sampleRTCService.js. Server-side APIs are RESTful, provided as a Node.js module. All APIs, except OWT_REST.API.init(), should not be called too frequently. These API calls carry local timestamps and are grouped by serviceID. Once the server is handling an API call from a certain serviceID, all other API calls from the same serviceID, whose timestamps are behind, would be expired or treated as invalid.<br>
 We recommend that API calls against serviceID should have interval of at least 100ms. Also, it is better to retry the logic if it fails with an unexpected timestamp error.
  */
-OMS_REST.API = (function(OMS_REST) {
+OWT_REST.API = (function(OWT_REST) {
   'use strict';
   var version = 'v1';
   var params = {
@@ -53,7 +53,7 @@ OMS_REST.API = (function(OMS_REST) {
     var hash, hex, signed;
     hash = CryptoJS.HmacSHA256(toSign, key);
     hex = hash.toString(CryptoJS.enc.Hex);
-    signed = OMS_REST.Base64.encodeBase64(hex);
+    signed = OWT_REST.Base64.encodeBase64(hex);
     return signed;
   };
 
@@ -131,14 +131,14 @@ OMS_REST.API = (function(OMS_REST) {
      * @function init
      * @desc This function completes the essential configuration.
   <br><b>Remarks:</b><br>
-  Make sure you use the correct OMS_REST server url, according to the OMS_REST ssl configuration.
-     * @memberOf OMS_REST.API
+  Make sure you use the correct OWT_REST server url, according to the OWT_REST ssl configuration.
+     * @memberOf OWT_REST.API
      * @param {string} service                       -The ID of your service.
      * @param {string} key                           -The key of your service.
-     * @param {string} url                           -The URL of OMS service.
+     * @param {string} url                           -The URL of OWT service.
      * @param {boolean} rejectUnauthorizedCert       -Flag to determine whether reject unauthorized certificates, with value being true or false, true by default.
      * @example
-  OMS_REST.API.init('5188b9af6e53c84ffd600413', '21989', 'http://61.129.90.140:3000/', true)
+  OWT_REST.API.init('5188b9af6e53c84ffd600413', '21989', 'http://61.129.90.140:3000/', true)
      */
   var init = function(service, key, url, rejectUnauthorizedCert) {
     if (typeof service !== 'string' || service === '') {
@@ -273,13 +273,13 @@ OMS_REST.API = (function(OMS_REST) {
       </tbody>
   </table>
   @endhtmlonly
-     * @memberOf OMS_REST.API
+     * @memberOf OWT_REST.API
      * @param {string} name                          -Room name.
      * @param {json} options                         -Room configuration.
      * @param {function} callback                    -Callback function on success.
      * @param {function} callbackError               -Callback function on error.
      * @example
-  OMS_REST.API.createRoom('myRoom', {
+  OWT_REST.API.createRoom('myRoom', {
     mode: 'hybrid',
     publishLimit: -1,
     userLimit: 30,
@@ -347,11 +347,11 @@ OMS_REST.API = (function(OMS_REST) {
   /**
      * @function getRooms
      * @desc This function lists the rooms in your service.
-     * @memberOf OMS_REST.API
+     * @memberOf OWT_REST.API
      * @param {function} callback                    -Callback function on success
      * @param {function} callbackError               -Callback function on error
      * @example
-  OMS_REST.API.getRooms(function(rooms) {
+  OWT_REST.API.getRooms(function(rooms) {
     for(var i in rooms) {
       console.log('Room', i, ':', rooms[i].name);
     }
@@ -374,13 +374,13 @@ OMS_REST.API = (function(OMS_REST) {
   /**
      * @function getRoom
      * @desc This function returns information on the specified room.
-     * @memberOf OMS_REST.API
+     * @memberOf OWT_REST.API
      * @param {string} room                          -Room ID
      * @param {function} callback                    -Callback function on success
      * @param {function} callbackError               -Callback function on error
      * @example
   var roomId = '51c10d86909ad1f939000001';
-  OMS_REST.API.getRoom(roomId, function(room) {
+  OWT_REST.API.getRoom(roomId, function(room) {
     console.log('Room name:', room.name);
   }, function(status, error) {
     // HTTP status and error
@@ -405,13 +405,13 @@ OMS_REST.API = (function(OMS_REST) {
   /**
      * @function deleteRoom
      * @desc This function deletes the specified room.
-     * @memberOf OMS_REST.API
+     * @memberOf OWT_REST.API
      * @param {string} room                          -Room ID to be deleted
      * @param {function} callback                    -Callback function on success
      * @param {function} callbackError               -Callback function on error
      * @example
   var room = '51c10d86909ad1f939000001';
-  OMS_REST.API.deleteRoom(room, function(result) {
+  OWT_REST.API.deleteRoom(room, function(result) {
     console.log ('Result:' result);
   }, function(status, error) {
     // HTTP status and error
@@ -427,13 +427,13 @@ OMS_REST.API = (function(OMS_REST) {
   /**
      * @function updateRoom
      * @desc This function updates a room's configuration entirely.
-     * @memberOf OMS_REST.API
+     * @memberOf OWT_REST.API
      * @param {string} room                          -Room ID.
-     * @param {json} options                         -Room configuration. See details about options in {@link OMS_REST.API#createRoom createRoom(name, options, callback, callbackError)}.
+     * @param {json} options                         -Room configuration. See details about options in {@link OWT_REST.API#createRoom createRoom(name, options, callback, callbackError)}.
      * @param {function} callback                    -Callback function on success
      * @param {function} callbackError               -Callback function on error
      * @example
-  OMS_REST.API.updateRoom(XXXXXXXXXX, {
+  OWT_REST.API.updateRoom(XXXXXXXXXX, {
     publishLimit: -1,
     userLimit: -1,
     enableMixing: 1,
@@ -494,13 +494,13 @@ OMS_REST.API = (function(OMS_REST) {
   /**
      * @function updateRoomPartially
      * @desc This function updates a room's configuration partially.
-     * @memberOf OMS_REST.API
+     * @memberOf OWT_REST.API
      * @param {string} room                          -Room ID.
      * @param {Array.<{op: string, path: string, value: json}>} items  -Configuration item list to be updated, with format following RFC6902(https://tools.ietf.org/html/rfc6902).
      * @param {function} callback                    -Callback function on success
      * @param {function} callbackError               -Callback function on error
      * @example
-  OMS_REST.API.updateRoomPartially(XXXXXXXXXX, [
+  OWT_REST.API.updateRoomPartially(XXXXXXXXXX, [
     {op: 'replace', path: '/enableMixing', value: 0},
     {op: 'replace', path: '/viewports/0/mediaMixing/video/avCoordinated', value: 1}
   ], function (res) {
@@ -523,13 +523,13 @@ OMS_REST.API = (function(OMS_REST) {
   /**
      * @function getParticipants
      * @desc This function lists participants currently in the specified room.
-     * @memberOf OMS_REST.API
+     * @memberOf OWT_REST.API
      * @param {string} room                          -Room ID
      * @param {onParticipantList} callback           -Callback function on success
      * @param {function} callbackError               -Callback function on error
      * @example
   var roomId = '51c10d86909ad1f939000001';
-  OMS_REST.API.getParticipants(roomId, function(participants) {
+  OWT_REST.API.getParticipants(roomId, function(participants) {
     var l = JSON.parse(participants);
     console.log ('This room has ', l.length, 'participants');
     for (var i in l) {
@@ -558,7 +558,7 @@ OMS_REST.API = (function(OMS_REST) {
   /**
      * @function getParticipant
      * @desc This function gets a participant's information from the specified room.
-     * @memberOf OMS_REST.API
+     * @memberOf OWT_REST.API
      * @param {string} room                          -Room ID
      * @param {string} participant                   -Participant ID
      * @param {onParticipantDetail} callback         -Callback function on success
@@ -566,7 +566,7 @@ OMS_REST.API = (function(OMS_REST) {
      * @example
   var roomId = '51c10d86909ad1f939000001';
   var participantID = 'JdlUI29yjfVY6O4yAAAB';
-  OMS_REST.API.getParticipant(roomId, participantID, function(participant) {
+  OWT_REST.API.getParticipant(roomId, participantID, function(participant) {
     console.log('Participant:', participant);
   }, function(status, error) {
     // HTTP status and error
@@ -590,7 +590,7 @@ OMS_REST.API = (function(OMS_REST) {
   /**
      * @function updateParticipant
      * @desc This function updates the permission of a participant in the specified room.
-     * @memberOf OMS_REST.API
+     * @memberOf OWT_REST.API
      * @param {string} room                          -Room ID
      * @param {string} participant                   -Participant ID
      * @param {Array.<{op: string, path: string, value: json}>} items   -Permission item list to be updated, with format following RFC6902(https://tools.ietf.org/html/rfc6902).
@@ -599,7 +599,7 @@ OMS_REST.API = (function(OMS_REST) {
      * @example
   var roomId = '51c10d86909ad1f939000001';
   var participantID = 'JdlUI29yjfVY6O4yAAAB';
-  OMS_REST.API.getParticipant(roomId, participantID, function(participant) {
+  OWT_REST.API.getParticipant(roomId, participantID, function(participant) {
     console.log('Participant:', participant);
   }, function(status, error) {
     // HTTP status and error
@@ -622,7 +622,7 @@ OMS_REST.API = (function(OMS_REST) {
   /**
      * @function dropParticipant
      * @desc This function drops a participant from a room.
-     * @memberOf OMS_REST.API
+     * @memberOf OWT_REST.API
      * @param {string} room                          -Room ID
      * @param {string} participant                   -Participant ID
      * @param {function} callback                    -Callback function on success
@@ -630,7 +630,7 @@ OMS_REST.API = (function(OMS_REST) {
      * @example
   var roomId = '51c10d86909ad1f939000001';
   var participantID = 'JdlUI29yjfVY6O4yAAAB';
-  OMS_REST.API.dropParticipant(roomId, participantID, function(res) {
+  OWT_REST.API.dropParticipant(roomId, participantID, function(res) {
     console.log('Participant', participantID, 'in room', roomId, 'deleted');
   }, function(status, error) {
     // HTTP status and error
@@ -654,13 +654,13 @@ OMS_REST.API = (function(OMS_REST) {
   /**
      * @function getStreams
      * @desc This function lists streams currently in the specified room.
-     * @memberOf OMS_REST.API
+     * @memberOf OWT_REST.API
      * @param {string} room                          -Room ID
      * @param {onStreamList} callback                -Callback function on success
      * @param {function} callbackError               -Callback function on error
      * @example
   var roomId = '51c10d86909ad1f939000001';
-  OMS_REST.API.getStreams(roomId, function(streams) {
+  OWT_REST.API.getStreams(roomId, function(streams) {
     var l = JSON.parse(streams);
     console.log ('This room has ', l.length, 'streams');
     for (var i in l) {
@@ -685,7 +685,7 @@ OMS_REST.API = (function(OMS_REST) {
   /**
      * @function getStream
      * @desc This function gets a stream's information from the specified room.
-     * @memberOf OMS_REST.API
+     * @memberOf OWT_REST.API
      * @param {string} room                          -Room ID
      * @param {string} stream                        -Stream ID
      * @param {onStreamInfo} callback                -Callback function on success
@@ -693,7 +693,7 @@ OMS_REST.API = (function(OMS_REST) {
      * @example
   var roomId = '51c10d86909ad1f939000001';
   var streamID = '878889273471677';
-  OMS_REST.API.getStream(roomId, streamID, function(stream) {
+  OWT_REST.API.getStream(roomId, streamID, function(stream) {
     console.log('Stream:', stream);
   }, function(status, error) {
     // HTTP status and error
@@ -717,7 +717,7 @@ OMS_REST.API = (function(OMS_REST) {
   /**
      * @function updateStream
      * @desc This function updates a stream's given attributes in the specified room.
-     * @memberOf OMS_REST.API
+     * @memberOf OWT_REST.API
      * @param {string} room                          -Room ID
      * @param {string} stream                        -Stream ID
      * @param {Array.<{op: string, path: string, value: json}>} items   -Attributes to be updated, with format following RFC6902(https://tools.ietf.org/html/rfc6902).
@@ -726,7 +726,7 @@ OMS_REST.API = (function(OMS_REST) {
      * @example
   var roomId = '51c10d86909ad1f939000001';
   var streamID = '878889273471677';
-  OMS_REST.API.updateStream(roomId, streamID, [{op: 'replace', path: '/media/audio/status', value: 'inactive'}], function(stream) {
+  OWT_REST.API.updateStream(roomId, streamID, [{op: 'replace', path: '/media/audio/status', value: 'inactive'}], function(stream) {
     console.log('Stream:', stream);
   }, function(status, error) {
     // HTTP status and error
@@ -749,7 +749,7 @@ OMS_REST.API = (function(OMS_REST) {
   /**
      * @function deleteStream
      * @desc This function deletes the specified stream from the specified room.
-     * @memberOf OMS_REST.API
+     * @memberOf OWT_REST.API
      * @param {string} room                          -Room ID
      * @param {string} stream                        -Stream ID
      * @param {function} callback                    -Callback function on success
@@ -757,7 +757,7 @@ OMS_REST.API = (function(OMS_REST) {
      * @example
   var roomId = '51c10d86909ad1f939000001';
   var streamID = '878889273471677';
-  OMS_REST.API.deleteStream(roomId, streamID, function(result) {
+  OWT_REST.API.deleteStream(roomId, streamID, function(result) {
     console.log('Stream:', streamID, 'in room:', roomId, 'deleted');
   }, function(status, error) {
     // HTTP status and error
@@ -781,7 +781,7 @@ OMS_REST.API = (function(OMS_REST) {
    ***
      * @function startStreamingIn
      * @desc This function adds an external RTSP/RTMP stream to the specified room.
-     * @memberOf OMS_REST.API
+     * @memberOf OWT_REST.API
      * @param {string} room                          -Room ID
      * @param {string} url                           -URL of the streaming source, e.g. the source URL of IPCamera.
      * @param {Object} transport                     -Transport parameters.
@@ -804,7 +804,7 @@ OMS_REST.API = (function(OMS_REST) {
     video: true
   };
 
-  OMS_REST.API.startStreamingIn(roomId, url, transport, media, function(stream) {
+  OWT_REST.API.startStreamingIn(roomId, url, transport, media, function(stream) {
     console.log('Streaming-In:', stream);
   }, function(status, error) {
     // HTTP status and error
@@ -829,7 +829,7 @@ OMS_REST.API = (function(OMS_REST) {
   /**
      * @function stopStreamingIn
      * @desc This function stops the specified external streaming-in in the specified room.
-     * @memberOf OMS_REST.API
+     * @memberOf OWT_REST.API
      * @param {string} room                          -Room ID
      * @param {string} stream                        -Stream ID
      * @param {function} callback                    -Callback function on success
@@ -837,7 +837,7 @@ OMS_REST.API = (function(OMS_REST) {
      * @example
   var roomId = '51c10d86909ad1f939000001';
   var streamID = '878889273471677';
-  OMS_REST.API.stopStreamingIn(roomId, streamID, function(result) {
+  OWT_REST.API.stopStreamingIn(roomId, streamID, function(result) {
     console.log('External streaming-in:', streamID, 'in room:', roomId, 'stopped');
   }, function(status, error) {
     // HTTP status and error
@@ -861,13 +861,13 @@ OMS_REST.API = (function(OMS_REST) {
   /**
      * @function getStreamingOuts
      * @desc This function gets all the ongoing streaming-outs in the specified room.
-     * @memberOf OMS_REST.API
+     * @memberOf OWT_REST.API
      * @param {string} room                          -Room ID.
      * @param {onStreamingOutList} callback          -Callback function on success
      * @param {function} callbackError               -Callback function on error
      * @example
   var roomId = '51c10d86909ad1f939000001';
-  OMS_REST.API.getStreamingOuts(roomId, function(streamingOuts) {
+  OWT_REST.API.getStreamingOuts(roomId, function(streamingOuts) {
     console.log('Streaming-outs:', streamingOuts);
   }, function(status, error) {
     // HTTP status and error
@@ -891,7 +891,7 @@ OMS_REST.API = (function(OMS_REST) {
   /**
      * @function startStreamingOut
      * @desc This function starts a streaming-out to the specified room.
-     * @memberOf OMS_REST.API
+     * @memberOf OWT_REST.API
      * @param {string} room                          -Room ID.
      * @param {string} url                           -The URL of the target streaming-out.
      * @param {Object} media                         -The media description of the streaming-out, which must follow the definition of object "MediaSubOptions" in section "3.3.11 Participant Starts a Subscription" in "Client-Portal Protocol.md" doc.
@@ -911,7 +911,7 @@ OMS_REST.API = (function(OMS_REST) {
       }
     }
   };
-  OMS_REST.API.startStreamingOut(roomId, url, media, function(streamingOut) {
+  OWT_REST.API.startStreamingOut(roomId, url, media, function(streamingOut) {
     console.log('Streaming-out:', streamingOut);
   }, function(status, error) {
     // HTTP status and error
@@ -937,7 +937,7 @@ OMS_REST.API = (function(OMS_REST) {
   /**
      * @function updateStreamingOut
      * @desc This function updates a streaming-out's given attributes in the specified room.
-     * @memberOf OMS_REST.API
+     * @memberOf OWT_REST.API
      * @param {string} room                          -Room ID
      * @param {string} id                            -Streaming-out ID
      * @param {Array.<{op: string, path: string, value: json}>} items -Attributes to be updated, with format following RFC6902(https://tools.ietf.org/html/rfc6902).
@@ -946,7 +946,7 @@ OMS_REST.API = (function(OMS_REST) {
      * @example
   var roomId = '51c10d86909ad1f939000001';
   var id = '878889273471677';
-  OMS_REST.API.updateStreamingOut(roomId, id, [{op: 'replace', path: '/media/audio/from', value: '9836636255531'}], function(subscription) {
+  OWT_REST.API.updateStreamingOut(roomId, id, [{op: 'replace', path: '/media/audio/from', value: '9836636255531'}], function(subscription) {
     console.log('Subscription:', subscription);
   }, function(status, error) {
     // HTTP status and error
@@ -969,7 +969,7 @@ OMS_REST.API = (function(OMS_REST) {
   /**
      * @function stopStreamingOut
      * @desc This function stops the specified streaming-out in the specified room.
-     * @memberOf OMS_REST.API
+     * @memberOf OWT_REST.API
      * @param {string} room                          -Room ID
      * @param {string} id                            -Streaming-out ID
      * @param {function} callback                    -Callback function on success
@@ -977,7 +977,7 @@ OMS_REST.API = (function(OMS_REST) {
      * @example
   var roomId = '51c10d86909ad1f939000001';
   var id = '878889273471677';
-  OMS_REST.API.stopStreamingOut(roomId, id, function(result) {
+  OWT_REST.API.stopStreamingOut(roomId, id, function(result) {
     console.log('Streaming-out:', id, 'in room:', roomId, 'stopped');
   }, function(status, error) {
     // HTTP status and error
@@ -1004,13 +1004,13 @@ OMS_REST.API = (function(OMS_REST) {
   /**
      * @function getRecordings
      * @desc This function gets the all the ongoing recordings in the specified room.
-     * @memberOf OMS_REST.API
+     * @memberOf OWT_REST.API
      * @param {string} room                          -Room ID.
      * @param {function} callback                    -Callback function on success
      * @param {function} callbackError               -Callback function on error
      * @example
   var roomId = '51c10d86909ad1f939000001';
-  OMS_REST.API.getRecordings(roomId, function(recordings) {
+  OWT_REST.API.getRecordings(roomId, function(recordings) {
     console.log('Recordings:', recordings);
   }, function(status, error) {
     // HTTP status and error
@@ -1036,7 +1036,7 @@ OMS_REST.API = (function(OMS_REST) {
   /**
      * @function startRecording
      * @desc This function starts a recording in the specified room.
-     * @memberOf OMS_REST.API
+     * @memberOf OWT_REST.API
      * @param {string} room                          -Room ID.
      * @param {string='mp4' | 'mkv' | 'auto'} container -The container type of the recording file, 'auto' by default.
      * @param {Object} media                         -The media description of the recording, which must follow the definition of object "MediaSubOptions" in section "3.3.11 Participant Starts a Subscription" in "Client-Portal Protocol.md" doc.
@@ -1056,7 +1056,7 @@ OMS_REST.API = (function(OMS_REST) {
       }
     }
   };
-  OMS_REST.API.startRecording(roomId, container, media, function(recording) {
+  OWT_REST.API.startRecording(roomId, container, media, function(recording) {
     console.log('recording:', recording);
   }, function(status, error) {
     // HTTP status and error
@@ -1082,7 +1082,7 @@ OMS_REST.API = (function(OMS_REST) {
   /**
      * @function updateRecording
      * @desc This function updates a recording's given attributes in the specified room.
-     * @memberOf OMS_REST.API
+     * @memberOf OWT_REST.API
      * @param {string} room                          -Room ID
      * @param {string} id                            -Recording ID
      * @param {Array.<{op: string, path: string, value: json}>} items -Attributes to be updated, with format following RFC6902(https://tools.ietf.org/html/rfc6902).
@@ -1091,7 +1091,7 @@ OMS_REST.API = (function(OMS_REST) {
      * @example
   var roomId = '51c10d86909ad1f939000001';
   var id = '878889273471677';
-  OMS_REST.API.updateRecording(roomId, id, [{op: 'replace', path: '/media/audio/from', value: '9836636255531'}], function(subscription) {
+  OWT_REST.API.updateRecording(roomId, id, [{op: 'replace', path: '/media/audio/from', value: '9836636255531'}], function(subscription) {
     console.log('Subscription:', subscription);
   }, function(status, error) {
     // HTTP status and error
@@ -1114,7 +1114,7 @@ OMS_REST.API = (function(OMS_REST) {
   /**
      * @function stopRecording
      * @desc This function stops the specified recording in the specified room.
-     * @memberOf OMS_REST.API
+     * @memberOf OWT_REST.API
      * @param {string} room                          -Room ID
      * @param {string} id                            -Recording ID
      * @param {function} callback                    -Callback function on success
@@ -1122,7 +1122,7 @@ OMS_REST.API = (function(OMS_REST) {
      * @example
   var roomId = '51c10d86909ad1f939000001';
   var id = '878889273471677';
-  OMS_REST.API.stopRecording(roomId, id, function(result) {
+  OWT_REST.API.stopRecording(roomId, id, function(result) {
     console.log('Recording:', id, 'in room:', roomId, 'stopped');
   }, function(status, error) {
     // HTTP status and error
@@ -1145,13 +1145,13 @@ OMS_REST.API = (function(OMS_REST) {
   /**
      * @function getSipCalls
      * @desc This function gets the all the ongoing sip calls in the specified room.
-     * @memberOf OMS_REST.API
+     * @memberOf OWT_REST.API
      * @param {string} room                          -Room ID.
      * @param {onSipCallList} callback               -Callback function on success
      * @param {function} callbackError               -Callback function on error
      * @example
   var roomId = '51c10d86909ad1f939000001';
-  OMS_REST.API.getSipCalls(roomId, function(sipCalls) {
+  OWT_REST.API.getSipCalls(roomId, function(sipCalls) {
     console.log('SipCalls:', sipCalls);
   }, function(status, error) {
     // HTTP status and error
@@ -1179,7 +1179,7 @@ OMS_REST.API = (function(OMS_REST) {
   /**
      * @function makeSipCall
      * @desc This function makes a SIP call to the specified peer in the specified room.
-     * @memberOf OMS_REST.API
+     * @memberOf OWT_REST.API
      * @param {string} room                          -Room ID.
      * @param {string} peerUri                       -The the peer URI to call.
      * @param {Object} mediaIn                       -The media requirements from peer sip endpoint to room.
@@ -1209,7 +1209,7 @@ OMS_REST.API = (function(OMS_REST) {
       }
     }
   };
-  OMS_REST.API.makeSipCall(roomId, peerUri, mediaIn, mediaOut, function(sipCallInfo) {
+  OWT_REST.API.makeSipCall(roomId, peerUri, mediaIn, mediaOut, function(sipCallInfo) {
     console.log('initiate sip call OK', sipCallInfo);
   }, function(status, error) {
     // HTTP status and error
@@ -1236,7 +1236,7 @@ OMS_REST.API = (function(OMS_REST) {
   /**
      * @function updateSipCall
      * @desc This function updates a sip call's specified output attributes in the specified room.
-     * @memberOf OMS_REST.API
+     * @memberOf OWT_REST.API
      * @param {string} room                          -Room ID
      * @param {string} id                            -Sip call ID
      * @param {Array.<{op: string, path: string, value: json}>} items -Attributes to be updated, with format following RFC6902(https://tools.ietf.org/html/rfc6902).
@@ -1245,7 +1245,7 @@ OMS_REST.API = (function(OMS_REST) {
      * @example
   var roomId = '51c10d86909ad1f939000001';
   var id = '878889273471677';
-  OMS_REST.API.updateSipCall(roomId, id, [{op: 'replace', path: '/media/audio/from', value: '9836636255531'}], function(sipCallInfo) {
+  OWT_REST.API.updateSipCall(roomId, id, [{op: 'replace', path: '/media/audio/from', value: '9836636255531'}], function(sipCallInfo) {
     console.log('updated sip call infor:', sipCallInfo);
   }, function(status, error) {
     // HTTP status and error
@@ -1268,7 +1268,7 @@ OMS_REST.API = (function(OMS_REST) {
   /**
      * @function endSipCall
      * @desc This function ends the specified sip call in the specified room.
-     * @memberOf OMS_REST.API
+     * @memberOf OWT_REST.API
      * @param {string} room                          -Room ID
      * @param {string} id                            -Sip call ID
      * @param {function} callback                    -Callback function on success
@@ -1276,7 +1276,7 @@ OMS_REST.API = (function(OMS_REST) {
      * @example
   var roomId = '51c10d86909ad1f939000001';
   var id = '878889273471677';
-  OMS_REST.API.endSipCall(roomId, id, function(result) {
+  OWT_REST.API.endSipCall(roomId, id, function(result) {
     console.log('Sip call:', id, 'in room:', roomId, 'ended');
   }, function(status, error) {
     // HTTP status and error
@@ -1295,7 +1295,7 @@ OMS_REST.API = (function(OMS_REST) {
   /**
      * @function createToken
      * @desc This function creates a new token when a new participant to a room needs to be added.
-     * @memberOf OMS_REST.API
+     * @memberOf OWT_REST.API
      * @param {string} room                          -Room ID
      * @param {string} user                          -Participant's user ID
      * @param {string} role                          -Participant's role
@@ -1308,7 +1308,7 @@ OMS_REST.API = (function(OMS_REST) {
   var role = 'guest';
   // Only isp and region are supported in preference currently, please see server's document for details.
   var preference = {isp: 'isp', region: 'region'};
-  OMS_REST.API.createToken(roomId, user, role, preference, function(token) {
+  OWT_REST.API.createToken(roomId, user, role, preference, function(token) {
     console.log ('Token created:' token);
   }, function(status, error) {
     // HTTP status and error
@@ -1372,4 +1372,4 @@ OMS_REST.API = (function(OMS_REST) {
     //Tokens management.
     createToken: createToken
   };
-}(OMS_REST));
+}(OWT_REST));

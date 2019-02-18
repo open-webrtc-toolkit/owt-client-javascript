@@ -110,7 +110,7 @@
     const signaling = new SignalingChannel();
     let publicationForCamera;
     let publicationForScreen;
-    var p2p = new Oms.P2P.P2PClient({
+    var p2p = new Owt.P2P.P2PClient({
       audioEncodings: true,
       videoEncodings: [{codec:{name: 'h264'}}, {codec: {name: 'vp9'}}, {codec: {name: 'vp8'}}],
       rtcConfiguration:{
@@ -153,9 +153,9 @@
             extensionId:'pndohhifhheefbpeljcmnhnkphepimhe'
           }
           let mediaStream;
-          Oms.Base.MediaStreamFactory.createMediaStream(config).then(stream => {
+          Owt.Base.MediaStreamFactory.createMediaStream(config).then(stream => {
             mediaStream = stream;
-            ScreenStream = new Oms.Base.LocalStream(mediaStream, new Oms.Base.StreamSourceInfo('screen-cast', 'screen-cast'));
+            ScreenStream = new Owt.Base.LocalStream(mediaStream, new Owt.Base.StreamSourceInfo('screen-cast', 'screen-cast'));
             $('#local').children('video').get(0).srcObject = ScreenStream.mediaStream;
             p2p.publish(getTargetId(), ScreenStream).then(publication=>{
               publicationForScreen = publication;
@@ -187,12 +187,12 @@
             console.log('Failed to share video.');
           }); // Publish local stream to remote client
         } else {
-          const audioConstraintsForMic = new Oms.Base.AudioTrackConstraints(Oms.Base.AudioSourceInfo.MIC);
-          const videoConstraintsForCamera = new Oms.Base.VideoTrackConstraints(Oms.Base.VideoSourceInfo.CAMERA);
+          const audioConstraintsForMic = new Owt.Base.AudioTrackConstraints(Owt.Base.AudioSourceInfo.MIC);
+          const videoConstraintsForCamera = new Owt.Base.VideoTrackConstraints(Owt.Base.VideoSourceInfo.CAMERA);
           let mediaStream;
-          Oms.Base.MediaStreamFactory.createMediaStream(new Oms.Base.StreamConstraints(audioConstraintsForMic, videoConstraintsForCamera)).then(stream=>{
+          Owt.Base.MediaStreamFactory.createMediaStream(new Owt.Base.StreamConstraints(audioConstraintsForMic, videoConstraintsForCamera)).then(stream=>{
             mediaStream=stream;
-            localStream = new Oms.Base.LocalStream(mediaStream, new Oms.Base.StreamSourceInfo('mic', 'camera'));
+            localStream = new Owt.Base.LocalStream(mediaStream, new Owt.Base.StreamSourceInfo('mic', 'camera'));
             $('#local').children('video').get(0).srcObject = localStream.mediaStream;
             p2p.publish(getTargetId(), localStream).then(publication=>{
               publicationForCamera = publication;

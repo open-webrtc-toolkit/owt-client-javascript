@@ -3,9 +3,10 @@
 // SPDX-License-Identifier: Apache-2.0
 
 'use strict';
-import * as Utils from './utils.js';
-import {EventDispatcher} from './event.js';
-import {OmsEvent} from './event.js';
+import Logger from './logger.js'
+import {OwtEvent} from './event.js'
+import * as Utils from './utils.js'
+import { EventDispatcher} from './event.js';
 
 // eslint-disable-next-line require-jsdoc
 function isAllowedValue(obj, allowedValues) {
@@ -15,7 +16,7 @@ function isAllowedValue(obj, allowedValues) {
 }
 /**
  * @class StreamSourceInfo
- * @memberOf Oms.Base
+ * @memberOf Owt.Base
  * @classDesc Information of a stream's source.
  * @constructor
  * @description Audio source info or video source info could be undefined if a stream does not have audio/video track.
@@ -39,9 +40,9 @@ export class StreamSourceInfo {
 }
 /**
  * @class Stream
- * @memberOf Oms.Base
+ * @memberOf Owt.Base
  * @classDesc Base class of streams.
- * @extends Oms.Base.EventDispatcher
+ * @extends Owt.Base.EventDispatcher
  * @hideconstructor
  */
 export class Stream extends EventDispatcher {
@@ -59,7 +60,7 @@ export class Stream extends EventDispatcher {
     /**
      * @member {?MediaStream} mediaStream
      * @instance
-     * @memberof Oms.Base.Stream
+     * @memberof Owt.Base.Stream
      * @see {@link https://www.w3.org/TR/mediacapture-streams/#mediastream|MediaStream API of Media Capture and Streams}.
      */
     Object.defineProperty(this, 'mediaStream', {
@@ -68,9 +69,9 @@ export class Stream extends EventDispatcher {
       value: stream,
     });
     /**
-     * @member {Oms.Base.StreamSourceInfo} source
+     * @member {Owt.Base.StreamSourceInfo} source
      * @instance
-     * @memberof Oms.Base.Stream
+     * @memberof Owt.Base.Stream
      * @desc Source info of a stream.
      */
     Object.defineProperty(this, 'source', {
@@ -81,7 +82,7 @@ export class Stream extends EventDispatcher {
     /**
      * @member {object} attributes
      * @instance
-     * @memberof Oms.Base.Stream
+     * @memberof Owt.Base.Stream
      * @desc Custom attributes of a stream.
      */
     Object.defineProperty(this, 'attributes', {
@@ -94,11 +95,11 @@ export class Stream extends EventDispatcher {
 /**
  * @class LocalStream
  * @classDesc Stream captured from current endpoint.
- * @memberOf Oms.Base
- * @extends Oms.Base.Stream
+ * @memberOf Owt.Base
+ * @extends Owt.Base.Stream
  * @constructor
  * @param {MediaStream} stream Underlying MediaStream.
- * @param {Oms.Base.StreamSourceInfo} sourceInfo Information about stream's source.
+ * @param {Owt.Base.StreamSourceInfo} sourceInfo Information about stream's source.
  * @param {object} attributes Custom attributes of the stream.
  */
 export class LocalStream extends Stream {
@@ -111,7 +112,7 @@ export class LocalStream extends Stream {
     /**
      * @member {string} id
      * @instance
-     * @memberof Oms.Base.LocalStream
+     * @memberof Owt.Base.LocalStream
      */
     Object.defineProperty(this, 'id', {
       configurable: false,
@@ -130,8 +131,8 @@ export class LocalStream extends Stream {
  * | ended           | Event            | Stream is ended.   |
  * | updated         | Event            | Stream is updated. |
  *
- * @memberOf Oms.Base
- * @extends Oms.Base.Stream
+ * @memberOf Owt.Base
+ * @extends Owt.Base.Stream
  * @hideconstructor
  */
 export class RemoteStream extends Stream {
@@ -141,7 +142,7 @@ export class RemoteStream extends Stream {
     /**
      * @member {string} id
      * @instance
-     * @memberof Oms.Base.RemoteStream
+     * @memberof Owt.Base.RemoteStream
      */
     Object.defineProperty(this, 'id', {
       configurable: false,
@@ -151,7 +152,7 @@ export class RemoteStream extends Stream {
     /**
      * @member {string} origin
      * @instance
-     * @memberof Oms.Base.RemoteStream
+     * @memberof Owt.Base.RemoteStream
      * @desc ID of the remote endpoint who published this stream.
      */
     Object.defineProperty(this, 'origin', {
@@ -160,16 +161,16 @@ export class RemoteStream extends Stream {
       value: origin,
     });
     /**
-     * @member {Oms.Base.PublicationSettings} settings
+     * @member {Owt.Base.PublicationSettings} settings
      * @instance
-     * @memberof Oms.Base.RemoteStream
+     * @memberof Owt.Base.RemoteStream
      * @desc Original settings for publishing this stream. This property is only valid in conference mode.
      */
     this.settings = undefined;
     /**
-     * @member {Oms.Conference.SubscriptionCapabilities} capabilities
+     * @member {Owt.Conference.SubscriptionCapabilities} capabilities
      * @instance
-     * @memberof Oms.Base.RemoteStream
+     * @memberof Owt.Base.RemoteStream
      * @desc Capabilities remote endpoint provides for subscription. This property is only valid in conference mode.
      */
     this.capabilities = undefined;
@@ -179,18 +180,18 @@ export class RemoteStream extends Stream {
 /**
  * @class StreamEvent
  * @classDesc Event for Stream.
- * @extends Oms.Base.OmsEvent
- * @memberof Oms.Base
+ * @extends Owt.Base.OwtEvent
+ * @memberof Owt.Base
  * @hideconstructor
  */
-export class StreamEvent extends OmsEvent {
+export class StreamEvent extends OwtEvent {
   // eslint-disable-next-line require-jsdoc
   constructor(type, init) {
     super(type);
     /**
-     * @member {Oms.Base.Stream} stream
+     * @member {Owt.Base.Stream} stream
      * @instance
-     * @memberof Oms.Base.StreamEvent
+     * @memberof Owt.Base.StreamEvent
      */
     this.stream = init.stream;
   }

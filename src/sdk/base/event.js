@@ -31,7 +31,7 @@
 /**
  * @class EventDispatcher
  * @classDesc A shim for EventTarget. Might be changed to EventTarget later.
- * @memberof Oms.Base
+ * @memberof Owt.Base
  * @hideconstructor
  */
 export const EventDispatcher = function() {
@@ -44,7 +44,7 @@ export const EventDispatcher = function() {
    * @function addEventListener
    * @desc This function registers a callback function as a handler for the corresponding event. It's shortened form is on(eventType, listener). See the event description in the following table.
    * @instance
-   * @memberof Oms.Base.EventDispatcher
+   * @memberof Owt.Base.EventDispatcher
    * @param {string} eventType Event string.
    * @param {function} listener Callback function.
    */
@@ -59,7 +59,7 @@ export const EventDispatcher = function() {
    * @function removeEventListener
    * @desc This function removes a registered event listener.
    * @instance
-   * @memberof Oms.Base.EventDispatcher
+   * @memberof Owt.Base.EventDispatcher
    * @param {string} eventType Event string.
    * @param {function} listener Callback function.
    */
@@ -77,7 +77,7 @@ export const EventDispatcher = function() {
    * @function clearEventListener
    * @desc This function removes all event listeners for one type.
    * @instance
-   * @memberof Oms.Base.EventDispatcher
+   * @memberof Owt.Base.EventDispatcher
    * @param {string} eventType Event string.
    */
   this.clearEventListener = function(eventType) {
@@ -97,12 +97,12 @@ export const EventDispatcher = function() {
 };
 
 /**
- * @class OmsEvent
- * @classDesc Class OmsEvent represents a generic Event in the library.
- * @memberof Oms.Base
+ * @class OwtEvent
+ * @classDesc Class OwtEvent represents a generic Event in the library.
+ * @memberof Owt.Base
  * @hideconstructor
  */
-export class OmsEvent {
+export class OwtEvent {
   // eslint-disable-next-line require-jsdoc
   constructor(type) {
     this.type = type;
@@ -112,31 +112,31 @@ export class OmsEvent {
 /**
  * @class MessageEvent
  * @classDesc Class MessageEvent represents a message Event in the library.
- * @memberof Oms.Base
+ * @memberof Owt.Base
  * @hideconstructor
  */
-export class MessageEvent extends OmsEvent {
+export class MessageEvent extends OwtEvent {
   // eslint-disable-next-line require-jsdoc
   constructor(type, init) {
     super(type);
     /**
      * @member {string} origin
      * @instance
-     * @memberof Oms.Base.MessageEvent
+     * @memberof Owt.Base.MessageEvent
      * @desc ID of the remote endpoint who published this stream.
      */
     this.origin = init.origin;
     /**
      * @member {string} message
      * @instance
-     * @memberof Oms.Base.MessageEvent
+     * @memberof Owt.Base.MessageEvent
      */
     this.message = init.message;
     /**
      * @member {string} to
      * @instance
-     * @memberof Oms.Base.MessageEvent
-     * @desc Values could be "all", "me" in conference mode, or undefined in P2P mode.
+     * @memberof Owt.Base.MessageEvent
+     * @desc Values could be "all", "me" in conference mode, or undefined in P2P mode..
      */
     this.to = init.to;
   }
@@ -145,17 +145,17 @@ export class MessageEvent extends OmsEvent {
 /**
  * @class ErrorEvent
  * @classDesc Class ErrorEvent represents an error Event in the library.
- * @memberof Oms.Base
+ * @memberof Owt.Base
  * @hideconstructor
  */
-export class ErrorEvent extends OmsEvent {
+export class ErrorEvent extends OwtEvent {
   // eslint-disable-next-line require-jsdoc
   constructor(type, init) {
     super(type);
     /**
      * @member {Error} error
      * @instance
-     * @memberof Oms.Base.ErrorEvent
+     * @memberof Owt.Base.ErrorEvent
      */
     this.error = init.error;
   }
@@ -164,17 +164,17 @@ export class ErrorEvent extends OmsEvent {
 /**
  * @class MuteEvent
  * @classDesc Class MuteEvent represents a mute or unmute event.
- * @memberof Oms.Base
+ * @memberof Owt.Base
  * @hideconstructor
  */
-export class MuteEvent extends OmsEvent {
+export class MuteEvent extends OwtEvent {
   // eslint-disable-next-line require-jsdoc
   constructor(type, init) {
     super(type);
     /**
-     * @member {Oms.Base.TrackKind} kind
+     * @member {Owt.Base.TrackKind} kind
      * @instance
-     * @memberof Oms.Base.MuteEvent
+     * @memberof Owt.Base.MuteEvent
      */
     this.kind = init.kind;
   }

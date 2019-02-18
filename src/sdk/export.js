@@ -8,18 +8,18 @@ import * as conference from './conference/export.js';
 
 /**
  * Base objects for both P2P and conference.
- * @namespace Oms.Base
+ * @namespace Owt.Base
  */
 export const Base = base;
 
 /**
  * P2P WebRTC connections.
- * @namespace Oms.P2P
+ * @namespace Owt.P2P
  */
 export const P2P = p2p;
 
 /**
  * WebRTC connections with conference server.
- * @namespace Oms.Conference
+ * @namespace Owt.Conference
  */
 export const Conference = conference;

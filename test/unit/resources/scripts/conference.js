@@ -31,7 +31,7 @@ describe('Unit tests for ConferenceClient', function() {
       conf2.addEventListener('test', () => {
         done();
       });
-      conf2.dispatchEvent(new EventModule.OmsEvent('test'));
+      conf2.dispatchEvent(new EventModule.OwtEvent('test'));
     });
   });
 });

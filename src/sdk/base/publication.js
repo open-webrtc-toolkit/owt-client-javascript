@@ -10,7 +10,7 @@ import {EventDispatcher} from '../base/event.js';
 
 /**
  * @class AudioPublicationSettings
- * @memberOf Oms.Base
+ * @memberOf Owt.Base
  * @classDesc The audio settings of a publication.
  * @hideconstructor
  */
@@ -18,9 +18,9 @@ export class AudioPublicationSettings {
   // eslint-disable-next-line require-jsdoc
   constructor(codec) {
     /**
-     * @member {?Oms.Base.AudioCodecParameters} codec
+     * @member {?Owt.Base.AudioCodecParameters} codec
      * @instance
-     * @memberof Oms.Base.AudioPublicationSettings
+     * @memberof Owt.Base.AudioPublicationSettings
      */
     this.codec = codec;
   }
@@ -28,7 +28,7 @@ export class AudioPublicationSettings {
 
 /**
  * @class VideoPublicationSettings
- * @memberOf Oms.Base
+ * @memberOf Owt.Base
  * @classDesc The video settings of a publication.
  * @hideconstructor
  */
@@ -36,33 +36,33 @@ export class VideoPublicationSettings {
   // eslint-disable-next-line require-jsdoc
   constructor(codec, resolution, frameRate, bitrate, keyFrameInterval) {
     /**
-     * @member {?Oms.Base.VideoCodecParameters} codec
+     * @member {?Owt.Base.VideoCodecParameters} codec
      * @instance
-     * @memberof Oms.Base.VideoPublicationSettings
+     * @memberof Owt.Base.VideoPublicationSettings
      */
     this.codec=codec,
     /**
-     * @member {?Oms.Base.Resolution} resolution
+     * @member {?Owt.Base.Resolution} resolution
      * @instance
-     * @memberof Oms.Base.VideoPublicationSettings
+     * @memberof Owt.Base.VideoPublicationSettings
      */
     this.resolution=resolution;
     /**
      * @member {?number} frameRates
      * @instance
-     * @memberof Oms.Base.VideoPublicationSettings
+     * @memberof Owt.Base.VideoPublicationSettings
      */
     this.frameRate=frameRate;
     /**
      * @member {?number} bitrate
      * @instance
-     * @memberof Oms.Base.VideoPublicationSettings
+     * @memberof Owt.Base.VideoPublicationSettings
      */
     this.bitrate=bitrate;
     /**
      * @member {?number} keyFrameIntervals
      * @instance
-     * @memberof Oms.Base.VideoPublicationSettings
+     * @memberof Owt.Base.VideoPublicationSettings
      */
     this.keyFrameInterval=keyFrameInterval;
   }
@@ -70,7 +70,7 @@ export class VideoPublicationSettings {
 
 /**
  * @class PublicationSettings
- * @memberOf Oms.Base
+ * @memberOf Owt.Base
  * @classDesc The settings of a publication.
  * @hideconstructor
  */
@@ -78,15 +78,15 @@ export class PublicationSettings {
   // eslint-disable-next-line require-jsdoc
   constructor(audio, video) {
     /**
-     * @member {Oms.Base.AudioPublicationSettings} audio
+     * @member {Owt.Base.AudioPublicationSettings} audio
      * @instance
-     * @memberof Oms.Base.PublicationSettings
+     * @memberof Owt.Base.PublicationSettings
      */
     this.audio=audio;
     /**
-     * @member {Oms.Base.VideoPublicationSettings} video
+     * @member {Owt.Base.VideoPublicationSettings} video
      * @instance
-     * @memberof Oms.Base.PublicationSettings
+     * @memberof Owt.Base.PublicationSettings
      */
     this.video=video;
   }
@@ -94,7 +94,7 @@ export class PublicationSettings {
 
 /**
  * @class Publication
- * @memberOf Oms.Base
+ * @memberOf Owt.Base
  * @classDesc Publication represents a sender for publishing a stream. It
  * handles the actions on a LocalStream published to a conference.
  * Events:
@@ -114,7 +114,7 @@ export class Publication extends EventDispatcher {
     /**
      * @member {string} id
      * @instance
-     * @memberof Oms.Base.Publication
+     * @memberof Owt.Base.Publication
      */
     Object.defineProperty(this, 'id', {
       configurable: false,
@@ -125,7 +125,7 @@ export class Publication extends EventDispatcher {
      * @function stop
      * @instance
      * @desc Stop certain publication. Once a subscription is stopped, it cannot be recovered.
-     * @memberof Oms.Base.Publication
+     * @memberof Owt.Base.Publication
      * @returns {undefined}
      */
     this.stop = stop;
@@ -133,7 +133,7 @@ export class Publication extends EventDispatcher {
      * @function getStats
      * @instance
      * @desc Get stats of underlying PeerConnection.
-     * @memberof Oms.Base.Publication
+     * @memberof Owt.Base.Publication
      * @returns {Promise<RTCStatsReport, Error>}
      */
     this.getStats = getStats;
@@ -141,8 +141,8 @@ export class Publication extends EventDispatcher {
      * @function mute
      * @instance
      * @desc Stop sending data to remote endpoint.
-     * @memberof Oms.Base.Publication
-     * @param {Oms.Base.TrackKind } kind Kind of tracks to be muted.
+     * @memberof Owt.Base.Publication
+     * @param {Owt.Base.TrackKind } kind Kind of tracks to be muted.
      * @returns {Promise<undefined, Error>}
      */
     this.mute = mute;
@@ -150,8 +150,8 @@ export class Publication extends EventDispatcher {
      * @function unmute
      * @instance
      * @desc Continue sending data to remote endpoint.
-     * @memberof Oms.Base.Publication
-     * @param {Oms.Base.TrackKind } kind Kind of tracks to be unmuted.
+     * @memberof Owt.Base.Publication
+     * @param {Owt.Base.TrackKind } kind Kind of tracks to be unmuted.
      * @returns {Promise<undefined, Error>}
      */
     this.unmute = unmute;
@@ -160,22 +160,22 @@ export class Publication extends EventDispatcher {
 
 /**
  * @class PublishOptions
- * @memberOf Oms.Base
- * @classDesc PublishOptions defines options for publishing a Oms.Base.LocalStream.
+ * @memberOf Owt.Base
+ * @classDesc PublishOptions defines options for publishing a Owt.Base.LocalStream.
  */
 export class PublishOptions {
   // eslint-disable-next-line require-jsdoc
   constructor(audio, video) {
     /**
-     * @member {?Array<Oms.Base.AudioEncodingParameters>} audio
+     * @member {?Array<Owt.Base.AudioEncodingParameters>} audio
      * @instance
-     * @memberof Oms.Base.PublishOptions
+     * @memberof Owt.Base.PublishOptions
      */
     this.audio = audio;
     /**
-     * @member {?Array<Oms.Base.VideoEncodingParameters>} video
+     * @member {?Array<Owt.Base.VideoEncodingParameters>} video
      * @instance
-     * @memberof Oms.Base.PublishOptions
+     * @memberof Owt.Base.PublishOptions
      */
     this.video = video;
   }

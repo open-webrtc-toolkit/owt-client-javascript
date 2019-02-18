@@ -122,7 +122,7 @@ describe('P2P JS SDK', function () {
               width = 1920;
               height = 1080;
             }
-            resolution = new Oms.Base.Resolution(width, height)
+            resolution = new Owt.Base.Resolution(width, height)
             actorUser.createLocalStream(resolution, undefined);
           })
           .then(function () {

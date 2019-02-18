@@ -7,7 +7,7 @@
 /**
  * @class ConferenceInfo
  * @classDesc Information for a conference.
- * @memberOf Oms.Conference
+ * @memberOf Owt.Conference
  * @hideconstructor
  */
 export class ConferenceInfo {
@@ -16,28 +16,28 @@ export class ConferenceInfo {
     /**
      * @member {string} id
      * @instance
-     * @memberof Oms.Conference.ConferenceInfo
+     * @memberof Owt.Conference.ConferenceInfo
      * @desc Conference ID.
      */
     this.id = id;
     /**
-     * @member {Array<Oms.Conference.Participant>} participants
+     * @member {Array<Owt.Conference.Participant>} participants
      * @instance
-     * @memberof Oms.Conference.ConferenceInfo
+     * @memberof Owt.Conference.ConferenceInfo
      * @desc Participants in the conference.
      */
     this.participants = participants;
     /**
-     * @member {Array<Oms.Base.RemoteStream>} remoteStreams
+     * @member {Array<Owt.Base.RemoteStream>} remoteStreams
      * @instance
-     * @memberof Oms.Conference.ConferenceInfo
+     * @memberof Owt.Conference.ConferenceInfo
      * @desc Streams published by participants. It also includes streams published by current user.
      */
     this.remoteStreams = remoteStreams;
     /**
-     * @member {Oms.Base.Participant} self
+     * @member {Owt.Base.Participant} self
      * @instance
-     * @memberof Oms.Conference.ConferenceInfo
+     * @memberof Owt.Conference.ConferenceInfo
      */
     this.self = myInfo;
   }
