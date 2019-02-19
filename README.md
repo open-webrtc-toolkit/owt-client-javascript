@@ -1,6 +1,6 @@
-# Open Media Streamer JavaScript SDK
+# Open WebRTC Toolkit JavaScript SDK
 
-Open Media Streamer JavaScript SDK builds on top of the W3C standard WebRTC APIs to accelerate development of real-time communications (RTC) for web applications, including peer-to-peer, broadcasting, and conference mode communications.
+Open WebRTC Toolkit JavaScript SDK builds on top of the W3C standard WebRTC APIs to accelerate development of real-time communications (RTC) for web applications, including peer-to-peer, broadcasting, and conference mode communications.
 
 ## How to build release package
 1. Run `npm install -g grunt-cli` to install grunt.

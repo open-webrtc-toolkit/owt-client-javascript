@@ -1,7 +1,7 @@
 {
   "name": "oms-javascript",
-  "title": "Open Media Streamer JavaScript SDK",
-  "description": "Open Media Streamer JavaScript SDK",
+  "title": "Open WebRTC Toolkit JavaScript SDK",
+  "description": "Open WebRTC Toolkit JavaScript SDK",
   "version": "4.1.0",
   "homepage": "https://webrtc.intel.com",
   "author": "Intel WebRTC team",
