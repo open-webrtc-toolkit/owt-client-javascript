@@ -2,6 +2,6 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-export * from './mediastream-factory.js'
-export * from './stream.js'
-export * from './mediaformat.js'
+export * from './mediastream-factory.js';
+export * from './stream.js';
+export * from './mediaformat.js';

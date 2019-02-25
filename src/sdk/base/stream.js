@@ -3,11 +3,11 @@
 // SPDX-License-Identifier: Apache-2.0
 
 'use strict';
-import Logger from './logger.js'
-import {OmsEvent} from './event.js'
-import * as Utils from './utils.js'
-import { EventDispatcher} from './event.js';
+import * as Utils from './utils.js';
+import {EventDispatcher} from './event.js';
+import {OmsEvent} from './event.js';
 
+// eslint-disable-next-line require-jsdoc
 function isAllowedValue(obj, allowedValues) {
   return (allowedValues.some((ele) => {
     return ele === obj;
@@ -23,15 +23,14 @@ function isAllowedValue(obj, allowedValues) {
  * @param {?string} videoSourceInfo Video source info. Accepted values are: "camera", "screen-cast", "file", "mixed" or undefined.
  */
 export class StreamSourceInfo {
+  // eslint-disable-next-line require-jsdoc
   constructor(audioSourceInfo, videoSourceInfo) {
     if (!isAllowedValue(audioSourceInfo, [undefined, 'mic', 'screen-cast',
-        'file', 'mixed'
-      ])) {
+      'file', 'mixed'])) {
       throw new TypeError('Incorrect value for audioSourceInfo');
     }
     if (!isAllowedValue(videoSourceInfo, [undefined, 'camera', 'screen-cast',
-        'file', 'encoded-file', 'raw-file', 'mixed'
-      ])) {
+      'file', 'encoded-file', 'raw-file', 'mixed'])) {
       throw new TypeError('Incorrect value for videoSourceInfo');
     }
     this.audio = audioSourceInfo;
@@ -46,11 +45,13 @@ export class StreamSourceInfo {
  * @hideconstructor
  */
 export class Stream extends EventDispatcher {
+  // eslint-disable-next-line require-jsdoc
   constructor(stream, sourceInfo, attributes) {
     super();
-    if ((stream && !(stream instanceof MediaStream)) || (typeof sourceInfo !== 'object')) {
-        throw new TypeError('Invalid stream or sourceInfo.');
-      }
+    if ((stream && !(stream instanceof MediaStream)) || (typeof sourceInfo !==
+        'object')) {
+      throw new TypeError('Invalid stream or sourceInfo.');
+    }
     if (stream && ((stream.getAudioTracks().length > 0 && !sourceInfo.audio) ||
         stream.getVideoTracks().length > 0 && !sourceInfo.video)) {
       throw new TypeError('Missing audio source info or video source info.');
@@ -64,7 +65,7 @@ export class Stream extends EventDispatcher {
     Object.defineProperty(this, 'mediaStream', {
       configurable: false,
       writable: true,
-      value: stream
+      value: stream,
     });
     /**
      * @member {Oms.Base.StreamSourceInfo} source
@@ -75,7 +76,7 @@ export class Stream extends EventDispatcher {
     Object.defineProperty(this, 'source', {
       configurable: false,
       writable: false,
-      value: sourceInfo
+      value: sourceInfo,
     });
     /**
      * @member {object} attributes
@@ -86,9 +87,9 @@ export class Stream extends EventDispatcher {
     Object.defineProperty(this, 'attributes', {
       configurable: true,
       writable: false,
-      value: attributes
+      value: attributes,
     });
-  };
+  }
 }
 /**
  * @class LocalStream
@@ -101,8 +102,9 @@ export class Stream extends EventDispatcher {
  * @param {object} attributes Custom attributes of the stream.
  */
 export class LocalStream extends Stream {
+  // eslint-disable-next-line require-jsdoc
   constructor(stream, sourceInfo, attributes) {
-    if(!(stream instanceof MediaStream)){
+    if (!(stream instanceof MediaStream)) {
       throw new TypeError('Invalid stream.');
     }
     super(stream, sourceInfo, attributes);
@@ -114,9 +116,9 @@ export class LocalStream extends Stream {
     Object.defineProperty(this, 'id', {
       configurable: false,
       writable: false,
-      value: Utils.createUuid()
+      value: Utils.createUuid(),
     });
-  };
+  }
 }
 /**
  * @class RemoteStream
@@ -133,6 +135,7 @@ export class LocalStream extends Stream {
  * @hideconstructor
  */
 export class RemoteStream extends Stream {
+  // eslint-disable-next-line require-jsdoc
   constructor(id, origin, stream, sourceInfo, attributes) {
     super(stream, sourceInfo, attributes);
     /**
@@ -143,7 +146,7 @@ export class RemoteStream extends Stream {
     Object.defineProperty(this, 'id', {
       configurable: false,
       writable: false,
-      value: id ? id : Utils.createUuid()
+      value: id ? id : Utils.createUuid(),
     });
     /**
      * @member {string} origin
@@ -154,7 +157,7 @@ export class RemoteStream extends Stream {
     Object.defineProperty(this, 'origin', {
       configurable: false,
       writable: false,
-      value: origin
+      value: origin,
     });
     /**
      * @member {Oms.Base.PublicationSettings} settings
@@ -181,6 +184,7 @@ export class RemoteStream extends Stream {
  * @hideconstructor
  */
 export class StreamEvent extends OmsEvent {
+  // eslint-disable-next-line require-jsdoc
   constructor(type, init) {
     super(type);
     /**

@@ -4,9 +4,9 @@
 
 'use strict';
 
-import * as Utils from './utils.js'
-import * as MediaFormat from './mediaformat.js'
-import { EventDispatcher} from '../base/event.js'
+import * as Utils from './utils.js';
+import * as MediaFormat from './mediaformat.js';
+import {EventDispatcher} from '../base/event.js';
 
 /**
  * @class AudioPublicationSettings
@@ -15,6 +15,7 @@ import { EventDispatcher} from '../base/event.js'
  * @hideconstructor
  */
 export class AudioPublicationSettings {
+  // eslint-disable-next-line require-jsdoc
   constructor(codec) {
     /**
      * @member {?Oms.Base.AudioCodecParameters} codec
@@ -32,7 +33,8 @@ export class AudioPublicationSettings {
  * @hideconstructor
  */
 export class VideoPublicationSettings {
-  constructor(codec, resolution, frameRate, bitrate, keyFrameInterval){
+  // eslint-disable-next-line require-jsdoc
+  constructor(codec, resolution, frameRate, bitrate, keyFrameInterval) {
     /**
      * @member {?Oms.Base.VideoCodecParameters} codec
      * @instance
@@ -73,7 +75,8 @@ export class VideoPublicationSettings {
  * @hideconstructor
  */
 export class PublicationSettings {
-  constructor(audio, video){
+  // eslint-disable-next-line require-jsdoc
+  constructor(audio, video) {
     /**
      * @member {Oms.Base.AudioPublicationSettings} audio
      * @instance
@@ -92,7 +95,8 @@ export class PublicationSettings {
 /**
  * @class Publication
  * @memberOf Oms.Base
- * @classDesc Publication represents a sender for publishing a stream. It handles the actions on a LocalStream published to a conference.
+ * @classDesc Publication represents a sender for publishing a stream. It
+ * handles the actions on a LocalStream published to a conference.
  * Events:
  *
  * | Event Name      | Argument Type    | Fired when       |
@@ -104,6 +108,7 @@ export class PublicationSettings {
  * @hideconstructor
  */
 export class Publication extends EventDispatcher {
+  // eslint-disable-next-line require-jsdoc
   constructor(id, stop, getStats, mute, unmute) {
     super();
     /**
@@ -114,7 +119,7 @@ export class Publication extends EventDispatcher {
     Object.defineProperty(this, 'id', {
       configurable: false,
       writable: false,
-      value: id ? id : Utils.createUuid()
+      value: id ? id : Utils.createUuid(),
     });
     /**
      * @function stop
@@ -159,6 +164,7 @@ export class Publication extends EventDispatcher {
  * @classDesc PublishOptions defines options for publishing a Oms.Base.LocalStream.
  */
 export class PublishOptions {
+  // eslint-disable-next-line require-jsdoc
   constructor(audio, video) {
     /**
      * @member {?Array<Oms.Base.AudioEncodingParameters>} audio

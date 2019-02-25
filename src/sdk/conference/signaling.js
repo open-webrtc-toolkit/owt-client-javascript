@@ -2,13 +2,14 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-/* global io */
-import Logger from '../base/logger.js'
-import * as EventModule from '../base/event.js'
-import { ConferenceError } from './error.js'
+/* global io, Promise */
+import Logger from '../base/logger.js';
+import * as EventModule from '../base/event.js';
+import {ConferenceError} from './error.js';
 
 'use strict';
 
+// eslint-disable-next-line require-jsdoc
 function handleResponse(status, data, resolve, reject) {
   if (status === 'ok' || status === 'success') {
     resolve(data);
@@ -17,7 +18,7 @@ function handleResponse(status, data, resolve, reject) {
   } else {
     Logger.error('MCU returns unknown ack.');
   }
-};
+}
 
 const MAX_TRIALS = 5;
 /**
@@ -30,6 +31,7 @@ const MAX_TRIALS = 5;
  * @see https://socket.io/docs/client-api/#io-url-options
  */
 export class SioSignaling extends EventModule.EventDispatcher {
+  // eslint-disable-next-line require-jsdoc
   constructor() {
     super();
     this._socket = null;
@@ -38,22 +40,33 @@ export class SioSignaling extends EventModule.EventDispatcher {
     this._reconnectionTicket = null;
   }
 
+  /**
+   * @function connect
+   * @instance
+   * @desc Connect to a portal.
+   * @memberof Oms.Conference.SioSignaling
+   * @return {Promise<Object, Error>} Return a promise resolved with the data returned by portal if successfully logged in. Or return a promise rejected with a newly created Oms.Error if failed.
+   * @param {string} host Host of the portal.
+   * @param {string} isSecured Is secure connection or not.
+   * @param {string} loginInfo Infomation required for logging in.
+   * @private.
+   */
   connect(host, isSecured, loginInfo) {
     return new Promise((resolve, reject) => {
-      var opts = {
+      const opts = {
         'reconnection': true,
         'reconnectionAttempts': MAX_TRIALS,
-        'force new connection': true
+        'force new connection': true,
       };
       this._socket = io(host, opts);
       ['participant', 'text', 'stream', 'progress'].forEach((
-        notification) => {
+          notification) => {
         this._socket.on(notification, (data) => {
           this.dispatchEvent(new EventModule.MessageEvent('data', {
             message: {
               notification: notification,
-              data: data
-            }
+              data: data,
+            },
           }));
         });
       });
@@ -64,10 +77,10 @@ export class SioSignaling extends EventModule.EventDispatcher {
         if (this._reconnectTimes >= MAX_TRIALS) {
           this.dispatchEvent(new EventModule.OmsEvent('disconnect'));
         }
-      })
+      });
       this._socket.on('drop', () => {
         this._reconnectTimes = MAX_TRIALS;
-      })
+      });
       this._socket.on('disconnect', () => {
         if (this._reconnectTimes >= MAX_TRIALS) {
           this._loggedIn = false;
@@ -80,14 +93,15 @@ export class SioSignaling extends EventModule.EventDispatcher {
           this._reconnectionTicket = data.reconnectionTicket;
           this._socket.on('connect', () => {
             // re-login with reconnection ticket.
-            this._socket.emit('relogin', this._reconnectionTicket, (status, data) => {
+            this._socket.emit('relogin', this._reconnectionTicket, (status,
+                data) => {
               if (status === 'ok') {
                 this._reconnectTimes = 0;
                 this._reconnectionTicket = data;
               } else {
                 this.dispatchEvent(new EventModule.OmsEvent('disconnect'));
               }
-            })
+            });
           });
         }
         handleResponse(status, data, resolve, reject);
@@ -95,10 +109,18 @@ export class SioSignaling extends EventModule.EventDispatcher {
     });
   }
 
+  /**
+   * @function disconnect
+   * @instance
+   * @desc Disconnect from a portal.
+   * @memberof Oms.Conference.SioSignaling
+   * @return {Promise<Object, Error>} Return a promise resolved with the data returned by portal if successfully disconnected. Or return a promise rejected with a newly created Oms.Error if failed.
+   * @private.
+   */
   disconnect() {
     if (!this._socket || this._socket.disconnected) {
       return Promise.reject(new ConferenceError(
-        'Portal is not connected.'));
+          'Portal is not connected.'));
     }
     return new Promise((resolve, reject) => {
       this._socket.emit('logout', (status, data) => {
@@ -110,6 +132,16 @@ export class SioSignaling extends EventModule.EventDispatcher {
     });
   }
 
+  /**
+   * @function send
+   * @instance
+   * @desc Send data to portal.
+   * @memberof Oms.Conference.SioSignaling
+   * @return {Promise<Object, Error>} Return a promise resolved with the data returned by portal. Or return a promise rejected with a newly created Oms.Error if failed to send the message.
+   * @param {string} requestName Name defined in client-server protocol.
+   * @param {string} requestData Data format is defined in client-server protocol.
+   * @private.
+   */
   send(requestName, requestData) {
     return new Promise((resolve, reject) => {
       this._socket.emit(requestName, requestData, (status, data) => {

@@ -13,7 +13,7 @@ export const AudioCodec = {
   ILBC: 'iLBC',
   AAC: 'aac',
   AC3: 'ac3',
-  NELLYMOSER: 'nellymoser'
+  NELLYMOSER: 'nellymoser',
 };
 /**
  * @class AudioCodecParameters
@@ -22,6 +22,7 @@ export const AudioCodec = {
  * @hideconstructor
  */
 export class AudioCodecParameters {
+  // eslint-disable-next-line require-jsdoc
   constructor(name, channelCount, clockRate) {
     /**
      * @member {string} name
@@ -54,6 +55,7 @@ export class AudioCodecParameters {
  * @hideconstructor
  */
 export class AudioEncodingParameters {
+  // eslint-disable-next-line require-jsdoc
   constructor(codec, maxBitrate) {
     /**
      * @member {?Oms.Base.AudioCodecParameters} codec
@@ -75,7 +77,7 @@ export const VideoCodec = {
   VP8: 'vp8',
   VP9: 'vp9',
   H264: 'h264',
-  H265: 'h265'
+  H265: 'h265',
 };
 
 /**
@@ -85,12 +87,13 @@ export const VideoCodec = {
  * @hideconstructor
  */
 export class VideoCodecParameters {
+  // eslint-disable-next-line require-jsdoc
   constructor(name, profile) {
     /**
      * @member {string} name
      * @memberof Oms.Base.VideoCodecParameters
      * @instance
-     * @desc Name of a codec. Please a value in Oms.Base.AudioCodec. However, some functions do not support all the values in Oms.Base.AudioCodec.
+     * @desc Name of a codec.Please a value in Oms.Base.AudioCodec.However, some functions do not support all the values in Oms.Base.AudioCodec.
      */
     this.name = name;
     /**
@@ -110,6 +113,7 @@ export class VideoCodecParameters {
  * @hideconstructor
  */
 export class VideoEncodingParameters {
+  // eslint-disable-next-line require-jsdoc
   constructor(codec, maxBitrate) {
     /**
      * @member {?Oms.Base.VideoCodecParameters} codec

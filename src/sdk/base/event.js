@@ -42,7 +42,7 @@ export const EventDispatcher = function() {
 
   /**
    * @function addEventListener
-   * @desc This function registers a callback function as a handler for the corresponding event. It's shortened form is on(eventType, listener). See the event description in the following table.<br>
+   * @desc This function registers a callback function as a handler for the corresponding event. It's shortened form is on(eventType, listener). See the event description in the following table.
    * @instance
    * @memberof Oms.Base.EventDispatcher
    * @param {string} eventType Event string.
@@ -67,7 +67,7 @@ export const EventDispatcher = function() {
     if (!spec.dispatcher.eventListeners[eventType]) {
       return;
     }
-    var index = spec.dispatcher.eventListeners[eventType].indexOf(listener);
+    const index = spec.dispatcher.eventListeners[eventType].indexOf(listener);
     if (index !== -1) {
       spec.dispatcher.eventListeners[eventType].splice(index, 1);
     }
@@ -103,6 +103,7 @@ export const EventDispatcher = function() {
  * @hideconstructor
  */
 export class OmsEvent {
+  // eslint-disable-next-line require-jsdoc
   constructor(type) {
     this.type = type;
   }
@@ -115,6 +116,7 @@ export class OmsEvent {
  * @hideconstructor
  */
 export class MessageEvent extends OmsEvent {
+  // eslint-disable-next-line require-jsdoc
   constructor(type, init) {
     super(type);
     /**
@@ -134,7 +136,7 @@ export class MessageEvent extends OmsEvent {
      * @member {string} to
      * @instance
      * @memberof Oms.Base.MessageEvent
-     * @desc Values could be "all", "me" in conference mode, or undefined in P2P mode..
+     * @desc Values could be "all", "me" in conference mode, or undefined in P2P mode.
      */
     this.to = init.to;
   }
@@ -146,7 +148,8 @@ export class MessageEvent extends OmsEvent {
  * @memberof Oms.Base
  * @hideconstructor
  */
-export class ErrorEvent extends OmsEvent{
+export class ErrorEvent extends OmsEvent {
+  // eslint-disable-next-line require-jsdoc
   constructor(type, init) {
     super(type);
     /**
@@ -165,7 +168,8 @@ export class ErrorEvent extends OmsEvent{
  * @hideconstructor
  */
 export class MuteEvent extends OmsEvent {
-  constructor(type, init){
+  // eslint-disable-next-line require-jsdoc
+  constructor(type, init) {
     super(type);
     /**
      * @member {Oms.Base.TrackKind} kind

@@ -4,9 +4,9 @@
 
 'use strict';
 
-import * as MediaFormatModule from '../base/mediaformat.js'
-import * as CodecModule from '../base/codec.js'
-import { EventDispatcher} from '../base/event.js'
+import * as MediaFormatModule from '../base/mediaformat.js';
+import * as CodecModule from '../base/codec.js';
+import {EventDispatcher} from '../base/event.js';
 
 /**
  * @class AudioSubscriptionCapabilities
@@ -15,6 +15,7 @@ import { EventDispatcher} from '../base/event.js'
  * @hideconstructor
  */
 export class AudioSubscriptionCapabilities {
+  // eslint-disable-next-line require-jsdoc
   constructor(codecs) {
     /**
      * @member {Array.<Oms.Base.AudioCodecParameters>} codecs
@@ -32,8 +33,9 @@ export class AudioSubscriptionCapabilities {
  * @hideconstructor
  */
 export class VideoSubscriptionCapabilities {
+  // eslint-disable-next-line require-jsdoc
   constructor(codecs, resolutions, frameRates, bitrateMultipliers,
-    keyFrameIntervals) {
+      keyFrameIntervals) {
     /**
      * @member {Array.<Oms.Base.VideoCodecParameters>} codecs
      * @instance
@@ -74,6 +76,7 @@ export class VideoSubscriptionCapabilities {
  * @hideconstructor
  */
 export class SubscriptionCapabilities {
+  // eslint-disable-next-line require-jsdoc
   constructor(audio, video) {
     /**
      * @member {?AudioSubscriptionCapabilities} audio
@@ -97,6 +100,7 @@ export class SubscriptionCapabilities {
  * @hideconstructor
  */
 export class AudioSubscriptionConstraints {
+  // eslint-disable-next-line require-jsdoc
   constructor(codecs) {
     /**
      * @member {?Array.<Oms.Base.AudioCodecParameters>} codecs
@@ -115,8 +119,9 @@ export class AudioSubscriptionConstraints {
  * @hideconstructor
  */
 export class VideoSubscriptionConstraints {
+  // eslint-disable-next-line require-jsdoc
   constructor(codecs, resolution, frameRate, bitrateMultiplier,
-    keyFrameInterval) {
+      keyFrameInterval) {
     /**
      * @member {?Array.<Oms.Base.VideoCodecParameters>} codecs
      * @instance
@@ -161,6 +166,7 @@ export class VideoSubscriptionConstraints {
  * @classDesc SubscribeOptions defines options for subscribing a Oms.Base.RemoteStream.
  */
 export class SubscribeOptions {
+  // eslint-disable-next-line require-jsdoc
   constructor(audio, video) {
     /**
      * @member {?AudioSubscriptionConstraints} audio
@@ -184,6 +190,7 @@ export class SubscribeOptions {
  * @hideconstructor
  */
 export class VideoSubscriptionUpdateOptions {
+  // eslint-disable-next-line require-jsdoc
   constructor() {
     /**
      * @member {?Oms.Base.Resolution} resolution
@@ -223,6 +230,7 @@ export class VideoSubscriptionUpdateOptions {
  * @hideconstructor
  */
 export class SubscriptionUpdateOptions {
+  // eslint-disable-next-line require-jsdoc
   constructor() {
     /**
      * @member {?VideoSubscriptionUpdateOptions} video
@@ -249,6 +257,7 @@ export class SubscriptionUpdateOptions {
  * @hideconstructor
  */
 export class Subscription extends EventDispatcher {
+  // eslint-disable-next-line require-jsdoc
   constructor(id, stop, getStats, mute, unmute, applyOptions) {
     super();
     if (!id) {
@@ -262,7 +271,7 @@ export class Subscription extends EventDispatcher {
     Object.defineProperty(this, 'id', {
       configurable: false,
       writable: false,
-      value: id
+      value: id,
     });
     /**
      * @function stop

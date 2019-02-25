@@ -4,9 +4,9 @@
 
 'use strict';
 
-import * as StreamModule from '../base/stream.js'
-import * as StreamUtilsModule from './streamutils.js'
-import { OmsEvent } from '../base/event.js'
+import * as StreamModule from '../base/stream.js';
+import * as StreamUtilsModule from './streamutils.js';
+import {OmsEvent} from '../base/event.js';
 
 /**
  * @class RemoteMixedStream
@@ -23,17 +23,18 @@ import { OmsEvent } from '../base/event.js'
  * @hideconstructor
  */
 export class RemoteMixedStream extends StreamModule.RemoteStream {
+  // eslint-disable-next-line require-jsdoc
   constructor(info) {
     if (info.type !== 'mixed') {
       throw new TypeError('Not a mixed stream');
     }
     super(info.id, undefined, undefined, new StreamModule.StreamSourceInfo(
-      'mixed', 'mixed'));
+        'mixed', 'mixed'));
 
     this.settings = StreamUtilsModule.convertToPublicationSettings(info.media);
 
     this.capabilities = new StreamUtilsModule.convertToSubscriptionCapabilities(
-      info.media);
+        info.media);
   }
 }
 
@@ -44,6 +45,7 @@ export class RemoteMixedStream extends StreamModule.RemoteStream {
  * @hideconstructor
  */
 export class ActiveAudioInputChangeEvent extends OmsEvent {
+  // eslint-disable-next-line require-jsdoc
   constructor(type, init) {
     super(type);
     /**
@@ -62,7 +64,8 @@ export class ActiveAudioInputChangeEvent extends OmsEvent {
  * @memberof Oms.Conference
  * @hideconstructor
  */
-export class LayoutChangeEvent extends OmsEvent{
+export class LayoutChangeEvent extends OmsEvent {
+  // eslint-disable-next-line require-jsdoc
   constructor(type, init) {
     super(type);
     /**

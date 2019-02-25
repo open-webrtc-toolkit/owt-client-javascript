@@ -20,6 +20,7 @@ import * as EventModule from '../base/event.js';
  * @hideconstructor
  */
 export class Participant extends EventModule.EventDispatcher {
+  // eslint-disable-next-line require-jsdoc
   constructor(id, role, userId) {
     super();
     /**
@@ -31,7 +32,7 @@ export class Participant extends EventModule.EventDispatcher {
     Object.defineProperty(this, 'id', {
       configurable: false,
       writable: false,
-      value: id
+      value: id,
     });
     /**
      * @member {string} role
@@ -41,7 +42,7 @@ export class Participant extends EventModule.EventDispatcher {
     Object.defineProperty(this, 'role', {
       configurable: false,
       writable: false,
-      value: role
+      value: role,
     });
     /**
      * @member {string} userId
@@ -52,7 +53,7 @@ export class Participant extends EventModule.EventDispatcher {
     Object.defineProperty(this, 'userId', {
       configurable: false,
       writable: false,
-      value: userId
+      value: userId,
     });
   }
 }

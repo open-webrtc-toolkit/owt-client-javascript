@@ -26,16 +26,16 @@
 
 // This file is borrowed from lynckia/licode with some modifications.
 
-/*global unescape*/
-"use strict";
+/* global unescape*/
+'use strict';
 export const Base64 = (function() {
-  var END_OF_INPUT, base64Chars, reverseBase64Chars, base64Str, base64Count,
-    i, setBase64Str, readBase64, encodeBase64, readReverseBase64, ntos,
-    decodeBase64;
+  const END_OF_INPUT = -1;
+  let base64Str;
+  let base64Count;
 
-  END_OF_INPUT = -1;
+  let i;
 
-  base64Chars = [
+  const base64Chars = [
     'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H',
     'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P',
     'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X',
@@ -43,38 +43,38 @@ export const Base64 = (function() {
     'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n',
     'o', 'p', 'q', 'r', 's', 't', 'u', 'v',
     'w', 'x', 'y', 'z', '0', '1', '2', '3',
-    '4', '5', '6', '7', '8', '9', '+', '/'
+    '4', '5', '6', '7', '8', '9', '+', '/',
   ];
 
-  reverseBase64Chars = [];
+  const reverseBase64Chars = [];
 
   for (i = 0; i < base64Chars.length; i = i + 1) {
     reverseBase64Chars[base64Chars[i]] = i;
   }
 
-  setBase64Str = function(str) {
+  const setBase64Str = function(str) {
     base64Str = str;
     base64Count = 0;
   };
 
-  readBase64 = function() {
-    var c;
+  const readBase64 = function() {
     if (!base64Str) {
       return END_OF_INPUT;
     }
     if (base64Count >= base64Str.length) {
       return END_OF_INPUT;
     }
-    c = base64Str.charCodeAt(base64Count) & 0xff;
+    const c = base64Str.charCodeAt(base64Count) & 0xff;
     base64Count = base64Count + 1;
     return c;
   };
 
-  encodeBase64 = function(str) {
-    var result, inBuffer, done;
+  const encodeBase64 = function(str) {
+    let result;
+    let done;
     setBase64Str(str);
     result = '';
-    inBuffer = new Array(3);
+    const inBuffer = new Array(3);
     done = false;
     while (!done && (inBuffer[0] = readBase64()) !== END_OF_INPUT) {
       inBuffer[1] = readBase64();
@@ -102,15 +102,15 @@ export const Base64 = (function() {
     return result;
   };
 
-  readReverseBase64 = function() {
+  const readReverseBase64 = function() {
     if (!base64Str) {
       return END_OF_INPUT;
     }
-    while (true) {
+    while (true) { // eslint-disable-line no-constant-condition
       if (base64Count >= base64Str.length) {
         return END_OF_INPUT;
       }
-      var nextCharacter = base64Str.charAt(base64Count);
+      const nextCharacter = base64Str.charAt(base64Count);
       base64Count = base64Count + 1;
       if (reverseBase64Chars[nextCharacter]) {
         return reverseBase64Chars[nextCharacter];
@@ -121,20 +121,21 @@ export const Base64 = (function() {
     }
   };
 
-  ntos = function(n) {
+  const ntos = function(n) {
     n = n.toString(16);
     if (n.length === 1) {
-      n = "0" + n;
+      n = '0' + n;
     }
-    n = "%" + n;
+    n = '%' + n;
     return unescape(n);
   };
 
-  decodeBase64 = function(str) {
-    var result, inBuffer, done;
+  const decodeBase64 = function(str) {
+    let result;
+    let done;
     setBase64Str(str);
-    result = "";
-    inBuffer = new Array(4);
+    result = '';
+    const inBuffer = new Array(4);
     done = false;
     while (!done && (inBuffer[0] = readReverseBase64()) !== END_OF_INPUT &&
       (inBuffer[1] = readReverseBase64()) !== END_OF_INPUT) {
@@ -146,7 +147,7 @@ export const Base64 = (function() {
         result += ntos((((inBuffer[1] << 4) & 0xff) | inBuffer[2] >> 2));
         if (inBuffer[3] !== END_OF_INPUT) {
           result = result + ntos((((inBuffer[2] << 6) & 0xff) | inBuffer[
-            3]));
+              3]));
         } else {
           done = true;
         }
@@ -159,6 +160,6 @@ export const Base64 = (function() {
 
   return {
     encodeBase64: encodeBase64,
-    decodeBase64: decodeBase64
+    decodeBase64: decodeBase64,
   };
 }());
