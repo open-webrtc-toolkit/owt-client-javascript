@@ -6,7 +6,7 @@
 
 import * as StreamModule from '../base/stream.js';
 import * as StreamUtilsModule from './streamutils.js';
-import {OmsEvent} from '../base/event.js';
+import {OwtEvent} from '../base/event.js';
 
 /**
  * @class RemoteMixedStream
@@ -18,8 +18,8 @@ import {OmsEvent} from '../base/event.js';
  * | activeaudioinputchange | Event            | Audio activeness of input stream(of the mixed stream) is changed. |
  * | layoutchange           | Event            | Video's layout has been changed. It usually happens when a new video is mixed into the target mixed stream or an existing video has been removed from mixed stream. |
  *
- * @memberOf Oms.Conference
- * @extends Oms.Base.RemoteStream
+ * @memberOf Owt.Conference
+ * @extends Owt.Base.RemoteStream
  * @hideconstructor
  */
 export class RemoteMixedStream extends StreamModule.RemoteStream {
@@ -41,17 +41,17 @@ export class RemoteMixedStream extends StreamModule.RemoteStream {
 /**
  * @class ActiveAudioInputChangeEvent
  * @classDesc Class ActiveInputChangeEvent represents an active audio input change event.
- * @memberof Oms.Conference
+ * @memberof Owt.Conference
  * @hideconstructor
  */
-export class ActiveAudioInputChangeEvent extends OmsEvent {
+export class ActiveAudioInputChangeEvent extends OwtEvent {
   // eslint-disable-next-line require-jsdoc
   constructor(type, init) {
     super(type);
     /**
      * @member {string} activeAudioInputStreamId
      * @instance
-     * @memberof Oms.Conference.ActiveAudioInputChangeEvent
+     * @memberof Owt.Conference.ActiveAudioInputChangeEvent
      * @desc The ID of input stream(of the mixed stream) whose audio is active.
      */
     this.activeAudioInputStreamId = init.activeAudioInputStreamId;
@@ -61,17 +61,17 @@ export class ActiveAudioInputChangeEvent extends OmsEvent {
 /**
  * @class LayoutChangeEvent
  * @classDesc Class LayoutChangeEvent represents an video layout change event.
- * @memberof Oms.Conference
+ * @memberof Owt.Conference
  * @hideconstructor
  */
-export class LayoutChangeEvent extends OmsEvent {
+export class LayoutChangeEvent extends OwtEvent {
   // eslint-disable-next-line require-jsdoc
   constructor(type, init) {
     super(type);
     /**
      * @member {object} layout
      * @instance
-     * @memberof Oms.Conference.LayoutChangeEvent
+     * @memberof Owt.Conference.LayoutChangeEvent
      * @desc Current video's layout. It's an array of map which maps each stream to a region.
      */
     this.layout = init.layout;

@@ -6,7 +6,8 @@
 
 'use strict';
 import Logger from '../base/logger.js';
-import {EventDispatcher, OmsEvent} from '../base/event.js';
+import {EventDispatcher, OwtEvent} from '../base/event.js';
+import * as Utils from '../base/utils.js';
 import * as ErrorModule from './error.js';
 import P2PPeerConnectionChannel from './peerconnection-channel.js';
 
@@ -20,28 +21,28 @@ const ConnectionState = {
 /**
  * @class P2PClientConfiguration
  * @classDesc Configuration for P2PClient.
- * @memberOf Oms.P2P
+ * @memberOf Owt.P2P
  * @hideconstructor
  */
 const P2PClientConfiguration = function() {
   /**
-   * @member {?Array<Oms.Base.AudioEncodingParameters>} audioEncoding
+   * @member {?Array<Owt.Base.AudioEncodingParameters>} audioEncoding
    * @instance
    * @desc Encoding parameters for publishing audio tracks.
-   * @memberof Oms.P2P.P2PClientConfiguration
+   * @memberof Owt.P2P.P2PClientConfiguration
    */
   this.audioEncoding = undefined;
   /**
-   * @member {?Array<Oms.Base.VideoEncodingParameters>} videoEncoding
+   * @member {?Array<Owt.Base.VideoEncodingParameters>} videoEncoding
    * @instance
    * @desc Encoding parameters for publishing video tracks.
-   * @memberof Oms.P2P.P2PClientConfiguration
+   * @memberof Owt.P2P.P2PClientConfiguration
    */
   this.videoEncoding = undefined;
   /**
    * @member {?RTCConfiguration} rtcConfiguration
    * @instance
-   * @memberof Oms.P2P.P2PClientConfiguration
+   * @memberof Owt.P2P.P2PClientConfiguration
    * @desc It will be used for creating PeerConnection.
    * @see {@link https://www.w3.org/TR/webrtc/#rtcconfiguration-dictionary|RTCConfiguration Dictionary of WebRTC 1.0}.
    * @example
@@ -72,12 +73,12 @@ const P2PClientConfiguration = function() {
  * | --------------------- | ---------------- | ---------------- |
  * | streamadded           | StreamEvent      | A new stream is sent from remote endpoint. |
  * | messagereceived       | MessageEvent     | A new message is received. |
- * | serverdisconnected    | OmsEvent         | Disconnected from signaling server. |
+ * | serverdisconnected    | OwtEvent         | Disconnected from signaling server. |
  *
- * @memberof Oms.P2P
- * @extends Oms.Base.EventDispatcher
+ * @memberof Owt.P2P
+ * @extends Owt.Base.EventDispatcher
  * @constructor
- * @param {?Oms.P2P.P2PClientConfiguration } configuration Configuration for Oms.P2P.P2PClient.
+ * @param {?Owt.P2P.P2PClientConfiguration } configuration Configuration for Owt.P2P.P2PClient.
  * @param {Object} signalingChannel A channel for sending and receiving signaling messages.
  */
 const P2PClient = function(configuration, signalingChannel) {
@@ -109,12 +110,12 @@ const P2PClient = function(configuration, signalingChannel) {
 
   signaling.onServerDisconnected = function() {
     state = ConnectionState.READY;
-    self.dispatchEvent(new OmsEvent('serverdisconnected'));
+    self.dispatchEvent(new OwtEvent('serverdisconnected'));
   };
 
   /**
    * @member {array} allowedRemoteIds
-   * @memberof Oms.P2P.P2PClient
+   * @memberof Owt.P2P.P2PClient
    * @instance
    * @desc Only allowed remote endpoint IDs are able to publish stream or send message to current endpoint. Removing an ID from allowedRemoteIds does stop existing connection with certain endpoint. Please call stop to stop the PeerConnection.
    */
@@ -124,7 +125,7 @@ const P2PClient = function(configuration, signalingChannel) {
    * @function connect
    * @instance
    * @desc Connect to signaling server. Since signaling can be customized, this method does not define how a token looks like. SDK passes token to signaling channel without changes.
-   * @memberof Oms.P2P.P2PClient
+   * @memberof Owt.P2P.P2PClient
    * @param {string} token A token for connecting to signaling server. The format of this token depends on signaling server's requirement.
    * @return {Promise<object, Error>} It returns a promise resolved with an object returned by signaling channel once signaling channel reports connection has been established.
    */
@@ -152,8 +153,8 @@ const P2PClient = function(configuration, signalingChannel) {
    * @function disconnect
    * @instance
    * @desc Disconnect from the signaling channel. It stops all existing sessions with remote endpoints.
-   * @memberof Oms.P2P.P2PClient
-   * @return {undefined}
+   * @memberof Owt.P2P.P2PClient
+   * @returns {Promise<undefined, Error>}
    */
   this.disconnect = function() {
     if (state == ConnectionState.READY) {
@@ -170,7 +171,7 @@ const P2PClient = function(configuration, signalingChannel) {
    * @function publish
    * @instance
    * @desc Publish a stream to a remote endpoint.
-   * @memberof Oms.P2P.P2PClient
+   * @memberof Owt.P2P.P2PClient
    * @param {string} remoteId Remote endpoint's ID.
    * @param {LocalStream} stream A LocalStream to be published.
    * @return {Promise<Publication, Error>} A promised resolved when remote side received the certain stream. However, remote endpoint may not display this stream, or ignore it.
@@ -192,7 +193,7 @@ const P2PClient = function(configuration, signalingChannel) {
    * @function send
    * @instance
    * @desc Send a message to remote endpoint.
-   * @memberof Oms.P2P.P2PClient
+   * @memberof Owt.P2P.P2PClient
    * @param {string} remoteId Remote endpoint's ID.
    * @param {string} message Message to be sent. It should be a string.
    * @return {Promise<undefined, Error>} It returns a promise resolved when remote endpoint received certain message.
@@ -214,7 +215,7 @@ const P2PClient = function(configuration, signalingChannel) {
    * @function stop
    * @instance
    * @desc Clean all resources associated with given remote endpoint. It may include RTCPeerConnection, RTCRtpTransceiver and RTCDataChannel. It still possible to publish a stream, or send a message to given remote endpoint after stop.
-   * @memberof Oms.P2P.P2PClient
+   * @memberof Owt.P2P.P2PClient
    * @param {string} remoteId Remote endpoint's ID.
    * @return {undefined}
    */
@@ -234,7 +235,7 @@ const P2PClient = function(configuration, signalingChannel) {
    * @function getStats
    * @instance
    * @desc Get stats of underlying PeerConnection.
-   * @memberof Oms.P2P.P2PClient
+   * @memberof Owt.P2P.P2PClient
    * @param {string} remoteId Remote endpoint's ID.
    * @return {Promise<RTCStatsReport, Error>} It returns a promise resolved with an RTCStatsReport or reject with an Error if there is no connection with specific user.
    */

@@ -35,16 +35,16 @@ const protocolVersion = '1.0';
 /**
  * @class ParticipantEvent
  * @classDesc Class ParticipantEvent represents a participant event.
-   @extends Oms.Base.OmsEvent
- * @memberof Oms.Conference
+   @extends Owt.Base.OwtEvent
+ * @memberof Owt.Conference
  * @hideconstructor
  */
 const ParticipantEvent = function(type, init) {
-  const that = new EventModule.OmsEvent(type, init);
+  const that = new EventModule.OwtEvent(type, init);
   /**
-   * @member {Oms.Conference.Participant} participant
+   * @member {Owt.Conference.Participant} participant
    * @instance
-   * @memberof Oms.Conference.ParticipantEvent
+   * @memberof Owt.Conference.ParticipantEvent
    */
   that.participant = init.participant;
   return that;
@@ -54,7 +54,7 @@ const ParticipantEvent = function(type, init) {
 /**
  * @class ConferenceClientConfiguration
  * @classDesc Configuration for ConferenceClient.
- * @memberOf Oms.Conference
+ * @memberOf Owt.Conference
  * @hideconstructor
  */
 class ConferenceClientConfiguration { // eslint-disable-line no-unused-vars
@@ -63,7 +63,7 @@ class ConferenceClientConfiguration { // eslint-disable-line no-unused-vars
     /**
      * @member {?RTCConfiguration} rtcConfiguration
      * @instance
-     * @memberof Oms.Conference.ConferenceClientConfiguration
+     * @memberof Owt.Conference.ConferenceClientConfiguration
      * @desc It will be used for creating PeerConnection.
      * @see {@link https://www.w3.org/TR/webrtc/#rtcconfiguration-dictionary|RTCConfiguration Dictionary of WebRTC 1.0}.
      * @example
@@ -92,16 +92,16 @@ class ConferenceClientConfiguration { // eslint-disable-line no-unused-vars
  *
  * | Event Name            | Argument Type                    | Fired when       |
  * | --------------------- | ---------------------------------| ---------------- |
- * | streamadded           | Oms.Base.StreamEvent             | A new stream is available in the conference. |
- * | participantjoined     | Oms.Conference.ParticipantEvent  | A new participant joined the conference. |
- * | messagereceived       | Oms.Base.MessageEvent            | A new message is received. |
- * | serverdisconnected    | Oms.Base.OmsEvent                | Disconnected from conference server. |
+ * | streamadded           | Owt.Base.StreamEvent             | A new stream is available in the conference. |
+ * | participantjoined     | Owt.Conference.ParticipantEvent  | A new participant joined the conference. |
+ * | messagereceived       | Owt.Base.MessageEvent            | A new message is received. |
+ * | serverdisconnected    | Owt.Base.OwtEvent                | Disconnected from conference server. |
  *
- * @memberof Oms.Conference
- * @extends Oms.Base.EventDispatcher
+ * @memberof Owt.Conference
+ * @extends Owt.Base.EventDispatcher
  * @constructor
- * @param {?Oms.Conference.ConferenceClientConfiguration } config Configuration for ConferenceClient.
- * @param {?Oms.Conference.SioSignaling } signalingImpl Signaling channel implementation for ConferenceClient. SDK uses default signaling channel implementation if this parameter is undefined. Currently, a Socket.IO signaling channel implementation was provided as ics.conference.SioSignaling. However, it is not recommended to directly access signaling channel or customize signaling channel for ConferenceClient as this time.
+ * @param {?Owt.Conference.ConferenceClientConfiguration } config Configuration for ConferenceClient.
+ * @param {?Owt.Conference.SioSignaling } signalingImpl Signaling channel implementation for ConferenceClient. SDK uses default signaling channel implementation if this parameter is undefined. Currently, a Socket.IO signaling channel implementation was provided as ics.conference.SioSignaling. However, it is not recommended to directly access signaling channel or customize signaling channel for ConferenceClient as this time.
  */
 export const ConferenceClient = function(config, signalingImpl) {
   Object.setPrototypeOf(this, new EventModule.EventDispatcher());
@@ -165,7 +165,7 @@ export const ConferenceClient = function(config, signalingImpl) {
   signaling.addEventListener('disconnect', () => {
     clean();
     signalingState = SignalingState.READY;
-    self.dispatchEvent(new EventModule.OmsEvent('serverdisconnected'));
+    self.dispatchEvent(new EventModule.OwtEvent('serverdisconnected'));
   });
 
   // eslint-disable-next-line require-jsdoc
@@ -186,7 +186,7 @@ export const ConferenceClient = function(config, signalingImpl) {
       }
       const participant = participants.get(participantId);
       participants.delete(participantId);
-      participant.dispatchEvent(new EventModule.OmsEvent('left'));
+      participant.dispatchEvent(new EventModule.OwtEvent('left'));
     }
   }
 
@@ -217,7 +217,7 @@ export const ConferenceClient = function(config, signalingImpl) {
       return;
     }
     const stream = remoteStreams.get(info.id);
-    const streamEvent = new EventModule.OmsEvent('ended');
+    const streamEvent = new EventModule.OwtEvent('ended');
     remoteStreams.delete(stream.id);
     stream.dispatchEvent(streamEvent);
   }
@@ -261,7 +261,7 @@ export const ConferenceClient = function(config, signalingImpl) {
         .media);
     stream.capabilities = StreamUtilsModule.convertToSubscriptionCapabilities(
         streamInfo.media);
-    const streamEvent = new EventModule.OmsEvent('updated');
+    const streamEvent = new EventModule.OwtEvent('updated');
     stream.dispatchEvent(streamEvent);
   }
 
@@ -327,8 +327,8 @@ export const ConferenceClient = function(config, signalingImpl) {
    * @function join
    * @instance
    * @desc Join a conference.
-   * @memberof Oms.Conference.ConferenceClient
-   * @return {Promise<ConferenceInfo, Error>} Return a promise resolved with current conference's information if successfully join the conference. Or return a promise rejected with a newly created Oms.Error if failed to join the conference.
+   * @memberof Owt.Conference.ConferenceClient
+   * @returns {Promise<ConferenceInfo, Error>} Return a promise resolved with current conference's information if successfully join the conference. Or return a promise rejected with a newly created Owt.Error if failed to join the conference.
    * @param {string} tokenString Token is issued by conference server(nuve).
    */
   this.join = function(tokenString) {
@@ -386,12 +386,12 @@ export const ConferenceClient = function(config, signalingImpl) {
 
   /**
    * @function publish
-   * @memberof Oms.Conference.ConferenceClient
+   * @memberof Owt.Conference.ConferenceClient
    * @instance
    * @desc Publish a LocalStream to conference server. Other participants will be able to subscribe this stream when it is successfully published.
-   * @param {Oms.Base.LocalStream} stream The stream to be published.
-   * @param {Oms.Base.PublishOptions} options Options for publication.
-   * @return {Promise<Publication, Error>} Returned promise will be resolved with a newly created Publication once specific stream is successfully published, or rejected with a newly created Error if stream is invalid or options cannot be satisfied. Successfully published means PeerConnection is established and server is able to process media data.
+   * @param {Owt.Base.LocalStream} stream The stream to be published.
+   * @param {Owt.Base.PublishOptions} options Options for publication.
+   * @returns {Promise<Publication, Error>} Returned promise will be resolved with a newly created Publication once specific stream is successfully published, or rejected with a newly created Error if stream is invalid or options cannot be satisfied. Successfully published means PeerConnection is established and server is able to process media data.
    */
   this.publish = function(stream, options) {
     if (!(stream instanceof StreamModule.LocalStream)) {
@@ -407,12 +407,12 @@ export const ConferenceClient = function(config, signalingImpl) {
 
   /**
    * @function subscribe
-   * @memberof Oms.Conference.ConferenceClient
+   * @memberof Owt.Conference.ConferenceClient
    * @instance
    * @desc Subscribe a RemoteStream from conference server.
-   * @param {Oms.Base.RemoteStream} stream The stream to be subscribed.
-   * @param {Oms.Conference.SubscribeOptions} options Options for subscription.
-   * @return {Promise<Subscription, Error>} Returned promise will be resolved with a newly created Subscription once specific stream is successfully subscribed, or rejected with a newly created Error if stream is invalid or options cannot be satisfied. Successfully subscribed means PeerConnection is established and server was started to send media data.
+   * @param {Owt.Base.RemoteStream} stream The stream to be subscribed.
+   * @param {Owt.Conference.SubscribeOptions} options Options for subscription.
+   * @returns {Promise<Subscription, Error>} Returned promise will be resolved with a newly created Subscription once specific stream is successfully subscribed, or rejected with a newly created Error if stream is invalid or options cannot be satisfied. Successfully subscribed means PeerConnection is established and server was started to send media data.
    */
   this.subscribe = function(stream, options) {
     if (!(stream instanceof StreamModule.RemoteStream)) {
@@ -424,7 +424,7 @@ export const ConferenceClient = function(config, signalingImpl) {
 
   /**
    * @function send
-   * @memberof Oms.Conference.ConferenceClient
+   * @memberof Owt.Conference.ConferenceClient
    * @instance
    * @desc Send a text message to a participant or all participants.
    * @param {string} message Message to be sent.
@@ -440,7 +440,7 @@ export const ConferenceClient = function(config, signalingImpl) {
 
   /**
    * @function leave
-   * @memberOf Oms.Conference.ConferenceClient
+   * @memberOf Owt.Conference.ConferenceClient
    * @instance
    * @desc Leave a conference.
    * @return {Promise<void, Error>} Returned promise will be resolved with undefined once the connection is disconnected.

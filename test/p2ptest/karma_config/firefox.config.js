@@ -10,7 +10,7 @@ module.exports = function (config) {
       './test/p2ptest/dependencies/adapter.js',
       './test/p2ptest/dependencies/q.js',
       './dist/samples/p2p/js/sc.websocket.js',
-      './dist/sdk/oms.js',
+      './dist/sdk/owt.js',
       './test/p2ptest/js/errorHandler.js',
       './test/p2ptest/js/test_functions.js',
       './test/p2ptest/js/video_detector.js',

@@ -4,7 +4,7 @@
 
 /**
  * @class SignalingChannel
- * @classDesc Signaling module for Open Media Streamer P2P chat
+ * @classDesc Signaling module for Open WebRTC Toolkit P2P chat
  */
 function SignalingChannel() {
 

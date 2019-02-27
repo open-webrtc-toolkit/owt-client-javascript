@@ -1,7 +1,7 @@
 {
   "name": "oms-sample-conference",
-  "title": "Open Media Streamer Conference Sample",
-  "description": "Open Media Streamer JavaScript Conference Sample",
+  "title": "Open WebRTC Toolkit Conference Sample",
+  "description": "Open WebRTC Toolkit JavaScript Conference Sample",
   "version": "4.1.0",
   "homepage": "http://webrtc.intel.com",
   "author": "Intel WebRTC team",

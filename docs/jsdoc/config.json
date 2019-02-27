@@ -26,7 +26,7 @@
     "dateFormat": "ddd MMM Do YYYY",
     "outputSourceFiles": false,
     "outputSourcePath": false,
-    "systemName": "Open Media Streamer",
+    "systemName": "Open WebRTC Toolkit",
     "footer": "",
     "copyright": "Copyright © 2018 Intel Corporation. All Rights Reserved. ",
     "navType": "vertical",

@@ -17,7 +17,7 @@ export const AudioCodec = {
 };
 /**
  * @class AudioCodecParameters
- * @memberOf Oms.Base
+ * @memberOf Owt.Base
  * @classDesc Codec parameters for an audio track.
  * @hideconstructor
  */
@@ -26,21 +26,21 @@ export class AudioCodecParameters {
   constructor(name, channelCount, clockRate) {
     /**
      * @member {string} name
-     * @memberof Oms.Base.AudioCodecParameters
+     * @memberof Owt.Base.AudioCodecParameters
      * @instance
-     * @desc Name of a codec. Please a value in Oms.Base.AudioCodec. However, some functions do not support all the values in Oms.Base.AudioCodec.
+     * @desc Name of a codec. Please a value in Owt.Base.AudioCodec. However, some functions do not support all the values in Owt.Base.AudioCodec.
      */
     this.name = name;
     /**
      * @member {?number} channelCount
-     * @memberof Oms.Base.AudioCodecParameters
+     * @memberof Owt.Base.AudioCodecParameters
      * @instance
      * @desc Numbers of channels for an audio track.
      */
     this.channelCount = channelCount;
     /**
      * @member {?number} clockRate
-     * @memberof Oms.Base.AudioCodecParameters
+     * @memberof Owt.Base.AudioCodecParameters
      * @instance
      * @desc The codec clock rate expressed in Hertz.
      */
@@ -50,7 +50,7 @@ export class AudioCodecParameters {
 
 /**
  * @class AudioEncodingParameters
- * @memberOf Oms.Base
+ * @memberOf Owt.Base
  * @classDesc Encoding parameters for sending an audio track.
  * @hideconstructor
  */
@@ -58,15 +58,15 @@ export class AudioEncodingParameters {
   // eslint-disable-next-line require-jsdoc
   constructor(codec, maxBitrate) {
     /**
-     * @member {?Oms.Base.AudioCodecParameters} codec
+     * @member {?Owt.Base.AudioCodecParameters} codec
      * @instance
-     * @memberof Oms.Base.AudioEncodingParameters
+     * @memberof Owt.Base.AudioEncodingParameters
      */
     this.codec = codec;
     /**
      * @member {?number} maxBitrate
      * @instance
-     * @memberof Oms.Base.AudioEncodingParameters
+     * @memberof Owt.Base.AudioEncodingParameters
      * @desc Max bitrate expressed in kbps.
      */
     this.maxBitrate = maxBitrate;
@@ -82,7 +82,7 @@ export const VideoCodec = {
 
 /**
  * @class VideoCodecParameters
- * @memberOf Oms.Base
+ * @memberOf Owt.Base
  * @classDesc Codec parameters for a video track.
  * @hideconstructor
  */
@@ -91,14 +91,14 @@ export class VideoCodecParameters {
   constructor(name, profile) {
     /**
      * @member {string} name
-     * @memberof Oms.Base.VideoCodecParameters
+     * @memberof Owt.Base.VideoCodecParameters
      * @instance
-     * @desc Name of a codec.Please a value in Oms.Base.AudioCodec.However, some functions do not support all the values in Oms.Base.AudioCodec.
+     * @desc Name of a codec. Please a value in Owt.Base.AudioCodec. However, some functions do not support all the values in Owt.Base.AudioCodec.
      */
     this.name = name;
     /**
      * @member {?string} profile
-     * @memberof Oms.Base.VideoCodecParameters
+     * @memberof Owt.Base.VideoCodecParameters
      * @instance
      * @desc The profile of a codec. Profile may not apply to all codecs.
      */
@@ -108,7 +108,7 @@ export class VideoCodecParameters {
 
 /**
  * @class VideoEncodingParameters
- * @memberOf Oms.Base
+ * @memberOf Owt.Base
  * @classDesc Encoding parameters for sending a video track.
  * @hideconstructor
  */
@@ -116,15 +116,15 @@ export class VideoEncodingParameters {
   // eslint-disable-next-line require-jsdoc
   constructor(codec, maxBitrate) {
     /**
-     * @member {?Oms.Base.VideoCodecParameters} codec
+     * @member {?Owt.Base.VideoCodecParameters} codec
      * @instance
-     * @memberof Oms.Base.VideoEncodingParameters
+     * @memberof Owt.Base.VideoEncodingParameters
      */
     this.codec = codec;
     /**
      * @member {?number} maxBitrate
      * @instance
-     * @memberof Oms.Base.VideoEncodingParameters
+     * @memberof Owt.Base.VideoEncodingParameters
      * @desc Max bitrate expressed in kbps.
      */
     this.maxBitrate = maxBitrate;

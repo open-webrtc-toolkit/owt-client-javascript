@@ -10,7 +10,7 @@ import {EventDispatcher} from '../base/event.js';
 
 /**
  * @class AudioSubscriptionCapabilities
- * @memberOf Oms.Conference
+ * @memberOf Owt.Conference
  * @classDesc Represents the audio capability for subscription.
  * @hideconstructor
  */
@@ -18,9 +18,9 @@ export class AudioSubscriptionCapabilities {
   // eslint-disable-next-line require-jsdoc
   constructor(codecs) {
     /**
-     * @member {Array.<Oms.Base.AudioCodecParameters>} codecs
+     * @member {Array.<Owt.Base.AudioCodecParameters>} codecs
      * @instance
-     * @memberof Oms.Conference.AudioSubscriptionCapabilities
+     * @memberof Owt.Conference.AudioSubscriptionCapabilities
      */
     this.codecs = codecs;
   }
@@ -28,7 +28,7 @@ export class AudioSubscriptionCapabilities {
 
 /**
  * @class VideoSubscriptionCapabilities
- * @memberOf Oms.Conference
+ * @memberOf Owt.Conference
  * @classDesc Represents the video capability for subscription.
  * @hideconstructor
  */
@@ -37,33 +37,33 @@ export class VideoSubscriptionCapabilities {
   constructor(codecs, resolutions, frameRates, bitrateMultipliers,
       keyFrameIntervals) {
     /**
-     * @member {Array.<Oms.Base.VideoCodecParameters>} codecs
+     * @member {Array.<Owt.Base.VideoCodecParameters>} codecs
      * @instance
-     * @memberof Oms.Conference.VideoSubscriptionCapabilities
+     * @memberof Owt.Conference.VideoSubscriptionCapabilities
      */
     this.codecs = codecs;
     /**
-     * @member {Array.<Oms.Base.Resolution>} resolution
+     * @member {Array.<Owt.Base.Resolution>} resolution
      * @instance
-     * @memberof Oms.Conference.VideoSubscriptionCapabilities
+     * @memberof Owt.Conference.VideoSubscriptionCapabilities
      */
     this.resolutions = resolutions;
     /**
      * @member {Array.<number>} frameRates
      * @instance
-     * @memberof Oms.Conference.VideoSubscriptionCapabilities
+     * @memberof Owt.Conference.VideoSubscriptionCapabilities
      */
     this.frameRates = frameRates;
     /**
      * @member {Array.<number>} bitrateMultipliers
      * @instance
-     * @memberof Oms.Conference.VideoSubscriptionCapabilities
+     * @memberof Owt.Conference.VideoSubscriptionCapabilities
      */
     this.bitrateMultipliers = bitrateMultipliers;
     /**
      * @member {Array.<number>} keyFrameIntervals
      * @instance
-     * @memberof Oms.Conference.VideoSubscriptionCapabilities
+     * @memberof Owt.Conference.VideoSubscriptionCapabilities
      */
     this.keyFrameIntervals = keyFrameIntervals;
   }
@@ -71,7 +71,7 @@ export class VideoSubscriptionCapabilities {
 
 /**
  * @class SubscriptionCapabilities
- * @memberOf Oms.Conference
+ * @memberOf Owt.Conference
  * @classDesc Represents the capability for subscription.
  * @hideconstructor
  */
@@ -81,13 +81,13 @@ export class SubscriptionCapabilities {
     /**
      * @member {?AudioSubscriptionCapabilities} audio
      * @instance
-     * @memberof Oms.Conference.SubscriptionCapabilities
+     * @memberof Owt.Conference.SubscriptionCapabilities
      */
     this.audio = audio;
     /**
      * @member {?VideoSubscriptionCapabilities} video
      * @instance
-     * @memberof Oms.Conference.SubscriptionCapabilities
+     * @memberof Owt.Conference.SubscriptionCapabilities
      */
     this.video = video;
   }
@@ -95,7 +95,7 @@ export class SubscriptionCapabilities {
 
 /**
  * @class AudioSubscriptionConstraints
- * @memberOf Oms.Conference
+ * @memberOf Owt.Conference
  * @classDesc Represents the audio constraints for subscription.
  * @hideconstructor
  */
@@ -103,9 +103,9 @@ export class AudioSubscriptionConstraints {
   // eslint-disable-next-line require-jsdoc
   constructor(codecs) {
     /**
-     * @member {?Array.<Oms.Base.AudioCodecParameters>} codecs
+     * @member {?Array.<Owt.Base.AudioCodecParameters>} codecs
      * @instance
-     * @memberof Oms.Conference.AudioSubscriptionConstraints
+     * @memberof Owt.Conference.AudioSubscriptionConstraints
      * @desc Codecs accepted. If none of `codecs` supported by both sides, connection fails. Leave it undefined will use all possible codecs.
      */
     this.codecs = codecs;
@@ -114,7 +114,7 @@ export class AudioSubscriptionConstraints {
 
 /**
  * @class VideoSubscriptionConstraints
- * @memberOf Oms.Conference
+ * @memberOf Owt.Conference
  * @classDesc Represents the video constraints for subscription.
  * @hideconstructor
  */
@@ -123,37 +123,37 @@ export class VideoSubscriptionConstraints {
   constructor(codecs, resolution, frameRate, bitrateMultiplier,
       keyFrameInterval) {
     /**
-     * @member {?Array.<Oms.Base.VideoCodecParameters>} codecs
+     * @member {?Array.<Owt.Base.VideoCodecParameters>} codecs
      * @instance
-     * @memberof Oms.Conference.VideoSubscriptionConstraints
+     * @memberof Owt.Conference.VideoSubscriptionConstraints
      * @desc Codecs accepted. If none of `codecs` supported by both sides, connection fails. Leave it undefined will use all possible codecs.
      */
     this.codecs = codecs;
     /**
-     * @member {?Oms.Base.Resolution} resolution
+     * @member {?Owt.Base.Resolution} resolution
      * @instance
-     * @memberof Oms.Conference.VideoSubscriptionConstraints
+     * @memberof Owt.Conference.VideoSubscriptionConstraints
      * @desc Only resolutions listed in VideoSubscriptionCapabilities are allowed.
      */
     this.resolution = resolution;
     /**
      * @member {?number} frameRate
      * @instance
-     * @memberof Oms.Conference.VideoSubscriptionConstraints
+     * @memberof Owt.Conference.VideoSubscriptionConstraints
      * @desc Only frameRates listed in VideoSubscriptionCapabilities are allowed.
      */
     this.frameRate = frameRate;
     /**
      * @member {?number} bitrateMultiplier
      * @instance
-     * @memberof Oms.Conference.VideoSubscriptionConstraints
+     * @memberof Owt.Conference.VideoSubscriptionConstraints
      * @desc Only bitrateMultipliers listed in VideoSubscriptionCapabilities are allowed.
      */
     this.bitrateMultiplier = bitrateMultiplier;
     /**
      * @member {?number} keyFrameInterval
      * @instance
-     * @memberof Oms.Conference.VideoSubscriptionConstraints
+     * @memberof Owt.Conference.VideoSubscriptionConstraints
      * @desc Only keyFrameIntervals listed in VideoSubscriptionCapabilities are allowed.
      */
     this.keyFrameInterval = keyFrameInterval;
@@ -162,8 +162,8 @@ export class VideoSubscriptionConstraints {
 
 /**
  * @class SubscribeOptions
- * @memberOf Oms.Conference
- * @classDesc SubscribeOptions defines options for subscribing a Oms.Base.RemoteStream.
+ * @memberOf Owt.Conference
+ * @classDesc SubscribeOptions defines options for subscribing a Owt.Base.RemoteStream.
  */
 export class SubscribeOptions {
   // eslint-disable-next-line require-jsdoc
@@ -171,13 +171,13 @@ export class SubscribeOptions {
     /**
      * @member {?AudioSubscriptionConstraints} audio
      * @instance
-     * @memberof Oms.Conference.SubscribeOptions
+     * @memberof Owt.Conference.SubscribeOptions
      */
     this.audio = audio;
     /**
      * @member {?VideoSubscriptionConstraints} video
      * @instance
-     * @memberof Oms.Conference.SubscribeOptions
+     * @memberof Owt.Conference.SubscribeOptions
      */
     this.video = video;
   }
@@ -185,7 +185,7 @@ export class SubscribeOptions {
 
 /**
  * @class VideoSubscriptionUpdateOptions
- * @memberOf Oms.Conference
+ * @memberOf Owt.Conference
  * @classDesc VideoSubscriptionUpdateOptions defines options for updating a subscription's video part.
  * @hideconstructor
  */
@@ -193,30 +193,30 @@ export class VideoSubscriptionUpdateOptions {
   // eslint-disable-next-line require-jsdoc
   constructor() {
     /**
-     * @member {?Oms.Base.Resolution} resolution
+     * @member {?Owt.Base.Resolution} resolution
      * @instance
-     * @memberof Oms.Conference.VideoSubscriptionUpdateOptions
+     * @memberof Owt.Conference.VideoSubscriptionUpdateOptions
      * @desc Only resolutions listed in VideoSubscriptionCapabilities are allowed.
      */
     this.resolution = undefined;
     /**
      * @member {?number} frameRates
      * @instance
-     * @memberof Oms.Conference.VideoSubscriptionUpdateOptions
+     * @memberof Owt.Conference.VideoSubscriptionUpdateOptions
      * @desc Only frameRates listed in VideoSubscriptionCapabilities are allowed.
      */
     this.frameRate = undefined;
     /**
      * @member {?number} bitrateMultipliers
      * @instance
-     * @memberof Oms.Conference.VideoSubscriptionUpdateOptions
+     * @memberof Owt.Conference.VideoSubscriptionUpdateOptions
      * @desc Only bitrateMultipliers listed in VideoSubscriptionCapabilities are allowed.
      */
     this.bitrateMultipliers = undefined;
     /**
      * @member {?number} keyFrameIntervals
      * @instance
-     * @memberof Oms.Conference.VideoSubscriptionUpdateOptions
+     * @memberof Owt.Conference.VideoSubscriptionUpdateOptions
      * @desc Only keyFrameIntervals listed in VideoSubscriptionCapabilities are allowed.
      */
     this.keyFrameInterval = undefined;
@@ -225,7 +225,7 @@ export class VideoSubscriptionUpdateOptions {
 
 /**
  * @class SubscriptionUpdateOptions
- * @memberOf Oms.Conference
+ * @memberOf Owt.Conference
  * @classDesc SubscriptionUpdateOptions defines options for updating a subscription.
  * @hideconstructor
  */
@@ -235,7 +235,7 @@ export class SubscriptionUpdateOptions {
     /**
      * @member {?VideoSubscriptionUpdateOptions} video
      * @instance
-     * @memberof Oms.Conference.SubscriptionUpdateOptions
+     * @memberof Owt.Conference.SubscriptionUpdateOptions
      */
     this.video = undefined;
   }
@@ -243,7 +243,7 @@ export class SubscriptionUpdateOptions {
 
 /**
  * @class Subscription
- * @memberof Oms.Conference
+ * @memberof Owt.Conference
  * @classDesc Subscription is a receiver for receiving a stream.
  * Events:
  *
@@ -253,7 +253,7 @@ export class SubscriptionUpdateOptions {
  * | mute            | MuteEvent        | Publication is muted. Remote side stopped sending audio and/or video data. |
  * | unmute          | MuteEvent        | Publication is unmuted. Remote side continued sending audio and/or video data. |
  *
- * @extends Oms.Base.EventDispatcher
+ * @extends Owt.Base.EventDispatcher
  * @hideconstructor
  */
 export class Subscription extends EventDispatcher {
@@ -266,7 +266,7 @@ export class Subscription extends EventDispatcher {
     /**
      * @member {string} id
      * @instance
-     * @memberof Oms.Conference.Subscription
+     * @memberof Owt.Conference.Subscription
      */
     Object.defineProperty(this, 'id', {
       configurable: false,
@@ -277,7 +277,7 @@ export class Subscription extends EventDispatcher {
      * @function stop
      * @instance
      * @desc Stop certain subscription. Once a subscription is stopped, it cannot be recovered.
-     * @memberof Oms.Conference.Subscription
+     * @memberof Owt.Conference.Subscription
      * @returns {undefined}
      */
     this.stop = stop;
@@ -285,7 +285,7 @@ export class Subscription extends EventDispatcher {
      * @function getStats
      * @instance
      * @desc Get stats of underlying PeerConnection.
-     * @memberof Oms.Conference.Subscription
+     * @memberof Owt.Conference.Subscription
      * @returns {Promise<RTCStatsReport, Error>}
      */
     this.getStats = getStats;
@@ -293,8 +293,8 @@ export class Subscription extends EventDispatcher {
      * @function mute
      * @instance
      * @desc Stop reeving data from remote endpoint.
-     * @memberof Oms.Conference.Subscription
-     * @param {Oms.Base.TrackKind } kind Kind of tracks to be muted.
+     * @memberof Owt.Conference.Subscription
+     * @param {Owt.Base.TrackKind } kind Kind of tracks to be muted.
      * @returns {Promise<undefined, Error>}
      */
     this.mute = mute;
@@ -302,8 +302,8 @@ export class Subscription extends EventDispatcher {
      * @function unmute
      * @instance
      * @desc Continue reeving data from remote endpoint.
-     * @memberof Oms.Conference.Subscription
-     * @param {Oms.Base.TrackKind } kind Kind of tracks to be unmuted.
+     * @memberof Owt.Conference.Subscription
+     * @param {Owt.Base.TrackKind } kind Kind of tracks to be unmuted.
      * @returns {Promise<undefined, Error>}
      */
     this.unmute = unmute;
@@ -311,8 +311,8 @@ export class Subscription extends EventDispatcher {
      * @function applyOptions
      * @instance
      * @desc Update subscription with given options.
-     * @memberof Oms.Conference.Subscription
-     * @param {Oms.Conference.SubscriptionUpdateOptions } options Subscription update options.
+     * @memberof Owt.Conference.Subscription
+     * @param {Owt.Conference.SubscriptionUpdateOptions } options Subscription update options.
      * @returns {Promise<undefined, Error>}
      */
     this.applyOptions = applyOptions;

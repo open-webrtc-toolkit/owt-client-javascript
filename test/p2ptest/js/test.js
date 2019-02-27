@@ -10,7 +10,7 @@ var TestClient = function(userName, serverURL, config) {
     config = {}
   }
   const signaling = new SignalingChannel();
-  this.peerClient = new Oms.P2P.P2PClient(config,signaling);
+  this.peerClient = new Owt.P2P.P2PClient(config,signaling);
   this.serverURL = serverURL || "http://10.239.44.127:8095/";
   console.log('serverURL:'+this.serverURL);
   this.userName = userName || "userName" + new Date().getTime();
@@ -55,14 +55,14 @@ TestClient.prototype = {
   createLocalStream: function(resolution,fps) {
     var that = this;
     var videoConstraintsForCamera
-    var audioConstraintsForMic = new Oms.Base.AudioTrackConstraints(Oms.Base.AudioSourceInfo.MIC);
-    videoConstraintsForCamera = new Oms.Base.VideoTrackConstraints(Oms.Base.VideoSourceInfo.CAMERA);
+    var audioConstraintsForMic = new Owt.Base.AudioTrackConstraints(Owt.Base.AudioSourceInfo.MIC);
+    videoConstraintsForCamera = new Owt.Base.VideoTrackConstraints(Owt.Base.VideoSourceInfo.CAMERA);
     videoConstraintsForCamera.resolution = resolution
     videoConstraintsForCamera.frameRate = fps
     let mediaStream;
-    Oms.Base.MediaStreamFactory.createMediaStream(new Oms.Base.StreamConstraints(audioConstraintsForMic, videoConstraintsForCamera)).then(stream=>{
+    Owt.Base.MediaStreamFactory.createMediaStream(new Owt.Base.StreamConstraints(audioConstraintsForMic, videoConstraintsForCamera)).then(stream=>{
       mediaStream=stream;
-      localStream = new Oms.Base.LocalStream(mediaStream, new Oms.Base.StreamSourceInfo('mic', 'camera'));
+      localStream = new Owt.Base.LocalStream(mediaStream, new Owt.Base.StreamSourceInfo('mic', 'camera'));
       that.localStream = localStream;
       var hasVideo = that.hasVideo(localStream)
       var hasAudio = that.hasAudio(localStream)
@@ -84,14 +84,14 @@ TestClient.prototype = {
   createLocalStreamVideoOnly: function(resolution,fps) {
     var that = this;
     var videoConstraintsForCamera
-    videoConstraintsForCamera = new Oms.Base.VideoTrackConstraints(Oms.Base.VideoSourceInfo.CAMERA);
-    videoConstraintsForCamera = new Oms.Base.VideoTrackConstraints(Oms.Base.VideoSourceInfo.CAMERA);
+    videoConstraintsForCamera = new Owt.Base.VideoTrackConstraints(Owt.Base.VideoSourceInfo.CAMERA);
+    videoConstraintsForCamera = new Owt.Base.VideoTrackConstraints(Owt.Base.VideoSourceInfo.CAMERA);
     videoConstraintsForCamera.resolution = resolution
     videoConstraintsForCamera.frameRate = fps
     let mediaStream;
-    Oms.Base.MediaStreamFactory.createMediaStream(new Oms.Base.StreamConstraints(false, videoConstraintsForCamera)).then(stream=>{
+    Owt.Base.MediaStreamFactory.createMediaStream(new Owt.Base.StreamConstraints(false, videoConstraintsForCamera)).then(stream=>{
       mediaStream=stream;
-      localStream = new Oms.Base.LocalStream(mediaStream, new Oms.Base.StreamSourceInfo('mic', 'camera'));
+      localStream = new Owt.Base.LocalStream(mediaStream, new Owt.Base.StreamSourceInfo('mic', 'camera'));
       that.debug("Create stream", "success");
       that.localStream = localStream;
       var hasVideo = that.hasVideo(localStream)
@@ -113,11 +113,11 @@ TestClient.prototype = {
 
   createLocalStreamAudioOnly: function() {
     var that = this;
-    const audioConstraintsForMic = new Oms.Base.AudioTrackConstraints(Oms.Base.AudioSourceInfo.MIC);
+    const audioConstraintsForMic = new Owt.Base.AudioTrackConstraints(Owt.Base.AudioSourceInfo.MIC);
     let mediaStream;
-    Oms.Base.MediaStreamFactory.createMediaStream(new Oms.Base.StreamConstraints(audioConstraintsForMic, false)).then(stream=>{
+    Owt.Base.MediaStreamFactory.createMediaStream(new Owt.Base.StreamConstraints(audioConstraintsForMic, false)).then(stream=>{
       mediaStream=stream;
-      localStream = new Oms.Base.LocalStream(mediaStream, new Oms.Base.StreamSourceInfo('mic', 'camera'));
+      localStream = new Owt.Base.LocalStream(mediaStream, new Owt.Base.StreamSourceInfo('mic', 'camera'));
       that.debug("create stream", "success");
       that.localStream = localStream;
       var hasVideo = that.hasVideo(localStream)
