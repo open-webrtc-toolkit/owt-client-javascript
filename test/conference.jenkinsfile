@@ -15,7 +15,7 @@ pipeline {
         stage('Unit test') {
             steps {
                 podTemplate(name: 'unit-test', label: 'unit-test', cloud: 'kubernetes', containers: [
-                    containerTemplate(name: 'unit-test', image: "$env.TEST_IMAGE",  ttyEnabled: true, alwaysPullImage: true, privileged: true, network: 'host', command: 'cat')
+                    containerTemplate(name: 'unit-test', image: "$env.TEST_IMAGE",  ttyEnabled: true, alwaysPullImage: true, privileged: true, resourceRequestCpu: '500m', resourceLimitCpu: '1000m', network: 'host', command: 'cat')
                     ]) {
                     node('unit-test') {
                         container('unit-test') {
@@ -28,7 +28,7 @@ pipeline {
         stage('Build package') {
             steps {
                 podTemplate(name: 'pack', label: 'pack-mcu', containers: [
-                    containerTemplate(name: 'pack-on-centos', image: "$env.PACK_IMAGE",  ttyEnabled: true, alwaysPullImage: true, privileged: true, network: 'host', command: 'cat')
+                    containerTemplate(name: 'pack-on-centos', image: "$env.PACK_IMAGE",  ttyEnabled: true, alwaysPullImage: true, privileged: true, resourceRequestCpu: '7000m', resourceLimitCpu: '8000m', network: 'host', command: 'cat')
                 ]){
                     node ('pack-mcu') {
                       container ('pack-on-centos') {
@@ -44,7 +44,7 @@ pipeline {
                 stage('API test') {
                     steps {
                         podTemplate(name: 'api-test', label: 'api-test', cloud: 'kubernetes', containers: [
-                            containerTemplate(name: 'api-test', image: "$env.TEST_IMAGE",  ttyEnabled: true, alwaysPullImage: true, privileged: true, network: 'host', command: 'cat'),
+                            containerTemplate(name: 'api-test', image: "$env.TEST_IMAGE",  ttyEnabled: true, alwaysPullImage: true, privileged: true, resourceRequestCpu: '3000m', resourceLimitCpu: '4000m', network: 'host', command: 'cat'),
                             ]) {
                         
                             node('api-test') {
@@ -59,7 +59,7 @@ pipeline {
                 stage('Subscribe test') {
                     steps {
                         podTemplate(name:'subscribe-test', label: 'subscribe-test', cloud: 'kubernetes', containers: [
-                            containerTemplate(name: 'subscribe-test', image: "$env.TEST_IMAGE",  ttyEnabled: true, alwaysPullImage: true, privileged: true, network: 'host', command: 'cat'),
+                            containerTemplate(name: 'subscribe-test', image: "$env.TEST_IMAGE",  ttyEnabled: true, alwaysPullImage: true, privileged: true, resourceRequestCpu: '3000m', resourceLimitCpu: '4000m', network: 'host', command: 'cat'),
                             ]) {
                         
                             node('subscribe-test') {
