@@ -50,10 +50,10 @@ pipeline {
 
     post {
         success {
-            setBuildStatus(${env.jsUrl}, "Build succeeded", "SUCCESS");
+            setBuildStatus("${env.jsUrl}", "Build succeeded", "SUCCESS");
         }
         failure {
-            setBuildStatus(${env.jsUrl}, "Build failed", "FAILURE");
+            setBuildStatus("${env.jsUrl}", "Build failed", "FAILURE");
         }
     }
 }
