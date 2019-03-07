@@ -58,6 +58,13 @@ describe('P2P JS SDK', function () {
     console.log(type, msg);
   }
 
+  function removeVideo() {
+    var videos = document.getElementsByClassName("video");
+    for (var i = 0; i < videos.length; i++) {
+      document.body.removeChild(videos[i]);
+    };
+  }
+
   var videoDetection = function (streamId) {
     window.setTimeout(function () {
       var framechecker = new VideoFrameChecker(
@@ -93,7 +100,7 @@ describe('P2P JS SDK', function () {
 
     afterEach(function () {
       actorUser.close();
-      actorUser.removeVideo(actorUser.localStream);
+      removeVideo()
       detection = '';
     });
 
@@ -342,7 +349,6 @@ describe('P2P JS SDK', function () {
         })
     });
 
-
     it('conncetWithSymolName', function (done) {
       Q('conncetWithSymolName')
         .then(function () {
@@ -532,8 +538,6 @@ describe('P2P JS SDK', function () {
             actorUser1_datasender = e.origin;
             actorUser1_data = e.message;
           });
-        })
-        .then(function () {
           actorUser2 = new TestClient(userName2, serverIP);
           actorUser2.bindListener("serverdisconnected", function (e) {
             actorUser2.request["server-disconnected_success"]++;
@@ -560,10 +564,9 @@ describe('P2P JS SDK', function () {
     afterEach(function () {
       Q('afterEach')
         .then(function () {
+          removeVideo()
           actorUser1.disconnect();
           actorUser1 = undefined
-        })
-        .then(function () {
           actorUser2.disconnect();
           actorUser2 = undefined
         })
@@ -650,8 +653,6 @@ describe('P2P JS SDK', function () {
         })
         .then(function () {
           actorUser1.close();
-          actorUser1.removeVideo(actorUser1.localStream);
-          actorUser2.removeVideo(User2RemoteStream)
           detection = '';
         })
         .then(function () {
@@ -748,8 +749,6 @@ describe('P2P JS SDK', function () {
         })
         .then(function () {
           actorUser1.close();
-          actorUser1.removeVideo(actorUser1.localStream);
-          actorUser2.removeVideo(User2RemoteStream)
           detection = '';
         })
         .then(function () {
@@ -823,8 +822,6 @@ describe('P2P JS SDK', function () {
         })
         .then(function () {
           actorUser1.close();
-          actorUser1.removeVideo(actorUser1.localStream);
-          actorUser2.removeVideo(User2RemoteStream)
           detection = '';
         })
         .then(function () {
@@ -1000,6 +997,10 @@ describe('P2P JS SDK', function () {
           }, userName2 + "check wait: streamended_success", waitInterval)
         })
         .then(function () {
+          actorUser1.close();
+          detection = '';
+        })
+        .then(function () {
           console.log('test end');
           done();
         })
@@ -1101,10 +1102,228 @@ describe('P2P JS SDK', function () {
           }, userName2 + "check wait: streamended_success", waitInterval)
         })
         .then(function () {
+          actorUser1.close();
+          detection = '';
+        })
+        .then(function () {
           console.log('test end');
           done();
         })
     });
   });
-});
 
+  describe('publish Test', function () {
+    var actorUser1 = undefined;
+    var actorUser2 = undefined;
+    var User1RemoteId = "";
+    var User1RemoteStream = undefined;
+    var User2RemoteId = "";
+    var User2RemoteStream = undefined;
+    var actorUser1_datasender = undefined;
+    var actorUser1_data = undefined;
+    var actorUser2_datasender = undefined;
+    var actorUser2_data = undefined;
+    
+    afterEach(function () {
+      Q('afterEach')
+        .then(function () {
+          actorUser2.close();
+          actorUser1.close();
+          removeVideo()
+          detection = '';
+          actorUser1.disconnect();
+          actorUser2.disconnect();
+          actorUser1 = undefined
+          actorUser2 = undefined
+        })
+    });
+
+    var videoCodecList = ["vp8", "h264"];
+    for (i = 0; i < videoCodecList.length; i++) {
+      it('publishEachOther', function (done) {
+        Q('publishEachOther')
+          .then(function () {
+            // action
+            config ={
+              videoEncodings:[{
+                codec:{
+                  name:videoCodecList[i]
+                },
+                maxBitrate:1000
+              }]
+            }
+            actorUser1 = new TestClient(userName1, serverIP, config);
+            actorUser1.bindListener("serverdisconnected", function (e) {
+              actorUser1.request["server-disconnected_success"]++;
+            });
+            actorUser1.bindListener('streamadded', function (e) {
+              console.log("trigger streamadded ")
+              actorUser1.request["streamadded_success"]++;
+              actorUser1.showInPage(e.stream);
+              e.stream.addEventListener('ended', () => {
+                console.log("stream is ended ")
+                actorUser1.request["streamended_success"]++;
+              })
+              User1RemoteId = e.stream.id;
+              User1RemoteStream = e.stream;
+            });
+            actorUser1.bindListener("messagereceived", function (e) {
+              actorUser1.request["data-received_success"]++;
+              actorUser1_datasender = e.origin;
+              actorUser1_data = e.message;
+            });
+            actorUser2 = new TestClient(userName2, serverIP, config);
+            actorUser2.bindListener("serverdisconnected", function (e) {
+             actorUser2.request["server-disconnected_success"]++;
+            });
+            actorUser2.bindListener('streamadded', function (e) {
+             console.log("trigger streamadded ")
+             actorUser2.request["streamadded_success"]++;
+              actorUser2.showInPage(e.stream);
+              e.stream.addEventListener('ended', () => {
+                console.log("stream is ended ")
+                actorUser2.request["streamended_success"]++;
+              })
+              User2RemoteId = e.stream.id;
+              User2RemoteStream = e.stream;
+            });
+            actorUser2.bindListener("messagereceived", function (e) {
+              actorUser2.request["data-received_success"]++;
+              actorUser2_datasender = e.origin;
+              actorUser2_data = e.message;
+            });
+          })
+          // 1. User1Connect
+          .then(function () {
+            // action
+            actorUser1.connect();
+          })
+          .then(function () {
+            // action
+            actorUser2.connect();
+          })
+          .then(function () {
+            return waitsFor(function () {
+              //check action
+              return actorUser1.request["connect_success"] === 1;
+            }, userName1 + " check action: login ", waitInterval)
+          })
+          .then(function () {
+            return waitsFor(function () {
+              //check action
+              return actorUser2.request["connect_success"] === 1;
+            }, userName2 + " check action: login ", waitInterval)
+          })
+          .then(function () {
+            // action
+            actorUser1.replaceAllowedRemoteIds(userName2);
+          })
+          .then(function () {
+            // action
+            actorUser2.replaceAllowedRemoteIds(userName1);
+          })
+          .then(function () {
+            // action
+            actorUser1.createLocalStream();
+          })
+          .then(function () {
+            return waitsFor(function () {
+              // check action
+              return actorUser1.request["createLocal_success"] === 1
+            }, userName1 + " check action: create localStream ", waitInterval)
+          })
+          .then(function () {
+            // action
+            detection = "";
+            videoDetection("stream" + actorUser1.request["localStreamId"]);
+          })
+          .then(function () {
+            return waitsFor(function () {
+              //wait lock
+              return detection === true;
+            }, userName1 + " create localstream is fail", waitInterval)
+          })
+          .then(function () {
+            //TODO change wrapper of publish
+            actorUser1.publish(userName2);
+          })
+          .then(function () {
+            return waitsFor(function () {
+              //check action
+              return actorUser1.request["publish_success"] === 1;
+            }, userName1 + "check action: publish", waitInterval)
+          })
+          .then(function () {
+            return waitsFor(function () {
+              //check wait
+              return actorUser2.request["streamadded_success"] === 1;
+            }, userName2 + "check wait: stream-added", waitInterval)
+          })
+          .then(function () {
+            // action
+            detection = "";
+            videoDetection("stream" + User2RemoteId);
+          })
+          .then(function () {
+            return waitsFor(function () {
+              //wait lock
+              return detection === true;
+            }, userName2 + " remote stream is good", waitInterval)
+          })
+
+          .then(function () {
+            // action
+            actorUser2.createLocalStream();
+          })
+          .then(function () {
+            return waitsFor(function () {
+              // check action
+              return actorUser2.request["createLocal_success"] === 1
+            }, userName2 + " check action: create localStream ", waitInterval)
+          })
+          .then(function () {
+            // action
+            detection = "";
+            videoDetection("stream" + actorUser2.request["localStreamId"]);
+          })
+          .then(function () {
+            return waitsFor(function () {
+              //wait lock
+              return detection === true;
+            }, userName2 + " create localstream is fail", waitInterval)
+          })
+          .then(function () {
+            //TODO change wrapper of publish
+            actorUser2.publish(userName1);
+          })
+          .then(function () {
+            return waitsFor(function () {
+              //check action
+              return actorUser2.request["publish_success"] === 1;
+            }, userName2 + "check action: publish", waitInterval)
+          })
+          .then(function () {
+            return waitsFor(function () {
+              //check wait
+              return actorUser1.request["streamadded_success"] === 1;
+            }, userName1 + "check wait: stream-added", waitInterval)
+          })
+          .then(function () {
+            // action
+            detection = "";
+            videoDetection("stream" + User2RemoteId);
+          })
+          .then(function () {
+            return waitsFor(function () {
+              //wait lock
+              return detection === true;
+            }, userName1 + " remote stream is good", waitInterval)
+          })
+          .then(function () {
+            console.log('test end');
+            done();
+          })
+      });
+    }
+  });
+});
