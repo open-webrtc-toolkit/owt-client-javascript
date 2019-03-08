@@ -30,6 +30,7 @@ describe('P2P JS SDK', function () {
           }
         }
       }
+      deferred.reject();
     }, timeout);
     var interval = setInterval(function () {
       if (latch.call(latch)) {
@@ -1123,7 +1124,7 @@ describe('P2P JS SDK', function () {
     var actorUser1_data = undefined;
     var actorUser2_datasender = undefined;
     var actorUser2_data = undefined;
-    
+
     afterEach(function () {
       Q('afterEach')
         .then(function () {
@@ -1300,7 +1301,7 @@ describe('P2P JS SDK', function () {
             return waitsFor(function () {
               //check action
               return actorUser2.request["publish_success"] === 1;
-            }, userName2 + "check action: publish", waitInterval)
+            }, undefined, waitInterval)
           })
           .then(function () {
             return waitsFor(function () {
@@ -1318,6 +1319,8 @@ describe('P2P JS SDK', function () {
               //wait lock
               return detection === true;
             }, userName1 + " remote stream is good", waitInterval)
+          }).catch(function () {
+            console.log('catch error');
           })
           .then(function () {
             console.log('test end');
