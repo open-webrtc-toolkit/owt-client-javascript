@@ -1301,7 +1301,7 @@ describe('P2P JS SDK', function () {
             return waitsFor(function () {
               //check action
               return actorUser2.request["publish_success"] === 1;
-            }, undefined, waitInterval)
+            }, userName2 + "check action: publish", waitInterval)
           })
           .then(function () {
             return waitsFor(function () {
@@ -1319,8 +1319,6 @@ describe('P2P JS SDK', function () {
               //wait lock
               return detection === true;
             }, userName1 + " remote stream is good", waitInterval)
-          }).catch(function () {
-            console.log('catch error');
           })
           .then(function () {
             console.log('test end');
