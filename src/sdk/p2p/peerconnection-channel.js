@@ -489,7 +489,8 @@ class P2PPeerConnectionChannel extends EventDispatcher {
     }
     if (this._pc.iceConnectionState === 'connected' ||
       this._pc.iceConnectionState === 'completed') {
-      this._sendSignalingMessage(SignalingType.TRACKS_ADDED, tracksInfo);
+      this._sendSignalingMessage(SignalingType.TRACKS_ADDED,
+          this._remoteStreamInfo.get(event.stream.id).trackIds);
     } else {
       this._addedTrackIds = this._addedTrackIds.concat(
           this._remoteStreamInfo.get(event.stream.id).trackIds);
