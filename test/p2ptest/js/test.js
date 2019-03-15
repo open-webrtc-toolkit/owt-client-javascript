@@ -265,17 +265,6 @@ TestClient.prototype = {
     document.body.appendChild(para);
     video.srcObject = stream.mediaStream
   },
-
-  removeVideo: function(stream) {
-    var videos = document.getElementsByClassName("video");
-    if (stream) {
-      videos = [document.getElementById("stream" + stream.id)]
-    };
-    for (var i = 0; i < videos.length; i++) {
-      document.body.removeChild(videos[i]);
-    };
-  },
-
 };
 
 TestClient.prototype.constructor = TestClient;
