@@ -26,7 +26,7 @@ pipeline {
                 script{
                     withEnv(['JENKINS_NODE_COOKIE=dontkill']) {
                         sh "python ${env.startServerScript} --p2p-server-path ${env.p2pServerPath} \
-                        --owner open-webrtc-toolkit --repo owt-client-android --commit-id ${GIT_COMMIT} \
+                        --owner open-webrtc-toolkit --repo owt-client-javascript --commit-id ${GIT_COMMIT} \
                         --github-script ${env.serverGithubScriptPath} --mode p2p"
                     }
                 }
