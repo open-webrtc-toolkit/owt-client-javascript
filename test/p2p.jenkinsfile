@@ -1,7 +1,7 @@
-void setBuildStatus(String message, String state) {
+void setBuildStatus(String jsUrl, String message, String state) {
     step([
         $class: "GitHubCommitStatusSetter",
-        reposSource: [$class: "ManuallyEnteredRepositorySource", url: "https://github.com/open-media-streamer/oms-client-javascript"],
+        reposSource: [$class: "ManuallyEnteredRepositorySource", url: jsUrl],
         contextSource: [$class: "ManuallyEnteredCommitContextSource", context: "ci/jenkins/p2p"],
         errorHandlers: [[$class: "ChangingBuildStatusErrorHandler", result: "UNSTABLE"]],
         statusResultSource: [ $class: "ConditionalStatusResultSource", results: [[$class: "AnyBuildResult", message: message, state: state]] ]
@@ -25,7 +25,9 @@ pipeline {
             steps{
                 script{
                     withEnv(['JENKINS_NODE_COOKIE=dontkill']) {
-                        sh "${env.startP2PServerScriptPath} --server-path ${env.p2pServerPath}"
+                        sh "python ${env.startServerScript} --p2p-server-path ${env.p2pServerPath} \
+                        --owner open-webrtc-toolkit --repo owt-client-javascript --commit-id ${GIT_COMMIT} \
+                        --github-script ${env.serverGithubScriptPath} --mode p2p"
                     }
                 }
             }
@@ -39,17 +41,19 @@ pipeline {
                 }
             }
             steps {
-                sh "python ${env.jsCiScriptPath}/runTest.py --mode ci --source-path ${env.jsSourcePath} --browsers chrome"
+                sh "python ${env.jsCiScriptPath}/runTest.py --mode ci --source-path ${env.jsSourcePath} \
+                --browsers chrome --mode ci --owner open-webrtc-toolkit --repo owt-client-javascript \
+                --commit-id ${GIT_COMMIT} --github-script ${env.jsP2PTestGithubScriptPath}"
             }
         }
     }
 
     post {
         success {
-            setBuildStatus("Build succeeded", "SUCCESS");
+            setBuildStatus("${env.jsUrl}", "Build succeeded", "SUCCESS");
         }
         failure {
-            setBuildStatus("Build failed", "FAILURE");
+            setBuildStatus("${env.jsUrl}", "Build failed", "FAILURE");
         }
     }
 }
