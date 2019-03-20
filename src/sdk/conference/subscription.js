@@ -43,7 +43,7 @@ export class VideoSubscriptionCapabilities {
      */
     this.codecs = codecs;
     /**
-     * @member {Array.<Owt.Base.Resolution>} resolution
+     * @member {Array.<Owt.Base.Resolution>} resolutions
      * @instance
      * @memberof Owt.Conference.VideoSubscriptionCapabilities
      */
@@ -79,13 +79,13 @@ export class SubscriptionCapabilities {
   // eslint-disable-next-line require-jsdoc
   constructor(audio, video) {
     /**
-     * @member {?AudioSubscriptionCapabilities} audio
+     * @member {?Owt.Conference.AudioSubscriptionCapabilities} audio
      * @instance
      * @memberof Owt.Conference.SubscriptionCapabilities
      */
     this.audio = audio;
     /**
-     * @member {?VideoSubscriptionCapabilities} video
+     * @member {?Owt.Conference.VideoSubscriptionCapabilities} video
      * @instance
      * @memberof Owt.Conference.SubscriptionCapabilities
      */
@@ -133,28 +133,28 @@ export class VideoSubscriptionConstraints {
      * @member {?Owt.Base.Resolution} resolution
      * @instance
      * @memberof Owt.Conference.VideoSubscriptionConstraints
-     * @desc Only resolutions listed in VideoSubscriptionCapabilities are allowed.
+     * @desc Only resolutions listed in Owt.Conference.VideoSubscriptionCapabilities are allowed.
      */
     this.resolution = resolution;
     /**
      * @member {?number} frameRate
      * @instance
      * @memberof Owt.Conference.VideoSubscriptionConstraints
-     * @desc Only frameRates listed in VideoSubscriptionCapabilities are allowed.
+     * @desc Only frameRates listed in Owt.Conference.VideoSubscriptionCapabilities are allowed.
      */
     this.frameRate = frameRate;
     /**
      * @member {?number} bitrateMultiplier
      * @instance
      * @memberof Owt.Conference.VideoSubscriptionConstraints
-     * @desc Only bitrateMultipliers listed in VideoSubscriptionCapabilities are allowed.
+     * @desc Only bitrateMultipliers listed in Owt.Conference.VideoSubscriptionCapabilities are allowed.
      */
     this.bitrateMultiplier = bitrateMultiplier;
     /**
      * @member {?number} keyFrameInterval
      * @instance
      * @memberof Owt.Conference.VideoSubscriptionConstraints
-     * @desc Only keyFrameIntervals listed in VideoSubscriptionCapabilities are allowed.
+     * @desc Only keyFrameIntervals listed in Owt.Conference.VideoSubscriptionCapabilities are allowed.
      */
     this.keyFrameInterval = keyFrameInterval;
   }

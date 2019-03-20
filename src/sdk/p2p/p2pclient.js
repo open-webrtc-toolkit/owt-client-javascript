@@ -173,8 +173,8 @@ const P2PClient = function(configuration, signalingChannel) {
    * @desc Publish a stream to a remote endpoint.
    * @memberof Owt.P2P.P2PClient
    * @param {string} remoteId Remote endpoint's ID.
-   * @param {LocalStream} stream A LocalStream to be published.
-   * @return {Promise<Publication, Error>} A promised resolved when remote side received the certain stream. However, remote endpoint may not display this stream, or ignore it.
+   * @param {Owt.Base.LocalStream} stream An Owt.Base.LocalStream to be published.
+   * @return {Promise<Owt.Base.Publication, Error>} A promised that resolves when remote side received the certain stream. However, remote endpoint may not display this stream, or ignore it.
    */
   this.publish = function(remoteId, stream) {
     if (state !== ConnectionState.CONNECTED) {
