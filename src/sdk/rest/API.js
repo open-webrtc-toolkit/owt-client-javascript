@@ -59,7 +59,7 @@ OWT_REST.API = (function(OWT_REST) {
 
   function send (method, resource, body, onOK, onError) {
     var url = Url.parse(params.url + resource);
-    var ssl = (url.protocol === 'https' ? true : false);
+    var ssl = (url.protocol === 'https:' ? true : false);
     var timestamp = new Date().getTime();
     var cnounce = require('crypto').randomBytes(8).toString('hex');
     var toSign = timestamp + ',' + cnounce;
