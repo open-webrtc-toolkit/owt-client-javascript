@@ -972,6 +972,22 @@ class P2PPeerConnectionChannel extends EventDispatcher {
     };
   }
 
+  // Returns all MediaStreams it belongs to.
+  _getStreamByTrack(mediaStreamTrack) {
+    const streams = [];
+    for (const [id, info] of this._remoteStreamInfo) {
+      if (!info.stream || !info.stream.mediaStream) {
+        continue;
+      }
+      for (const track of info.stream.mediaStream.getTracks()) {
+        if (mediaStreamTrack === track) {
+          streams.push(info.stream.mediaStream);
+        }
+      }
+    }
+    return streams;
+  }
+
   _areAllTracksEnded(mediaStream) {
     for (const track of mediaStream.getTracks()) {
       if (track.readyState === 'live') {
@@ -1061,9 +1077,12 @@ class P2PPeerConnectionChannel extends EventDispatcher {
           });
           if (this._isUnifiedPlan()) {
             for (const track of info.mediaStream.getTracks()) {
-              track.addEventListener('ended', () => {
-                if (self._areAllTracksEnded(info.mediaStream)) {
-                  self._onRemoteStreamRemoved(info.stream);
+              track.addEventListener('ended', (event) => {
+                const mediaStreams = this._getStreamByTrack(event.target);
+                for (const mediaStream of mediaStreams) {
+                  if (this._areAllTracksEnded(mediaStream)) {
+                    this._onRemoteStreamRemoved(mediaStream);
+                  }
                 }
               });
             }
