@@ -2,6 +2,8 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
+'use strict';
+
 import {ConferenceClient} from '../../../../src/sdk/conference/client.js';
 import * as StreamModule from '../../../../src/sdk/base/stream.js';
 import * as EventModule from '../../../../src/sdk/base/event.js'

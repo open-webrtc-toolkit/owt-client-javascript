@@ -28,12 +28,13 @@
 
 /* global console,window */
 
+'use strict';
+
 /*
  * API to write logs based on traditional logging mechanisms: debug, trace,
  * info, warning, error
  */
 const Logger = (function() {
-  'use strict';
   const DEBUG = 0;
   const TRACE = 1;
   const INFO = 2;

@@ -2,6 +2,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
+'use strict';
 /**
  * @class SignalingChannel
  * @classDesc Signaling module for Open WebRTC Toolkit P2P chat

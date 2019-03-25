@@ -4,6 +4,7 @@
 
 // REST samples. It sends HTTP requests to sample server, and sample server sends requests to conference server.
 // Both this file and sample server are samples.
+'use strict';
 var send = function (method, path, body, onRes, host) {
     var req = new XMLHttpRequest()
     req.onreadystatechange = function () {

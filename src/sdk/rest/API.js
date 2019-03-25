@@ -26,6 +26,8 @@
 
 // This file is borrowed from lynckia/licode with some modifications.
 
+'use strict';
+
 /*global require, CryptoJS, Buffer, url, http, https*/
 var Url = require("url");
 

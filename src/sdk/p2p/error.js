@@ -2,6 +2,8 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
+'use strict';
+
 export const errors = {
   // 2100-2999 for P2P errors
   // 2100-2199 for connection errors
