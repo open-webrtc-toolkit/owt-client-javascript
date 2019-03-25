@@ -4,7 +4,8 @@
 
 'use strict';
 /**
- * Source info about an audio track. Values: 'mic', 'screen-cast', 'file', 'mixed'.
+ * @class AudioSourceInfo
+ * @classDesc Source info about an audio track. Values: 'mic', 'screen-cast', 'file', 'mixed'.
  * @memberOf Owt.Base
  * @readonly
  * @enum {string}
@@ -17,7 +18,8 @@ export const AudioSourceInfo = {
 };
 
 /**
- * Source info about a video track. Values: 'camera', 'screen-cast', 'file', 'mixed'.
+ * @class VideoSourceInfo
+ * @classDesc Source info about a video track. Values: 'camera', 'screen-cast', 'file', 'mixed'.
  * @memberOf Owt.Base
  * @readonly
  * @enum {string}
@@ -30,7 +32,8 @@ export const VideoSourceInfo = {
 };
 
 /**
- * Kind of a track. Values: 'audio' for audio track, 'video' for video track, 'av' for both audio and video tracks.
+ * @class TrackKind
+ * @classDesc Kind of a track. Values: 'audio' for audio track, 'video' for video track, 'av' for both audio and video tracks.
  * @memberOf Owt.Base
  * @readonly
  * @enum {string}

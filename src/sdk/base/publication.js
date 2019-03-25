@@ -50,6 +50,7 @@ export class VideoPublicationSettings {
     /**
      * @member {?number} frameRates
      * @instance
+     * @classDesc Frames per second.
      * @memberof Owt.Base.VideoPublicationSettings
      */
     this.frameRate=frameRate;
@@ -62,6 +63,7 @@ export class VideoPublicationSettings {
     /**
      * @member {?number} keyFrameIntervals
      * @instance
+     * @classDesc The time interval between key frames. Unit: second.
      * @memberof Owt.Base.VideoPublicationSettings
      */
     this.keyFrameInterval=keyFrameInterval;
@@ -94,6 +96,7 @@ export class PublicationSettings {
 
 /**
  * @class Publication
+ * @extends Owt.Base.EventDispatcher
  * @memberOf Owt.Base
  * @classDesc Publication represents a sender for publishing a stream. It
  * handles the actions on a LocalStream published to a conference.
