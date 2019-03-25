@@ -12,15 +12,6 @@
     "dictionaries": ["jsdoc", "closure"]
   },
   "templates": {
-    "default":{
-      "staticFiles": {
-        "include":[
-          "docs/templates/intellogo.png"
-        ]
-      }
-    },
-    "version": "4.1",
-    "logoFile": "./intellogo.png",
     "cleverLinks": false,
     "monospaceLinks": false,
     "dateFormat": "ddd MMM Do YYYY",
