@@ -386,10 +386,12 @@ app.get('/rooms/:room/streaming-outs', function(req, res) {
 app.post('/rooms/:room/streaming-outs', function(req, res) {
   'use strict';
   var room = req.params.room,
+    protocol = req.body.protocol,
     url = req.body.url,
+    parameters = req.body.parameters,
     media = req.body.media;
 
-  icsREST.API.startStreamingOut(room, url, media, function(info) {
+  icsREST.API.startStreamingOut(room, protocol, url, parameters, media, function(info) {
     res.send(info);
   }, function(err) {
     res.send(err);

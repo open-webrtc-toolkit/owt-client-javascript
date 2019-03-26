@@ -855,7 +855,7 @@ OWT_REST.API = (function(OWT_REST) {
 
   /*
      * * @callback onStreamingOutList
-     * * @param {Array.<id: string, url: string, media: Object>} streamingOutList    -The list of streaming-outs.
+     * * @param {Array.<id: string, protocol: string, url: string, parameters: Object, media: Object>} streamingOutList    -The list of streaming-outs.
      * * @param {Object} streamingOutList[x].media   -The media description of the streaming-out, which must follow the definition of object "MediaSubOptions" in section "3.3.11 Participant Starts a Subscription" in "Client-Portal Protocol.md" doc.
   */
   /**
@@ -885,7 +885,9 @@ OWT_REST.API = (function(OWT_REST) {
      * * @callback onStartingStreamingOutOK
      * * @param {Object} streamingOutInfo              -The object containing the information of the external streaming-out.
      * * @param {string} streamingOutInfo.id         -The streaming-out ID.
+     * * @param {string} streamingOutInfo.protocol   -The streaming-out protocol.
      * * @param {string} streamingOutInfo.url        -The URL of the target streaming-out.
+     * * @param {string} streamingOutInfo.parameters -The connection parameters of the target streaming-out.
      * * @param {Object} streamingOutInfo.media      -The media description of the streaming-out, which must follow the definition of object "MediaSubOptions" in section "3.3.11 Participant Starts a Subscription" in "Client-Portal Protocol.md" doc.
   */
   /**
@@ -893,13 +895,26 @@ OWT_REST.API = (function(OWT_REST) {
      * @desc This function starts a streaming-out to the specified room.
      * @memberOf OWT_REST.API
      * @param {string} room                          -Room ID.
+     * @param {string} protocol                      -Streaming-out protocol.
      * @param {string} url                           -The URL of the target streaming-out.
+     * @param {Object} parameters                    -The connection parameters of the target streaming-out.
+     * @param {string} parameters.method             -The HTTP(s) method to create file on streaming servers, 'PUT' or 'POST, 'PUT' by default.
+     * @param {string} parameters.hlsTime            -The hls segment length in seconds, 2 by default, required in case protocol is 'hls'.
+     * @param {string} parameters.hlsListSize        -The maximum number of playlist entries, 5 by default, required in case protocol is 'hls'.
+     * @param {string} parameters.dashSegDuration    -The segment length in seconds, 2 by default, required in case protocol is 'dash'.
+     * @param {string} parameters.dashWindowSize     -The maximum number of segments kept in the manifest, 5 by default, required in case protocol is 'dash'.
      * @param {Object} media                         -The media description of the streaming-out, which must follow the definition of object "MediaSubOptions" in section "3.3.11 Participant Starts a Subscription" in "Client-Portal Protocol.md" doc.
      * @param {onStartingStreamingOutOK} callback    -Callback function on success
      * @param {function} callbackError               -Callback function on error
      * @example
   var roomId = '51c10d86909ad1f939000001';
-  var url = 'rtmp://USER:PASS@localhost:1935/live';
+  var protocol = 'hls'
+  var url = 'https://USER:PASS@localhost:443/live.m3u8';
+  var parameters = {
+    method: 'PUT',
+    hlsTime: 2,
+    hlsListSize: 5
+  },
   var media = {
     audio: {
       from: '7652773772543651'
@@ -911,16 +926,18 @@ OWT_REST.API = (function(OWT_REST) {
       }
     }
   };
-  OWT_REST.API.startStreamingOut(roomId, url, media, function(streamingOut) {
+  OWT_REST.API.startStreamingOut(roomId, protocol, url, parameters, media, function(streamingOut) {
     console.log('Streaming-out:', streamingOut);
   }, function(status, error) {
     // HTTP status and error
     console.log(status, error);
   });
      */
-  var startStreamingOut = function(room, url, media, callback, callbackError) {
+  var startStreamingOut = function(room, protocol, url, parameters, media, callback, callbackError) {
     var options = {
+      protocol: protocol,
       url: url,
+      parameters: parameters,
       media: media
     };
 
