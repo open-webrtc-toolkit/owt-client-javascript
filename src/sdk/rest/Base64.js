@@ -26,10 +26,11 @@
 
 // This file is borrowed from lynckia/licode with some modifications.
 
+'use strict';
+
 /*global unescape*/
 var OWT_REST = OWT_REST || {};
 OWT_REST.Base64 = (function(OWT_REST) {
-  "use strict";
   var END_OF_INPUT, base64Chars, reverseBase64Chars, base64Str, base64Count,
     i, setBase64Str, readBase64, encodeBase64, readReverseBase64, ntos,
     decodeBase64;

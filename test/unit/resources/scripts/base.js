@@ -2,6 +2,8 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
+'use strict';
+
 import * as MediaStreamFactoryModule from '../../../../src/sdk/base/mediastream-factory.js';
 import * as StreamModule from '../../../../src/sdk/base/stream.js';
 import * as MediaFormatModule from '../../../../src/sdk/base/mediaformat.js'

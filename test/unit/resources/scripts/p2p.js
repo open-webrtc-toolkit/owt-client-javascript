@@ -2,6 +2,8 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
+'use strict';
+
 import P2PClient from '../../../../src/sdk/p2p/p2pclient.js';
 import SignalingChannel from './fake-p2p-signaling.js';
 import * as StreamModule from '../../../../src/sdk/base/stream.js';
