@@ -55,6 +55,7 @@ app.use(function(req, res, next) {
   res.header('Access-Control-Allow-Methods', 'POST, GET, PUT, PATCH, OPTIONS, DELETE');
   res.header('Access-Control-Allow-Headers', 'origin, content-type');
   res.header('Strict-Transport-Security', 'max-age=1024000; includeSubDomain');
+  res.header('X-Content-Type-Options', 'nosniff');
   if (req.method == 'OPTIONS') {
     res.send(200);
   } else {
