@@ -63,7 +63,7 @@ app.use(function(req, res, next) {
   }
 });
 
-icsREST.API.init('_service_ID_', '_service_KEY_', 'http://localhost:3000/', true);
+icsREST.API.init('_service_ID_', '_service_KEY_', 'https://localhost:3000/', false);
 
 var sampleRoom;
 var pageOption = { page: 1, per_page: 100 };
