@@ -89,12 +89,7 @@ In the customized signaling channel, you need to implement `connect`, `disconnec
 
 The JavaScript objects fires events using `Ics.Base.EventDispatchers`. For more detailed events, please refer to the specific class description page.
 
-# 7 Migrating from 3.x
-
-There are significant API changes since 3.x.
-- Client SDKs focuses on WebRTC connections. Please refer to REST API guide for other conference features, e.g. external input/output and recording.
-- Publication was introduced for both conference and P2P mode. You'll get a publication after publishing a stream successfully.
-- Subscription was introduced for conference mode. You'll get a subscription after subscribing a stream successfully. P2P mode does not have subscription at this time since remote stream will be added to PeerConnection automatically.
-- Callbacks were changed to promises.
+# 7 Privacy and security
+SDK will send operation system's name and version, browser name, version and abilities, SDK name and version to conference server and P2P endpoints it tries to make connection. SDK does not store this information on disk.
 
 **Note:** \* Other names and brands may be claimed as the property of others.
