@@ -6,7 +6,7 @@ The Open WebRTC Toolkit Client SDK for JavaScript provides tools to help you dev
 
 Refer to the SDK release notes for the latest information on the SDK release package, including features, supported browsers, bug fixes, and known issues.
 
-Please include `adapter.js` before `owt.js` in HTML files. `adapter.js` is an open source project hosted on [Github](https://github.com/webrtc/adapter). The revision we depend on is `4.0.2`.
+Please include `adapter.js` before `owt.js` in HTML files. `adapter.js` is an open source project hosted on [Github](https://github.com/webrtc/adapter). The revision we depend on is `7.0.0`.
 
 If you want to use conference SDK, please also include `socket.io.js` before `owt.js`.
 
@@ -18,10 +18,10 @@ Conference Mode:
 
 |                                 | Windows* | Ubuntu* | macOS* |
 | ------------------------------- | -------- | ------- |------- |
-| Chrome* 69                      | √        | √       | √      |
-| Firefox* 62                     | √        | √       | √      |
+| Chrome* 73                      | √        | √       | √      |
+| Firefox* 66                     | √        | √       | √      |
 | Safari* 12                      |          |         | √      |
-| Microsoft Edge* 42.17134.1.0    | √        |         |        |    |
+| Microsoft Edge* 44.17763.1.0    | √        |         |        |    |
 
 *Table 1: Browser requirements for Conference Mode*
 
@@ -30,8 +30,8 @@ P2P Mode:
 
 |                                 | Windows* | Ubuntu* | macOS* |
 | ------------------------------- | -------- | ------- |------- |
-| Chrome* 69                      | √        | √       | √      |
-| Firefox* 62                     | √        | √       | √      |
+| Chrome* 73                      | √        | √       | √      |
+| Firefox* 66                     | √        | √       | √      |
 | Safari* 12                      |          |         | √      |
 
 *Table 2: Browser requirements for P2P Mode*
@@ -98,4 +98,3 @@ There are significant API changes since 3.x.
 - Callbacks were changed to promises.
 
 **Note:** \* Other names and brands may be claimed as the property of others.
-
