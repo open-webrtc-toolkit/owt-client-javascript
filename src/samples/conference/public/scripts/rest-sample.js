@@ -27,8 +27,8 @@ var generateUrl = function(host, path) {
     if (host !== undefined) {
         url = host + path;  // Use the host user set.
     }else {
-        let index = document.URL.lastIndexOf('\/');
-        url = document.URL.substring(0, index) + path;  // Get the string before last '/'.
+        let u = new URL(document.URL);
+        url = u.origin + path;  // Get the string before last '/'.
     }
     return url;
 }
