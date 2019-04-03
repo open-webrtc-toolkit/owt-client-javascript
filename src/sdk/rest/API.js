@@ -1360,7 +1360,7 @@ OWT_REST.API = (function(OWT_REST) {
      * @param {function} callbackError               -Callback function on error
      * @example
   var roomId = '51c10d86909ad1f939000001';
-  var algorithm = 'testalgo123';
+  var algorithm = 'b849f44bee074b08bf3e627f3fc927c7'; //guid in plugin.cfg
   var media = {
     audio: {
       from: '7652773772543651'
