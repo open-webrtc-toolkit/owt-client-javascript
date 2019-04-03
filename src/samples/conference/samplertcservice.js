@@ -48,11 +48,14 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({
   extended: true
 }));
+app.disable('x-powered-by');
 
 app.use(function(req, res, next) {
   res.header('Access-Control-Allow-Origin', '*');
   res.header('Access-Control-Allow-Methods', 'POST, GET, PUT, PATCH, OPTIONS, DELETE');
   res.header('Access-Control-Allow-Headers', 'origin, content-type');
+  res.header('Strict-Transport-Security', 'max-age=1024000; includeSubDomain');
+  res.header('X-Content-Type-Options', 'nosniff');
   if (req.method == 'OPTIONS') {
     res.send(200);
   } else {
@@ -60,7 +63,7 @@ app.use(function(req, res, next) {
   }
 });
 
-icsREST.API.init('_service_ID_', '_service_KEY_', 'http://localhost:3000/', true);
+icsREST.API.init('_service_ID_', '_service_KEY_', 'https://localhost:3000/', false);
 
 var sampleRoom;
 var pageOption = { page: 1, per_page: 100 };

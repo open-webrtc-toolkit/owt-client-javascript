@@ -7,6 +7,7 @@
 <!DOCTYPE html>
 
 <head>
+  <meta charset="utf-8">
   <title>Intel&reg; Collaboration Suite for WebRTC P2P Direct Call Sample</title>
   <style>
     html{
@@ -58,7 +59,7 @@
   <h1>Intel<sup>&reg;</sup> Collaboration Suite for WebRTC</h1>
   <h2>P2P Sample</h2>
   <div id="description">
-    <p>This sample works with the latest Chrome and FireFox.</p>
+    <p>This sample works with the latest Chrome and Firefox.</p>
   </div>
   <div id="control">
     <p>
@@ -73,6 +74,7 @@
     <p>
       <button id="target-video-publish">Share Camera</button>
       <button id="target-video-unpublish">Stop Camera Sharing</button>
+      <button id="target-peerconnection-stop">Stop Conversation</button>
       <button id="target-screen">Share Screen</button>
     </p>
   </div>
@@ -128,6 +130,7 @@
     }, signaling);
     var localStream;
     var localScreen;
+    var screenStream;
 
     var getTargetId = function() {
       return $('#remote-uid').val();
@@ -156,9 +159,9 @@
           let mediaStream;
           Owt.Base.MediaStreamFactory.createMediaStream(config).then(stream => {
             mediaStream = stream;
-            ScreenStream = new Owt.Base.LocalStream(mediaStream, new Owt.Base.StreamSourceInfo('screen-cast', 'screen-cast'));
-            $('#local').children('video').get(0).srcObject = ScreenStream.mediaStream;
-            p2p.publish(getTargetId(), ScreenStream).then(publication=>{
+            screenStream = new Owt.Base.LocalStream(mediaStream, new Owt.Base.StreamSourceInfo('screen-cast', 'screen-cast'));
+            $('#local').children('video').get(0).srcObject = screenStream.mediaStream;
+            p2p.publish(getTargetId(), screenStream).then(publication=>{
               publicationForScreen = publication;
             }), error => {
               console.log('Failed to share screen.');
@@ -206,8 +209,8 @@
         }
       });
 
-      $('#target-disconnect').click(function() {
-        p2p.stop($('#target-uid').val()); // Stop chat
+      $('#target-peerconnection-stop').click(function() {
+        p2p.stop($('#remote-uid').val()); // Stop conversation
       });
 
       $('#login').click(function() {
@@ -252,7 +255,7 @@
     });
 
     window.onbeforeunload = function() {
-      p2p.stop($('#target-uid').val());
+      p2p.stop($('#remote-uid').val());
     }
   </script>
 </body>

@@ -236,7 +236,7 @@ window.L = L;\n\
         src: ['docs/mdfiles/index.md'],
         options: {
           destination: 'dist/docs',
-          template : 'docs/jsdoc/template',
+          template : 'node_modules/ink-docstrap/template',
           configure : 'docs/jsdoc/config.json',
           recurse: true
         }

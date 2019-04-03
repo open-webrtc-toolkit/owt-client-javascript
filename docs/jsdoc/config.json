@@ -12,15 +12,6 @@
     "dictionaries": ["jsdoc", "closure"]
   },
   "templates": {
-    "default":{
-      "staticFiles": {
-        "include":[
-          "docs/templates/intellogo.png"
-        ]
-      }
-    },
-    "version": "4.1",
-    "logoFile": "./intellogo.png",
     "cleverLinks": false,
     "monospaceLinks": false,
     "dateFormat": "ddd MMM Do YYYY",
@@ -28,7 +19,7 @@
     "outputSourcePath": false,
     "systemName": "Open WebRTC Toolkit",
     "footer": "",
-    "copyright": "Copyright © 2018 Intel Corporation. All Rights Reserved. ",
+    "copyright": "Copyright © 2019 Intel Corporation. All Rights Reserved. ",
     "navType": "vertical",
     "theme": "cosmo",
     "linenums": true,
