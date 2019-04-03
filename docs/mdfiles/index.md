@@ -1,4 +1,4 @@
-Open WebRTC Toolkit Client SDK for JavaScript
+Open WebRTC Toolkit Client SDK for JavaScript Documentation
 ------------------
 
 # 1 Introduction
