@@ -46,18 +46,47 @@ const runSocketIOSample = function() {
     }
 
     var subscribeForward = getParameterByName('forward') === 'true'?true:false;
-
+    var isSelf = getParameterByName('self') === 'false'?false:true;
     conference = new Owt.Conference.ConferenceClient();
     function renderVideo(stream){
+        let subscirptionForward=null;
+        function subscribeDifferentResolutionForward(forward, resolution){
+            subscirptionForward && subscirptionForward.stop();
+            subscirptionForward = null;
+            const videoOptions = {};
+            videoOptions.resolution = resolution;
+            conference.subscribe(stream, {
+                audio: true,
+                video: videoOptions
+            }).then((
+                subscription) => {
+                    subscirptionForward = subscription;
+                $(`#${stream.id}`).get(0).srcObject = stream.mediaStream;
+            });
+        }
+        let $p = $(`<div id=${stream.id}resolutions> </div>`)
+        for (const resolution of stream.capabilities.video.resolutions) {
+            const button = $('<button/>', {
+                text: resolution.width + 'x' +
+                    resolution.height,
+                click: () => {
+                    subscribeDifferentResolutionForward(stream, resolution);
+                }
+            });
+            button.appendTo($p);
+        };
+        $p.appendTo($('body'));
         conference.subscribe(stream)
-        .then((subscriptions)=>{
-           let $video = $(`<video controls autoplay id=${stream.id} width="320" height="240">this browser does not supported video tag</video>`);
+        .then((subscription)=>{
+            subscirptionForward = subscription;
+            let $video = $(`<video controls autoplay id=${stream.id} style="display:block" >this browser does not supported video tag</video>`);
            $video.get(0).srcObject = stream.mediaStream;
-           $('body').append($video);
+           $p.append($video);
         }, (err)=>{ console.log('subscribe failed', err);
         });
         stream.addEventListener('ended', () => {
             removeUi(stream.id);
+            $(`#${stream.id}resolutions`).remove();
         });
     }
     function removeUi(id){
@@ -74,13 +103,14 @@ const runSocketIOSample = function() {
         }).then((
             subscription) => {
             subscriptionForMixedStream = subscription;
-            $('.remote video').get(0).srcObject = stream.mediaStream;
+            $(`#${stream.id}`).get(0).srcObject = stream.mediaStream;
         });
     }
 
     conference.addEventListener('streamadded', (event) => {
         console.log('A new stream is added ', event.stream.id);
-        subscribeForward &&  renderVideo(event.stream);
+        isSelf = isSelf?isSelf:event.stream.id != publicationGlobal.id;
+        subscribeForward && isSelf && renderVideo(event.stream);
         mixStream(myRoom, event.stream.id, 'common');
         event.stream.addEventListener('ended', () => {
             console.log(event.stream.id + ' is ended.');
@@ -139,7 +169,9 @@ const runSocketIOSample = function() {
                             video: true
                         }).then((subscription) => {
                             subscriptionForMixedStream = subscription;
-                            $('.remote video').get(0).srcObject = stream.mediaStream;
+                            let $video = $(`<video controls autoplay id=${stream.id} style='display:block'>this browser does not supported video tag</video>`);
+                            $video.get(0).srcObject = stream.mediaStream;
+                            $('body').append($video);
                             subscription.addEventListener('error', (err) => {
                                 console.log('Subscription error: ' + err.error.message);
                             })
@@ -152,7 +184,7 @@ const runSocketIOSample = function() {
                                     subscribeDifferentResolution(stream, resolution);
                                 }
                             });
-                            button.appendTo($('#resolutions'));
+                            button.appendTo($('body'));
                         };
                       }
                     }else if(stream.source.audio !== 'mixed'){
