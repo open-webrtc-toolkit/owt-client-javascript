@@ -20,8 +20,9 @@ import * as SdpUtils from '../base/sdputils.js';
 /**
  * @class P2PPeerConnectionChannelEvent
  * @desc Event for Stream.
- * @private.
- */
+ * @memberOf Owt.P2P
+ * @private
+ * */
 export class P2PPeerConnectionChannelEvent extends Event {
   /* eslint-disable-next-line require-jsdoc */
   constructor(init) {
@@ -53,7 +54,8 @@ const sysInfo = Utils.sysInfo();
 /**
  * @class P2PPeerConnectionChannel
  * @desc A P2PPeerConnectionChannel handles all interactions between this endpoint and a remote endpoint.
- * @private.
+ * @memberOf Owt.P2P
+ * @private
  */
 class P2PPeerConnectionChannel extends EventDispatcher {
   // |signaling| is an object has a method |sendSignalingMessage|.
@@ -96,6 +98,7 @@ class P2PPeerConnectionChannel extends EventDispatcher {
   /**
    * @function publish
    * @desc Publish a stream to the remote endpoint.
+   * @private
    */
   publish(stream) {
     if (!(stream instanceof StreamModule.LocalStream)) {
@@ -136,6 +139,7 @@ class P2PPeerConnectionChannel extends EventDispatcher {
   /**
    * @function send
    * @desc Send a message to the remote endpoint.
+   * @private
    */
   send(message) {
     if (!(typeof message === 'string')) {
@@ -176,6 +180,7 @@ class P2PPeerConnectionChannel extends EventDispatcher {
   /**
    * @function stop
    * @desc Stop the connection with remote endpoint.
+   * @private
    */
   stop() {
     this._stop(undefined, true);
@@ -184,6 +189,7 @@ class P2PPeerConnectionChannel extends EventDispatcher {
   /**
    * @function getStats
    * @desc Get stats for a specific MediaStream.
+   * @private
    */
   getStats(mediaStream) {
     if (this._pc) {
@@ -216,6 +222,7 @@ class P2PPeerConnectionChannel extends EventDispatcher {
   /**
    * @function onMessage
    * @desc This method is called by P2PClient when there is new signaling message arrived.
+   * @private
    */
   onMessage(message) {
     this._SignalingMesssageHandler(message);
@@ -267,6 +274,7 @@ class P2PPeerConnectionChannel extends EventDispatcher {
   /**
    * @function _tracksAddedHandler
    * @desc Handle track added event from remote side.
+   * @private
    */
   _tracksAddedHandler(ids) {
     // Currently, |ids| contains all track IDs of a MediaStream. Following algorithm also handles |ids| is a part of a MediaStream's tracks.
@@ -324,6 +332,7 @@ class P2PPeerConnectionChannel extends EventDispatcher {
   /**
    * @function _tracksRemovedHandler
    * @desc Handle track removed event from remote side.
+   * @private
    */
   _tracksRemovedHandler(ids) {
     // Currently, |ids| contains all track IDs of a MediaStream. Following algorithm also handles |ids| is a part of a MediaStream's tracks.
@@ -342,6 +351,7 @@ class P2PPeerConnectionChannel extends EventDispatcher {
   /**
    * @function _dataReceivedHandler
    * @desc Handle data received event from remote side.
+   * @private
    */
   _dataReceivedHandler(id) {
     if (!this._sendDataPromises.has(id)) {
@@ -355,6 +365,7 @@ class P2PPeerConnectionChannel extends EventDispatcher {
   /**
    * @function _sdpHandler
    * @desc Handle SDP received event from remote side.
+   * @private
    */
   _sdpHandler(sdp) {
     if (sdp.type === 'offer') {
@@ -369,6 +380,7 @@ class P2PPeerConnectionChannel extends EventDispatcher {
   /**
    * @function _trackSourcesHandler
    * @desc Received track source information from remote side.
+   * @private
    */
   _trackSourcesHandler(data) {
     for (const info of data) {
@@ -379,6 +391,7 @@ class P2PPeerConnectionChannel extends EventDispatcher {
   /**
    * @function _streamInfoHandler
    * @desc Received stream information from remote side.
+   * @private
    */
   _streamInfoHandler(data) {
     if (!data) {
@@ -397,6 +410,7 @@ class P2PPeerConnectionChannel extends EventDispatcher {
   /**
    * @function _chatClosedHandler
    * @desc Received chat closed event from remote side.
+   * @private
    */
   _chatClosedHandler(data) {
     this._disposed = true;

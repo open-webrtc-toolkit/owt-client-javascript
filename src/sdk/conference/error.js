@@ -7,7 +7,7 @@
 /**
  * @class ConferenceError
  * @classDesc The ConferenceError object represents an error in conference mode.
- * @memberOf Oms.Conference
+ * @memberOf Owt.Conference
  * @hideconstructor
  */
 export class ConferenceError extends Error {

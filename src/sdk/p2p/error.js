@@ -88,7 +88,8 @@ export const errors = {
  * @function getErrorByCode
  * @desc Get error object by error code.
  * @param {string} errorCode Error code.
- * @return {Oms.P2P.Error} Error object
+ * @return {Owt.P2P.Error} Error object
+ * @private
  */
 export function getErrorByCode(errorCode) {
   const codeErrorMap = {
@@ -115,7 +116,7 @@ export function getErrorByCode(errorCode) {
 /**
  * @class P2PError
  * @classDesc The P2PError object represents an error in P2P mode.
- * @memberOf Oms.P2P
+ * @memberOf Owt.P2P
  * @hideconstructor
  */
 export class P2PError extends Error {

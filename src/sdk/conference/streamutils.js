@@ -17,7 +17,7 @@ import * as SubscriptionModule from './subscription.js';
  * @function extractBitrateMultiplier
  * @desc Extract bitrate multiplier from a string like "x0.2".
  * @return {Promise<Object, Error>} The float number after "x".
- * @private.
+ * @private
  */
 function extractBitrateMultiplier(input) {
   if (typeof input !== 'string' || !input.startsWith('x')) {
@@ -44,7 +44,7 @@ function sortResolutions(x, y) {
 /**
  * @function convertToPublicationSettings
  * @desc Convert mediaInfo received from server to PublicationSettings.
- * @private.
+ * @private
  */
 export function convertToPublicationSettings(mediaInfo) {
   let audio;
@@ -89,7 +89,7 @@ export function convertToPublicationSettings(mediaInfo) {
 /**
  * @function convertToSubscriptionCapabilities
  * @desc Convert mediaInfo received from server to SubscriptionCapabilities.
- * @private.
+ * @private
  */
 export function convertToSubscriptionCapabilities(mediaInfo) {
   let audio; let video;
