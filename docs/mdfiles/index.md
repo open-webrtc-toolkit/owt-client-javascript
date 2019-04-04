@@ -2,7 +2,7 @@ Open WebRTC Toolkit Client SDK for JavaScript Documentation
 ------------------
 
 # 1 Introduction
-The Open WebRTC Toolkit Client SDK for JavaScript provides tools to help you develop Web applications. The SDK is distributed in the `CS_WebRTC_Client_SDK_JavaScript.<ver>.zip`  release package.
+Open WebRTC Toolkit Client SDK for JavaScript provides tools to help you develop Web applications. The SDK is distributed in the `CS_WebRTC_Client_SDK_JavaScript.<ver>.zip`  release package.
 
 Refer to the SDK release notes for the latest information on the SDK release package, including features, supported browsers, bug fixes, and known issues.
 
@@ -12,7 +12,7 @@ If you want to use conference SDK, please also include `socket.io.js` before `ow
 
 # 2 Browser requirement
 
-The Open WebRTC Toolkit Client SDK for JavaScript has been tested on the following browsers and operating systems:
+Open WebRTC Toolkit Client SDK for JavaScript has been tested on the following browsers and operating systems:
 
 Conference Mode:
 
