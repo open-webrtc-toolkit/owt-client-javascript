@@ -54,6 +54,7 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
    * @desc Received a message from conference portal. Defined in client-server protocol.
    * @param {string} notification Notification type.
    * @param {object} message Message received.
+   * @private
    */
   onMessage(notification, message) {
     switch (notification) {

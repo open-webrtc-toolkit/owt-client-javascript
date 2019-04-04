@@ -121,6 +121,7 @@ export const ConferenceClient = function(config, signalingImpl) {
    * @desc Received a message from conference portal. Defined in client-server protocol.
    * @param {string} notification Notification type.
    * @param {object} data Data received.
+   * @private
    */
   function onSignalingMessage(notification, data) {
     if (notification === 'soac' || notification === 'progress') {
