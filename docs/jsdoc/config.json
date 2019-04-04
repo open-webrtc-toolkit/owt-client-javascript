@@ -18,7 +18,7 @@
     "outputSourceFiles": false,
     "outputSourcePath": false,
     "systemName": "Intel® Collaboration Suite for WebRTC",
-    "footer": "",
+    "footer": "version 4.2",
     "copyright": "Copyright © 2019 Intel Corporation. All Rights Reserved.",
     "navType": "vertical",
     "theme": "cosmo",
