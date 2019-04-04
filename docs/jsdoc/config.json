@@ -17,7 +17,7 @@
     "dateFormat": "ddd MMM Do YYYY",
     "outputSourceFiles": false,
     "outputSourcePath": false,
-    "systemName": "Intel® Collaboration Suite for WebRTC",
+    "systemName": "Intel® Collaboration Suite for WebRTC version 4.2",
     "footer": "",
     "copyright": "Copyright © 2019 Intel Corporation. All Rights Reserved.",
     "navType": "vertical",
