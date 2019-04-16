@@ -1,0 +1,164 @@
+<!--
+ Copyright (C) <2018> Intel Corporation
+
+ SPDX-License-Identifier: Apache-2.0
+-->
+
+<!DOCTYPE html>
+
+<head>
+  <meta charset="utf-8">
+  <title>Intel&reg; Collaboration Suite for WebRTC QUIC Sample</title>
+  <style>
+    html{
+      font-family: "intel-clear","tahoma",Helvetica,"helvetica",Arial,sans-serif;
+      font-size: 90%;
+    }
+    textarea {
+      font-family: monospace;
+      margin: 2px;
+      height: 100px;
+      width: 250px;
+    }
+    div#send {
+      float: left;
+      margin-right: 20px;
+    }
+    div#sendreceive {
+      margin: 0 0 20px 0;
+    }
+    h2 {
+      margin: 0 0 10px 0;
+    }
+    div#local {
+      float: left;
+      margin-right: 20px;
+    }
+    div#remote {
+      float: left;
+    }
+    div#screen {
+      float: left;
+    }
+    div#videocontainer {
+      margin: 0 0 20px 0;
+      width: 1300px;
+      height: 700px;
+    }
+    .get-local-info-button {
+      display: block;
+    }
+  </style>
+</head>
+
+<body>
+  <script src="https://code.jquery.com/jquery-1.10.2.min.js" type="text/javascript"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.2.0/socket.io.js" type="text/javascript"></script>
+  <script src="https://webrtchacks.github.io/adapter/adapter-7.0.0.js" type="text/javascript"></script>
+  <h1>Intel<sup>&reg;</sup> Collaboration Suite for WebRTC</h1>
+  <h2>QUIC Sample</h2>
+  <div id="description">
+    <p>This sample works with the latest Chrome.</p>
+  </div>
+  <div id="control">
+    <p>
+      <button id="ice-gather">Gather</button>
+      <input id="remote-ice-parameters-userfrag" type="text" />
+      <input id="remote-ice-parameters-password" type="text" />
+      <button id="set-remote-ice-parameters">Start</button>
+    </p>
+    <p>
+      <input id="remote-ice-candidate" type="text" />
+      <button id="add-remote-ice-candidate">Add Remote ICE Candidate</button>
+    </p>
+  </div>
+  <div id="local-info">
+    <div id="local-info-ice-parameters">
+      <button class="get-local-info-button" id="get-local-info-ice-parameters">Get Local ICE Parameters</button>
+      <textarea id="local-ice-parameters" rows="5" cols="10" disabled></textarea>
+      <textarea id="local-ice-candidates" rows="5" cols="10" disabled></textarea>
+    </div>
+    <div id="local-info-key">
+      <button class="get-local-info-button" id="get-local-info-key">Get Local Key</button>
+      <textarea id="local-key" rows="5" cols="10" disabled></textarea>
+    </div>
+  </div>
+  <div id="sendreceive">
+    <div id="send">
+      <h2>Send data</h2>
+      <textarea id="dataSent" rows="5" cols="10"></textarea>
+    </div>
+    <div id="receive">
+      <h2>Received data</h2>
+      <textarea id="dataReceived" rows="5" cols="10" disabled="true"></textarea>
+    </div>
+    <button id="data-create-stream">Create stream</button>
+    <button id="data-send">Send data</button>
+  </div>
+
+  <footer id="status"></footer>
+  <div id="infoDiv"></div>
+  <script type="text/javascript">
+    'use strict';
+    let iceCandidates=[];
+    let quicStream;
+    const iceTransport=new RTCIceTransport();
+    const quicTransport=new RTCQuicTransport(iceTransport);
+    iceTransport.onicecandidate=e=>{
+      if(e.candidate){
+        $('#local-ice-candidates').append(e.candidate.candidate+'&#13;&#10;');
+        iceCandidates.push(e.candidate.candidate);
+      }
+    };
+    iceTransport.onstatechange=e=>{
+      console.log('onstatechange: '+iceTransport.state);
+      if(iceTransport.state==='connected'){
+        quicTransport.onstatechange=e=>{
+          console.log('Quic transport state: '+quicTransport.state);
+        };
+        quicTransport.onerror=e=>{
+          console.log('Quic on error: '+e);
+        };
+        quicTransport.onquicstream =e=>{
+          console.log('onbidirectionalstream.');
+        };
+        quicTransport.onbidirectionalstream =e=>{
+          console.log('onbidirectionalstream.');
+        };
+        quicTransport.connect();
+      }
+    };
+    iceTransport.ongatheringstatechange=e=>{
+      if(iceTransport.gatheringState==="complete"){
+        const parameters=iceTransport.getLocalParameters();
+        const key=quicTransport.getKey();
+        $.ajax({url:'http://example.com:7081/rest/client', type:'put', data:{iceParameters:parameters,iceCandidates:iceCandidates, quicKey:new Uint8Array(key)}, success:()=>{
+          console.log('Successfully upload ICE info.');
+        }});
+      }
+    };
+    $('#ice-gather').click(()=>{
+      iceTransport.gather({});
+    });
+    $('#set-remote-ice-parameters').click(() => {
+      $.get('http://example.com:7081/rest/server', data => {
+        iceTransport.start({ usernameFragment: data.parameters.usernameFragment, password: data.parameters.password });
+      });
+    });
+    $('#add-remote-ice-candidate').click(()=>{
+      iceTransport.addRemoteCandidate($('#remote-ice-candidate').text());
+    });
+    $('#get-local-info-ice-parameters').click(()=>{
+      $('#local-ice-parameters').text(JSON.stringify(iceTransport.getLocalParameters()));
+    });
+    $('#get-local-info-key').click(()=>{
+      $('#local-key').text(JSON.stringify(quicTransport.getKey()));
+    });
+    $('#data-create-stream').click(()=>{
+      quicStream = quicTransport.createStream();
+    });
+    $('#data-send').click(()=>{
+      quicStream.write({data: new Uint8Array([42])});
+    });
+  </script>
+</body>
