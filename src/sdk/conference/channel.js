@@ -483,12 +483,13 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
       return;
     }
 
-    Logger.debug('ICE connection state changed to '
-        + event.currentTarget.iceConnectionState);
-    if (event.currentTarget.iceConnectionState === 'closed'
-        || event.currentTarget.iceConnectionState === 'failed') {
-      this._rejectPromise(
-          new ConferenceError('ICE connection failed or closed.'));
+    Logger.debug('ICE connection state changed to ' +
+        event.currentTarget.iceConnectionState);
+    if (event.currentTarget.iceConnectionState === 'closed' ||
+        event.currentTarget.iceConnectionState === 'failed') {
+      if (event.currentTarget.iceConnectionState === 'failed') {
+        this._handleError('ICE connection failed.');
+      }
       // Fire ended event if publication or subscription exists.
       this._fireEndedEventOnPublicationOrSubscription();
     }
@@ -583,17 +584,20 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
   }
 
   _errorHandler(errorMessage) {
+    return this._handleError(errorMessage);
+  }
+
+  _handleError(errorMessage){
+    const error = new ConferenceError(errorMessage);
     const p = this._publishPromise || this._subscribePromise;
     if (p) {
-      p.reject(new ConferenceError(errorMessage));
-      return;
+      return this._rejectPromise(error);
     }
     const dispatcher = this._publication || this._subscription;
     if (!dispatcher) {
       Logger.warning('Neither publication nor subscription is available.');
       return;
     }
-    const error = new ConferenceError(errorMessage);
     const errorEvent = new ErrorEvent('error', {
       error: error,
     });
