@@ -105,6 +105,7 @@ export class PublicationSettings {
  * | Event Name      | Argument Type    | Fired when       |
  * | ----------------| ---------------- | ---------------- |
  * | ended           | Event            | Publication is ended. |
+ * | error           | ErrorEvent       | An error occurred on the publication. |
  * | mute            | MuteEvent        | Publication is muted. Client stopped sending audio and/or video data to remote endpoint. |
  * | unmute          | MuteEvent        | Publication is unmuted. Client continued sending audio and/or video data to remote endpoint. |
  *
