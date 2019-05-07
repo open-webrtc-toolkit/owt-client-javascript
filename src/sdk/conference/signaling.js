@@ -6,8 +6,11 @@
 import Logger from '../base/logger.js';
 import * as EventModule from '../base/event.js';
 import {ConferenceError} from './error.js';
+import {Base64} from '../base/base64.js';
 
 'use strict';
+
+const reconnectionAttempts = 10;
 
 // eslint-disable-next-line require-jsdoc
 function handleResponse(status, data, resolve, reject) {
@@ -20,15 +23,12 @@ function handleResponse(status, data, resolve, reject) {
   }
 }
 
-const MAX_TRIALS = 5;
 /**
  * @class SioSignaling
  * @classdesc Socket.IO signaling channel for ConferenceClient. It is not recommended to directly access this class.
  * @memberof Owt.Conference
  * @extends Owt.Base.EventDispatcher
  * @constructor
- * @param {?Object } sioConfig Configuration for Socket.IO options.
- * @see https://socket.io/docs/client-api/#io-url-options
  */
 export class SioSignaling extends EventModule.EventDispatcher {
   // eslint-disable-next-line require-jsdoc
@@ -38,6 +38,7 @@ export class SioSignaling extends EventModule.EventDispatcher {
     this._loggedIn = false;
     this._reconnectTimes = 0;
     this._reconnectionTicket = null;
+    this._refreshReconnectionTicket = null;
   }
 
   /**
@@ -55,7 +56,7 @@ export class SioSignaling extends EventModule.EventDispatcher {
     return new Promise((resolve, reject) => {
       const opts = {
         'reconnection': true,
-        'reconnectionAttempts': MAX_TRIALS,
+        'reconnectionAttempts': reconnectionAttempts,
         'force new connection': true,
       };
       this._socket = io(host, opts);
@@ -74,15 +75,16 @@ export class SioSignaling extends EventModule.EventDispatcher {
         this._reconnectTimes++;
       });
       this._socket.on('reconnect_failed', () => {
-        if (this._reconnectTimes >= MAX_TRIALS) {
+        if (this._reconnectTimes >= reconnectionAttempts) {
           this.dispatchEvent(new EventModule.OwtEvent('disconnect'));
         }
       });
       this._socket.on('drop', () => {
-        this._reconnectTimes = MAX_TRIALS;
+        this._reconnectTimes = reconnectionAttempts;
       });
       this._socket.on('disconnect', () => {
-        if (this._reconnectTimes >= MAX_TRIALS) {
+        this._clearReconnectionTask();
+        if (this._reconnectTimes >= reconnectionAttempts) {
           this._loggedIn = false;
           this.dispatchEvent(new EventModule.OwtEvent('disconnect'));
         }
@@ -90,14 +92,14 @@ export class SioSignaling extends EventModule.EventDispatcher {
       this._socket.emit('login', loginInfo, (status, data) => {
         if (status === 'ok') {
           this._loggedIn = true;
-          this._reconnectionTicket = data.reconnectionTicket;
+          this._onReconnectionTicket(data.reconnectionTicket);
           this._socket.on('connect', () => {
             // re-login with reconnection ticket.
             this._socket.emit('relogin', this._reconnectionTicket, (status,
                 data) => {
               if (status === 'ok') {
                 this._reconnectTimes = 0;
-                this._reconnectionTicket = data;
+                this._onReconnectionTicket(data);
               } else {
                 this.dispatchEvent(new EventModule.OwtEvent('disconnect'));
               }
@@ -125,7 +127,7 @@ export class SioSignaling extends EventModule.EventDispatcher {
     return new Promise((resolve, reject) => {
       this._socket.emit('logout', (status, data) => {
         // Maximize the reconnect times to disable reconnection.
-        this._reconnectTimes = MAX_TRIALS;
+        this._reconnectTimes = reconnectionAttempts;
         this._socket.disconnect();
         handleResponse(status, data, resolve, reject);
       });
@@ -148,5 +150,44 @@ export class SioSignaling extends EventModule.EventDispatcher {
         handleResponse(status, data, resolve, reject);
       });
     });
+  }
+
+  /**
+   * @function _onReconnectionTicket
+   * @instance
+   * @desc Parse reconnection ticket and schedule ticket refreshing.
+   * @memberof Owt.Conference.SioSignaling
+   * @private.
+   */
+  _onReconnectionTicket(ticketString) {
+    this._reconnectionTicket = ticketString;
+    const ticket = JSON.parse(Base64.decodeBase64(ticketString));
+    // Refresh ticket 1 min or 10 seconds before it expires.
+    const now = Date.now();
+    const millisecondsInOneMinute = 60 * 1000;
+    const millisecondsInTenSeconds = 10 * 1000;
+    if (ticket.notAfter <= now - millisecondsInTenSeconds) {
+      Logger.warning('Reconnection ticket expires too soon.');
+      return;
+    }
+    let refreshAfter = ticket.notAfter - now - millisecondsInOneMinute;
+    if (refreshAfter < 0) {
+      refreshAfter = ticket.notAfter - now - millisecondsInTenSeconds;
+    }
+    this._clearReconnectionTask();
+    this._refreshReconnectionTicket = setTimeout(() => {
+      this._socket.emit('refreshReconnectionTicket', (status, data) => {
+        if (status !== 'ok') {
+          Logger.warning('Failed to refresh reconnection ticket.');
+          return;
+        }
+        this._onReconnectionTicket(data);
+      });
+    }, refreshAfter);
+  }
+
+  _clearReconnectionTask() {
+    clearTimeout(this._refreshReconnectionTicket);
+    this._refreshReconnectionTicket = null;
   }
 }
