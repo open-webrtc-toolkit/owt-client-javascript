@@ -593,6 +593,9 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
     if (p) {
       return this._rejectPromise(error);
     }
+    if (this._ended) {
+      return;
+    }
     const dispatcher = this._publication || this._subscription;
     if (!dispatcher) {
       Logger.warning('Neither publication nor subscription is available.');
