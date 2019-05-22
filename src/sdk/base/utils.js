@@ -120,7 +120,7 @@ export function sysInfo() {
   }
   info.capabilities = {
     continualIceGathering: false,
-    unifiedPlan: false,
+    unifiedPlan: true,
     streamRemovable: info.runtime.name !== 'Firefox',
   };
   return info;
