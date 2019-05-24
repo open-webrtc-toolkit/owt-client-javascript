@@ -16,9 +16,10 @@ import * as StreamModule from '../base/stream.js'
 import { Participant } from './participant.js'
 import { ConferenceInfo } from './info.js'
 import { ConferencePeerConnectionChannel, ConferenceQuicChannel } from './channel.js'
+import { ConferenceDataChannel } from './datachannel.js'
 import { RemoteMixedStream, ActiveAudioInputChangeEvent, LayoutChangeEvent } from './mixedstream.js'
 import * as StreamUtilsModule from './streamutils.js'
-import { timingSafeEqual } from 'crypto';
+import { timingSafeEqual, createSign } from 'crypto';
 
 const SignalingState = {
   READY: 1,
@@ -112,6 +113,9 @@ export const ConferenceClient = function(config, signalingImpl) {
   const participants = new Map(); // Key is participant ID, value is a Participant object.
   const publishChannels = new Map(); // Key is MediaStream's ID, value is pc channel.
   const channels = new Map(); // Key is channel's internal ID, value is channel.
+  let dataChannel = null;
+  let dataChannelId = null;
+  let incomingDataChannels = new Map(); // TODO: Mutiplexing.
 
   /**
    * @function onSignalingMessage
@@ -122,11 +126,14 @@ export const ConferenceClient = function(config, signalingImpl) {
    */
   function onSignalingMessage(notification, data) {
     if (notification === 'soac' || notification === 'progress') {
-      if (!channels.has(data.id)) {
+      if (channels.has(data.id)) {
+        channels.get(data.id).onMessage(notification, data);
+      } else if (dataChannelId === data.id) {
+        dataChannel.onMessage(notification, data);
+      } else {
         Logger.warning('Cannot find a channel for incoming data.');
-        return;
       }
-      channels.get(data.id).onMessage(notification, data);
+      return;
     } else if (notification === 'stream') {
       if (data.status === 'add') {
         fireStreamAdded(data.data);
@@ -294,10 +301,16 @@ export const ConferenceClient = function(config, signalingImpl) {
   }
 
   // eslint-disable-next-line require-jsdoc
-  function createPeerConnectionChannel(transport) {
+  function createSignalingForChannel() {
     // Construct an signaling sender/receiver for ConferencePeerConnection.
     const signalingForChannel = Object.create(EventModule.EventDispatcher);
     signalingForChannel.sendSignalingMessage = sendSignalingMessage;
+    return signalingForChannel;
+  }
+
+  // eslint-disable-next-line require-jsdoc
+  function createPeerConnectionChannel(transport) {
+    const signalingForChannel = createSignalingForChannel();
     let channel;
     if (transport && transport.protocol === 'quic') {
       channel = new ConferenceQuicChannel(config, signalingForChannel);
@@ -314,6 +327,11 @@ export const ConferenceClient = function(config, signalingImpl) {
   function clean() {
     participants.clear();
     remoteStreams.clear();
+  }
+
+  function createDataChannel() {
+    const signalingForChannel = createSignalingForChannel();
+    return new ConferenceDataChannel(config, signalingForChannel);
   }
 
   Object.defineProperty(this, 'info', {
@@ -423,6 +441,13 @@ export const ConferenceClient = function(config, signalingImpl) {
     if (!(stream instanceof StreamModule.RemoteStream)) {
       return Promise.reject(new ConferenceError('Invalid stream.'));
     }
+    if(!stream.source.audio&&!stream.source.video){ // QUIC stream.
+      const dataChannel=createDataChannel();
+      dataChannel.addEventListener('id',messageEvent=>{
+        incomingDataChannels.set(messageEvent.message, dataChannel);
+      });
+      return dataChannel.subscribe(stream);
+    }
     const channel = createPeerConnectionChannel(options.transport);
     return channel.subscribe(stream, options);
   };
@@ -455,5 +480,20 @@ export const ConferenceClient = function(config, signalingImpl) {
       clean();
       signalingState = SignalingState.READY;
     });
+  };
+
+    /**
+   * @function createDataStream
+   * @memberOf Owt.Conference.ConferenceClient
+   * @instance
+   * @desc Create a bidirectional stream.
+   * @return {Promise<void, Error>} Returned promise will be resolved with a bidirectional stream once stream is created.
+   */
+  this.createDataStream = function() {
+    dataChannel = createDataChannel();
+    dataChannel.addEventListener('id', (messageEvent) => {
+      dataChannelId = messageEvent.message;
+    });
+    return dataChannel.createStream();
   };
 };

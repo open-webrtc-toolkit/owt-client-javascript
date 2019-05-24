@@ -36,6 +36,7 @@ const runSocketIOSample = function() {
     let myId;
     let subscriptionForMixedStream;
     let myRoom;
+    let bidirectionalStream;
 
     function getParameterByName(name) {
         name = name.replace(/[\[]/, '\\\[').replace(/[\]]/, '\\\]');
@@ -143,6 +144,9 @@ const runSocketIOSample = function() {
             conference.join(token).then(resp => {
                 myId = resp.self.id;
                 myRoom = resp.id;
+                conference.createDataStream().then(stream=>{
+                    bidirectionalStream=stream;
+                });
                 if(mediaUrl){
                      startStreamingIn(myRoom, mediaUrl);
                 }
@@ -191,33 +195,8 @@ const runSocketIOSample = function() {
                     if(!subscribeForward){
                       if (stream.source.audio === 'mixed' || stream.source.video ===
                         'mixed') {
-<<<<<<< HEAD
                         subscribeAndRenderVideo(stream);
-=======
-                        conference.subscribe(stream, {
-                            audio: {codecs:[{name:'opus'}]},
-                            video: true,
-                            transport: {protocol:'quic'}
-                        }).then((subscription) => {
-                            subscriptionForMixedStream = subscription;
-                            let $video = $(`<video controls autoplay id=${stream.id} style='display:block'>this browser does not supported video tag</video>`);
-                            $video.get(0).srcObject = stream.mediaStream;
-                            $('body').append($video);
-                            subscription.addEventListener('error', (err) => {
-                                console.log('Subscription error: ' + err.error.message);
-                            })
-                        });
-                        for (const resolution of stream.capabilities.video.resolutions) {
-                            const button = $('<button/>', {
-                                text: resolution.width + 'x' +
-                                    resolution.height,
-                                click: () => {
-                                    subscribeDifferentResolution(stream, resolution);
-                                }
-                            });
-                            button.appendTo($('body'));
-                        };
->>>>>>> d4a3a3c... Initialize QUIC support.
+                        return;
                       }
                     } else if (stream.source.audio !== 'mixed') {
                         subscribeAndRenderVideo(stream);

@@ -63,7 +63,7 @@ app.use(function(req, res, next) {
   }
 });
 
-icsREST.API.init('_service_ID_', '_service_KEY_', 'https://localhost:3000/', false);
+icsREST.API.init('5c9ee9f852f121d3c541674f', 'IjI073vAiP2t6EYu1paQOE7NrdDIsIutQ0u2Ee6U2sKVOeBgCrJlW3HJeYiCP1YRHudAhtFQQlmwDgZstHQp8V3f1X1ziQ/Bp8RqP8EpEAheubrRTPDqNUi9SNOwOLu2aVoJt8pxVkJAyH9vOvUlvGG+79wiE34VuKKpV2jdRzM=', 'https://jianjun-ubuntu.sh.intel.com:3000/', false);
 
 var sampleRoom;
 var pageOption = { page: 1, per_page: 100 };
