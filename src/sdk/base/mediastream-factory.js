@@ -20,7 +20,7 @@ export class AudioTrackConstraints {
   // eslint-disable-next-line require-jsdoc
   constructor(source) {
     if (!Object.values(MediaFormatModule.AudioSourceInfo)
-      .some((v) => v === source)) {
+        .some((v) => v === source)) {
       throw new TypeError('Invalid source.');
     }
     /**
@@ -94,7 +94,6 @@ export class VideoTrackConstraints {
  * @constructor
  * @param {?Owt.Base.AudioTrackConstraints} audioConstraints
  * @param {?Owt.Base.VideoTrackConstraints} videoConstraints
- * @param {?string} extensionId The ID of Chrome screen sharing extension.
  */
 export class StreamConstraints {
   // eslint-disable-next-line require-jsdoc
@@ -111,12 +110,6 @@ export class StreamConstraints {
      * @instance
      */
     this.video = videoConstraints;
-    /**
-     * @member {string} extensionId
-     * @memberof Owt.Base.MediaStreamDeviceConstraints
-     * @desc The ID of Chrome Extension for screen sharing.
-     * @instance
-     */
   }
 }
 
@@ -147,38 +140,38 @@ export class MediaStreamFactory {
    */
   static createMediaStream(constraints) {
     if (typeof constraints !== 'object' ||
-      (!constraints.audio && !constraints.video)) {
+        (!constraints.audio && !constraints.video)) {
       return Promise.reject(new TypeError('Invalid constrains'));
     }
     if (!isVideoConstrainsForScreenCast(constraints) &&
-      (typeof constraints.audio === 'object') &&
-      constraints.audio.source ===
-      MediaFormatModule.AudioSourceInfo.SCREENCAST) {
+        (typeof constraints.audio === 'object') &&
+        constraints.audio.source ===
+            MediaFormatModule.AudioSourceInfo.SCREENCAST) {
       return Promise.reject(
-        new TypeError('Cannot share screen without video.'));
+          new TypeError('Cannot share screen without video.'));
     }
     if (isVideoConstrainsForScreenCast(constraints) && !utils.isChrome() &&
-      !utils.isFirefox()) {
+        !utils.isFirefox()) {
       return Promise.reject(
-        new TypeError('Screen sharing only supports Chrome and Firefox.'));
+          new TypeError('Screen sharing only supports Chrome and Firefox.'));
     }
     if (isVideoConstrainsForScreenCast(constraints) &&
-      typeof constraints.audio === 'object' &&
-      constraints.audio.source !==
-      MediaFormatModule.AudioSourceInfo.SCREENCAST) {
+        typeof constraints.audio === 'object' &&
+        constraints.audio.source !==
+            MediaFormatModule.AudioSourceInfo.SCREENCAST) {
       return Promise.reject(new TypeError(
-        'Cannot capture video from screen cast while capture audio from'
-        + ' other source.'));
+          'Cannot capture video from screen cast while capture audio from'
+          + ' other source.'));
     }
 
-    // check and convert constraints
+    // Check and convert constraints.
     if (!constraints.audio && !constraints.video) {
       return Promise.reject(new TypeError(
         'At least one of audio and video must be requested.'));
     }
     const mediaConstraints = Object.create({});
     if (typeof constraints.audio === 'object' &&
-      constraints.audio.source === MediaFormatModule.AudioSourceInfo.MIC) {
+        constraints.audio.source === MediaFormatModule.AudioSourceInfo.MIC) {
       mediaConstraints.audio = Object.create({});
       if (utils.isEdge()) {
         mediaConstraints.audio.deviceId = constraints.audio.deviceId;
@@ -191,8 +184,8 @@ export class MediaStreamFactory {
       mediaConstraints.audio = constraints.audio;
     }
     if (typeof constraints.audio === 'object' &&
-      constraints.audio.source ===
-      MediaFormatModule.AudioSourceInfo.SCREENCAST) {
+        constraints.audio.source ===
+            MediaFormatModule.AudioSourceInfo.SCREENCAST) {
       Logger.warning(
         'Screen sharing with audio is not supported in Firefox.');
       mediaConstraints.audio = false;
@@ -203,21 +196,21 @@ export class MediaStreamFactory {
         mediaConstraints.video.frameRate = constraints.video.frameRate;
       }
       if (constraints.video.resolution &&
-        constraints.video.resolution.width &&
-        constraints.video.resolution.height) {
+          constraints.video.resolution.width &&
+          constraints.video.resolution.height) {
         mediaConstraints.video.width = Object.create({});
         mediaConstraints.video.width.exact =
-          constraints.video.resolution.width;
+            constraints.video.resolution.width;
         mediaConstraints.video.height = Object.create({});
         mediaConstraints.video.height.exact =
-          constraints.video.resolution.height;
+            constraints.video.resolution.height;
       }
       if (typeof constraints.video.deviceId === 'string') {
         mediaConstraints.video.deviceId = { exact: constraints.video.deviceId };
       }
       if (utils.isFirefox() &&
-        constraints.video.source ===
-        MediaFormatModule.VideoSourceInfo.SCREENCAST) {
+          constraints.video.source ===
+              MediaFormatModule.VideoSourceInfo.SCREENCAST) {
         mediaConstraints.video.mediaSource = 'screen';
       }
     } else {
