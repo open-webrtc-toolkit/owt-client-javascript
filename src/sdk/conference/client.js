@@ -130,6 +130,8 @@ export const ConferenceClient = function(config, signalingImpl) {
         channels.get(data.id).onMessage(notification, data);
       } else if (dataChannelId === data.id) {
         dataChannel.onMessage(notification, data);
+      } else if (incomingDataChannels.has(data.id)){
+        incomingDataChannels.get(data.id).onMessage(notification, data);
       } else {
         Logger.warning('Cannot find a channel for incoming data.');
       }
