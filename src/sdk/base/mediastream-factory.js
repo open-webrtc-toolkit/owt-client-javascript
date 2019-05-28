@@ -181,7 +181,11 @@ export class MediaStreamFactory {
         };
       }
     } else {
-      mediaConstraints.audio = constraints.audio;
+      if (constraints.audio.source === MediaFormatModule.AudioSourceInfo.SCREENCAST) {
+        mediaConstraints.audio = true;
+      } else {
+        mediaConstraints.audio = constraints.audio;
+      }
     }
     if (typeof constraints.audio === 'object' &&
         constraints.audio.source ===
@@ -198,11 +202,9 @@ export class MediaStreamFactory {
       if (constraints.video.resolution &&
           constraints.video.resolution.width &&
           constraints.video.resolution.height) {
-        mediaConstraints.video.width = Object.create({});
-        mediaConstraints.video.width.exact =
+        mediaConstraints.video.width = 
             constraints.video.resolution.width;
-        mediaConstraints.video.height = Object.create({});
-        mediaConstraints.video.height.exact =
+        mediaConstraints.video.height = 
             constraints.video.resolution.height;
       }
       if (typeof constraints.video.deviceId === 'string') {
