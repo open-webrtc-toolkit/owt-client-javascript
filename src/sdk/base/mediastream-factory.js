@@ -187,13 +187,6 @@ export class MediaStreamFactory {
         mediaConstraints.audio = constraints.audio;
       }
     }
-    if (typeof constraints.audio === 'object' &&
-        constraints.audio.source ===
-            MediaFormatModule.AudioSourceInfo.SCREENCAST) {
-      Logger.warning(
-        'Screen sharing with audio is not supported in Firefox.');
-      mediaConstraints.audio = false;
-    }
     if (typeof constraints.video === 'object') {
       mediaConstraints.video = Object.create({});
       if (typeof constraints.video.frameRate === 'number') {
