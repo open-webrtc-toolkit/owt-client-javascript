@@ -196,6 +196,19 @@ const runSocketIOSample = function() {
                 console.log('Participants in conference: ' + participants.length);
             }, function(err) {
                 console.error('server connection failed:', err);
+                if (err.message.indexOf('connect_error:') >= 0) {
+                    const signalingHost = err.message.replace('connect_error:', '');
+                    const signalingUi = 'signaling';
+                    removeUi(signalingUi);
+                    let $p = $(`<div id=${signalingUi}> </div>`);
+                    const anchor = $('<a/>', {
+                        text: 'Click this for testing certificate and refresh',
+                        target: '_blank',
+                        href: `${signalingHost}/socket.io/`
+                    });
+                    anchor.appendTo($p);
+                    $p.appendTo($('body'));
+                }
             });
         });
     };
