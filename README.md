@@ -3,7 +3,7 @@
 Open WebRTC Toolkit JavaScript SDK builds on top of the W3C standard WebRTC APIs to accelerate development of real-time communications (RTC) for web applications, including peer-to-peer, broadcasting, and conference mode communications.
 
 ## How to build release package
-1. Run `npm install -g grunt-cli` to install grunt.
+1. Run `npm install -g grunt-cli` to install grunt. (You may need to `chown -R $USER /usr/local` for this to work.)
 2. Go to "scripts" folder.
 3. Run `npm install` to install development dependencies.
 4. Run `grunt`.
