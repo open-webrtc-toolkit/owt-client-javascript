@@ -1490,8 +1490,9 @@ OWT_REST.API = (function(OWT_REST) {
     stopRecording: stopRecording,
 
     //Analytics management
-    startAnalyzing: startAnalyzing,
-    stopAnalyzing: stopAnalyzing,
+    getAnalytics: getAnalytics,
+    startAnalytics: startAnalytics,
+    stopAnalytics: stopAnalytics,
 
     //Sip calls management
     getSipCalls: getSipCalls,
