@@ -47,12 +47,7 @@ In P2P mode, only one stream per direction can be published between Firefox and 
 
 # 3 Screen sharing
 
-## 3.1 Chrome
-We provide source code of a Chrome screen sharing extension sample. Developers should edit manifest.json and publish it to Chrome App Store to make it work for their products. After your extension is published, you will get an extension ID. This ID will be used when creating screen sharing stream.
-
-> **Note:** End users need to install your extension and visit your site with https if they want to use screen sharing.
-
-## 3.2 Firefox
+## 3.1 Firefox
 Screen sharing on Firefox requires following in `about:config`.
 
 - `media.getusermedia.screensharing.enabled` is `true`.
