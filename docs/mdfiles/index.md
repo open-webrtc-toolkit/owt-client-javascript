@@ -45,27 +45,10 @@ Safari support is limited. Not all functions work in Safari.
 
 In P2P mode, only one stream per direction can be published between Firefox and other clients.
 
-# 3 Screen sharing
-
-## 3.1 Chrome
-We provide source code of a Chrome screen sharing extension sample. Developers should edit manifest.json and publish it to Chrome App Store to make it work for their products. After your extension is published, you will get an extension ID. This ID will be used when creating screen sharing stream.
-
-> **Note:** End users need to install your extension and visit your site with https if they want to use screen sharing.
-
-## 3.2 Firefox
-Screen sharing on Firefox requires following in `about:config`.
-
-- `media.getusermedia.screensharing.enabled` is `true`.
-- `media.getusermedia.screensharing.allowed_domains` includes your domain name. (only needed before Firefox 52)
-
-Developers can help end users to make these changes by Firefox extension.
-
-> **Note:** End users need to visit your site with https if they want to use screen sharing.
-
-# 4 NAT and firewall traversal
+# 3 NAT and firewall traversal
 Open WebRTC Toolkit Client SDK for JavaScript fully supports NAT and firewall traversal with STUN / TURN / ICE. The Coturn TURN server from https://github.com/coturn/coturn can be one choice.
 
-# 5 Peer-to-peer (P2P) mode
+# 4 Peer-to-peer (P2P) mode
 To enable P2P chat, copy and paste the following code into the head section of your HTML document:
 ~~~~~~{.js}
 <script type="text/JavaScript" src="socket.io.js"></script>
@@ -75,21 +58,21 @@ To enable P2P chat, copy and paste the following code into the head section of y
 ~~~~~~
 If you're using customized signling channel, please replace `socket.io.js` and `sc.websocket.js` with your own signaling channel implementation.
 
-## 5.1 P2P direct call chat
+## 4.1 P2P direct call chat
 
 Direct call chat refers to the discovery of another client by chatting with that user's ID. This is a synchronous call and requires that the two clients should be online on the signaling server.
 
-## 5.2 Customize signaling channel
+## 4.2 Customize signaling channel
 
 Signaling channel is an implementation to transmit signaling data for creating a WebRTC session. Signaling channel for P2P sessions can be customized. You can pass your customized signaling channel to `P2PClient`'s constructor. The default Socket.IO signaling channel has been provided in the release package with a file named `sc.websocket.js`.
 
 In the customized signaling channel, you need to implement `connect`, `disconnect` and `send`, invoke `onMessage` when a new message arrives, and invoke `onServerDisconnected` when the connection is lost. Then include your customized `sc.*.js` into the HTML page.
 
-# 6 Events
+# 5 Events
 
 The JavaScript objects fires events using `Ics.Base.EventDispatchers`. For more detailed events, please refer to the specific class description page.
 
-# 7 Privacy and security
+# 6 Privacy and security
 SDK will send operation system's name and version, browser name, version and abilities, SDK name and version to conference server and P2P endpoints it tries to make connection. SDK does not store this information on disk.
 
 **Note:** \* Other names and brands may be claimed as the property of others.
