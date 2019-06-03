@@ -28,7 +28,7 @@ pipeline {
         stage('Build package') {
             steps {
                 podTemplate(name: 'pack', label: 'pack-mcu', containers: [
-                    containerTemplate(name: 'pack-on-centos', image: "$env.PACK_IMAGE",  ttyEnabled: true, alwaysPullImage: true, privileged: true, resourceRequestCpu: '7000m', resourceLimitCpu: '8000m', network: 'host', command: 'cat')
+                    containerTemplate(name: 'pack-on-centos', image: "$env.PACK_IMAGE42x",  ttyEnabled: true, alwaysPullImage: true, privileged: true, resourceRequestCpu: '7000m', resourceLimitCpu: '8000m', network: 'host', command: 'cat')
                 ]){
                     node ('pack-mcu') {
                       container ('pack-on-centos') {
