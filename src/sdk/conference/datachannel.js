@@ -116,6 +116,15 @@ export class ConferenceDataChannel extends EventDispatcher {
     }
   }
 
+  _readAndPrint(){
+    this._quicStreams[0].waitForReadable(5).then(()=>{
+      let data = new Uint8Array(this._quicStreams[0].readBufferedAmount);
+      this._quicStreams[0].readInto(data);
+      Logger.info('Read data: ' + data);
+      this._readAndPrint();
+    });
+  }
+
   _onquicstatechange(event) {
     Logger.info('on QUIC state change: ' + this._quicTransport.state);
     if (this._quicTransport.state === 'connected') {
@@ -123,11 +132,7 @@ export class ConferenceDataChannel extends EventDispatcher {
         this._quicStreams.push(this._quicTransport.createStream());
         this._quicStreams[0].write({data: new Uint8Array([42])});
         // This is an experienment of receiving data.
-        this._quicStreams[0].waitForReadable(1).then(() => {
-          let data = new Uint8Array(1);
-          this._quicStreams[0].readInto(data);
-          Logger.info('Read data: ' + data);
-        });
+        this._readAndPrint();
         if (this._createStreamPromise) {
           this._createStreamPromise.resolve(this._quicStreams[0]);
         }

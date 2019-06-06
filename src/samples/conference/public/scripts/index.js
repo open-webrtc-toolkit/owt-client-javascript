@@ -145,7 +145,7 @@ const runSocketIOSample = function() {
                 myId = resp.self.id;
                 myRoom = resp.id;
                 conference.createDataStream().then(stream=>{
-                    bidirectionalStream=stream;
+                    window.bidirectionalStream=stream;
                 });
                 if(mediaUrl){
                      startStreamingIn(myRoom, mediaUrl);
