@@ -5,7 +5,7 @@
 // This file doesn't have public APIs.
 /* eslint-disable valid-jsdoc */
 /* eslint-disable require-jsdoc */
-/* global Event, Map, Promise, RTCIceCandidate */
+/* global Event, Map, Promise, RTCIceCandidate, navigator */
 
 'use strict';
 
@@ -770,7 +770,8 @@ class P2PPeerConnectionChannel extends EventDispatcher {
     const dc = this._dataChannels.get(DataChannelLabel.MESSAGE);
     if (dc && dc.readyState === 'open') {
       for (let i = 0; i < this._pendingMessages.length; i++) {
-        Logger.debug('Sending message via data channel: '+this._pendingMessages[i]);
+        Logger.debug('Sending message via data channel: ' +
+            this._pendingMessages[i]);
         dc.send(JSON.stringify(this._pendingMessages[i]));
       }
       this._pendingMessages.length = 0;
@@ -781,7 +782,8 @@ class P2PPeerConnectionChannel extends EventDispatcher {
 
   _sendStreamInfo(stream) {
     if (!stream || !stream.mediaStream) {
-      return new ErrorModule.P2PError(ErrorModule.errors.P2P_CLIENT_ILLEGAL_ARGUMENT);
+      return new ErrorModule.P2PError(
+          ErrorModule.errors.P2P_CLIENT_ILLEGAL_ARGUMENT);
     }
     const info = [];
     stream.mediaStream.getTracks().map((track) => {
@@ -882,7 +884,7 @@ class P2PPeerConnectionChannel extends EventDispatcher {
     this._pc.createOffer().then((desc) => {
       desc.sdp = this._setRtpReceiverOptions(desc.sdp);
       localDesc = desc;
-      if(this._pc.signalingState==='stable'){
+      if (this._pc.signalingState==='stable') {
         return this._pc.setLocalDescription(desc).then(()=>{
           return this._sendSdp(localDesc);
         });
@@ -915,7 +917,7 @@ class P2PPeerConnectionChannel extends EventDispatcher {
     });
   }
 
-  _logCurrentAndPendingLocalDescription(){
+  _logCurrentAndPendingLocalDescription() {
     Logger.info('Current description: '+this._pc.currentLocalDescription);
     Logger.info('Pending description: '+this._pc.pendingLocalDescription);
   }

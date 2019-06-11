@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-/* global io, Promise */
+/* global io, Promise, setTimeout, clearTimeout */
 import Logger from '../base/logger.js';
 import * as EventModule from '../base/event.js';
 import {ConferenceError} from './error.js';

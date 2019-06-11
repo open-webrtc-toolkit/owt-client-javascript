@@ -7,7 +7,6 @@
 'use strict';
 import Logger from '../base/logger.js';
 import {EventDispatcher, OwtEvent} from '../base/event.js';
-import * as Utils from '../base/utils.js';
 import * as ErrorModule from './error.js';
 import P2PPeerConnectionChannel from './peerconnection-channel.js';
 

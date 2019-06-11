@@ -4,8 +4,6 @@
 
 'use strict';
 
-import * as MediaFormatModule from '../base/mediaformat.js';
-import * as CodecModule from '../base/codec.js';
 import {EventDispatcher} from '../base/event.js';
 
 /**
