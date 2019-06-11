@@ -466,7 +466,7 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
 
   _rejectPromise(error) {
     if (!error) {
-      const error = new ConferenceError('Connection failed or closed.');
+      error = new ConferenceError('Connection failed or closed.');
     }
     // Rejecting corresponding promise if publishing and subscribing is ongoing.
     if (this._publishPromise) {
