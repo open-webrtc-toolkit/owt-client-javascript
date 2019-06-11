@@ -153,7 +153,6 @@ const P2PClient = function(configuration, signalingChannel) {
    * @instance
    * @desc Disconnect from the signaling channel. It stops all existing sessions with remote endpoints.
    * @memberof Owt.P2P.P2PClient
-   * @returns {Promise<undefined, Error>}
    */
   this.disconnect = function() {
     if (state == ConnectionState.READY) {
