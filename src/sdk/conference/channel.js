@@ -191,10 +191,6 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
       });
       this.dispatchEvent(messageEvent);
       this._internalId = data.id;
-      const offerOptions = {
-        offerToReceiveAudio: false,
-        offerToReceiveVideo: false,
-      };
       if (typeof this._pc.addTransceiver === 'function') {
         // |direction| seems not working on Safari.
         if (mediaOptions.audio && stream.mediaStream.getAudioTracks() > 0) {
@@ -205,7 +201,7 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
         }
       }
       let localDesc;
-      this._pc.createOffer(offerOptions).then((desc) => {
+      this._pc.createOffer().then((desc) => {
         if (options) {
           desc.sdp = this._setRtpReceiverOptions(desc.sdp, options);
         }
@@ -319,10 +315,6 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
       this.dispatchEvent(messageEvent);
       this._internalId = data.id;
       this._createPeerConnection();
-      const offerOptions = {
-        offerToReceiveAudio: !!options.audio,
-        offerToReceiveVideo: !!options.video,
-      };
       if (typeof this._pc.addTransceiver === 'function') {
         // |direction| seems not working on Safari.
         if (mediaOptions.audio) {
@@ -332,7 +324,7 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
           this._pc.addTransceiver('video', {direction: 'recvonly'});
         }
       }
-      this._pc.createOffer(offerOptions).then((desc) => {
+      this._pc.createOffer().then((desc) => {
         if (options) {
           desc.sdp = this._setRtpReceiverOptions(desc.sdp, options);
         }
