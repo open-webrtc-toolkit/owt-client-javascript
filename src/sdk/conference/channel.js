@@ -77,20 +77,20 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
 
   publish(stream, options) {
     if (options === undefined) {
-      options = {audio: !!stream.mediaStream.getAudioTracks(), video: !!stream
-          .mediaStream.getVideoTracks()};
+      options = {audio: !!stream.mediaStream.getAudioTracks().length, video: !!stream
+          .mediaStream.getVideoTracks().length};
     }
     if (typeof options !== 'object') {
       return Promise.reject(new TypeError('Options should be an object.'));
     }
     if (options.audio === undefined) {
-      options.audio = !!stream.mediaStream.getAudioTracks();
+      options.audio = !!stream.mediaStream.getAudioTracks().length;
     }
     if (options.video === undefined) {
-      options.video = !!stream.mediaStream.getVideoTracks();
+      options.video = !!stream.mediaStream.getVideoTracks().length;
     }
-    if (!!options.audio === !stream.mediaStream.getAudioTracks().length || !!
-    options.video === !stream.mediaStream.getVideoTracks().length) {
+    if (!!options.audio > !!stream.mediaStream.getAudioTracks().length || !!
+    options.video > !!stream.mediaStream.getVideoTracks().length) {
       return Promise.reject(new ConferenceError(
           'options.audio/video is inconsistent with tracks presented in the ' +
           'MediaStream.'
