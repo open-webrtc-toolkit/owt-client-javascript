@@ -109,8 +109,7 @@ VideoFrameChecker.prototype = {
   },
 
   getCurrentImageData_: function() {
-    console.log("GetCurrentImageData_ videoElements videoWith is ,", this.videoElement_);
-    console.log("GetCurrentImageData_ videoElements videoHeightis ,", this.videoElement_);
+
     this.canvas_.width = this.videoElement_.videoWidth;
     this.canvas_.height = this.videoElement_.videoHeight;
 
@@ -139,7 +138,6 @@ VideoFrameChecker.prototype = {
     if (this.isBlackFrame_(imageData.data, imageData.data.length)) {
       this.frameStats.numBlackFrames++;
     }
-   console.log("This.frameComparator.calculate(this.previousFrame_, imageData.data)", this.frameComparator.calculate(this.previousFrame_, imageData.data));
    console.log("This.differenceThreshold is ",this.differenceThreshold);
     if (this.frameComparator.calculate(this.previousFrame_, imageData.data) >
         this.identicalFrameSsimThreshold) {

@@ -261,9 +261,8 @@ TestClient.prototype = {
     video.setAttribute("autoplay", "autoplay");
     console.log('added video:'+stream.mediaStream);
     document.body.appendChild(video);
-    var para = document.createElement("p");
-    document.body.appendChild(para);
     video.srcObject = stream.mediaStream
+    video.addEventListener('playing', ()=> console.log("video play!!!",videoId));
   },
 };
 

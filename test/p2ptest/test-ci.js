@@ -1,5 +1,5 @@
 describe('P2P JS SDK', function () {
-  jasmine.DEFAULT_TIMEOUT_INTERVAL = 20000;
+  jasmine.DEFAULT_TIMEOUT_INTERVAL = 40000;
   var detection = '';
 
   function waitsFor(latch, message, tiout) {
@@ -59,11 +59,16 @@ describe('P2P JS SDK', function () {
     console.log(type, msg);
   }
 
-  function removeVideo() {
+  function removeAllVideoTag() {
     var videos = document.getElementsByClassName("video");
     for (var i = 0; i < videos.length; i++) {
       document.body.removeChild(videos[i]);
     };
+  }
+
+  function removeVideo(streamId) {
+    var video = document.getElementById(streamId);
+      document.body.removeChild(video);
   }
 
   var videoDetection = function (streamId) {
@@ -89,7 +94,7 @@ describe('P2P JS SDK', function () {
           detection = false;
         }
       }, 1000);
-    }, 1000);
+    }, 3000);
   }
 
   describe('media stream test', function () {
@@ -97,11 +102,12 @@ describe('P2P JS SDK', function () {
 
     beforeEach(function () {
       actorUser = new TestClient(userName1, serverIP);
+      removeAllVideoTag()
     });
 
     afterEach(function () {
       actorUser.close();
-      removeVideo()
+      removeAllVideoTag()
       detection = '';
     });
 
@@ -151,6 +157,10 @@ describe('P2P JS SDK', function () {
             }, userName1 + " create localstream is fail", waitInterval)
           })
           .then(function () {
+            // action
+            removeVideo("stream" + actorUser.request["localStreamId"]);
+          })
+          .then(function () {
             waits('test end', 2000)
           })
           .then(function () {
@@ -186,6 +196,10 @@ describe('P2P JS SDK', function () {
             //wait lock
             return detection === true;
           }, userName1 + " create localstream is fail", waitInterval)
+        })
+        .then(function () {
+          // action
+          removeVideo("stream" + actorUser.request["localStreamId"]);
         })
         .then(function () {
           var video_result = actorUser.hasVideo(actorUser.localStream);
@@ -519,6 +533,7 @@ describe('P2P JS SDK', function () {
     beforeEach(function () {
       Q('beforeEach')
         .then(function () {
+          removeAllVideoTag()
           actorUser1 = new TestClient(userName1, serverIP);
           actorUser1.bindListener("serverdisconnected", function (e) {
             actorUser1.request["server-disconnected_success"]++;
@@ -565,7 +580,7 @@ describe('P2P JS SDK', function () {
     afterEach(function () {
       Q('afterEach')
         .then(function () {
-          removeVideo()
+          removeAllVideoTag()
           actorUser1.disconnect();
           actorUser1 = undefined
           actorUser2.disconnect();
@@ -626,6 +641,10 @@ describe('P2P JS SDK', function () {
           }, userName1 + " create localstream is fail", waitInterval)
         })
         .then(function () {
+          // action
+          removeVideo("stream" + actorUser1.request["localStreamId"]);
+        })
+        .then(function () {
           //TODO change wrapper of publish
           actorUser1.publish(userName2);
         })
@@ -651,6 +670,10 @@ describe('P2P JS SDK', function () {
             //wait lock
             return detection === true;
           }, userName2 + " remote stream is good", waitInterval)
+        })
+        .then(function () {
+          // action
+          removeVideo("stream" + User2RemoteId);
         })
         .then(function () {
           actorUser1.close();
@@ -715,6 +738,10 @@ describe('P2P JS SDK', function () {
           }, userName1 + " create localstream is fail", waitInterval)
         })
         .then(function () {
+          // action
+          removeVideo("stream" + actorUser1.request["localStreamId"]);
+        })
+        .then(function () {
           //TODO change wrapper of publish
           actorUser1.publish(userName2);
         })
@@ -740,6 +767,10 @@ describe('P2P JS SDK', function () {
             //wait lock
             return detection === true;
           }, userName2 + " remote stream is good", waitInterval)
+        })
+        .then(function () {
+          // action
+          removeVideo("stream" + User2RemoteId);
         })
         .then(function () {
           //TODO change wrapper of publish
@@ -961,6 +992,10 @@ describe('P2P JS SDK', function () {
           }, userName1 + " create localstream is fail", waitInterval)
         })
         .then(function () {
+          // action
+          removeVideo("stream" + actorUser1.request["localStreamId"]);
+        })
+        .then(function () {
           //TODO change wrapper of publish
           actorUser1.publish(userName2);
         })
@@ -986,6 +1021,10 @@ describe('P2P JS SDK', function () {
             //wait lock
             return detection === true;
           }, userName2 + " remote stream is good", waitInterval)
+        })
+        .then(function () {
+          // action
+          removeVideo("stream" + User2RemoteId);
         })
         .then(function () {
           // action
@@ -1060,6 +1099,10 @@ describe('P2P JS SDK', function () {
           }, userName1 + " create localstream is fail", waitInterval)
         })
         .then(function () {
+          // action
+          removeVideo("stream" + actorUser1.request["localStreamId"]);
+        })
+        .then(function () {
           //TODO change wrapper of publish
           actorUser1.publish(userName2);
         })
@@ -1085,6 +1128,10 @@ describe('P2P JS SDK', function () {
             //wait lock
             return detection === true;
           }, userName2 + " remote stream is good", waitInterval)
+        })
+        .then(function () {
+          // action
+          removeVideo("stream" + User2RemoteId);
         })
         .then(function () {
           // action
@@ -1130,13 +1177,17 @@ describe('P2P JS SDK', function () {
         .then(function () {
           actorUser2.close();
           actorUser1.close();
-          removeVideo()
+          removeAllVideoTag()
           detection = '';
           actorUser1.disconnect();
           actorUser2.disconnect();
           actorUser1 = undefined
           actorUser2 = undefined
         })
+    });
+
+    beforeEach(function () {
+      removeAllVideoTag()
     });
 
     var videoCodecList = ["vp8", "h264"];
@@ -1245,6 +1296,10 @@ describe('P2P JS SDK', function () {
             }, userName1 + " create localstream is fail", waitInterval)
           })
           .then(function () {
+            // action
+            removeVideo("stream" + actorUser1.request["localStreamId"]);
+          })
+          .then(function () {
             //TODO change wrapper of publish
             actorUser1.publish(userName2);
           })
@@ -1271,7 +1326,10 @@ describe('P2P JS SDK', function () {
               return detection === true;
             }, userName2 + " remote stream is good", waitInterval)
           })
-
+          .then(function () {
+            // action
+            removeVideo("stream" + User2RemoteId);
+          })
           .then(function () {
             // action
             actorUser2.createLocalStream();
@@ -1294,6 +1352,10 @@ describe('P2P JS SDK', function () {
             }, userName2 + " create localstream is fail", waitInterval)
           })
           .then(function () {
+            // action
+            removeVideo("stream" + actorUser2.request["localStreamId"]);
+          })
+          .then(function () {
             //TODO change wrapper of publish
             actorUser2.publish(userName1);
           })
@@ -1312,13 +1374,17 @@ describe('P2P JS SDK', function () {
           .then(function () {
             // action
             detection = "";
-            videoDetection("stream" + User2RemoteId);
+            videoDetection("stream" + User1RemoteId);
           })
           .then(function () {
             return waitsFor(function () {
               //wait lock
               return detection === true;
             }, userName1 + " remote stream is good", waitInterval)
+          })
+          .then(function () {
+            // action
+            removeVideo("stream" + User1RemoteId);
           })
           .then(function () {
             console.log('test end');
