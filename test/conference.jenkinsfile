@@ -18,7 +18,6 @@ pipeline {
     }
     stages {
         stage('Unit test') {
-            options { timeout(time: 10, unit: 'MINUTES') }
             steps {
                 podTemplate(name: 'unit-test', label: 'unit-test', cloud: 'kubernetes', containers: [
                     containerTemplate(name: 'unit-test', image: "$env.JSMCU_TEST_IMAGE", ttyEnabled: true, alwaysPullImage: true, privileged: true, resourceRequestCpu: '500m', resourceLimitCpu: '1000m', resourceLimitMemory: '1.0Gi', resourceRequestMemory: '0.5Gi', network: 'host', command: 'cat')
