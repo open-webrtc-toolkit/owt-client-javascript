@@ -46,7 +46,7 @@ pipeline {
         }
 
         stage('Start test') {
-            options { timeout(time: 60, unit: 'MINUTES') }
+            options { timeout(time: 40, unit: 'MINUTES') }
             parallel {
                 stage('API test') {
                     steps {
