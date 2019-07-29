@@ -19,11 +19,11 @@ pipeline {
     stages {
         stage('Unit test') {
             steps {
-                podTemplate(name: 'unit-test', label: 'unit-test', cloud: 'kubernetes', containers: [
-                    containerTemplate(name: 'unit-test', image: "$env.JSMCU_TEST_IMAGE_UBUNTU", ttyEnabled: true, alwaysPullImage: true, privileged: true, resourceRequestCpu: '500m', resourceLimitCpu: '1000m', resourceLimitMemory: '1.0Gi', resourceRequestMemory: '0.5Gi', network: 'host', command: 'cat')
+                podTemplate(name: 'unit-test-ubuntu', label: 'unit-test-ubuntu', cloud: 'kubernetes', containers: [
+                    containerTemplate(name: 'unit-test-ubuntu', image: "$env.JSMCU_TEST_IMAGE_UBUNTU", ttyEnabled: true, alwaysPullImage: true, privileged: true, resourceRequestCpu: '500m', resourceLimitCpu: '1000m', resourceLimitMemory: '1.0Gi', resourceRequestMemory: '0.5Gi', network: 'host', command: 'cat')
                 ]) {
-                    node('unit-test') {
-                        container('unit-test') {
+                    node('unit-test-ubuntu') {
+                        container('unit-test-ubuntu') {
                             sh "cd /root/owt-client-javascript/test/unit/karma-test/ && ./start.sh"
                         }
                     }
@@ -33,11 +33,11 @@ pipeline {
         stage('Build package') {
             options { timeout(time: 20, unit: 'MINUTES') }
             steps {
-                podTemplate(name: 'pack', label: 'pack-mcu', containers: [
-                    containerTemplate(name: 'pack-on-centos', image: "$env.JS_MCU_BUILD_UBUNTU", ttyEnabled: true, alwaysPullImage: true, privileged: true, resourceRequestCpu: '1000m', resourceLimitCpu: '1500m', resourceLimitMemory: '1.5Gi', resourceRequestMemory: '1.0Gi', network: 'host', command: 'cat')
+                podTemplate(name: 'pack-ubuntu', label: 'pack-mcu-ubuntu', containers: [
+                    containerTemplate(name: 'pack-on-ubuntu', image: "$env.JS_MCU_BUILD_UBUNTU", ttyEnabled: true, alwaysPullImage: true, privileged: true, resourceRequestCpu: '1000m', resourceLimitCpu: '1500m', resourceLimitMemory: '1.5Gi', resourceRequestMemory: '1.0Gi', network: 'host', command: 'cat')
                 ]){
-                    node('pack-mcu') {
-                        container('pack-on-centos') {
+                    node('pack-mcu-ubuntu') {
+                        container('pack-on-ubuntu') {
                             sh "/root/packSDKInDocker.sh $env.GIT_COMMIT $env.GIT_BRANCH $env.CHANGE_ID"
                         }
                     }
@@ -46,16 +46,16 @@ pipeline {
         }
 
         stage('Start test') {
-            options { timeout(time: 100, unit: 'MINUTES') }
+            options { timeout(time: 40, unit: 'MINUTES') }
             parallel {
                 stage('API test') {
                     steps {
-                        podTemplate(name: 'api-test', label: 'api-test', cloud: 'kubernetes', containers: [
-                            containerTemplate(name: 'api-test', image: "$env.JSMCU_TEST_IMAGE_UBUNTU", ttyEnabled: true, alwaysPullImage: true, privileged: true, resourceRequestCpu: '8000m', resourceLimitCpu: '9000m', resourceLimitMemory: '10.0Gi', resourceRequestMemory: '9.0Gi', network: 'host', command: 'cat'),
+                        podTemplate(name: 'api-test-ubuntu', label: 'api-test-ubuntu', cloud: 'kubernetes', containers: [
+                            containerTemplate(name: 'api-test-ubuntu', image: "$env.JSMCU_TEST_IMAGE_UBUNTU", ttyEnabled: true, alwaysPullImage: true, privileged: true, resourceRequestCpu: '8000m', resourceLimitCpu: '9000m', resourceLimitMemory: '10.0Gi', resourceRequestMemory: '9.0Gi', network: 'host', command: 'cat'),
                         ]) {
 
-                            node('api-test') {
-                                container('api-test') {
+                            node('api-test-ubuntu') {
+                                container('api-test-ubuntu') {
                                     sh "/root/start.sh ${env.GIT_COMMIT}1 ConferenceClient_api"
                                 }
                             }
@@ -65,12 +65,12 @@ pipeline {
 
                 stage('Subscribe test') {
                     steps {
-                        podTemplate(name: 'subscribe-test', label: 'subscribe-test', cloud: 'kubernetes', containers: [
-                            containerTemplate(name: 'subscribe-test', image: "$env.JSMCU_TEST_IMAGE_UBUNTU", ttyEnabled: true, alwaysPullImage: true, privileged: true, resourceRequestCpu: '8000m', resourceLimitCpu: '9000m', resourceLimitMemory: '10.0Gi', resourceRequestMemory: '9.0Gi', network: 'host', command: 'cat'),
+                        podTemplate(name: 'subscribe-test-ubuntu', label: 'subscribe-test-ubuntu', cloud: 'kubernetes', containers: [
+                            containerTemplate(name: 'subscribe-test-ubuntu', image: "$env.JSMCU_TEST_IMAGE_UBUNTU", ttyEnabled: true, alwaysPullImage: true, privileged: true, resourceRequestCpu: '8000m', resourceLimitCpu: '9000m', resourceLimitMemory: '10.0Gi', resourceRequestMemory: '9.0Gi', network: 'host', command: 'cat'),
                         ]) {
 
-                            node('subscribe-test') {
-                                container('subscribe-test') {
+                            node('subscribe-test-ubuntu') {
+                                container('subscribe-test-ubuntu') {
                                     sh "/root/start.sh ${env.GIT_COMMIT}2 ConferenceClient_subscribe"
                                 }
                             }
@@ -90,3 +90,4 @@ pipeline {
         }
     }
 }
+
