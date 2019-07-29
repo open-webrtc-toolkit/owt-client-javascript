@@ -31,7 +31,7 @@ pipeline {
             }
         }
         stage('Build package') {
-            options { timeout(time: 10, unit: 'MINUTES') }
+            options { timeout(time: 20, unit: 'MINUTES') }
             steps {
                 podTemplate(name: 'pack', label: 'pack-mcu', containers: [
                     containerTemplate(name: 'pack-on-centos', image: "$env.JS_MCU_BUILD", ttyEnabled: true, alwaysPullImage: true, privileged: true, resourceRequestCpu: '1000m', resourceLimitCpu: '1500m', resourceLimitMemory: '1.5Gi', resourceRequestMemory: '1.0Gi', network: 'host', command: 'cat')
@@ -46,7 +46,7 @@ pipeline {
         }
 
         stage('Start test') {
-            options { timeout(time: 60, unit: 'MINUTES') }
+            options { timeout(time: 40, unit: 'MINUTES') }
             parallel {
                 stage('API test') {
                     steps {
