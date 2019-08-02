@@ -2,7 +2,7 @@ void setBuildStatus(String message, String state) {
     step([
         $class: "GitHubCommitStatusSetter",
         reposSource: [$class: "ManuallyEnteredRepositorySource", url: "${REPO_URL}/owt-client-javascript"],
-        contextSource: [$class: "ManuallyEnteredCommitContextSource", context: "ci/jenkins/conference"],
+        contextSource: [$class: "ManuallyEnteredCommitContextSource", context: "ci/jenkins/ubuntuconference"],
         errorHandlers: [[$class: "ChangingBuildStatusErrorHandler", result: "UNSTABLE"]],
         statusResultSource: [$class: "ConditionalStatusResultSource", results: [[$class: "AnyBuildResult", message: message, state: state]]]
     ]);
@@ -82,6 +82,12 @@ pipeline {
     }
 
     post {
+
+        always {
+            script {
+                sh "curl -H \"Content-Type: application/json\" -X POST --data '{\"commit_id\":\"'$GIT_COMMIT'\",\"job_path\":\"'${env.JS_CHECK_UBUNTU_PATH}'\",\"job_name\":\"'$JOB_BASE_NAME'\",\"build_num\":\"'$BUILD_NUMBER'\",\"os_version\":\"'$env.UBUTUN_VERSION'\"}' '${env.checkServerUrl}'/runServer/JS_BUILD_CONFERENCE_STEPS"
+            }
+        }
         success {
             setBuildStatus("Build succeeded", "SUCCESS");
         }
