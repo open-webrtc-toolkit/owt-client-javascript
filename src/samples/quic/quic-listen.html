@@ -65,23 +65,12 @@
       <button id="ice-gather">Gather</button>
       <input id="remote-ice-parameters-userfrag" type="text" />
       <input id="remote-ice-parameters-password" type="text" />
-      <button id="set-remote-ice-parameters">Start</button>
+      <button id="quic-listen">Listen</button>
     </p>
     <p>
       <input id="remote-ice-candidate" type="text" />
       <button id="add-remote-ice-candidate">Add Remote ICE Candidate</button>
     </p>
-  </div>
-  <div id="local-info">
-    <div id="local-info-ice-parameters">
-      <button class="get-local-info-button" id="get-local-info-ice-parameters">Get Local ICE Parameters</button>
-      <textarea id="local-ice-parameters" rows="5" cols="10" disabled></textarea>
-      <textarea id="local-ice-candidates" rows="5" cols="10" disabled></textarea>
-    </div>
-    <div id="local-info-key">
-      <button class="get-local-info-button" id="get-local-info-key">Get Local Key</button>
-      <textarea id="local-key" rows="5" cols="10" disabled></textarea>
-    </div>
   </div>
   <div id="sendreceive">
     <div id="send">
@@ -125,14 +114,12 @@
         quicTransport.onbidirectionalstream =e=>{
           console.log('onbidirectionalstream.');
         };
-        quicTransport.connect();
       }
     };
     iceTransport.ongatheringstatechange=e=>{
       if(iceTransport.gatheringState==="complete"){
         const parameters=iceTransport.getLocalParameters();
-        const key=quicTransport.getKey();
-        $.ajax({url:'http://example.com:7081/rest/client', type:'put', data:{iceParameters:parameters,iceCandidates:iceCandidates, quicKey:new Uint8Array(key)}, success:()=>{
+        $.ajax({url:'http://localhost:7081/rest/server', type:'put', data:{iceParameters:parameters,iceCandidates:iceCandidates}, success:()=>{
           console.log('Successfully upload ICE info.');
         }});
       }
@@ -140,9 +127,13 @@
     $('#ice-gather').click(()=>{
       iceTransport.gather({});
     });
-    $('#set-remote-ice-parameters').click(() => {
-      $.get('http://example.com:7081/rest/server', data => {
+    $('#quic-listen').click(() => {
+      $.get('http://localhost:7081/rest/client', data => {
         iceTransport.start({ usernameFragment: data.parameters.usernameFragment, password: data.parameters.password });
+        for(const candidate of data.candidates){
+          iceTransport.addRemoteCandidate(new RTCIceCandidate({candidate:candidate, sdpMLineIndex:0}));
+        };
+        quicTransport.listen(new Uint8Array(data.quicKey));
       });
     });
     $('#add-remote-ice-candidate').click(()=>{
