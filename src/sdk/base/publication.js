@@ -171,15 +171,17 @@ export class PublishOptions {
   // eslint-disable-next-line require-jsdoc
   constructor(audio, video) {
     /**
-     * @member {?Array<Owt.Base.AudioEncodingParameters>} audio
+     * @member {?Array<Owt.Base.AudioEncodingParameters> | ?Array<RTCRtpEncodingParameters>} audio
      * @instance
      * @memberof Owt.Base.PublishOptions
+     * @desc Parameters for audio RtpSender.
      */
     this.audio = audio;
     /**
-     * @member {?Array<Owt.Base.VideoEncodingParameters>} video
+     * @member {?Array<Owt.Base.VideoEncodingParameters> | ?Array<RTCRtpEncodingParameters>} video
      * @instance
      * @memberof Owt.Base.PublishOptions
+     * @desc Parameters for video RtpSender.
      */
     this.video = video;
   }

@@ -1,5 +1,8 @@
 Change Log
 ==========
+# 4.3
+* The type of `conferenceClient.publish` method's option is changed from `AudioEncodingParameters` and `VideoEncodingParameters` to `RTCRtpSendParameters`.
+
 # 4.0.2
 * Fix a compatibility issue for Chrome 69 beta.
 

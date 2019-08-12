@@ -83,6 +83,13 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
     if (typeof options !== 'object') {
       return Promise.reject(new TypeError('Options should be an object.'));
     }
+    if ((this._isRtpEncodingParameters(options.audio) &&
+         this._isOwtEncodingParameters(options.video)) ||
+        (this._isOwtEncodingParameters(options.audio) &&
+         this._isRtpEncodingParameters(options.video))) {
+      return Promise.reject(new ConferenceError(
+          'Mixing RTCRtpEncodingParameters and AudioEncodingParameters/VideoEncodingParameters is not allowed.'))
+    }
     if (options.audio === undefined) {
       options.audio = !!stream.mediaStream.getAudioTracks().length;
     }
@@ -115,18 +122,20 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
         }
       }
     }
-    if (typeof options.video === 'object') {
-      if (!Array.isArray(options.video)) {
-        return Promise.reject(new TypeError(
-            'options.video should be a boolean or an array.'));
-      }
+    if (typeof options.video === 'object' && !Array.isArray(options.video)) {
+      return Promise.reject(new TypeError(
+        'options.video should be a boolean or an array.'));
+    }
+    if (this._isOwtEncodingParameters(options.video)) {
       for (const parameters of options.video) {
-        if (!parameters.codec || typeof parameters.codec.name !== 'string' || (
-          parameters.maxBitrate !== undefined && typeof parameters.maxBitrate
-          !== 'number') || (parameters.codec.profile !== undefined
-          && typeof parameters.codec.profile !== 'string')) {
+        if (!parameters.codec || typeof parameters.codec.name !== 'string' ||
+          (
+            parameters.maxBitrate !== undefined && typeof parameters
+            .maxBitrate !==
+            'number') || (parameters.codec.profile !== undefined &&
+            typeof parameters.codec.profile !== 'string')) {
           return Promise.reject(new TypeError(
-              'options.video has incorrect parameters.'));
+            'options.video has incorrect parameters.'));
         }
       }
     }
@@ -149,9 +158,6 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
       }
       mediaOptions.audio = {};
       mediaOptions.audio.source = stream.source.audio;
-      for (const track of stream.mediaStream.getAudioTracks()) {
-        this._pc.addTrack(track, stream.mediaStream);
-      }
     } else {
       mediaOptions.audio = false;
     }
@@ -174,9 +180,6 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
         },
         framerate: trackSettings.frameRate,
       };
-      for (const track of stream.mediaStream.getVideoTracks()) {
-        this._pc.addTrack(track, stream.mediaStream);
-      }
     } else {
       mediaOptions.video = false;
     }
@@ -197,15 +200,31 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
       };
       if (typeof this._pc.addTransceiver === 'function') {
         // |direction| seems not working on Safari.
-        if (mediaOptions.audio && stream.mediaStream.getAudioTracks() > 0) {
-          this._pc.addTransceiver('audio', {direction: 'sendonly'});
+        if (mediaOptions.audio && stream.mediaStream.getAudioTracks().length >
+          0) {
+          const transceiverInit = {
+            direction: 'sendonly'
+          };
+          if (this._isRtpEncodingParameters(options.audio)) {
+            transceiverInit.sendEncodings = options.audio;
+          }
+          this._pc.addTransceiver(stream.mediaStream.getAudioTracks()[0],
+            transceiverInit);
         }
-        if (mediaOptions.video && stream.mediaStream.getVideoTracks() > 0) {
-          this._pc.addTransceiver('video', {direction: 'sendonly'});
+        if (mediaOptions.video && stream.mediaStream.getVideoTracks().length >
+          0) {
+          const transceiverInit = {
+            direction: 'sendonly'
+          };
+          if (this._isRtpEncodingParameters(options.video)) {
+            transceiverInit.sendEncodings = options.video;
+          }
+          this._pc.addTransceiver(stream.mediaStream.getVideoTracks()[0],
+            transceiverInit);
         }
       }
       let localDesc;
-      this._pc.createOffer(offerOptions).then((desc) => {
+      this._pc.createOffer().then((desc) => {
         if (options) {
           desc.sdp = this._setRtpReceiverOptions(desc.sdp, options);
         }
@@ -332,7 +351,7 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
           this._pc.addTransceiver('video', {direction: 'recvonly'});
         }
       }
-      this._pc.createOffer(offerOptions).then((desc) => {
+      this._pc.createOffer().then((desc) => {
         if (options) {
           desc.sdp = this._setRtpReceiverOptions(desc.sdp, options);
         }
@@ -645,11 +664,20 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
   }
 
   _setRtpSenderOptions(sdp, options) {
+    // SDP mugling is deprecated, moving to `setParameters`.
+    if (this._isRtpEncodingParameters(options.audio) ||
+        this._isRtpEncodingParameters(options.video)) {
+      return sdp;
+    }
     sdp = this._setMaxBitrate(sdp, options);
     return sdp;
   }
 
   _setRtpReceiverOptions(sdp, options) {
+    if (this._isRtpEncodingParameters(options.audio) ||
+        this._isRtpEncodingParameters(options.video)) {
+      return sdp;
+    }
     sdp = this._setCodecOrder(sdp, options);
     return sdp;
   }
@@ -682,5 +710,24 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
     } else {
       Logger.warning('Invalid data value for stream update info.');
     }
+  }
+
+  _isRtpEncodingParameters(obj) {
+    if (!Array.isArray(obj)) {
+      return false;
+    }
+    // Only check the first one.
+    const param = obj[0];
+    return param.codecPayloadType || param.dtx || param.active || param
+      .ptime || param.maxFramerate || param.scaleResolutionDownBy || param.rid;
+  }
+
+  _isOwtEncodingParameters(obj) {
+    if (!Array.isArray(obj)) {
+      return false;
+    }
+    // Only check the first one.
+    const param = obj[0];
+    return !!param.codec;
   }
 }
