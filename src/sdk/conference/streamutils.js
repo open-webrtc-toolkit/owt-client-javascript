@@ -47,41 +47,38 @@ function sortResolutions(x, y) {
  * @private
  */
 export function convertToPublicationSettings(mediaInfo) {
-  let audio;
-  let audioCodec;
-  let video;
-  let videoCodec;
-  let resolution;
-  let framerate;
-  let bitrate;
-  let keyFrameInterval;
+  let audio = [],
+    video = [];
+  let audioCodec, videoCodec, resolution, framerate, bitrate, keyFrameInterval,
+    rid;
   if (mediaInfo.audio) {
     if (mediaInfo.audio.format) {
       audioCodec = new CodecModule.AudioCodecParameters(
-          mediaInfo.audio.format.codec, mediaInfo.audio.format.channelNum,
-          mediaInfo.audio.format.sampleRate
-      );
+        mediaInfo.audio.format.codec, mediaInfo.audio.format.channelNum,
+        mediaInfo.audio.format.sampleRate);
     }
-    audio = new PublicationModule.AudioPublicationSettings(audioCodec);
+    audio.push(new PublicationModule.AudioPublicationSettings(audioCodec));
   }
   if (mediaInfo.video) {
-    if (mediaInfo.video.format) {
-      videoCodec = new CodecModule.VideoCodecParameters(
-          mediaInfo.video.format.codec, mediaInfo.video.format.profile);
-    }
-    if (mediaInfo.video.parameters) {
-      if (mediaInfo.video.parameters.resolution) {
-        resolution = new MediaFormatModule.Resolution(
-            mediaInfo.video.parameters.resolution.width,
-            mediaInfo.video.parameters.resolution.height);
+    for (const videoInfo of mediaInfo.video.original) {
+      if (videoInfo.format) {
+        videoCodec = new CodecModule.VideoCodecParameters(
+          videoInfo.format.codec, videoInfo.format.profile);
       }
-      framerate = mediaInfo.video.parameters.framerate;
-      bitrate = mediaInfo.video.parameters.bitrate * 1000;
-      keyFrameInterval = mediaInfo.video.parameters.keyFrameInterval;
+      if (videoInfo.parameters) {
+        if (videoInfo.parameters.resolution) {
+          resolution = new MediaFormatModule.Resolution(
+            videoInfo.parameters.resolution.width,
+            videoInfo.parameters.resolution.height);
+        }
+        framerate = videoInfo.parameters.framerate;
+        bitrate = videoInfo.parameters.bitrate * 1000;
+        keyFrameInterval = videoInfo.parameters.keyFrameInterval;
+        rid = videoInfo.parameters.simulcastRid;
+      }
+      video.push(new PublicationModule.VideoPublicationSettings(
+        videoCodec, resolution, framerate, bitrate, keyFrameInterval, rid));
     }
-    video = new PublicationModule.VideoPublicationSettings(videoCodec,
-        resolution, framerate, bitrate, keyFrameInterval
-    );
   }
   return new PublicationModule.PublicationSettings(audio, video);
 }
