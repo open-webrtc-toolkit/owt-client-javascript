@@ -35,5 +35,17 @@ describe('Unit tests for ConferenceClient', function() {
       });
       conf2.dispatchEvent(new EventModule.OwtEvent('test'));
     });
+
+    it('Event listener should not be triggered after removeEventListener.',
+       done => {
+         const conf1 = new ConferenceClient({});
+         const listener = () => {
+           done('Event listener should not be fired.');
+         };
+         conf1.addEventListener('test', listener);
+         conf1.removeEventListener('test', listener);
+         conf1.dispatchEvent(new EventModule.OwtEvent('test'));
+         done();
+       });
   });
 });
