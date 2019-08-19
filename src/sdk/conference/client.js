@@ -260,7 +260,8 @@ export const ConferenceClient = function(config, signalingImpl) {
     const stream = remoteStreams.get(streamInfo.id);
     stream.settings = StreamUtilsModule.convertToPublicationSettings(streamInfo
         .media);
-    stream.capabilities = StreamUtilsModule.convertToSubscriptionCapabilities(
+    stream.extraCapabilities = StreamUtilsModule
+      .convertToSubscriptionCapabilities(
         streamInfo.media);
     const streamEvent = new EventModule.OwtEvent('updated');
     stream.dispatchEvent(streamEvent);
@@ -283,7 +284,8 @@ export const ConferenceClient = function(config, signalingImpl) {
               audioSourceInfo, videoSourceInfo), streamInfo.info.attributes);
       stream.settings = StreamUtilsModule.convertToPublicationSettings(
           streamInfo.media);
-      stream.capabilities = StreamUtilsModule.convertToSubscriptionCapabilities(
+      stream.extraCapabilities = StreamUtilsModule
+        .convertToSubscriptionCapabilities(
           streamInfo.media);
       return stream;
     }

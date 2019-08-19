@@ -168,12 +168,12 @@ export class RemoteStream extends Stream {
      */
     this.settings = undefined;
     /**
-     * @member {Owt.Conference.SubscriptionCapabilities} capabilities
+     * @member {Owt.Conference.SubscriptionCapabilities} extraCapabilities
      * @instance
      * @memberof Owt.Base.RemoteStream
-     * @desc Capabilities remote endpoint provides for subscription. This property is only valid in conference mode.
+     * @desc Extra capabilities remote endpoint provides for subscription. Extra capabilities don't include original settings. This property is only valid in conference mode.
      */
-    this.capabilities = undefined;
+    this.extraCapabilities = undefined;
   }
 }
 

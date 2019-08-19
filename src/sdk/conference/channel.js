@@ -258,18 +258,18 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
   subscribe(stream, options) {
     if (options === undefined) {
       options = {
-        audio: !!stream.capabilities.audio,
-        video: !!stream.capabilities.video,
+        audio: !!stream.settings.audio,
+        video: !!stream.settings.video,
       };
     }
     if (typeof options !== 'object') {
       return Promise.reject(new TypeError('Options should be an object.'));
     }
     if (options.audio === undefined) {
-      options.audio = !!stream.capabilities.audio;
+      options.audio = !!stream.settings.audio;
     }
     if (options.video === undefined) {
-      options.video = !!stream.capabilities.video;
+      options.video = !!stream.settings.video;
     }
     if ((options.audio !== undefined && typeof options.audio !== 'object' &&
         typeof options.audio !== 'boolean' && options.audio !== null) || (
@@ -277,8 +277,8 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
         typeof options.video !== 'boolean' && options.video !== null)) {
       return Promise.reject(new TypeError('Invalid options type.'));
     }
-    if (options.audio && !stream.capabilities.audio || (options.video &&
-        !stream.capabilities.video)) {
+    if (options.audio && !stream.settings.audio || (options.video &&
+        !stream.settings.video)) {
       return Promise.reject(new ConferenceError(
           'options.audio/video cannot be true or an object if there is no '
           + 'audio/video track in remote stream.'

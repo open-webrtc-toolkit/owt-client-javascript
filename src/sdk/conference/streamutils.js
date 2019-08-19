@@ -92,11 +92,6 @@ export function convertToSubscriptionCapabilities(mediaInfo) {
   let audio; let video;
   if (mediaInfo.audio) {
     const audioCodecs = [];
-    if (mediaInfo.audio && mediaInfo.audio.format) {
-      audioCodecs.push(new CodecModule.AudioCodecParameters(
-          mediaInfo.audio.format.codec, mediaInfo.audio.format.channelNum,
-          mediaInfo.audio.format.sampleRate));
-    }
     if (mediaInfo.audio && mediaInfo.audio.optional &&
       mediaInfo.audio.optional.format) {
       for (const audioCodecInfo of mediaInfo.audio.optional.format) {
@@ -111,10 +106,6 @@ export function convertToSubscriptionCapabilities(mediaInfo) {
   }
   if (mediaInfo.video) {
     const videoCodecs = [];
-    if (mediaInfo.video && mediaInfo.video.format) {
-      videoCodecs.push(new CodecModule.VideoCodecParameters(
-          mediaInfo.video.format.codec, mediaInfo.video.format.profile));
-    }
     if (mediaInfo.video && mediaInfo.video.optional &&
       mediaInfo.video.optional.format) {
       for (const videoCodecInfo of mediaInfo.video.optional.format) {
@@ -127,12 +118,6 @@ export function convertToSubscriptionCapabilities(mediaInfo) {
     const resolutions = Array.from(
         mediaInfo.video.optional.parameters.resolution,
         (r) => new MediaFormatModule.Resolution(r.width, r.height));
-    if (mediaInfo.video && mediaInfo.video.parameters &&
-      mediaInfo.video.parameters.resolution) {
-      resolutions.push(new MediaFormatModule.Resolution(
-          mediaInfo.video.parameters.resolution.width,
-          mediaInfo.video.parameters.resolution.height));
-    }
     resolutions.sort(sortResolutions);
     const bitrates = Array.from(
         mediaInfo.video.optional.parameters.bitrate,
@@ -141,17 +126,9 @@ export function convertToSubscriptionCapabilities(mediaInfo) {
     bitrates.sort(sortNumbers);
     const frameRates = JSON.parse(
         JSON.stringify(mediaInfo.video.optional.parameters.framerate));
-    if (mediaInfo.video && mediaInfo.video.parameters &&
-        mediaInfo.video.parameters.framerate) {
-      frameRates.push(mediaInfo.video.parameters.framerate);
-    }
     frameRates.sort(sortNumbers);
     const keyFrameIntervals = JSON.parse(
         JSON.stringify(mediaInfo.video.optional.parameters.keyFrameInterval));
-    if (mediaInfo.video && mediaInfo.video.parameters &&
-        mediaInfo.video.parameters.keyFrameInterval) {
-      keyFrameIntervals.push(mediaInfo.video.parameters.keyFrameInterval);
-    }
     keyFrameIntervals.sort(sortNumbers);
     video = new SubscriptionModule.VideoSubscriptionCapabilities(
         videoCodecs, resolutions, frameRates, bitrates, keyFrameIntervals);
