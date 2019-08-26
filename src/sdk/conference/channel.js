@@ -34,6 +34,7 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
     super();
     this._config = config;
     this._options = null;
+    this._videoCodecs = undefined;
     this._signaling = signaling;
     this._pc = null;
     this._internalId = null; // It's publication ID or subscription ID.
@@ -75,7 +76,7 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
     }
   }
 
-  publish(stream, options) {
+  publish(stream, options, videoCodecs) {
     if (options === undefined) {
       options = {audio: !!stream.mediaStream.getAudioTracks().length, video: !!stream
           .mediaStream.getVideoTracks().length};
@@ -218,6 +219,7 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
           };
           if (this._isRtpEncodingParameters(options.video)) {
             transceiverInit.sendEncodings = options.video;
+            this._videoCodecs = videoCodecs;
           }
           this._pc.addTransceiver(stream.mediaStream.getVideoTracks()[0],
             transceiverInit);
@@ -675,6 +677,11 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
   }
 
   _setRtpReceiverOptions(sdp, options) {
+    // _videoCodecs is a workaround for setting video codecs. It will be moved to RTCRtpSendParameters.
+    if (this._isRtpEncodingParameters(options.video) && this._videoCodecs) {
+      sdp = SdpUtils.reorderCodecs(sdp, 'video', this._videoCodecs);
+      return sdp;
+    }
     if (this._isRtpEncodingParameters(options.audio) ||
         this._isRtpEncodingParameters(options.video)) {
       return sdp;
