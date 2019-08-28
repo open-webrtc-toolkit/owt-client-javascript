@@ -2,7 +2,7 @@
   "name": "owt-client-javascript",
   "title": "Open WebRTC Toolkit JavaScript SDK",
   "description": "Open WebRTC Toolkit JavaScript SDK",
-  "version": "4.2.1",
+  "version": "4.3",
   "homepage": "https://webrtc.intel.com",
   "author": "Intel WebRTC team",
   "contributors": [
