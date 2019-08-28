@@ -121,7 +121,7 @@ export class AudioSubscriptionConstraints {
 export class VideoSubscriptionConstraints {
   // eslint-disable-next-line require-jsdoc
   constructor(codecs, resolution, frameRate, bitrateMultiplier,
-      keyFrameInterval) {
+      keyFrameInterval, rid) {
     /**
      * @member {?Array.<Owt.Base.VideoCodecParameters>} codecs
      * @instance
@@ -157,6 +157,13 @@ export class VideoSubscriptionConstraints {
      * @desc Only keyFrameIntervals listed in Owt.Conference.VideoSubscriptionCapabilities are allowed.
      */
     this.keyFrameInterval = keyFrameInterval;
+    /**
+     * @member {?number} rid
+     * @instance
+     * @memberof Owt.Conference.VideoSubscriptionConstraints
+     * @desc Restriction identifier to identify the RTP Streams within an RTP session. When rid is specified, other constraints will be ignored.
+     */
+    this.rid = rid;
   }
 }
 

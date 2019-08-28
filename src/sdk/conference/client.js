@@ -29,7 +29,7 @@ const SignalingState = {
   CONNECTED: 3,
 };
 
-const protocolVersion = '1.0';
+const protocolVersion = '1.1';
 
 /* eslint-disable valid-jsdoc */
 /**
@@ -260,7 +260,8 @@ export const ConferenceClient = function(config, signalingImpl) {
     const stream = remoteStreams.get(streamInfo.id);
     stream.settings = StreamUtilsModule.convertToPublicationSettings(streamInfo
         .media);
-    stream.capabilities = StreamUtilsModule.convertToSubscriptionCapabilities(
+    stream.extraCapabilities = StreamUtilsModule
+      .convertToSubscriptionCapabilities(
         streamInfo.media);
     const streamEvent = new EventModule.OwtEvent('updated');
     stream.dispatchEvent(streamEvent);
@@ -283,7 +284,8 @@ export const ConferenceClient = function(config, signalingImpl) {
               audioSourceInfo, videoSourceInfo), streamInfo.info.attributes);
       stream.settings = StreamUtilsModule.convertToPublicationSettings(
           streamInfo.media);
-      stream.capabilities = StreamUtilsModule.convertToSubscriptionCapabilities(
+      stream.extraCapabilities = StreamUtilsModule
+        .convertToSubscriptionCapabilities(
           streamInfo.media);
       return stream;
     }
@@ -392,9 +394,10 @@ export const ConferenceClient = function(config, signalingImpl) {
    * @desc Publish a LocalStream to conference server. Other participants will be able to subscribe this stream when it is successfully published.
    * @param {Owt.Base.LocalStream} stream The stream to be published.
    * @param {Owt.Base.PublishOptions} options Options for publication.
+   * @param {string[]} videoCodecs Video codec names for publishing. Valid values are 'VP8', 'VP9' and 'H264'. This parameter only valid when options.video is RTCRtpEncodingParameters. Publishing with RTCRtpEncodingParameters is an experimental feature. This parameter is subject to change.
    * @returns {Promise<Publication, Error>} Returned promise will be resolved with a newly created Publication once specific stream is successfully published, or rejected with a newly created Error if stream is invalid or options cannot be satisfied. Successfully published means PeerConnection is established and server is able to process media data.
    */
-  this.publish = function(stream, options) {
+  this.publish = function(stream, options, videoCodecs) {
     if (!(stream instanceof StreamModule.LocalStream)) {
       return Promise.reject(new ConferenceError('Invalid stream.'));
     }
@@ -403,7 +406,7 @@ export const ConferenceClient = function(config, signalingImpl) {
           'Cannot publish a published stream.'));
     }
     const channel = createPeerConnectionChannel();
-    return channel.publish(stream, options);
+    return channel.publish(stream, options, videoCodecs);
   };
 
   /**

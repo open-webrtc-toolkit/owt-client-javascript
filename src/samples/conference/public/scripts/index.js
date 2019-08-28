@@ -65,7 +65,8 @@ const runSocketIOSample = function() {
             });
         }
         let $p = $(`<div id=${stream.id}resolutions> </div>`)
-        for (const resolution of stream.capabilities.video.resolutions) {
+        // TODO: Add resolutions from settings.
+        for (const resolution of stream.extraCapabilities.video.resolutions) {
             const button = $('<button/>', {
                 text: resolution.width + 'x' +
                     resolution.height,
@@ -147,7 +148,11 @@ const runSocketIOSample = function() {
                             mediaStream, new Owt.Base.StreamSourceInfo(
                                 'mic', 'camera'));
                         $('.local video').get(0).srcObject = stream;
-                        conference.publish(localStream).then(publication => {
+                        conference.publish(localStream, {video:[
+                            {rid: 'q', active: true, scaleResolutionDownBy: 4.0},
+                            {rid: 'h', active: true, scaleResolutionDownBy: 2.0},
+                            {rid: 'f', active: true}
+                          ]}).then(publication => {
                             publicationGlobal = publication;
                             mixStream(myRoom, publication.id, 'common')
                             publication.addEventListener('error', (err) => {
@@ -176,7 +181,8 @@ const runSocketIOSample = function() {
                                 console.log('Subscription error: ' + err.error.message);
                             })
                         });
-                        for (const resolution of stream.capabilities.video.resolutions) {
+                        // TODO: Add resolutions from settings.
+                        for (const resolution of stream.extraCapabilities.video.resolutions) {
                             const button = $('<button/>', {
                                 text: resolution.width + 'x' +
                                     resolution.height,

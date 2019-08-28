@@ -34,7 +34,7 @@ export class AudioPublicationSettings {
  */
 export class VideoPublicationSettings {
   // eslint-disable-next-line require-jsdoc
-  constructor(codec, resolution, frameRate, bitrate, keyFrameInterval) {
+  constructor(codec, resolution, frameRate, bitrate, keyFrameInterval, rid) {
     /**
      * @member {?Owt.Base.VideoCodecParameters} codec
      * @instance
@@ -67,6 +67,13 @@ export class VideoPublicationSettings {
      * @memberof Owt.Base.VideoPublicationSettings
      */
     this.keyFrameInterval=keyFrameInterval;
+    /**
+     * @member {?number} rid
+     * @instance
+     * @classDesc Restriction identifier to identify the RTP Streams within an RTP session.
+     * @memberof Owt.Base.VideoPublicationSettings
+     */
+    this.rid=rid;
   }
 }
 
@@ -80,13 +87,13 @@ export class PublicationSettings {
   // eslint-disable-next-line require-jsdoc
   constructor(audio, video) {
     /**
-     * @member {Owt.Base.AudioPublicationSettings} audio
+     * @member {Owt.Base.AudioPublicationSettings[]} audio
      * @instance
      * @memberof Owt.Base.PublicationSettings
      */
     this.audio=audio;
     /**
-     * @member {Owt.Base.VideoPublicationSettings} video
+     * @member {Owt.Base.VideoPublicationSettings[]} video
      * @instance
      * @memberof Owt.Base.PublicationSettings
      */
@@ -171,15 +178,17 @@ export class PublishOptions {
   // eslint-disable-next-line require-jsdoc
   constructor(audio, video) {
     /**
-     * @member {?Array<Owt.Base.AudioEncodingParameters>} audio
+     * @member {?Array<Owt.Base.AudioEncodingParameters> | ?Array<RTCRtpEncodingParameters>} audio
      * @instance
      * @memberof Owt.Base.PublishOptions
+     * @desc Parameters for audio RtpSender. Publishing with RTCRtpEncodingParameters is an experimental feature. It is subject to change.
      */
     this.audio = audio;
     /**
-     * @member {?Array<Owt.Base.VideoEncodingParameters>} video
+     * @member {?Array<Owt.Base.VideoEncodingParameters> | ?Array<RTCRtpEncodingParameters>} video
      * @instance
      * @memberof Owt.Base.PublishOptions
+     * @desc Parameters for video RtpSender. Publishing with RTCRtpEncodingParameters is an experimental feature. It is subject to change.
      */
     this.video = video;
   }
