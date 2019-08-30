@@ -319,9 +319,11 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
           framerate: options.video.frameRate,
           bitrate: options.video.bitrateMultiplier ? 'x'
               + options.video.bitrateMultiplier.toString() : undefined,
-          keyFrameInterval: options.video.keyFrameInterval,
-          simulcastRid: options.video.rid
+          keyFrameInterval: options.video.keyFrameInterval
         };
+      }
+      if (options.video.rid) {
+        mediaOptions.video.simulcastRid = options.video.rid;
       }
     } else {
       mediaOptions.video = false;

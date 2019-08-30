@@ -74,7 +74,9 @@ export function convertToPublicationSettings(mediaInfo) {
         framerate = videoInfo.parameters.framerate;
         bitrate = videoInfo.parameters.bitrate * 1000;
         keyFrameInterval = videoInfo.parameters.keyFrameInterval;
-        rid = videoInfo.parameters.simulcastRid;
+      }
+      if (videoInfo.simulcastRid) {
+        rid = videoInfo.simulcastRid;
       }
       video.push(new PublicationModule.VideoPublicationSettings(
         videoCodec, resolution, framerate, bitrate, keyFrameInterval, rid));
