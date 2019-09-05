@@ -2,7 +2,7 @@
   "name": "oms-sample-conference",
   "title": "Open WebRTC Toolkit Conference Sample",
   "description": "Open WebRTC Toolkit JavaScript Conference Sample",
-  "version": "4.3",
+  "version": "4.3.0",
   "homepage": "http://webrtc.intel.com",
   "author": "Intel WebRTC team",
   "keywords": [

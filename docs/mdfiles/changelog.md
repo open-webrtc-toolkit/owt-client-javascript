@@ -1,6 +1,6 @@
 Change Log
 ==========
-# 4.3
+# 4.3.0
 * The type of `conferenceClient.publish` method's option is changed from `AudioEncodingParameters` and `VideoEncodingParameters` to `RTCRtpSendParameters`.
 * `audio` and `video` of `PublicationSettings` is changed from `AudioPublicationSettings` and `VideoPublicationSettings` to `AudioPublicationSettings` array and `VideoPublicationSettings` array.
 * Add `rid` to `VideoSubscriptionConstraints`. When `rid` is specified, other constraints will be ignored.
