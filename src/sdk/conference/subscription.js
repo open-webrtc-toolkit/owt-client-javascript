@@ -176,13 +176,13 @@ export class SubscribeOptions {
   // eslint-disable-next-line require-jsdoc
   constructor(audio, video) {
     /**
-     * @member {?AudioSubscriptionConstraints} audio
+     * @member {?Owt.Conference.AudioSubscriptionConstraints} audio
      * @instance
      * @memberof Owt.Conference.SubscribeOptions
      */
     this.audio = audio;
     /**
-     * @member {?VideoSubscriptionConstraints} video
+     * @member {?Owt.Conference.VideoSubscriptionConstraints} video
      * @instance
      * @memberof Owt.Conference.SubscribeOptions
      */
