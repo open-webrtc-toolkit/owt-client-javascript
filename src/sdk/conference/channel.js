@@ -220,9 +220,24 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
           this._pc.addTransceiver(stream.mediaStream.getVideoTracks()[0],
             transceiverInit);
         }
+      } else {
+        if (mediaOptions.audio && stream.mediaStream.getAudioTracks().length > 0) {
+          for (const track of stream.mediaStream.getAudioTracks())
+            this._pc.addTrack(track, stream.mediaStream);
+        }
+
+        if (mediaOptions.video && stream.mediaStream.getVideoTracks().length > 0) {
+          for (const track of stream.mediaStream.getVideoTracks())
+            this._pc.addTrack(track, stream.mediaStream);
+        }
       }
+
       let localDesc;
-      this._pc.createOffer().then((desc) => {
+      const offerOptions = {
+        offerToReceiveAudio: false,
+        offerToReceiveVideo: false,
+      };
+      this._pc.createOffer(offerOptions).then((desc) => {
         if (options) {
           desc.sdp = this._setRtpReceiverOptions(desc.sdp, options);
         }
@@ -328,6 +343,7 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
     } else {
       mediaOptions.video = false;
     }
+
     this._subscribedStream = stream;
     this._signaling.sendSignalingMessage('subscribe', {
       media: mediaOptions,
@@ -348,7 +364,11 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
           this._pc.addTransceiver('video', {direction: 'recvonly'});
         }
       }
-      this._pc.createOffer().then((desc) => {
+      const offerOptions = {
+        offerToReceiveAudio: !!options.audio,
+        offerToReceiveVideo: !!options.video,
+      };
+      this._pc.createOffer(offerOptions).then((desc) => {
         if (options) {
           desc.sdp = this._setRtpReceiverOptions(desc.sdp, options);
         }
