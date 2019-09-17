@@ -195,6 +195,7 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
       });
       this.dispatchEvent(messageEvent);
       this._internalId = data.id;
+      const offerOptions = {};
       if (typeof this._pc.addTransceiver === 'function') {
         // |direction| seems not working on Safari.
         if (mediaOptions.audio && stream.mediaStream.getAudioTracks().length >
@@ -230,13 +231,12 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
           for (const track of stream.mediaStream.getVideoTracks())
             this._pc.addTrack(track, stream.mediaStream);
         }
+
+        offerOptions.offerToReceiveAudio = false;
+        offerOptions.offerToReceiveVideo = false;
       }
 
       let localDesc;
-      const offerOptions = {
-        offerToReceiveAudio: false,
-        offerToReceiveVideo: false,
-      };
       this._pc.createOffer(offerOptions).then((desc) => {
         if (options) {
           desc.sdp = this._setRtpReceiverOptions(desc.sdp, options);
@@ -355,6 +355,7 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
       this.dispatchEvent(messageEvent);
       this._internalId = data.id;
       this._createPeerConnection();
+      const offerOptions = {};
       if (typeof this._pc.addTransceiver === 'function') {
         // |direction| seems not working on Safari.
         if (mediaOptions.audio) {
@@ -363,11 +364,11 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
         if (mediaOptions.video) {
           this._pc.addTransceiver('video', {direction: 'recvonly'});
         }
+      } else {
+        offerOptions.offerToReceiveAudio = !!options.audio;
+        offerOptions.offerToReceiveVideo = !!options.video;
       }
-      const offerOptions = {
-        offerToReceiveAudio: !!options.audio,
-        offerToReceiveVideo: !!options.video,
-      };
+
       this._pc.createOffer(offerOptions).then((desc) => {
         if (options) {
           desc.sdp = this._setRtpReceiverOptions(desc.sdp, options);
