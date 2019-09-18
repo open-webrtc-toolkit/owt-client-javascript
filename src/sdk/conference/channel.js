@@ -339,6 +339,9 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
       }
       if (options.video.rid) {
         mediaOptions.video.simulcastRid = options.video.rid;
+        // Ignore other settings when RID set.
+        delete mediaOptions.video.parameters;
+        options.video = true;
       }
     } else {
       mediaOptions.video = false;
