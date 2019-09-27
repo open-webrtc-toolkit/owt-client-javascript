@@ -525,13 +525,20 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
 
     Logger.debug('ICE connection state changed to ' +
         event.currentTarget.iceConnectionState);
-    if (event.currentTarget.iceConnectionState === 'closed' ||
-        event.currentTarget.iceConnectionState === 'failed') {
-      if (event.currentTarget.iceConnectionState === 'failed') {
-        this._handleError('ICE connection failed.');
+    if (event.currentTarget.iceConnectionState === 'failed') {
+      this._handleError('ICE connection failed.');
+    }
+  }
+
+  _onConnectionStateChange(event) {
+    if (this._pc.connectionState === 'closed' ||
+        this._pc.connectionState === 'failed') {
+      if (this._pc.connectionState === 'failed') {
+        this._handleError('connection failed.');
+      } else {
+        // Fire ended event if publication or subscription exists.
+        this._fireEndedEventOnPublicationOrSubscription();
       }
-      // Fire ended event if publication or subscription exists.
-      this._fireEndedEventOnPublicationOrSubscription();
     }
   }
 
@@ -563,6 +570,9 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
     };
     this._pc.oniceconnectionstatechange = (event) => {
       this._onIceConnectionStateChange.apply(this, [event]);
+    };
+    this._pc.onconnectionstatechange = (event) => {
+      this._onConnectionStateChange.apply(this, [event]);
     };
   }
 
@@ -645,6 +655,8 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
       error: error,
     });
     dispatcher.dispatchEvent(errorEvent);
+    // Fire ended event when error occured
+    this._fireEndedEventOnPublicationOrSubscription();
   }
 
   _setCodecOrder(sdp, options) {
