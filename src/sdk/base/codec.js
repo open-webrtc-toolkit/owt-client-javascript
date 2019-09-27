@@ -79,6 +79,12 @@ export class AudioEncodingParameters {
   }
 }
 
+/**
+ * @class VideoCodec
+ * @memberOf Owt.Base
+ * @classDesc Video codec enumeration.
+ * @hideconstructor
+ */
 export const VideoCodec = {
   VP8: 'vp8',
   VP9: 'vp9',
