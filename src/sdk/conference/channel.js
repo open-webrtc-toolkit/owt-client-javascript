@@ -48,6 +48,7 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
     // Timer for PeerConnection disconnected. Will stop connection after timer.
     this._disconnectTimer = null;
     this._ended = false;
+    this._stopped = false;
   }
 
   /**
@@ -407,24 +408,30 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
   }
 
   _unpublish() {
-    this._signaling.sendSignalingMessage('unpublish', {id: this._internalId})
-        .catch((e) => {
-          Logger.warning('MCU returns negative ack for unpublishing, ' + e);
-        });
-    if (this._pc && this._pc.signalingState !== 'closed') {
-      this._pc.close();
+    if (!this._stopped) {
+      this._stopped = true;
+      this._signaling.sendSignalingMessage('unpublish', {id: this._internalId})
+          .catch((e) => {
+            Logger.warning('MCU returns negative ack for unpublishing, ' + e);
+          });
+      if (this._pc && this._pc.signalingState !== 'closed') {
+        this._pc.close();
+      }
     }
   }
 
   _unsubscribe() {
-    this._signaling.sendSignalingMessage('unsubscribe', {
-      id: this._internalId,
-    })
-        .catch((e) => {
-          Logger.warning('MCU returns negative ack for unsubscribing, ' + e);
-        });
-    if (this._pc && this._pc.signalingState !== 'closed') {
-      this._pc.close();
+    if (!this._stopped) {
+      this._stopped = true;
+      this._signaling.sendSignalingMessage('unsubscribe', {
+        id: this._internalId,
+      })
+          .catch((e) => {
+            Logger.warning('MCU returns negative ack for unsubscribing, ' + e);
+          });
+      if (this._pc && this._pc.signalingState !== 'closed') {
+        this._pc.close();
+      }
     }
   }
 
@@ -525,8 +532,14 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
 
     Logger.debug('ICE connection state changed to ' +
         event.currentTarget.iceConnectionState);
-    if (event.currentTarget.iceConnectionState === 'failed') {
-      this._handleError('ICE connection failed.');
+    if (event.currentTarget.iceConnectionState === 'closed' ||
+        event.currentTarget.iceConnectionState === 'failed') {
+      if (event.currentTarget.iceConnectionState === 'failed') {
+        this._handleError('connection failed.');
+      } else {
+        // Fire ended event if publication or subscription exists.
+        this._fireEndedEventOnPublicationOrSubscription();
+      }
     }
   }
 
