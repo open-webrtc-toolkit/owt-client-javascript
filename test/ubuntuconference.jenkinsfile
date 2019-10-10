@@ -24,7 +24,7 @@ pipeline {
                 ]) {
                     node('unit-test-ubuntu') {
                         container('unit-test-ubuntu') {
-                            sh "cd /root/owt-client-javascript/test/unit/karma-test/ && ./start.sh"
+                            sh "cd /root/owt-client-javascript/test/unit/karma-test/ && ./start.sh $env.GIT_BRANCH $env.CHANGE_ID"
                         }
                     }
                 }
