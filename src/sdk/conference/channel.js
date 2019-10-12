@@ -219,8 +219,16 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
             transceiverInit.sendEncodings = options.video;
             this._videoCodecs = videoCodecs;
           }
-          this._pc.addTransceiver(stream.mediaStream.getVideoTracks()[0],
+          const transceiver = this._pc.addTransceiver(stream.mediaStream.getVideoTracks()[0],
             transceiverInit);
+
+          if (Utils.isFirefox()) {
+            // Firefox does not support encodings setting in addTransceiver
+            const parameters = transceiver.sender.getParameters();
+            parameters.encodings = transceiverInit.sendEncodings;
+            return transceiver.sender.setParameters(parameters)
+              .then(() => offerOptions);
+          }
         }
       } else {
         if (mediaOptions.audio && stream.mediaStream.getAudioTracks().length > 0) {
@@ -236,7 +244,8 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
         offerOptions.offerToReceiveAudio = false;
         offerOptions.offerToReceiveVideo = false;
       }
-
+      return offerOptions;
+    }).then((offerOptions) => {
       let localDesc;
       this._pc.createOffer(offerOptions).then((desc) => {
         if (options) {
