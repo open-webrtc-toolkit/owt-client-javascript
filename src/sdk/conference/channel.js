@@ -198,6 +198,7 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
       this._internalId = data.id;
       const offerOptions = {};
       if (typeof this._pc.addTransceiver === 'function') {
+        let setPromise = Promise.resolve();
         // |direction| seems not working on Safari.
         if (mediaOptions.audio && stream.mediaStream.getAudioTracks().length >
           0) {
@@ -207,8 +208,15 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
           if (this._isRtpEncodingParameters(options.audio)) {
             transceiverInit.sendEncodings = options.audio;
           }
-          this._pc.addTransceiver(stream.mediaStream.getAudioTracks()[0],
+          const transceiver = this._pc.addTransceiver(stream.mediaStream.getAudioTracks()[0],
             transceiverInit);
+
+          if (Utils.isFirefox()) {
+            // Firefox does not support encodings setting in addTransceiver.
+            const parameters = transceiver.sender.getParameters();
+            parameters.encodings = transceiverInit.sendEncodings;
+            setPromise = transceiver.sender.setParameters(parameters);
+          }
         }
         if (mediaOptions.video && stream.mediaStream.getVideoTracks().length >
           0) {
@@ -226,21 +234,20 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
             // Firefox does not support encodings setting in addTransceiver.
             const parameters = transceiver.sender.getParameters();
             parameters.encodings = transceiverInit.sendEncodings;
-            return transceiver.sender.setParameters(parameters)
-              .then(() => offerOptions);
+            setPromise = setPromise.then(
+              () => transceiver.sender.setParameters(parameters));
           }
         }
+        return setPromise.then(() => offerOptions);
       } else {
         if (mediaOptions.audio && stream.mediaStream.getAudioTracks().length > 0) {
           for (const track of stream.mediaStream.getAudioTracks())
             this._pc.addTrack(track, stream.mediaStream);
         }
-
         if (mediaOptions.video && stream.mediaStream.getVideoTracks().length > 0) {
           for (const track of stream.mediaStream.getVideoTracks())
             this._pc.addTrack(track, stream.mediaStream);
         }
-
         offerOptions.offerToReceiveAudio = false;
         offerOptions.offerToReceiveVideo = false;
       }
