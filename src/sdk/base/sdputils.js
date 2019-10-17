@@ -603,6 +603,88 @@ export function reorderCodecs(sdp, type, codecs) {
   return sdp;
 }
 
+// Add legacy simulcast.
+export function addLegacySimulcast(sdp, type, numStreams) {
+  if (!numStreams || !(numStreams > 1)) {
+    return sdp;
+  }
+
+  let sdpLines = sdp.split('\r\n');
+  // Search for m line.
+  const mLineStart = findLine(sdpLines, 'm=', type);
+  if (mLineStart === null) {
+    return sdp;
+  }
+  let mLineEnd = findLineInRange(sdpLines, mLineStart + 1, -1, 'm=');
+  if (mLineEnd === null) {
+    mLineEnd = sdpLines.length;
+  }
+
+  const ssrcGetter = (line) => {
+    const parts = line.split(' ');
+    const ssrc = parts[0].split(':')[1];
+    return ssrc;
+  };
+
+  // Process ssrc lines from mLineIndex.
+  const removes = new Set();
+  const ssrcs = new Set();
+  const gssrcs = new Set();
+  const simLines = [];
+  const simGroupLines = [];
+  let i = mLineStart + 1;
+  while (i < mLineEnd) {
+    const line = sdpLines[i];
+    if (line === '') {
+      break;
+    }
+    if (line.indexOf('a=ssrc:') > -1) {
+      const ssrc = ssrcGetter(sdpLines[i]);
+      ssrcs.add(ssrc);
+      if (line.indexOf('cname') > -1 || line.indexOf('msid') > -1) {
+        for (let j = 1; j < numStreams; j++) {
+          const nssrc = (parseInt(ssrc) + j) + '';
+          simLines.push(line.replace(ssrc, nssrc));
+        }
+      } else {
+        removes.add(line);
+      }
+    }
+    if (line.indexOf('a=ssrc-group:FID') > -1) {
+      const parts = line.split(' ');
+      gssrcs.add(parts[2]);
+      for (let j = 1; j < numStreams; j++) {
+        const nssrc1 = (parseInt(parts[1]) + j) + '';
+        const nssrc2 = (parseInt(parts[2]) + j) + '';
+        simGroupLines.push(
+          line.replace(parts[1], nssrc1).replace(parts[2], nssrc2));
+      }
+    }
+    i++;
+  }
+
+  const insertPos = i;
+  ssrcs.forEach(ssrc => {
+    if (!gssrcs.has(ssrc)) {
+      let groupLine = 'a=ssrc-group:SIM';
+      groupLine = groupLine + ' ' + ssrc;
+      for (let j = 1; j < numStreams; j++) {
+        groupLine = groupLine + ' ' + (parseInt(ssrc) + j);
+      }
+      simGroupLines.push(groupLine);
+    }
+  });
+
+  simLines.sort();
+  // Insert simulcast ssrc lines.
+  sdpLines.splice(insertPos, 0, ...simGroupLines);
+  sdpLines.splice(insertPos, 0, ...simLines);
+  sdpLines = sdpLines.filter(line => !removes.has(line));
+
+  sdp = sdpLines.join('\r\n');
+  return sdp;
+}
+
 export function setMaxBitrate(sdp, encodingParametersList) {
   for (const encodingParameters of encodingParametersList) {
     if (encodingParameters.maxBitrate) {
