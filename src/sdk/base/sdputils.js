@@ -610,8 +610,6 @@ export function addLegacySimulcast(sdp, type, numStreams) {
   }
 
   let sdpLines = sdp.split('\r\n');
-  let copyLines = sdp.split('\r\n');
-
   // Search for m line.
   const mLineStart = findLine(sdpLines, 'm=', type);
   if (mLineStart === null) {
