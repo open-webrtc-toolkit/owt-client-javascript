@@ -736,6 +736,13 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
   }
 
   _setRtpReceiverOptions(sdp, options) {
+    // Add legacy simulcast in SDP for safari.
+    if (this._isRtpEncodingParameters(options.video) && Utils.isSafari()) {
+      if (options.video.length > 1) {
+        sdp = SdpUtils.addLegacySimulcast(sdp, 'video', options.video.length);
+      }
+    }
+
     // _videoCodecs is a workaround for setting video codecs. It will be moved to RTCRtpSendParameters.
     if (this._isRtpEncodingParameters(options.video) && this._videoCodecs) {
       sdp = SdpUtils.reorderCodecs(sdp, 'video', this._videoCodecs);
