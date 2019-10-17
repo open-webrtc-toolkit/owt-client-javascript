@@ -69,7 +69,7 @@ const runSocketIOSample = function() {
             }
         }
         // Resolutions from extraCapabilities.
-        for (const resolution of stream.extraCapabilities.video.resolutions) {
+        for (const resolution of stream.extraCapabilities.video.resolutions.reverse()) {
             const button = $('<button/>', {
                 text: resolution.width + 'x' +
                     resolution.height,
