@@ -3,7 +3,7 @@
   "recurseDepth": 10,
   "source": {
     "include": "src/sdk",
-    "exclude": ["src/sdk/rest", "src/sdk/nuve", "src/sdk/ui"],
+    "exclude": ["src/sdk/rest", "src/sdk/ui"],
     "excludePattern": "w*.legacy.*"
   },
   "sourceType": "module",
