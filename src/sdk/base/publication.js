@@ -107,6 +107,7 @@ export class PublicationSettings {
  * @memberOf Owt.Base
  * @classDesc Publication represents a sender for publishing a stream. It
  * handles the actions on a LocalStream published to a conference.
+ *
  * Events:
  *
  * | Event Name      | Argument Type    | Fired when       |
@@ -115,6 +116,8 @@ export class PublicationSettings {
  * | error           | ErrorEvent       | An error occurred on the publication. |
  * | mute            | MuteEvent        | Publication is muted. Client stopped sending audio and/or video data to remote endpoint. |
  * | unmute          | MuteEvent        | Publication is unmuted. Client continued sending audio and/or video data to remote endpoint. |
+ *
+ * `ended` event may not be fired on Safari after calling `Publication.stop()`.
  *
  * @hideconstructor
  */
