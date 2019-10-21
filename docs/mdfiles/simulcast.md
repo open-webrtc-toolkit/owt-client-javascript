@@ -2,11 +2,11 @@ OWT Simulcast Description
 ---------------------
 
 # {#simulcast}
-The MCU server supports simulcast. This can be enabled through OWT Client SDK API. <br>
+The conference server supports simulcast. This can be enabled through OWT Client SDK API. <br>
 
 1. Publish a simulcast stream
 ~~~~~~{.js}
-//Example of simulcast publication
+// Example of simulcast publication.
 conference = new Owt.Conference.ConferenceClient();
 // ...
 conference.join(token).then(resp => {
@@ -14,19 +14,20 @@ conference.join(token).then(resp => {
     Owt.Base.MediaStreamFactory.createMediaStream(new Owt.Base.StreamConstraints(
             audioConstraints, videoConstraints)).then(stream => {
         /*
-         * Use `VideoEncodingParameters` as publish option.
+         * Use `RTCRtpEncodingParameters` as publish option
+         * (https://w3c.github.io/webrtc-pc/#dom-rtcrtpencodingparameters).
          * The following option would create 3 streams with resolutions if browser supports:
          * OriginResolution, OriginResolution/2.0 and OriginResolution/4.0.
          * For current Firefox, the resolutions must be sorted in descending order.
-         * For current Safari, legacy simulcast is used and the `rid` won't take effect.
-         * Besides `scaleResolutionDownBy`, other `VideoEncodingParameters` can be set
+         * For current Safari, legacy simulcast is used and the parameters like `rid` won't take effect.
+         * Besides `scaleResolutionDownBy`, other `RTCRtpEncodingParameters` can be set
          * if browser supports.
          * The actual output will be determined by browsers, the outcome may not be exactly same
          * as what is set in publishOption, e.g. For a vga video stream, there may be 2 RTP streams
          * rather than 3.
          */
         const publishOption = {video:[
-            {rid: 'q', active: true},
+            {rid: 'q', active: true, scaleResolutionDownBy: 1.0},
             {rid: 'h', active: true, scaleResolutionDownBy: 2.0},
             {rid: 'f', active: true, scaleResolutionDownBy: 4.0}
         ]};
@@ -45,7 +46,8 @@ conference.join(token).then(resp => {
 ~~~~~~
 
 2. Subscribe a simulcast stream
-//Example of subscription
+~~~~~~{.js}
+// Example of subscription.
 conference = new Owt.Conference.ConferenceClient();
 // ...
 conference.join(token).then(resp => {
