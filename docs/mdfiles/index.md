@@ -21,7 +21,7 @@ Conference Mode:
 | Chrome* 77                      | √        | √       | √      |
 | Firefox* 69                     | √        | √       | √      |
 | Safari* 13                      |          |         | √      |
-| Microsoft Edge* 44.17763.1.0    | √        |         |        |    |
+| Microsoft Edge* 44.18362.387.0    | √        |         |        |    |
 
 *Table 1: Browser requirements for Conference Mode*
 
