@@ -2,7 +2,7 @@ OWT Simulcast Description
 ---------------------
 
 # {#simulcast}
-The conference server supports simulcast. This can be enabled through OWT Client SDK API. <br>
+The conference server supports simulcast. This can be enabled through OWT Client SDK for JavaScript. Only JavaScript SDK can enable simulcast.
 
 1. Publish a simulcast stream
 ~~~~~~{.js}
@@ -70,4 +70,4 @@ conference.join(token).then(resp => {
 1. The simulcast stream published to conference won't be transcoded.
 2. The `rid` attribute may not be present once a 'streamadded' event triggered. Users should listen on stream's `updated`
 event for new `rid` added.
-3. Current browsers(Chrome/Firefox/Safari) support VP8 simulcast. Only software encoder in chrome supports H264 simulcast.
+3. Current browsers(Chrome/Firefox/Safari) support VP8 simulcast while H264 simulcast has some limitations.
