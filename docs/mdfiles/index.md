@@ -68,11 +68,25 @@ Signaling channel is an implementation to transmit signaling data for creating a
 
 In the customized signaling channel, you need to implement `connect`, `disconnect` and `send`, invoke `onMessage` when a new message arrives, and invoke `onServerDisconnected` when the connection is lost. Then include your customized `sc.*.js` into the HTML page.
 
-# 5 Events
+# 5 Conference mode
 
-The JavaScript objects fires events using `Ics.Base.EventDispatchers`. For more detailed events, please refer to the specific class description page.
+Conference mode is designed for applications with multiple participants. The JavaScript SDK includes a demo application for this.
 
-# 6 Privacy and security
+Please refer to [media server user guide](https://software.intel.com/sites/products/documentation/webrtc/conference) for detailed server side features.
+
+To initialize your HTML code, copy and paste the following code into the head section of your HTML document:
+~~~~~~{.js}
+<script type="text/javascript" src="socket.io.js"></script>
+<script type="text/javascript" src="adapter.js"></script>
+<script type="text/javascript" src="owt.js"></script>
+~~~~~~
+After a room and a token are created, the token can then be sent to a client to join the conference using JavaScript APIs.
+
+# 6 Events
+
+The JavaScript objects fires events using `Owt.Base.EventDispatchers`. For more detailed events, please refer to the specific class description page.
+
+# 7 Privacy and security
 SDK will send operation system's name and version, browser name, version and abilities, SDK name and version to conference server and P2P endpoints it tries to make connection. SDK does not store this information on disk.
 
 **Note:** \* Other names and brands may be claimed as the property of others.
