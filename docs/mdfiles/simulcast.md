@@ -18,7 +18,7 @@ conference.join(token).then(resp => {
          * (https://w3c.github.io/webrtc-pc/#dom-rtcrtpencodingparameters).
          * The following option would create 3 streams with resolutions if browser supports:
          * OriginResolution, OriginResolution/2.0 and OriginResolution/4.0.
-         * For current Firefox, the resolutions must be sorted in descending order.
+         * For current Firefox, the resolutions should be sorted in descending order(reversed sample's option).
          * For current Safari, legacy simulcast is used and the parameters like `rid` won't take effect.
          * Besides `scaleResolutionDownBy`, other `RTCRtpEncodingParameters` can be set
          * if browser supports.
@@ -27,9 +27,9 @@ conference.join(token).then(resp => {
          * rather than 3.
          */
         const publishOption = {video:[
-            {rid: 'q', active: true, scaleResolutionDownBy: 1.0},
+            {rid: 'q', active: true, scaleResolutionDownBy: 4.0},
             {rid: 'h', active: true, scaleResolutionDownBy: 2.0},
-            {rid: 'f', active: true, scaleResolutionDownBy: 4.0}
+            {rid: 'f', active: true, scaleResolutionDownBy: 1.0}
         ]};
         /*
          * Codec priority list.
@@ -70,4 +70,4 @@ conference.join(token).then(resp => {
 1. The simulcast stream published to conference won't be transcoded.
 2. The `rid` attribute may not be present once a 'streamadded' event triggered. Users should listen on stream's `updated`
 event for new `rid` added.
-3. Current browsers(Chrome/Firefox/Safari) can support VP8 simulcast well while H.264 simulcast has some limitations.
+3. Current browsers support VP8 simulcast well while H.264 simulcast has some limitations.
