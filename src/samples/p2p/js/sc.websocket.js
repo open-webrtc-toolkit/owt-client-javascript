@@ -115,7 +115,7 @@ function SignalingChannel() {
     });
 
     wsServer.on('owt-message', function(data) {
-      console.info('Received woogeen message.');
+      console.info('Received owt message.');
       if (self.onMessage)
         self.onMessage(data.from, data.data);
     });
