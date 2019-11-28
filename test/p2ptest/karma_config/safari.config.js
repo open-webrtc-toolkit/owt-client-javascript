@@ -7,7 +7,6 @@ module.exports = function (config) {
     files: [
       './test/p2ptest/dependencies/jquery.min.js',
       './test/p2ptest/dependencies/socket.io.min.js',
-      './test/p2ptest/dependencies/adapter.js',
       './test/p2ptest/dependencies/q.js',
       './dist/samples/p2p/js/sc.websocket.js',
       './dist/sdk/owt.js',
