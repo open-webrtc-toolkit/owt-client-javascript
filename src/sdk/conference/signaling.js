@@ -39,6 +39,7 @@ export class SioSignaling extends EventModule.EventDispatcher {
     this._reconnectTimes = 0;
     this._reconnectionTicket = null;
     this._refreshReconnectionTicket = null;
+    this._messageSequence = 0;
   }
 
   /**
@@ -69,6 +70,7 @@ export class SioSignaling extends EventModule.EventDispatcher {
               data: data,
             },
           }));
+          this._messageSequence++;
         });
       });
       this._socket.on('reconnecting', () => {
@@ -102,7 +104,25 @@ export class SioSignaling extends EventModule.EventDispatcher {
                 data) => {
               if (status === 'ok') {
                 this._reconnectTimes = 0;
-                this._onReconnectionTicket(data);
+                if (typeof data === 'object') {
+                  if (Array.isArray(data.messages)) {
+                    const pendingMessages = data.messages.filter(msg => {
+                      return (msg.seq > this._messageSequence);
+                    });
+                    pendingMessages.forEach(msg => {
+                      this.dispatchEvent(new EventModule.MessageEvent('data', {
+                        message: {
+                          notification: msg.event,
+                          data: msg.data,
+                        },
+                      }));
+                      this._messageSequence++;
+                    });
+                  }
+                  this._onReconnectionTicket(data.ticket);
+                } else {
+                  this._onReconnectionTicket(data);
+                }
               } else {
                 this.dispatchEvent(new EventModule.OwtEvent('disconnect'));
               }
