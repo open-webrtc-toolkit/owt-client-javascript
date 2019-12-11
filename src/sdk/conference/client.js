@@ -29,7 +29,7 @@ const SignalingState = {
   CONNECTED: 3,
 };
 
-const protocolVersion = '1.0';
+const protocolVersion = '1.0.1';
 
 /* eslint-disable valid-jsdoc */
 /**
