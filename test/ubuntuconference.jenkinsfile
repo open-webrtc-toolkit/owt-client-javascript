@@ -20,7 +20,7 @@ pipeline {
         stage('Unit test') {
             steps {
                 podTemplate(name: 'unit-test-ubuntu', label: 'unit-test-ubuntu', cloud: 'kubernetes', containers: [
-                    containerTemplate(name: 'unit-test-ubuntu', image: "$env.JSMCU_TEST_IMAGE_UBUNTU", ttyEnabled: true, alwaysPullImage: true, privileged: true, resourceRequestCpu: '500m', resourceLimitCpu: '1000m', resourceLimitMemory: '1.0Gi', resourceRequestMemory: '0.5Gi', network: 'host', command: 'cat')
+                    containerTemplate(name: 'unit-test-ubuntu', image: "$env.ubuntu_test_images", ttyEnabled: true, alwaysPullImage: true, privileged: true, resourceRequestCpu: '500m', resourceLimitCpu: '1000m', resourceLimitMemory: '1.0Gi', resourceRequestMemory: '0.5Gi', network: 'host', command: 'cat')
                 ]) {
                     node('unit-test-ubuntu') {
                         container('unit-test-ubuntu') {
@@ -33,12 +33,17 @@ pipeline {
         stage('Build package') {
             options { timeout(time: 20, unit: 'MINUTES') }
             steps {
-                podTemplate(name: 'pack-ubuntu', label: 'pack-mcu-ubuntu', containers: [
-                    containerTemplate(name: 'pack-on-ubuntu', image: "$env.JS_MCU_BUILD_UBUNTU", ttyEnabled: true, alwaysPullImage: true, privileged: true, resourceRequestCpu: '1000m', resourceLimitCpu: '1500m', resourceLimitMemory: '1.5Gi', resourceRequestMemory: '1.0Gi', network: 'host', command: 'cat')
+                podTemplate(name: 'pack-ubuntu', label: 'pack-mcu-ubuntu',
+                volumes: [
+                persistentVolumeClaim(claimName: 'stability-package',mountPath: '/root/stabilityPackage',readOnly: false),
+                persistentVolumeClaim(claimName: 'js-ubuntu-package',mountPath: '/root/ubuntu_package',readOnly: false)
+                ],
+                containers: [
+                    containerTemplate(name: 'pack-on-ubuntu', image: "$env.ubuntu_build_images", ttyEnabled: true, alwaysPullImage: true, privileged: true, resourceRequestCpu: '1000m', resourceLimitCpu: '1500m', resourceLimitMemory: '1.5Gi', resourceRequestMemory: '1.0Gi', network: 'host', command: 'cat')
                 ]){
                     node('pack-mcu-ubuntu') {
                         container('pack-on-ubuntu') {
-                            sh "/root/packSDKInDocker.sh $env.GIT_COMMIT $env.GIT_BRANCH $env.CHANGE_ID"
+                            sh "/root/startRun.sh $env.gitlab_username $env.gitlab_password ubuntu build javascript $env.GIT_BRANCH $env.GIT_COMMIT $env.CHANGE_ID"
                         }
                     }
                 }
@@ -50,13 +55,23 @@ pipeline {
             parallel {
                 stage('API test') {
                     steps {
-                        podTemplate(name: 'api-test-ubuntu', label: 'api-test-ubuntu', cloud: 'kubernetes', containers: [
-                            containerTemplate(name: 'api-test-ubuntu', image: "$env.JSMCU_TEST_IMAGE_UBUNTU", ttyEnabled: true, alwaysPullImage: true, privileged: true, resourceRequestCpu: '8000m', resourceLimitCpu: '9000m', resourceLimitMemory: '10.0Gi', resourceRequestMemory: '9.0Gi', network: 'host', command: 'cat'),
+                        podTemplate(name: 'api-test-ubuntu', label: 'api-test-ubuntu', cloud: 'kubernetes',
+                        volumes: [
+                              persistentVolumeClaim(claimName: 'js-ubuntu-package', mountPath: '/root/ubuntu_package', readOnly: false),
+                              persistentVolumeClaim(claimName: 'ubuntu-audio-lib', mountPath: '/root/audio_lib',readOnly: false),
+                              persistentVolumeClaim(claimName: 'ubuntu-recording-lib', mountPath: '/root/recording_lib',readOnly: false),
+                              persistentVolumeClaim(claimName: 'ubuntu-sip-lib', mountPath: '/root/sip_lib',readOnly: false),
+                              persistentVolumeClaim(claimName: 'ubuntu-streaming-lib', mountPath: '/root/streaming_lib', readOnly: false),
+                              persistentVolumeClaim(claimName: 'ubuntu-video-lib', mountPath: '/root/video_lib',readOnly: false),
+                              persistentVolumeClaim(claimName: 'js-ubuntu-log', mountPath: '/root/ubuntu_log', readOnly: false)
+                              ],
+                        containers: [
+                            containerTemplate(name: 'api-test-ubuntu', image: "$env.ubuntu_test_images", ttyEnabled: true, alwaysPullImage: true, privileged: true, resourceRequestCpu: '8000m', resourceLimitCpu: '9000m', resourceLimitMemory: '10.0Gi', resourceRequestMemory: '9.0Gi', network: 'host', command: 'cat'),
                         ]) {
 
                             node('api-test-ubuntu') {
                                 container('api-test-ubuntu') {
-                                    sh "/root/start.sh ${env.GIT_COMMIT}1 ConferenceClient_api"
+                                    sh "/root/startRun.sh $env.gitlab_username $env.gitlab_password ubuntu test ${env.GIT_COMMIT} ConferenceClient_api"
                                 }
                             }
                         }
@@ -65,13 +80,23 @@ pipeline {
 
                 stage('Subscribe test') {
                     steps {
-                        podTemplate(name: 'subscribe-test-ubuntu', label: 'subscribe-test-ubuntu', cloud: 'kubernetes', containers: [
-                            containerTemplate(name: 'subscribe-test-ubuntu', image: "$env.JSMCU_TEST_IMAGE_UBUNTU", ttyEnabled: true, alwaysPullImage: true, privileged: true, resourceRequestCpu: '8000m', resourceLimitCpu: '9000m', resourceLimitMemory: '10.0Gi', resourceRequestMemory: '9.0Gi', network: 'host', command: 'cat'),
+                        podTemplate(name: 'subscribe-test-ubuntu', label: 'subscribe-test-ubuntu', cloud: 'kubernetes',
+                        volumes: [
+                              persistentVolumeClaim(claimName: 'js-ubuntu-package', mountPath: '/root/ubuntu_package', readOnly: false),
+                              persistentVolumeClaim(claimName: 'ubuntu-audio-lib', mountPath: '/root/audio_lib',readOnly: false),
+                              persistentVolumeClaim(claimName: 'ubuntu-recording-lib', mountPath: '/root/recording_lib',readOnly: false),
+                              persistentVolumeClaim(claimName: 'ubuntu-sip-lib', mountPath: '/root/sip_lib',readOnly: false),
+                              persistentVolumeClaim(claimName: 'ubuntu-streaming-lib', mountPath: '/root/streaming_lib', readOnly: false),
+                              persistentVolumeClaim(claimName: 'ubuntu-video-lib', mountPath: '/root/video_lib',readOnly: false),
+                              persistentVolumeClaim(claimName: 'js-ubuntu-log', mountPath: '/root/ubuntu_log', readOnly: false)
+                              ],
+                        containers: [
+                            containerTemplate(name: 'subscribe-test-ubuntu', image: "$env.ubuntu_test_images", ttyEnabled: true, alwaysPullImage: true, privileged: true, resourceRequestCpu: '8000m', resourceLimitCpu: '9000m', resourceLimitMemory: '10.0Gi', resourceRequestMemory: '9.0Gi', network: 'host', command: 'cat'),
                         ]) {
 
                             node('subscribe-test-ubuntu') {
                                 container('subscribe-test-ubuntu') {
-                                    sh "/root/start.sh ${env.GIT_COMMIT}2 ConferenceClient_subscribe"
+                                    sh "/root/startRun.sh $env.gitlab_username $env.gitlab_password ubuntu test ${env.GIT_COMMIT} ConferenceClient_subscribe"
                                 }
                             }
                         }
