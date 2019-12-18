@@ -11,6 +11,7 @@ import {Base64} from '../base/base64.js';
 'use strict';
 
 const reconnectionAttempts = 10;
+const maxSequence = 2147483647;
 
 // eslint-disable-next-line require-jsdoc
 function handleResponse(status, data, resolve, reject) {
@@ -70,7 +71,7 @@ export class SioSignaling extends EventModule.EventDispatcher {
               data: data,
             },
           }));
-          this._messageSequence++;
+          this._incrementMessageSequence();
         });
       });
       this._socket.on('reconnecting', () => {
@@ -106,18 +107,20 @@ export class SioSignaling extends EventModule.EventDispatcher {
                 this._reconnectTimes = 0;
                 if (typeof data === 'object') {
                   if (Array.isArray(data.messages)) {
-                    const pendingMessages = data.messages.filter(msg => {
-                      return (msg.seq > this._messageSequence);
-                    });
-                    pendingMessages.forEach(msg => {
-                      this.dispatchEvent(new EventModule.MessageEvent('data', {
-                        message: {
-                          notification: msg.event,
-                          data: msg.data,
-                        },
-                      }));
-                      this._messageSequence++;
-                    });
+                    let isMissingStart = false;
+                    for (const msg of data.messages) {
+                      if (isMissingStart) {
+                        this.dispatchEvent(new EventModule.MessageEvent('data', {
+                          message: {
+                            notification: msg.event,
+                            data: msg.data,
+                          },
+                        }));
+                        this._incrementMessageSequence();
+                      } else if (msg.seq === this._messageSequence) {
+                        isMissingStart = true;
+                      }
+                    }
                   }
                   this._onReconnectionTicket(data.ticket);
                 } else {
@@ -220,5 +223,13 @@ export class SioSignaling extends EventModule.EventDispatcher {
   _clearReconnectionTask() {
     clearTimeout(this._refreshReconnectionTicket);
     this._refreshReconnectionTicket = null;
+  }
+
+  _incrementMessageSequence() {
+    if (this._messageSequence === maxSequence) {
+      this._messageSequence = 0;
+    } else {
+      this._messageSequence++;
+    }
   }
 }
