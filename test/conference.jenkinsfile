@@ -66,7 +66,7 @@ pipeline {
                               persistentVolumeClaim(claimName: 'js-centos-log', mountPath: '/root/centos_log', readOnly: false)
                               ],
                         containers: [
-                            containerTemplate(name: 'api-test', image: "$env.centos_test_images", ttyEnabled: true, alwaysPullImage: true, privileged: true, resourceRequestCpu: '8000m', resourceLimitCpu: '9000m', resourceLimitMemory: '10.0Gi', resourceRequestMemory: '9.0Gi', network: 'host', command: 'cat'),
+                            containerTemplate(name: 'api-test', image: "$env.centos_test_images", ttyEnabled: true, alwaysPullImage: true, privileged: true, resourceRequestCpu: '2000m', resourceLimitCpu: '6000m', resourceLimitMemory: '9.0Gi', resourceRequestMemory: '8.0Gi', network: 'host', command: 'cat'),
                         ]) {
 
                             node('api-test') {
@@ -91,7 +91,7 @@ pipeline {
                               persistentVolumeClaim(claimName: 'js-centos-log', mountPath: '/root/centos_log', readOnly: false)
                               ],
                         containers: [
-                            containerTemplate(name: 'subscribe-test', image: "$env.centos_test_images", ttyEnabled: true, alwaysPullImage: true, privileged: true, resourceRequestCpu: '8000m', resourceLimitCpu: '9000m', resourceLimitMemory: '10.0Gi', resourceRequestMemory: '9.0Gi', network: 'host', command: 'cat'),
+                            containerTemplate(name: 'subscribe-test', image: "$env.centos_test_images", ttyEnabled: true, alwaysPullImage: true, privileged: true, resourceRequestCpu: '2000m', resourceLimitCpu: '6000m', resourceLimitMemory: '9.0Gi', resourceRequestMemory: '8.0Gi', network: 'host', command: 'cat'),
                         ]) {
 
                             node('subscribe-test') {
@@ -115,7 +115,7 @@ pipeline {
                               persistentVolumeClaim(claimName: 'js-centos-log', mountPath: '/root/centos_log', readOnly: false)
                               ],
                         containers: [
-                            containerTemplate(name: 'simucast-test-server', image: "$env.centos_test_images",  ttyEnabled: true, alwaysPullImage: true, privileged: true, resourceRequestCpu: '8000m', resourceLimitCpu: '9000m',resourceLimitMemory: '10.0Gi', resourceRequestMemory: '8.0Gi', network: 'host', command: 'cat'),
+                            containerTemplate(name: 'simucast-test-server', image: "$env.centos_test_images",  ttyEnabled: true, alwaysPullImage: true, privileged: true, resourceRequestCpu: '2000m', resourceLimitCpu: 6000m',resourceLimitMemory: '9.0Gi', resourceRequestMemory: '8.0Gi', network: 'host', command: 'cat'),
                             ]) {
                             node('simucast-test-server') {
                                 container('simucast-test-server') {
