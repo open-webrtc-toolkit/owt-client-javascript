@@ -34,6 +34,7 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
     super();
     this._config = config;
     this._options = null;
+    this._videoCodecs = undefined;
     this._signaling = signaling;
     this._pc = null;
     this._internalId = null; // It's publication ID or subscription ID.
@@ -47,6 +48,7 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
     // Timer for PeerConnection disconnected. Will stop connection after timer.
     this._disconnectTimer = null;
     this._ended = false;
+    this._stopped = false;
   }
 
   /**
@@ -75,22 +77,29 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
     }
   }
 
-  publish(stream, options) {
+  publish(stream, options, videoCodecs) {
     if (options === undefined) {
-      options = {audio: !!stream.mediaStream.getAudioTracks(), video: !!stream
-          .mediaStream.getVideoTracks()};
+      options = {audio: !!stream.mediaStream.getAudioTracks().length, video: !!stream
+          .mediaStream.getVideoTracks().length};
     }
     if (typeof options !== 'object') {
       return Promise.reject(new TypeError('Options should be an object.'));
     }
+    if ((this._isRtpEncodingParameters(options.audio) &&
+         this._isOwtEncodingParameters(options.video)) ||
+        (this._isOwtEncodingParameters(options.audio) &&
+         this._isRtpEncodingParameters(options.video))) {
+      return Promise.reject(new ConferenceError(
+          'Mixing RTCRtpEncodingParameters and AudioEncodingParameters/VideoEncodingParameters is not allowed.'))
+    }
     if (options.audio === undefined) {
-      options.audio = !!stream.mediaStream.getAudioTracks();
+      options.audio = !!stream.mediaStream.getAudioTracks().length;
     }
     if (options.video === undefined) {
-      options.video = !!stream.mediaStream.getVideoTracks();
+      options.video = !!stream.mediaStream.getVideoTracks().length;
     }
-    if (!!options.audio === !stream.mediaStream.getAudioTracks().length || !!
-    options.video === !stream.mediaStream.getVideoTracks().length) {
+    if ((!!options.audio && !stream.mediaStream.getAudioTracks().length) ||
+        (!!options.video && !stream.mediaStream.getVideoTracks().length)) {
       return Promise.reject(new ConferenceError(
           'options.audio/video is inconsistent with tracks presented in the ' +
           'MediaStream.'
@@ -115,18 +124,20 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
         }
       }
     }
-    if (typeof options.video === 'object') {
-      if (!Array.isArray(options.video)) {
-        return Promise.reject(new TypeError(
-            'options.video should be a boolean or an array.'));
-      }
+    if (typeof options.video === 'object' && !Array.isArray(options.video)) {
+      return Promise.reject(new TypeError(
+        'options.video should be a boolean or an array.'));
+    }
+    if (this._isOwtEncodingParameters(options.video)) {
       for (const parameters of options.video) {
-        if (!parameters.codec || typeof parameters.codec.name !== 'string' || (
-          parameters.maxBitrate !== undefined && typeof parameters.maxBitrate
-          !== 'number') || (parameters.codec.profile !== undefined
-          && typeof parameters.codec.profile !== 'string')) {
+        if (!parameters.codec || typeof parameters.codec.name !== 'string' ||
+          (
+            parameters.maxBitrate !== undefined && typeof parameters
+            .maxBitrate !==
+            'number') || (parameters.codec.profile !== undefined &&
+            typeof parameters.codec.profile !== 'string')) {
           return Promise.reject(new TypeError(
-              'options.video has incorrect parameters.'));
+            'options.video has incorrect parameters.'));
         }
       }
     }
@@ -149,9 +160,6 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
       }
       mediaOptions.audio = {};
       mediaOptions.audio.source = stream.source.audio;
-      for (const track of stream.mediaStream.getAudioTracks()) {
-        this._pc.addTrack(track, stream.mediaStream);
-      }
     } else {
       mediaOptions.audio = false;
     }
@@ -174,9 +182,6 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
         },
         framerate: trackSettings.frameRate,
       };
-      for (const track of stream.mediaStream.getVideoTracks()) {
-        this._pc.addTrack(track, stream.mediaStream);
-      }
     } else {
       mediaOptions.video = false;
     }
@@ -191,19 +196,63 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
       });
       this.dispatchEvent(messageEvent);
       this._internalId = data.id;
-      const offerOptions = {
-        offerToReceiveAudio: false,
-        offerToReceiveVideo: false,
-      };
+      const offerOptions = {};
       if (typeof this._pc.addTransceiver === 'function') {
+        let setPromise = Promise.resolve();
         // |direction| seems not working on Safari.
-        if (mediaOptions.audio && stream.mediaStream.getAudioTracks() > 0) {
-          this._pc.addTransceiver('audio', {direction: 'sendonly'});
+        if (mediaOptions.audio && stream.mediaStream.getAudioTracks().length >
+          0) {
+          const transceiverInit = {
+            direction: 'sendonly'
+          };
+          if (this._isRtpEncodingParameters(options.audio)) {
+            transceiverInit.sendEncodings = options.audio;
+          }
+          const transceiver = this._pc.addTransceiver(stream.mediaStream.getAudioTracks()[0],
+            transceiverInit);
+
+          if (Utils.isFirefox()) {
+            // Firefox does not support encodings setting in addTransceiver.
+            const parameters = transceiver.sender.getParameters();
+            parameters.encodings = transceiverInit.sendEncodings;
+            setPromise = transceiver.sender.setParameters(parameters);
+          }
         }
-        if (mediaOptions.video && stream.mediaStream.getVideoTracks() > 0) {
-          this._pc.addTransceiver('video', {direction: 'sendonly'});
+        if (mediaOptions.video && stream.mediaStream.getVideoTracks().length >
+          0) {
+          const transceiverInit = {
+            direction: 'sendonly'
+          };
+          if (this._isRtpEncodingParameters(options.video)) {
+            transceiverInit.sendEncodings = options.video;
+            this._videoCodecs = videoCodecs;
+          }
+          const transceiver = this._pc.addTransceiver(stream.mediaStream.getVideoTracks()[0],
+            transceiverInit);
+
+          if (Utils.isFirefox()) {
+            // Firefox does not support encodings setting in addTransceiver.
+            const parameters = transceiver.sender.getParameters();
+            parameters.encodings = transceiverInit.sendEncodings;
+            setPromise = setPromise.then(
+              () => transceiver.sender.setParameters(parameters));
+          }
         }
+        return setPromise.then(() => offerOptions);
+      } else {
+        if (mediaOptions.audio && stream.mediaStream.getAudioTracks().length > 0) {
+          for (const track of stream.mediaStream.getAudioTracks())
+            this._pc.addTrack(track, stream.mediaStream);
+        }
+        if (mediaOptions.video && stream.mediaStream.getVideoTracks().length > 0) {
+          for (const track of stream.mediaStream.getVideoTracks())
+            this._pc.addTrack(track, stream.mediaStream);
+        }
+        offerOptions.offerToReceiveAudio = false;
+        offerOptions.offerToReceiveVideo = false;
       }
+      return offerOptions;
+    }).then((offerOptions) => {
       let localDesc;
       this._pc.createOffer(offerOptions).then((desc) => {
         if (options) {
@@ -239,18 +288,18 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
   subscribe(stream, options) {
     if (options === undefined) {
       options = {
-        audio: !!stream.capabilities.audio,
-        video: !!stream.capabilities.video,
+        audio: !!stream.settings.audio,
+        video: !!stream.settings.video,
       };
     }
     if (typeof options !== 'object') {
       return Promise.reject(new TypeError('Options should be an object.'));
     }
     if (options.audio === undefined) {
-      options.audio = !!stream.capabilities.audio;
+      options.audio = !!stream.settings.audio;
     }
     if (options.video === undefined) {
-      options.video = !!stream.capabilities.video;
+      options.video = !!stream.settings.video;
     }
     if ((options.audio !== undefined && typeof options.audio !== 'object' &&
         typeof options.audio !== 'boolean' && options.audio !== null) || (
@@ -258,8 +307,8 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
         typeof options.video !== 'boolean' && options.video !== null)) {
       return Promise.reject(new TypeError('Invalid options type.'));
     }
-    if (options.audio && !stream.capabilities.audio || (options.video &&
-        !stream.capabilities.video)) {
+    if (options.audio && !stream.settings.audio || (options.video &&
+        !stream.settings.video)) {
       return Promise.reject(new ConferenceError(
           'options.audio/video cannot be true or an object if there is no '
           + 'audio/video track in remote stream.'
@@ -302,12 +351,19 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
           framerate: options.video.frameRate,
           bitrate: options.video.bitrateMultiplier ? 'x'
               + options.video.bitrateMultiplier.toString() : undefined,
-          keyFrameInterval: options.video.keyFrameInterval,
+          keyFrameInterval: options.video.keyFrameInterval
         };
+      }
+      if (options.video.rid) {
+        mediaOptions.video.simulcastRid = options.video.rid;
+        // Ignore other settings when RID set.
+        delete mediaOptions.video.parameters;
+        options.video = true;
       }
     } else {
       mediaOptions.video = false;
     }
+
     this._subscribedStream = stream;
     this._signaling.sendSignalingMessage('subscribe', {
       media: mediaOptions,
@@ -319,10 +375,7 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
       this.dispatchEvent(messageEvent);
       this._internalId = data.id;
       this._createPeerConnection();
-      const offerOptions = {
-        offerToReceiveAudio: !!options.audio,
-        offerToReceiveVideo: !!options.video,
-      };
+      const offerOptions = {};
       if (typeof this._pc.addTransceiver === 'function') {
         // |direction| seems not working on Safari.
         if (mediaOptions.audio) {
@@ -331,7 +384,11 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
         if (mediaOptions.video) {
           this._pc.addTransceiver('video', {direction: 'recvonly'});
         }
+      } else {
+        offerOptions.offerToReceiveAudio = !!options.audio;
+        offerOptions.offerToReceiveVideo = !!options.video;
       }
+
       this._pc.createOffer(offerOptions).then((desc) => {
         if (options) {
           desc.sdp = this._setRtpReceiverOptions(desc.sdp, options);
@@ -367,24 +424,30 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
   }
 
   _unpublish() {
-    this._signaling.sendSignalingMessage('unpublish', {id: this._internalId})
-        .catch((e) => {
-          Logger.warning('MCU returns negative ack for unpublishing, ' + e);
-        });
-    if (this._pc && this._pc.signalingState !== 'closed') {
-      this._pc.close();
+    if (!this._stopped) {
+      this._stopped = true;
+      this._signaling.sendSignalingMessage('unpublish', {id: this._internalId})
+          .catch((e) => {
+            Logger.warning('MCU returns negative ack for unpublishing, ' + e);
+          });
+      if (this._pc && this._pc.signalingState !== 'closed') {
+        this._pc.close();
+      }
     }
   }
 
   _unsubscribe() {
-    this._signaling.sendSignalingMessage('unsubscribe', {
-      id: this._internalId,
-    })
-        .catch((e) => {
-          Logger.warning('MCU returns negative ack for unsubscribing, ' + e);
-        });
-    if (this._pc && this._pc.signalingState !== 'closed') {
-      this._pc.close();
+    if (!this._stopped) {
+      this._stopped = true;
+      this._signaling.sendSignalingMessage('unsubscribe', {
+        id: this._internalId,
+      })
+          .catch((e) => {
+            Logger.warning('MCU returns negative ack for unsubscribing, ' + e);
+          });
+      if (this._pc && this._pc.signalingState !== 'closed') {
+        this._pc.close();
+      }
     }
   }
 
@@ -488,10 +551,23 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
     if (event.currentTarget.iceConnectionState === 'closed' ||
         event.currentTarget.iceConnectionState === 'failed') {
       if (event.currentTarget.iceConnectionState === 'failed') {
-        this._handleError('ICE connection failed.');
+        this._handleError('connection failed.');
+      } else {
+        // Fire ended event if publication or subscription exists.
+        this._fireEndedEventOnPublicationOrSubscription();
       }
-      // Fire ended event if publication or subscription exists.
-      this._fireEndedEventOnPublicationOrSubscription();
+    }
+  }
+
+  _onConnectionStateChange(event) {
+    if (this._pc.connectionState === 'closed' ||
+        this._pc.connectionState === 'failed') {
+      if (this._pc.connectionState === 'failed') {
+        this._handleError('connection failed.');
+      } else {
+        // Fire ended event if publication or subscription exists.
+        this._fireEndedEventOnPublicationOrSubscription();
+      }
     }
   }
 
@@ -523,6 +599,9 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
     };
     this._pc.oniceconnectionstatechange = (event) => {
       this._onIceConnectionStateChange.apply(this, [event]);
+    };
+    this._pc.onconnectionstatechange = (event) => {
+      this._onConnectionStateChange.apply(this, [event]);
     };
   }
 
@@ -605,6 +684,8 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
       error: error,
     });
     dispatcher.dispatchEvent(errorEvent);
+    // Fire ended event when error occured
+    this._fireEndedEventOnPublicationOrSubscription();
   }
 
   _setCodecOrder(sdp, options) {
@@ -645,11 +726,32 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
   }
 
   _setRtpSenderOptions(sdp, options) {
+    // SDP mugling is deprecated, moving to `setParameters`.
+    if (this._isRtpEncodingParameters(options.audio) ||
+        this._isRtpEncodingParameters(options.video)) {
+      return sdp;
+    }
     sdp = this._setMaxBitrate(sdp, options);
     return sdp;
   }
 
   _setRtpReceiverOptions(sdp, options) {
+    // Add legacy simulcast in SDP for safari.
+    if (this._isRtpEncodingParameters(options.video) && Utils.isSafari()) {
+      if (options.video.length > 1) {
+        sdp = SdpUtils.addLegacySimulcast(sdp, 'video', options.video.length);
+      }
+    }
+
+    // _videoCodecs is a workaround for setting video codecs. It will be moved to RTCRtpSendParameters.
+    if (this._isRtpEncodingParameters(options.video) && this._videoCodecs) {
+      sdp = SdpUtils.reorderCodecs(sdp, 'video', this._videoCodecs);
+      return sdp;
+    }
+    if (this._isRtpEncodingParameters(options.audio) ||
+        this._isRtpEncodingParameters(options.video)) {
+      return sdp;
+    }
     sdp = this._setCodecOrder(sdp, options);
     return sdp;
   }
@@ -682,5 +784,24 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
     } else {
       Logger.warning('Invalid data value for stream update info.');
     }
+  }
+
+  _isRtpEncodingParameters(obj) {
+    if (!Array.isArray(obj)) {
+      return false;
+    }
+    // Only check the first one.
+    const param = obj[0];
+    return param.codecPayloadType || param.dtx || param.active || param
+      .ptime || param.maxFramerate || param.scaleResolutionDownBy || param.rid;
+  }
+
+  _isOwtEncodingParameters(obj) {
+    if (!Array.isArray(obj)) {
+      return false;
+    }
+    // Only check the first one.
+    const param = obj[0];
+    return !!param.codec;
   }
 }

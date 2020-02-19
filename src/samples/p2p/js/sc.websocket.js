@@ -13,7 +13,7 @@ function SignalingChannel() {
   this.onServerDisconnected = null;
 
   var clientType = 'Web';
-  var clientVersion = '4.2.1';
+  var clientVersion = '4.3';
 
   var wsServer = null;
 
@@ -115,7 +115,7 @@ function SignalingChannel() {
     });
 
     wsServer.on('owt-message', function(data) {
-      console.info('Received woogeen message.');
+      console.info('Received owt message.');
       if (self.onMessage)
         self.onMessage(data.from, data.data);
     });

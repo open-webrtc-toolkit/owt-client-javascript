@@ -94,13 +94,13 @@ const P2PClient = function(configuration, signalingChannel) {
     const data = JSON.parse(message);
     if (data.type === 'chat-closed') {
       if (channels.has(origin)) {
-        getOrCreateChannel(origin).onMessage(data);
+        getOrCreateChannel(origin, false).onMessage(data);
         channels.delete(origin);
       }
       return;
     }
     if (self.allowedRemoteIds.indexOf(origin) >= 0) {
-      getOrCreateChannel(origin).onMessage(data);
+      getOrCreateChannel(origin, false).onMessage(data);
     } else {
       sendSignalingMessage(origin, 'chat-closed',
           ErrorModule.errors.P2P_CLIENT_DENIED);
@@ -184,7 +184,7 @@ const P2PClient = function(configuration, signalingChannel) {
       return Promise.reject(new ErrorModule.P2PError(
           ErrorModule.errors.P2P_CLIENT_NOT_ALLOWED));
     }
-    return Promise.resolve(getOrCreateChannel(remoteId).publish(stream));
+    return Promise.resolve(getOrCreateChannel(remoteId, true).publish(stream));
   };
 
   /**
@@ -206,7 +206,7 @@ const P2PClient = function(configuration, signalingChannel) {
       return Promise.reject(new ErrorModule.P2PError(
           ErrorModule.errors.P2P_CLIENT_NOT_ALLOWED));
     }
-    return Promise.resolve(getOrCreateChannel(remoteId).send(message));
+    return Promise.resolve(getOrCreateChannel(remoteId, true).send(message));
   };
 
   /**
@@ -261,13 +261,13 @@ const P2PClient = function(configuration, signalingChannel) {
     });
   };
 
-  const getOrCreateChannel = function(remoteId) {
+  const getOrCreateChannel = function(remoteId, isInitializer) {
     if (!channels.has(remoteId)) {
       // Construct an signaling sender/receiver for P2PPeerConnection.
       const signalingForChannel = Object.create(EventDispatcher);
       signalingForChannel.sendSignalingMessage = sendSignalingMessage;
       const pcc = new P2PPeerConnectionChannel(config, myId, remoteId,
-          signalingForChannel);
+          signalingForChannel, isInitializer);
       pcc.addEventListener('streamadded', (streamEvent)=>{
         self.dispatchEvent(streamEvent);
       });

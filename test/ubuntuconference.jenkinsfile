@@ -1,0 +1,147 @@
+void setBuildStatus(String message, String state) {
+    step([
+        $class: "GitHubCommitStatusSetter",
+        reposSource: [$class: "ManuallyEnteredRepositorySource", url: "${REPO_URL}/owt-client-javascript"],
+        contextSource: [$class: "ManuallyEnteredCommitContextSource", context: "ci/jenkins/ubuntuconference"],
+        errorHandlers: [[$class: "ChangingBuildStatusErrorHandler", result: "UNSTABLE"]],
+        statusResultSource: [$class: "ConditionalStatusResultSource", results: [[$class: "AnyBuildResult", message: message, state: state]]]
+    ]);
+}
+
+
+
+
+pipeline {
+    agent any
+    options {
+        buildDiscarder(logRotator(numToKeepStr: '10', artifactNumToKeepStr: '10'))
+    }
+    stages {
+        stage('Unit test') {
+            steps {
+                podTemplate(name: 'unit-test-ubuntu', label: 'unit-test-ubuntu', cloud: 'kubernetes', containers: [
+                    containerTemplate(name: 'unit-test-ubuntu', image: "$env.ubuntu_test_images", ttyEnabled: true, alwaysPullImage: true, privileged: true, resourceRequestCpu: '500m', resourceLimitCpu: '1000m', resourceLimitMemory: '1.0Gi', resourceRequestMemory: '0.5Gi', network: 'host', command: 'cat')
+                ]) {
+                    node('unit-test-ubuntu') {
+                        container('unit-test-ubuntu') {
+                            sh "cd /root/owt-client-javascript/test/unit/karma-test/ && ./start.sh $env.GIT_BRANCH $env.CHANGE_ID"
+                        }
+                    }
+                }
+            }
+        }
+        stage('Build package') {
+            options { timeout(time: 20, unit: 'MINUTES') }
+            steps {
+                podTemplate(name: 'pack-ubuntu', label: 'pack-mcu-ubuntu',
+                volumes: [
+                persistentVolumeClaim(claimName: 'stability-package',mountPath: '/root/stabilityPackage',readOnly: false),
+                persistentVolumeClaim(claimName: 'js-ubuntu-package',mountPath: '/root/ubuntu_package',readOnly: false)
+                ],
+                containers: [
+                    containerTemplate(name: 'pack-on-ubuntu', image: "$env.ubuntu_build_images", ttyEnabled: true, alwaysPullImage: true, privileged: true, resourceRequestCpu: '1000m', resourceLimitCpu: '1500m', resourceLimitMemory: '1.5Gi', resourceRequestMemory: '1.0Gi', network: 'host', command: 'cat')
+                ]){
+                    node('pack-mcu-ubuntu') {
+                        container('pack-on-ubuntu') {
+                            sh "/root/startRun.sh $env.gitlab_username $env.gitlab_password ubuntu build javascript $env.GIT_BRANCH $env.GIT_COMMIT $env.CHANGE_ID"
+                        }
+                    }
+                }
+            }
+        }
+
+        stage('Start test') {
+            options { timeout(time: 40, unit: 'MINUTES') }
+            parallel {
+                stage('ConferenceClient API 1') {
+                    steps {
+                        podTemplate(name: 'api-test-ubuntu', label: 'api-test-ubuntu', cloud: 'kubernetes',
+                        volumes: [
+                              persistentVolumeClaim(claimName: 'js-ubuntu-package', mountPath: '/root/ubuntu_package', readOnly: false),
+                              persistentVolumeClaim(claimName: 'ubuntu-audio-lib', mountPath: '/root/audio_lib',readOnly: false),
+                              persistentVolumeClaim(claimName: 'ubuntu-recording-lib', mountPath: '/root/recording_lib',readOnly: false),
+                              persistentVolumeClaim(claimName: 'ubuntu-sip-lib', mountPath: '/root/sip_lib',readOnly: false),
+                              persistentVolumeClaim(claimName: 'ubuntu-streaming-lib', mountPath: '/root/streaming_lib', readOnly: false),
+                              persistentVolumeClaim(claimName: 'ubuntu-video-lib', mountPath: '/root/video_lib',readOnly: false),
+                              persistentVolumeClaim(claimName: 'js-ubuntu-log', mountPath: '/root/ubuntu_log', readOnly: false)
+                              ],
+                        containers: [
+                            containerTemplate(name: 'api-test-ubuntu', image: "$env.ubuntu_test_images", ttyEnabled: true, alwaysPullImage: true, privileged: true, resourceRequestCpu: '2000m', resourceLimitCpu: '6000m', resourceLimitMemory: '9.0Gi', resourceRequestMemory: '8.0Gi', network: 'host', command: 'cat'),
+                        ]) {
+
+                            node('api-test-ubuntu') {
+                                container('api-test-ubuntu') {
+                                    sh "/root/startRun.sh $env.gitlab_username $env.gitlab_password ubuntu test ${env.GIT_COMMIT} ConferenceClient_API_1"
+                                }
+                            }
+                        }
+                    }
+                }
+
+                stage('ConferenceClient API 2') {
+                    steps {
+                        podTemplate(name: 'subscribe-test-ubuntu', label: 'subscribe-test-ubuntu', cloud: 'kubernetes',
+                        volumes: [
+                              persistentVolumeClaim(claimName: 'js-ubuntu-package', mountPath: '/root/ubuntu_package', readOnly: false),
+                              persistentVolumeClaim(claimName: 'ubuntu-audio-lib', mountPath: '/root/audio_lib',readOnly: false),
+                              persistentVolumeClaim(claimName: 'ubuntu-recording-lib', mountPath: '/root/recording_lib',readOnly: false),
+                              persistentVolumeClaim(claimName: 'ubuntu-sip-lib', mountPath: '/root/sip_lib',readOnly: false),
+                              persistentVolumeClaim(claimName: 'ubuntu-streaming-lib', mountPath: '/root/streaming_lib', readOnly: false),
+                              persistentVolumeClaim(claimName: 'ubuntu-video-lib', mountPath: '/root/video_lib',readOnly: false),
+                              persistentVolumeClaim(claimName: 'js-ubuntu-log', mountPath: '/root/ubuntu_log', readOnly: false)
+                              ],
+                        containers: [
+                            containerTemplate(name: 'subscribe-test-ubuntu', image: "$env.ubuntu_test_images", ttyEnabled: true, alwaysPullImage: true, privileged: true, resourceRequestCpu: '2000m', resourceLimitCpu: '6000m', resourceLimitMemory: '9.0Gi', resourceRequestMemory: '8.0Gi', network: 'host', command: 'cat'),
+                        ]) {
+
+                            node('subscribe-test-ubuntu') {
+                                container('subscribe-test-ubuntu') {
+                                    sh "/root/startRun.sh $env.gitlab_username $env.gitlab_password ubuntu test ${env.GIT_COMMIT} ConferenceClient_API_2"
+                                }
+                            }
+                        }
+                    }
+                }
+                 stage('ConferenceClient API 3') {
+                    steps {
+                        podTemplate(name:'simucast-test-ubuntu', label: 'simucast-test-ubuntu', cloud: 'kubernetes',
+                        volumes: [
+                              persistentVolumeClaim(claimName: 'js-ubuntu-package', mountPath: '/root/ubuntu_package', readOnly: false),
+                              persistentVolumeClaim(claimName: 'ubuntu-audio-lib', mountPath: '/root/audio_lib',readOnly: false),
+                              persistentVolumeClaim(claimName: 'ubuntu-recording-lib', mountPath: '/root/recording_lib',readOnly: false),
+                              persistentVolumeClaim(claimName: 'ubuntu-sip-lib', mountPath: '/root/sip_lib',readOnly: false),
+                              persistentVolumeClaim(claimName: 'ubuntu-streaming-lib', mountPath: '/root/streaming_lib', readOnly: false),
+                              persistentVolumeClaim(claimName: 'ubuntu-video-lib', mountPath: '/root/video_lib',readOnly: false),
+                              persistentVolumeClaim(claimName: 'js-ubuntu-log', mountPath: '/root/ubuntu_log', readOnly: false)
+                              ],
+                        containers: [
+                            containerTemplate(name: 'simucast-test-ubuntu', image: "$env.ubuntu_test_images",  ttyEnabled: true, alwaysPullImage: true, privileged: true, resourceRequestCpu: '2000m', resourceLimitCpu: '6000m',resourceLimitMemory: '9.0Gi', resourceRequestMemory: '8.0Gi', network: 'host', command: 'cat'),
+                            ]) {
+                            node('simucast-test-ubuntu') {
+                                container('simucast-test-ubuntu') {
+                                    sh "/root/startRun.sh $env.gitlab_username $env.gitlab_password ubuntu test ${env.GIT_COMMIT} ConferenceClient_API_3"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    post {
+
+        always {
+            script {
+                sh "curl -H \"Content-Type: application/json\" -X POST --data '{\"commit_id\":\"'$GIT_COMMIT'\",\"job_path\":\"'${env.JS_CHECK_UBUNTU_PATH}'\",\"job_name\":\"'$JOB_BASE_NAME'\",\"build_num\":\"'$BUILD_NUMBER'\",\"os_version\":\"'$env.UBUTUN_VERSION'\"}' '${env.checkServerUrl}'/runServer/JS_BUILD_CONFERENCE_STEPS"
+            }
+        }
+        success {
+            setBuildStatus("Build succeeded", "SUCCESS");
+        }
+        failure {
+            setBuildStatus("Build failed", "FAILURE");
+        }
+    }
+}
+

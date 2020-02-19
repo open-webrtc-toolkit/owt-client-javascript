@@ -60,7 +60,7 @@ const sysInfo = Utils.sysInfo();
 class P2PPeerConnectionChannel extends EventDispatcher {
   // |signaling| is an object has a method |sendSignalingMessage|.
   /* eslint-disable-next-line require-jsdoc */
-  constructor(config, localId, remoteId, signaling) {
+  constructor(config, localId, remoteId, signaling, isInitializer) {
     super();
     this._config = config;
     this._localId = localId;
@@ -93,6 +93,10 @@ class P2PPeerConnectionChannel extends EventDispatcher {
     this._infoSent = false;
     this._disposed = false;
     this._createPeerConnection();
+    if (isInitializer) {
+      this._sendSignalingMessage(SignalingType.CLOSED);
+    }
+    this._sendSignalingMessage(SignalingType.UA, sysInfo);
   }
 
   /**
@@ -114,9 +118,7 @@ class P2PPeerConnectionChannel extends EventDispatcher {
           ErrorModule.errors.P2P_CLIENT_INVALID_STATE,
           'All tracks are ended.'));
     }
-    return Promise.all([this._sendClosedMsgIfNecessary(),
-      this._sendSysInfoIfNecessary(),
-      this._sendStreamInfo(stream)]).then(() => {
+    return this._sendStreamInfo(stream).then(() => {
       return new Promise((resolve, reject) => {
         // Replace |addStream| with PeerConnection.addTrack when all browsers are ready.
         for (const track of stream.mediaStream.getTracks()) {
@@ -158,14 +160,6 @@ class P2PPeerConnectionChannel extends EventDispatcher {
     if (!this._dataChannels.has(DataChannelLabel.MESSAGE)) {
       this._createDataChannel(DataChannelLabel.MESSAGE);
     }
-
-    this._sendClosedMsgIfNecessary().catch((err) => {
-      Logger.debug('Failed to send closed message.' + err.message);
-    });
-
-    this._sendSysInfoIfNecessary().catch((err) => {
-      Logger.debug('Failed to send sysInfo.' + err.message);
-    });
 
     const dc = this._dataChannels.get(DataChannelLabel.MESSAGE);
     if (dc.readyState === 'open') {
@@ -242,7 +236,6 @@ class P2PPeerConnectionChannel extends EventDispatcher {
     switch (message.type) {
       case SignalingType.UA:
         this._handleRemoteCapability(message.data);
-        this._sendSysInfoIfNecessary();
         break;
       case SignalingType.TRACK_SOURCES:
         this._trackSourcesHandler(message.data);
@@ -803,23 +796,6 @@ class P2PPeerConnectionChannel extends EventDispatcher {
       source: stream.source,
     }),
     ]);
-  }
-
-
-  _sendSysInfoIfNecessary() {
-    if (this._infoSent) {
-      return Promise.resolve();
-    }
-    this._infoSent = true;
-    return this._sendSignalingMessage(SignalingType.UA, sysInfo);
-  }
-
-  _sendClosedMsgIfNecessary() {
-    if (this._pc.remoteDescription === null ||
-        this._pc.remoteDescription.sdp === '') {
-      return this._sendSignalingMessage(SignalingType.CLOSED);
-    }
-    return Promise.resolve();
   }
 
   _handleRemoteCapability(ua) {

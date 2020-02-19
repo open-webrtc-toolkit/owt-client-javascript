@@ -48,11 +48,44 @@ const runSocketIOSample = function() {
     var subscribeForward = getParameterByName('forward') === 'true'?true:false;
     var isSelf = getParameterByName('self') === 'false'?false:true;
     conference = new Owt.Conference.ConferenceClient();
-    function renderVideo(stream){
-        let subscirptionForward=null;
-        function subscribeDifferentResolutionForward(forward, resolution){
-            subscirptionForward && subscirptionForward.stop();
-            subscirptionForward = null;
+    function createResolutionButtons(stream, subscribeResolutionCallback) {
+        let $p = $(`#${stream.id}resolutions`);
+        if ($p.length === 0) {
+            $p = $(`<div id=${stream.id}resolutions> </div>`);
+            $p.appendTo($('body'));
+        }
+        // Resolutions from settings.
+        for (const videoSetting of stream.settings.video) {
+            const resolution = videoSetting.resolution;
+            if (resolution) {
+                const button = $('<button/>', {
+                    text: resolution.width + 'x' +
+                        resolution.height,
+                    click: () => {
+                        subscribeResolutionCallback(stream, resolution);
+                    }
+                });
+                button.prependTo($p);
+            }
+        }
+        // Resolutions from extraCapabilities.
+        for (const resolution of stream.extraCapabilities.video.resolutions.reverse()) {
+            const button = $('<button/>', {
+                text: resolution.width + 'x' +
+                    resolution.height,
+                click: () => {
+                    subscribeResolutionCallback(stream, resolution);
+                }
+            });
+            button.prependTo($p);
+        };
+        return $p;
+    }
+    function subscribeAndRenderVideo(stream){
+        let subscirptionLocal=null;
+        function subscribeDifferentResolution(stream, resolution){
+            subscirptionLocal && subscirptionLocal.stop();
+            subscirptionLocal = null;
             const videoOptions = {};
             videoOptions.resolution = resolution;
             conference.subscribe(stream, {
@@ -60,25 +93,14 @@ const runSocketIOSample = function() {
                 video: videoOptions
             }).then((
                 subscription) => {
-                    subscirptionForward = subscription;
+                    subscirptionLocal = subscription;
                 $(`#${stream.id}`).get(0).srcObject = stream.mediaStream;
             });
         }
-        let $p = $(`<div id=${stream.id}resolutions> </div>`)
-        for (const resolution of stream.capabilities.video.resolutions) {
-            const button = $('<button/>', {
-                text: resolution.width + 'x' +
-                    resolution.height,
-                click: () => {
-                    subscribeDifferentResolutionForward(stream, resolution);
-                }
-            });
-            button.appendTo($p);
-        };
-        $p.appendTo($('body'));
+        let $p = createResolutionButtons(stream, subscribeDifferentResolution);
         conference.subscribe(stream)
         .then((subscription)=>{
-            subscirptionForward = subscription;
+            subscirptionLocal = subscription;
             let $video = $(`<video controls autoplay id=${stream.id} style="display:block" >this browser does not supported video tag</video>`);
            $video.get(0).srcObject = stream.mediaStream;
            $p.append($video);
@@ -88,29 +110,20 @@ const runSocketIOSample = function() {
             removeUi(stream.id);
             $(`#${stream.id}resolutions`).remove();
         });
+        stream.addEventListener('updated', () => {
+            // Update resolution buttons
+            $p.children('button').remove();
+            createResolutionButtons(stream, subscribeDifferentResolution);
+        });
     }
     function removeUi(id){
         $(`#${id}`).remove();
-    }
-    function subscribeDifferentResolution(stream, resolution) {
-        subscriptionForMixedStream.stop();
-        subscriptionForMixedStream = null;
-        const videoOptions = {};
-        videoOptions.resolution = resolution;
-        conference.subscribe(stream, {
-            audio: true,
-            video: videoOptions
-        }).then((
-            subscription) => {
-            subscriptionForMixedStream = subscription;
-            $(`#${stream.id}`).get(0).srcObject = stream.mediaStream;
-        });
     }
 
     conference.addEventListener('streamadded', (event) => {
         console.log('A new stream is added ', event.stream.id);
         isSelf = isSelf?isSelf:event.stream.id != publicationGlobal.id;
-        subscribeForward && isSelf && renderVideo(event.stream);
+        subscribeForward && isSelf && subscribeAndRenderVideo(event.stream);
         mixStream(myRoom, event.stream.id, 'common');
         event.stream.addEventListener('ended', () => {
             console.log(event.stream.id + ' is ended.');
@@ -119,10 +132,7 @@ const runSocketIOSample = function() {
 
 
     window.onload = function() {
-        var myResolution = getParameterByName('resolution') || {
-            width: 1280,
-            height: 720
-        };
+        var simulcast = getParameterByName('simulcast') || false;
         var shareScreen = getParameterByName('screen') || false;
         myRoom = getParameterByName('room');
         var isHttps = (location.protocol === 'https:');
@@ -137,17 +147,34 @@ const runSocketIOSample = function() {
                      startStreamingIn(myRoom, mediaUrl);
                 }
                 if (isPublish !== 'false') {
-                    const audioConstraintsForMic = new Owt.Base.AudioTrackConstraints(Owt.Base.AudioSourceInfo.MIC);
-                    const videoConstraintsForCamera = new Owt.Base.VideoTrackConstraints(Owt.Base.VideoSourceInfo.CAMERA);
+                    // audioConstraintsForMic
+                    let audioConstraints = new Owt.Base.AudioTrackConstraints(Owt.Base.AudioSourceInfo.MIC);
+                    // videoConstraintsForCamera
+                    let videoConstraints = new Owt.Base.VideoTrackConstraints(Owt.Base.VideoSourceInfo.CAMERA);
+                    if (shareScreen) {
+                        // audioConstraintsForScreen
+                        audioConstraints = new Owt.Base.AudioTrackConstraints(Owt.Base.AudioSourceInfo.SCREENCAST);
+                        // videoConstraintsForScreen
+                        videoConstraints = new Owt.Base.VideoTrackConstraints(Owt.Base.VideoSourceInfo.SCREENCAST);
+                    }
+
                     let mediaStream;
                     Owt.Base.MediaStreamFactory.createMediaStream(new Owt.Base.StreamConstraints(
-                        audioConstraintsForMic, videoConstraintsForCamera)).then(stream => {
+                        audioConstraints, videoConstraints)).then(stream => {
+                        let publishOption;
+                        if (simulcast) {
+                            publishOption = {video:[
+                                {rid: 'q', active: true/*, scaleResolutionDownBy: 4.0*/},
+                                {rid: 'h', active: true/*, scaleResolutionDownBy: 2.0*/},
+                                {rid: 'f', active: true}
+                            ]};
+                        }
                         mediaStream = stream;
                         localStream = new Owt.Base.LocalStream(
                             mediaStream, new Owt.Base.StreamSourceInfo(
                                 'mic', 'camera'));
                         $('.local video').get(0).srcObject = stream;
-                        conference.publish(localStream).then(publication => {
+                        conference.publish(localStream, publishOption).then(publication => {
                             publicationGlobal = publication;
                             mixStream(myRoom, publication.id, 'common')
                             publication.addEventListener('error', (err) => {
@@ -164,31 +191,10 @@ const runSocketIOSample = function() {
                     if(!subscribeForward){
                       if (stream.source.audio === 'mixed' || stream.source.video ===
                         'mixed') {
-                        conference.subscribe(stream, {
-                            audio: {codecs:[{name:'opus'}]},
-                            video: true
-                        }).then((subscription) => {
-                            subscriptionForMixedStream = subscription;
-                            let $video = $(`<video controls autoplay id=${stream.id} style='display:block'>this browser does not supported video tag</video>`);
-                            $video.get(0).srcObject = stream.mediaStream;
-                            $('body').append($video);
-                            subscription.addEventListener('error', (err) => {
-                                console.log('Subscription error: ' + err.error.message);
-                            })
-                        });
-                        for (const resolution of stream.capabilities.video.resolutions) {
-                            const button = $('<button/>', {
-                                text: resolution.width + 'x' +
-                                    resolution.height,
-                                click: () => {
-                                    subscribeDifferentResolution(stream, resolution);
-                                }
-                            });
-                            button.appendTo($('body'));
-                        };
+                        subscribeAndRenderVideo(stream);
                       }
-                    }else if(stream.source.audio !== 'mixed'){
-                        subscribeForward && renderVideo(stream);
+                    } else if (stream.source.audio !== 'mixed') {
+                        subscribeAndRenderVideo(stream);
                     }
                 }
                 console.log('Streams in conference:', streams.length);
