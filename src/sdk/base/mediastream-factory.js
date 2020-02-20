@@ -2,11 +2,10 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-/* global console, window, Promise, chrome, navigator */
+/* global Promise, navigator */
 
 'use strict';
 import * as utils from './utils.js';
-import Logger from './logger.js';
 import * as MediaFormatModule from './mediaformat.js';
 
 /**
@@ -52,7 +51,7 @@ export class VideoTrackConstraints {
   // eslint-disable-next-line require-jsdoc
   constructor(source) {
     if (!Object.values(MediaFormatModule.VideoSourceInfo)
-      .some((v) => v === source)) {
+        .some((v) => v === source)) {
       throw new TypeError('Invalid source.');
     }
     /**
@@ -130,7 +129,7 @@ export class MediaStreamFactory {
    * @static
    * @desc Create a MediaStream with given constraints. If you want to create a MediaStream for screen cast, please make sure both audio and video's source are "screen-cast".
    * @memberof Owt.Base.MediaStreamFactory
-   * @returns {Promise<MediaStream, Error>} Return a promise that is resolved when stream is successfully created, or rejected if one of the following error happened:
+   * @return {Promise<MediaStream, Error>} Return a promise that is resolved when stream is successfully created, or rejected if one of the following error happened:
    * - One or more parameters cannot be satisfied.
    * - Specified device is busy.
    * - Cannot obtain necessary permission or operation is canceled by user.
@@ -167,7 +166,7 @@ export class MediaStreamFactory {
     // Check and convert constraints.
     if (!constraints.audio && !constraints.video) {
       return Promise.reject(new TypeError(
-        'At least one of audio and video must be requested.'));
+          'At least one of audio and video must be requested.'));
     }
     const mediaConstraints = Object.create({});
     if (typeof constraints.audio === 'object' &&
@@ -181,7 +180,8 @@ export class MediaStreamFactory {
         };
       }
     } else {
-      if (constraints.audio.source === MediaFormatModule.AudioSourceInfo.SCREENCAST) {
+      if (constraints.audio.source ===
+          MediaFormatModule.AudioSourceInfo.SCREENCAST) {
         mediaConstraints.audio = true;
       } else {
         mediaConstraints.audio = constraints.audio;
@@ -195,24 +195,21 @@ export class MediaStreamFactory {
       if (constraints.video.resolution &&
           constraints.video.resolution.width &&
           constraints.video.resolution.height) {
-            if (constraints.video.source ===
+        if (constraints.video.source ===
               MediaFormatModule.VideoSourceInfo.SCREENCAST) {
-              mediaConstraints.video.width =
-                constraints.video.resolution.width;
-              mediaConstraints.video.height =
-                constraints.video.resolution.height;
-            } else {
-              mediaConstraints.video.width = Object.create({});
-              mediaConstraints.video.width.exact =
-                  constraints.video.resolution.width;
-              mediaConstraints.video.height = Object.create({});
-              mediaConstraints.video.height.exact =
-                  constraints.video.resolution.height;
-
-            }
+          mediaConstraints.video.width = constraints.video.resolution.width;
+          mediaConstraints.video.height = constraints.video.resolution.height;
+        } else {
+          mediaConstraints.video.width = Object.create({});
+          mediaConstraints.video.width.exact =
+            constraints.video.resolution.width;
+          mediaConstraints.video.height = Object.create({});
+          mediaConstraints.video.height.exact =
+            constraints.video.resolution.height;
+        }
       }
       if (typeof constraints.video.deviceId === 'string') {
-        mediaConstraints.video.deviceId = { exact: constraints.video.deviceId };
+        mediaConstraints.video.deviceId = {exact: constraints.video.deviceId};
       }
       if (utils.isFirefox() &&
           constraints.video.source ===

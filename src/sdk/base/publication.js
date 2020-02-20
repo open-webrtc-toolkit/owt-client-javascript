@@ -5,7 +5,6 @@
 'use strict';
 
 import * as Utils from './utils.js';
-import * as MediaFormat from './mediaformat.js';
 import {EventDispatcher} from '../base/event.js';
 
 /**

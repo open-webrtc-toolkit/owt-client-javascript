@@ -11,7 +11,7 @@ import * as PublicationModule from '../base/publication.js';
 import * as MediaFormatModule from '../base/mediaformat.js';
 import * as CodecModule from '../base/codec.js';
 import * as SubscriptionModule from './subscription.js';
-
+import Logger from '../base/logger.js';
 
 /**
  * @function extractBitrateMultiplier
@@ -21,7 +21,7 @@ import * as SubscriptionModule from './subscription.js';
  */
 function extractBitrateMultiplier(input) {
   if (typeof input !== 'string' || !input.startsWith('x')) {
-    L.Logger.warning('Invalid bitrate multiplier input.');
+    Logger.warning('Invalid bitrate multiplier input.');
     return 0;
   }
   return Number.parseFloat(input.replace(/^x/, ''));

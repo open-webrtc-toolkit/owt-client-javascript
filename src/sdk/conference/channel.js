@@ -13,12 +13,12 @@ import {
   MessageEvent,
   OwtEvent,
   ErrorEvent,
-  MuteEvent
+  MuteEvent,
 } from '../base/event.js';
-import { TrackKind } from '../base/mediaformat.js'
-import { Publication } from '../base/publication.js';
-import { Subscription } from './subscription.js'
-import { ConferenceError } from './error.js'
+import {TrackKind} from '../base/mediaformat.js';
+import {Publication} from '../base/publication.js';
+import {Subscription} from './subscription.js';
+import {ConferenceError} from './error.js';
 import * as Utils from '../base/utils.js';
 import * as SdpUtils from '../base/sdputils.js';
 
@@ -529,7 +529,7 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
 
   _rejectPromise(error) {
     if (!error) {
-      const error = new ConferenceError('Connection failed or closed.');
+      error = new ConferenceError('Connection failed or closed.');
     }
     // Rejecting corresponding promise if publishing and subscribing is ongoing.
     if (this._publishPromise) {
@@ -666,7 +666,7 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
     return this._handleError(errorMessage);
   }
 
-  _handleError(errorMessage){
+  _handleError(errorMessage) {
     const error = new ConferenceError(errorMessage);
     const p = this._publishPromise || this._subscribePromise;
     if (p) {

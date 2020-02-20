@@ -5,7 +5,7 @@
 // This file doesn't have public APIs.
 /* eslint-disable valid-jsdoc */
 /* eslint-disable require-jsdoc */
-/* global Event, Map, Promise, RTCIceCandidate */
+/* global Event, Map, Promise, RTCIceCandidate, navigator */
 
 'use strict';
 
@@ -763,7 +763,8 @@ class P2PPeerConnectionChannel extends EventDispatcher {
     const dc = this._dataChannels.get(DataChannelLabel.MESSAGE);
     if (dc && dc.readyState === 'open') {
       for (let i = 0; i < this._pendingMessages.length; i++) {
-        Logger.debug('Sending message via data channel: '+this._pendingMessages[i]);
+        Logger.debug('Sending message via data channel: ' +
+            this._pendingMessages[i]);
         dc.send(JSON.stringify(this._pendingMessages[i]));
       }
       this._pendingMessages.length = 0;
@@ -774,7 +775,8 @@ class P2PPeerConnectionChannel extends EventDispatcher {
 
   _sendStreamInfo(stream) {
     if (!stream || !stream.mediaStream) {
-      return new ErrorModule.P2PError(ErrorModule.errors.P2P_CLIENT_ILLEGAL_ARGUMENT);
+      return new ErrorModule.P2PError(
+          ErrorModule.errors.P2P_CLIENT_ILLEGAL_ARGUMENT);
     }
     const info = [];
     stream.mediaStream.getTracks().map((track) => {
@@ -858,7 +860,7 @@ class P2PPeerConnectionChannel extends EventDispatcher {
     this._pc.createOffer().then((desc) => {
       desc.sdp = this._setRtpReceiverOptions(desc.sdp);
       localDesc = desc;
-      if(this._pc.signalingState==='stable'){
+      if (this._pc.signalingState==='stable') {
         return this._pc.setLocalDescription(desc).then(()=>{
           return this._sendSdp(localDesc);
         });
@@ -891,7 +893,7 @@ class P2PPeerConnectionChannel extends EventDispatcher {
     });
   }
 
-  _logCurrentAndPendingLocalDescription(){
+  _logCurrentAndPendingLocalDescription() {
     Logger.info('Current description: '+this._pc.currentLocalDescription);
     Logger.info('Pending description: '+this._pc.pendingLocalDescription);
   }
@@ -911,9 +913,11 @@ class P2PPeerConnectionChannel extends EventDispatcher {
 
   _unpublish(stream) {
     if (navigator.mozGetUserMedia || !this._remoteSideSupportsRemoveStream) {
-      // Actually unpublish is supported. It is a little bit complex since Firefox implemented WebRTC spec while Chrome implemented an old API.
+      // Actually unpublish is supported. It is a little bit complex since
+      // Firefox implemented WebRTC spec while Chrome implemented an old API.
       Logger.error(
-          'Stopping a publication is not supported on Firefox. Please use P2PClient.stop() to stop the connection with remote endpoint.'
+          'Stopping a publication is not supported on Firefox. Please use ' +
+          'P2PClient.stop() to stop the connection with remote endpoint.'
       );
       return Promise.reject(new ErrorModule.P2PError(
           ErrorModule.errors.P2P_CLIENT_UNSUPPORTED_METHOD));
@@ -939,7 +943,8 @@ class P2PPeerConnectionChannel extends EventDispatcher {
       return;
     }
     if (!this._pc) {
-      Logger.debug('PeerConnection is not available before creating DataChannel.');
+      Logger.debug('PeerConnection is not available before creating ' +
+         'DataChannel.');
       return;
     }
     Logger.debug('Create data channel.');
@@ -960,14 +965,14 @@ class P2PPeerConnectionChannel extends EventDispatcher {
       this._onDataChannelClose.apply(this, [event]);
     };
     dc.onerror = (event) => {
-      Logger.debug('Data Channel Error:', error);
+      Logger.debug('Data Channel Error: ' + event);
     };
   }
 
   // Returns all MediaStreams it belongs to.
   _getStreamByTrack(mediaStreamTrack) {
     const streams = [];
-    for (const [id, info] of this._remoteStreamInfo) {
+    for (const [/* id */, info] of this._remoteStreamInfo) {
       if (!info.stream || !info.stream.mediaStream) {
         continue;
       }
@@ -995,22 +1000,22 @@ class P2PPeerConnectionChannel extends EventDispatcher {
       promiseError = new ErrorModule.P2PError(
           ErrorModule.errors.P2P_CLIENT_UNKNOWN);
     }
-    for (const [label, dc] of this._dataChannels) {
+    for (const [/* label */, dc] of this._dataChannels) {
       dc.close();
     }
     this._dataChannels.clear();
     if (this._pc && this._pc.iceConnectionState !== 'closed') {
       this._pc.close();
     }
-    for (const [id, promise] of this._publishPromises) {
+    for (const [/* id */, promise] of this._publishPromises) {
       promise.reject(promiseError);
     }
     this._publishPromises.clear();
-    for (const [id, promise] of this._unpublishPromises) {
+    for (const [/* id */, promise] of this._unpublishPromises) {
       promise.reject(promiseError);
     }
     this._unpublishPromises.clear();
-    for (const [id, promise] of this._sendDataPromises) {
+    for (const [/* id */, promise] of this._sendDataPromises) {
       promise.reject(promiseError);
     }
     this._sendDataPromises.clear();
@@ -1062,7 +1067,7 @@ class P2PPeerConnectionChannel extends EventDispatcher {
   _checkIceConnectionStateAndFireEvent() {
     if (this._pc.iceConnectionState === 'connected' ||
         this._pc.iceConnectionState === 'completed') {
-      for (const [id, info] of this._remoteStreamInfo) {
+      for (const [/* id */, info] of this._remoteStreamInfo) {
         if (info.mediaStream) {
           const streamEvent = new StreamModule.StreamEvent('streamadded', {
             stream: info.stream,

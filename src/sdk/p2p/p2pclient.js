@@ -7,7 +7,6 @@
 'use strict';
 import Logger from '../base/logger.js';
 import {EventDispatcher, OwtEvent} from '../base/event.js';
-import * as Utils from '../base/utils.js';
 import * as ErrorModule from './error.js';
 import P2PPeerConnectionChannel from './peerconnection-channel.js';
 
@@ -154,7 +153,6 @@ const P2PClient = function(configuration, signalingChannel) {
    * @instance
    * @desc Disconnect from the signaling channel. It stops all existing sessions with remote endpoints.
    * @memberof Owt.P2P.P2PClient
-   * @returns {Promise<undefined, Error>}
    */
   this.disconnect = function() {
     if (state == ConnectionState.READY) {

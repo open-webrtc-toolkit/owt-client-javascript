@@ -3,10 +3,9 @@
 // SPDX-License-Identifier: Apache-2.0
 
 'use strict';
-import Logger from './logger.js'
-import {OwtEvent} from './event.js'
-import * as Utils from './utils.js'
-import { EventDispatcher} from './event.js';
+import {OwtEvent} from './event.js';
+import * as Utils from './utils.js';
+import {EventDispatcher} from './event.js';
 
 // eslint-disable-next-line require-jsdoc
 function isAllowedValue(obj, allowedValues) {
