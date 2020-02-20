@@ -13,6 +13,7 @@
       "ignorePattern": "The above copyright notice and this permission notice shall be included in all",
       // Some lines for JSDoc is longer than 80.
       "ignoreComments": true
-    }]
+    }],
+    "indent": ["warn"]
   }
 }
