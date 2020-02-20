@@ -67,6 +67,7 @@ TestClient.prototype = {
       var hasVideo = that.hasVideo(localStream)
       var hasAudio = that.hasAudio(localStream)
       if(hasVideo && hasAudio){
+        that.debug("Create stream success");
         that.request["createLocal_success"]++
       }else{
         console.log("hasVideo is "+hasVideo +" and hasAudio is "+hasAudio);
@@ -74,7 +75,6 @@ TestClient.prototype = {
       }
       that.request["localStreamId"] = localStream.id;
       that.debug("Create stream id:", localStream.id);
-      that.showInPage(localStream, "LOCAL STREAM"); 
     }, err=>{
           console.error('Failed to create MediaStream, '+err);
           that.request["createLocal_failed"]++;
@@ -104,7 +104,6 @@ TestClient.prototype = {
       }
       that.request["localStreamId"] = localStream.id;
       that.debug("Create stream id:", localStream.id);
-      that.showInPage(localStream, "LOCAL STREAM");
     }, err=>{
           console.error('Failed to create MediaStream, '+err);
           that.request["createLocal_failed"]++;
@@ -130,7 +129,6 @@ TestClient.prototype = {
       }
       that.request["localStreamId"] = localStream.id;
       that.debug("Create stream id:", localStream.id);
-      that.showInPage(localStream, "LOCAL STREAM");
     }, err=>{
           console.error('Failed to create MediaStream, '+err);
           that.request["createLocal_failed"]++;
@@ -250,21 +248,6 @@ TestClient.prototype = {
     return result
   },
 
-  showInPage: function(stream) {
-    var that = this;
-    var video = document.createElement("video"),
-    videoId = "stream" + stream.id;
-    video.setAttribute("id", videoId);
-    video.setAttribute("width", "320px");
-    video.setAttribute("height", "240px");
-    video.setAttribute("class", "video");
-    video.setAttribute("autoplay", "autoplay");
-    console.log('added video:'+stream.mediaStream);
-    document.body.appendChild(video);
-    var para = document.createElement("p");
-    document.body.appendChild(para);
-    video.srcObject = stream.mediaStream
-  },
 };
 
 TestClient.prototype.constructor = TestClient;
