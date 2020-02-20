@@ -137,7 +137,8 @@ export class Publication extends EventDispatcher {
     /**
      * @function stop
      * @instance
-     * @desc Stop certain publication. Once a subscription is stopped, it cannot be recovered.
+     * @desc Stop certain publication. Once a subscription is stopped, it cannot
+     * be recovered.
      * @memberof Owt.Base.Publication
      * @returns {undefined}
      */
@@ -174,7 +175,8 @@ export class Publication extends EventDispatcher {
 /**
  * @class PublishOptions
  * @memberOf Owt.Base
- * @classDesc PublishOptions defines options for publishing a Owt.Base.LocalStream.
+ * @classDesc PublishOptions defines options for publishing a
+ * Owt.Base.LocalStream.
  */
 export class PublishOptions {
   // eslint-disable-next-line require-jsdoc

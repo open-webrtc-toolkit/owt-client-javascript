@@ -42,7 +42,9 @@ export const EventDispatcher = function() {
 
   /**
    * @function addEventListener
-   * @desc This function registers a callback function as a handler for the corresponding event. It's shortened form is on(eventType, listener). See the event description in the following table.
+   * @desc This function registers a callback function as a handler for the
+   * corresponding event. It's shortened form is on(eventType, listener). See
+   * the event description in the following table.
    * @instance
    * @memberof Owt.Base.EventDispatcher
    * @param {string} eventType Event string.
@@ -136,7 +138,8 @@ export class MessageEvent extends OwtEvent {
      * @member {string} to
      * @instance
      * @memberof Owt.Base.MessageEvent
-     * @desc Values could be "all", "me" in conference mode, or undefined in P2P mode..
+     * @desc Values could be "all", "me" in conference mode, or undefined in
+     * P2P mode.
      */
     this.to = init.to;
   }

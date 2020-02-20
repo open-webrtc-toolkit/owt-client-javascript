@@ -34,7 +34,8 @@ export class AudioCodecParameters {
      * @member {string} name
      * @memberof Owt.Base.AudioCodecParameters
      * @instance
-     * @desc Name of a codec. Please use a value in Owt.Base.AudioCodec. However, some functions do not support all the values in Owt.Base.AudioCodec.
+     * @desc Name of a codec. Please a value in Oms.Base.AudioCodec. However,
+     * some functions do not support all the values in Oms.Base.AudioCodec.
      */
     this.name = name;
     /**
@@ -105,7 +106,8 @@ export class VideoCodecParameters {
      * @member {string} name
      * @memberof Owt.Base.VideoCodecParameters
      * @instance
-     * @desc Name of a codec. Please use a value in Owt.Base.VideoCodec. However, some functions do not support all the values in Owt.Base.AudioCodec.
+     * @desc Name of a codec.Please a value in Oms.Base.AudioCodec.However,
+       some functions do not support all the values in Oms.Base.AudioCodec.
      */
     this.name = name;
     /**

@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 /* eslint-disable require-jsdoc */
-/* global Promise */
+/* global Promise, RTCPeerConnection */
 
 'use strict';
 
@@ -24,7 +24,8 @@ import * as SdpUtils from '../base/sdputils.js';
 
 /**
  * @class ConferencePeerConnectionChannel
- * @classDesc A channel for a connection between client and conference server. Currently, only one stream could be tranmitted in a channel.
+ * @classDesc A channel for a connection between client and conference server.
+ * Currently, only one stream could be tranmitted in a channel.
  * @hideconstructor
  * @private
  */
@@ -53,7 +54,8 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
 
   /**
    * @function onMessage
-   * @desc Received a message from conference portal. Defined in client-server protocol.
+   * @desc Received a message from conference portal. Defined in client-server
+   * protocol.
    * @param {string} notification Notification type.
    * @param {object} message Message received.
    * @private
@@ -79,8 +81,10 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
 
   publish(stream, options, videoCodecs) {
     if (options === undefined) {
-      options = {audio: !!stream.mediaStream.getAudioTracks().length, video: !!stream
-          .mediaStream.getVideoTracks().length};
+      options = {
+        audio: !!stream.mediaStream.getAudioTracks().length,
+        video: !!stream.mediaStream.getVideoTracks().length,
+      };
     }
     if (typeof options !== 'object') {
       return Promise.reject(new TypeError('Options should be an object.'));
@@ -90,7 +94,8 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
         (this._isOwtEncodingParameters(options.audio) &&
          this._isRtpEncodingParameters(options.video))) {
       return Promise.reject(new ConferenceError(
-          'Mixing RTCRtpEncodingParameters and AudioEncodingParameters/VideoEncodingParameters is not allowed.'))
+          'Mixing RTCRtpEncodingParameters and ' +
+          'AudioEncodingParameters/VideoEncodingParameters is not allowed.'));
     }
     if (options.audio === undefined) {
       options.audio = !!stream.mediaStream.getAudioTracks().length;
@@ -203,13 +208,13 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
         if (mediaOptions.audio && stream.mediaStream.getAudioTracks().length >
           0) {
           const transceiverInit = {
-            direction: 'sendonly'
+            direction: 'sendonly',
           };
           if (this._isRtpEncodingParameters(options.audio)) {
             transceiverInit.sendEncodings = options.audio;
           }
-          const transceiver = this._pc.addTransceiver(stream.mediaStream.getAudioTracks()[0],
-            transceiverInit);
+          const transceiver = this._pc.addTransceiver(
+              stream.mediaStream.getAudioTracks()[0], transceiverInit);
 
           if (Utils.isFirefox()) {
             // Firefox does not support encodings setting in addTransceiver.
@@ -221,32 +226,36 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
         if (mediaOptions.video && stream.mediaStream.getVideoTracks().length >
           0) {
           const transceiverInit = {
-            direction: 'sendonly'
+            direction: 'sendonly',
           };
           if (this._isRtpEncodingParameters(options.video)) {
             transceiverInit.sendEncodings = options.video;
             this._videoCodecs = videoCodecs;
           }
-          const transceiver = this._pc.addTransceiver(stream.mediaStream.getVideoTracks()[0],
-            transceiverInit);
+          const transceiver = this._pc.addTransceiver(
+              stream.mediaStream.getVideoTracks()[0], transceiverInit);
 
           if (Utils.isFirefox()) {
             // Firefox does not support encodings setting in addTransceiver.
             const parameters = transceiver.sender.getParameters();
             parameters.encodings = transceiverInit.sendEncodings;
             setPromise = setPromise.then(
-              () => transceiver.sender.setParameters(parameters));
+                () => transceiver.sender.setParameters(parameters));
           }
         }
         return setPromise.then(() => offerOptions);
       } else {
-        if (mediaOptions.audio && stream.mediaStream.getAudioTracks().length > 0) {
-          for (const track of stream.mediaStream.getAudioTracks())
+        if (mediaOptions.audio &&
+            stream.mediaStream.getAudioTracks().length > 0) {
+          for (const track of stream.mediaStream.getAudioTracks()) {
             this._pc.addTrack(track, stream.mediaStream);
+          }
         }
-        if (mediaOptions.video && stream.mediaStream.getVideoTracks().length > 0) {
-          for (const track of stream.mediaStream.getVideoTracks())
+        if (mediaOptions.video &&
+            stream.mediaStream.getVideoTracks().length > 0) {
+          for (const track of stream.mediaStream.getVideoTracks()) {
             this._pc.addTrack(track, stream.mediaStream);
+          }
         }
         offerOptions.offerToReceiveAudio = false;
         offerOptions.offerToReceiveVideo = false;
@@ -351,7 +360,7 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
           framerate: options.video.frameRate,
           bitrate: options.video.bitrateMultiplier ? 'x'
               + options.video.bitrateMultiplier.toString() : undefined,
-          keyFrameInterval: options.video.keyFrameInterval
+          keyFrameInterval: options.video.keyFrameInterval,
         };
       }
       if (options.video.rid) {

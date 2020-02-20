@@ -5,7 +5,8 @@
 // This file doesn't have public APIs.
 /* eslint-disable valid-jsdoc */
 /* eslint-disable require-jsdoc */
-/* global Event, Map, Promise, RTCIceCandidate, navigator */
+/* global Event, Map, Promise, RTCIceCandidate, RTCSessionDescription,
+   RTCPeerConnection, navigator */
 
 'use strict';
 
@@ -860,8 +861,8 @@ class P2PPeerConnectionChannel extends EventDispatcher {
     this._pc.createOffer().then((desc) => {
       desc.sdp = this._setRtpReceiverOptions(desc.sdp);
       localDesc = desc;
-      if (this._pc.signalingState==='stable') {
-        return this._pc.setLocalDescription(desc).then(()=>{
+      if (this._pc.signalingState === 'stable') {
+        return this._pc.setLocalDescription(desc).then(() => {
           return this._sendSdp(localDesc);
         });
       }
@@ -894,8 +895,8 @@ class P2PPeerConnectionChannel extends EventDispatcher {
   }
 
   _logCurrentAndPendingLocalDescription() {
-    Logger.info('Current description: '+this._pc.currentLocalDescription);
-    Logger.info('Pending description: '+this._pc.pendingLocalDescription);
+    Logger.info('Current description: ' + this._pc.currentLocalDescription);
+    Logger.info('Pending description: ' + this._pc.pendingLocalDescription);
   }
 
   _getAndDeleteTrackSourceInfo(tracks) {
@@ -943,8 +944,8 @@ class P2PPeerConnectionChannel extends EventDispatcher {
       return;
     }
     if (!this._pc) {
-      Logger.debug('PeerConnection is not available before creating ' +
-         'DataChannel.');
+      Logger.debug(
+          'PeerConnection is not available before creating DataChannel.');
       return;
     }
     Logger.debug('Create data channel.');

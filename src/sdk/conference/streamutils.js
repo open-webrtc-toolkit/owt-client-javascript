@@ -47,15 +47,20 @@ function sortResolutions(x, y) {
  * @private
  */
 export function convertToPublicationSettings(mediaInfo) {
-  let audio = [],
-    video = [];
-  let audioCodec, videoCodec, resolution, framerate, bitrate, keyFrameInterval,
-    rid;
+  const audio = [];
+  const video = [];
+  let audioCodec;
+  let videoCodec;
+  let resolution;
+  let framerate;
+  let bitrate;
+  let keyFrameInterval;
+  let rid;
   if (mediaInfo.audio) {
     if (mediaInfo.audio.format) {
       audioCodec = new CodecModule.AudioCodecParameters(
-        mediaInfo.audio.format.codec, mediaInfo.audio.format.channelNum,
-        mediaInfo.audio.format.sampleRate);
+          mediaInfo.audio.format.codec, mediaInfo.audio.format.channelNum,
+          mediaInfo.audio.format.sampleRate);
     }
     audio.push(new PublicationModule.AudioPublicationSettings(audioCodec));
   }
@@ -63,13 +68,13 @@ export function convertToPublicationSettings(mediaInfo) {
     for (const videoInfo of mediaInfo.video.original) {
       if (videoInfo.format) {
         videoCodec = new CodecModule.VideoCodecParameters(
-          videoInfo.format.codec, videoInfo.format.profile);
+            videoInfo.format.codec, videoInfo.format.profile);
       }
       if (videoInfo.parameters) {
         if (videoInfo.parameters.resolution) {
           resolution = new MediaFormatModule.Resolution(
-            videoInfo.parameters.resolution.width,
-            videoInfo.parameters.resolution.height);
+              videoInfo.parameters.resolution.width,
+              videoInfo.parameters.resolution.height);
         }
         framerate = videoInfo.parameters.framerate;
         bitrate = videoInfo.parameters.bitrate * 1000;
@@ -79,7 +84,7 @@ export function convertToPublicationSettings(mediaInfo) {
         rid = videoInfo.simulcastRid;
       }
       video.push(new PublicationModule.VideoPublicationSettings(
-        videoCodec, resolution, framerate, bitrate, keyFrameInterval, rid));
+          videoCodec, resolution, framerate, bitrate, keyFrameInterval, rid));
     }
   }
   return new PublicationModule.PublicationSettings(audio, video);
@@ -91,11 +96,12 @@ export function convertToPublicationSettings(mediaInfo) {
  * @private
  */
 export function convertToSubscriptionCapabilities(mediaInfo) {
-  let audio; let video;
+  let audio;
+  let video;
   if (mediaInfo.audio) {
     const audioCodecs = [];
     if (mediaInfo.audio && mediaInfo.audio.optional &&
-      mediaInfo.audio.optional.format) {
+        mediaInfo.audio.optional.format) {
       for (const audioCodecInfo of mediaInfo.audio.optional.format) {
         const audioCodec = new CodecModule.AudioCodecParameters(
             audioCodecInfo.codec, audioCodecInfo.channelNum,
@@ -109,7 +115,7 @@ export function convertToSubscriptionCapabilities(mediaInfo) {
   if (mediaInfo.video) {
     const videoCodecs = [];
     if (mediaInfo.video && mediaInfo.video.optional &&
-      mediaInfo.video.optional.format) {
+        mediaInfo.video.optional.format) {
       for (const videoCodecInfo of mediaInfo.video.optional.format) {
         const videoCodec = new CodecModule.VideoCodecParameters(
             videoCodecInfo.codec, videoCodecInfo.profile);
