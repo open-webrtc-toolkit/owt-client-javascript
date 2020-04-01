@@ -321,8 +321,15 @@ export const ConferenceClient = function(config, signalingImpl) {
       if (!room) {
         return null;
       }
-      return new ConferenceInfo(room.id, Array.from(participants, (x) => x[
-          1]), Array.from(remoteStreams, (x) => x[1]), me);
+      return new ConferenceInfo(room.id, Array.from(participants
+        .values()), Array.from(remoteStreams.values()), me);
+    },
+  });
+
+  Object.defineProperty(this, 'channels', {
+    configurable: false,
+    get: () => {
+      return Array.from(channels.values());
     },
   });
 

@@ -112,6 +112,13 @@ const P2PClient = function(configuration, signalingChannel) {
     self.dispatchEvent(new OwtEvent('serverdisconnected'));
   };
 
+  Object.defineProperty(this, 'channels', {
+    configurable: false,
+    get: () => {
+      return Array.from(channels.values());
+    },
+  });
+
   /**
    * @member {array} allowedRemoteIds
    * @memberof Owt.P2P.P2PClient
