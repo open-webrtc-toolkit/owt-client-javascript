@@ -122,6 +122,7 @@ export function sysInfo() {
     continualIceGathering: false,
     unifiedPlan: true,
     streamRemovable: info.runtime.name !== 'Firefox',
+    ignoreDataChannelAcks: true,
   };
   return info;
 }

@@ -83,6 +83,7 @@ class P2PPeerConnectionChannel extends EventDispatcher {
     this._remoteSideSupportsRemoveStream = true;
     this._remoteSideSupportsPlanB = true;
     this._remoteSideSupportsUnifiedPlan = true;
+    this._remoteSideIgnoresDataChannelAcks = false;
     this._remoteIceCandidates = [];
     this._dataChannels = new Map(); // Key is data channel's label, value is a RTCDataChannel.
     this._pendingMessages = [];
@@ -151,24 +152,25 @@ class P2PPeerConnectionChannel extends EventDispatcher {
       id: this._dataSeq++,
       data: message,
     };
-    const promise = new Promise((resolve, reject) => {
-      this._sendDataPromises.set(data.id, {
-        resolve: resolve,
-        reject: reject,
-      });
-    });
     if (!this._dataChannels.has(DataChannelLabel.MESSAGE)) {
       this._createDataChannel(DataChannelLabel.MESSAGE);
     }
 
     const dc = this._dataChannels.get(DataChannelLabel.MESSAGE);
     if (dc.readyState === 'open') {
-      this._dataChannels.get(DataChannelLabel.MESSAGE).send(
-          JSON.stringify(data));
+      this._dataChannels.get(DataChannelLabel.MESSAGE)
+          .send(JSON.stringify(data));
+      return Promise.resolve();
     } else {
       this._pendingMessages.push(data);
+      const promise = new Promise((resolve, reject) => {
+        this._sendDataPromises.set(data.id, {
+          resolve: resolve,
+          reject: reject,
+        });
+      });
+      return promise;
     }
-    return promise;
   }
 
   /**
@@ -601,8 +603,9 @@ class P2PPeerConnectionChannel extends EventDispatcher {
 
   _onDataChannelMessage(event) {
     const message=JSON.parse(event.data);
-    Logger.debug('Data channel message received: '+message.data);
-    this._sendSignalingMessage(SignalingType.DATA_RECEIVED, message.id);
+    if (!this._remoteSideIgnoresDataChannelAcks) {
+      this._sendSignalingMessage(SignalingType.DATA_RECEIVED, message.id);
+    }
     const messageEvent = new MessageEvent('messagereceived', {
       message: message.data,
       origin: this._remoteId,
@@ -763,9 +766,13 @@ class P2PPeerConnectionChannel extends EventDispatcher {
     const dc = this._dataChannels.get(DataChannelLabel.MESSAGE);
     if (dc && dc.readyState === 'open') {
       for (let i = 0; i < this._pendingMessages.length; i++) {
-        Logger.debug('Sending message via data channel: ' +
-            this._pendingMessages[i]);
+        Logger.debug(
+            'Sending message via data channel: ' + this._pendingMessages[i]);
         dc.send(JSON.stringify(this._pendingMessages[i]));
+        const messageId = this._pendingMessages[i].id;
+        if (this._sendDataPromises.has(messageId)) {
+          this._sendDataPromises.get(messageId).resolve();
+        }
       }
       this._pendingMessages.length = 0;
     } else if (this._pc && !dc) {
@@ -808,6 +815,10 @@ class P2PPeerConnectionChannel extends EventDispatcher {
       this._remoteSideSupportsRemoveStream = true;
       this._remoteSideSupportsPlanB = true;
       this._remoteSideSupportsUnifiedPlan = false;
+    }
+    if (ua.capabilities) {
+      this._remoteSideIgnoresDataChannelAcks =
+          ua.capabilities.ignoreDataChannelAcks;
     }
   }
 
