@@ -661,7 +661,7 @@ class P2PPeerConnectionChannel extends EventDispatcher {
       this._pc.addTransceiver('audio');
       this._pc.addTransceiver('video');
     }
-    if (!this._isUnifiedPlan()) {
+    if (!this._isUnifiedPlan() && !Utils.isSafari()) {
       this._pc.onaddstream = (event) => {
         // TODO: Legacy API, should be removed when all UAs implemented WebRTC 1.0.
         this._onRemoteStreamAdded.apply(this, [event]);
