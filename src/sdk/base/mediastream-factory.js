@@ -149,11 +149,6 @@ export class MediaStreamFactory {
       return Promise.reject(
           new TypeError('Cannot share screen without video.'));
     }
-    if (isVideoConstrainsForScreenCast(constraints) && !utils.isChrome() &&
-        !utils.isFirefox()) {
-      return Promise.reject(
-          new TypeError('Screen sharing only supports Chrome and Firefox.'));
-    }
     if (isVideoConstrainsForScreenCast(constraints) &&
         typeof constraints.audio === 'object' &&
         constraints.audio.source !==
