@@ -152,7 +152,7 @@ class P2PPeerConnectionChannel extends EventDispatcher {
       data: message,
     };
     const promise = new Promise((resolve, reject) => {
-      this._sendDataPromises.set(data.id, {
+      this._sendDataPromises.set(data.id.toString(), {
         resolve: resolve,
         reject: reject,
       });
@@ -232,7 +232,7 @@ class P2PPeerConnectionChannel extends EventDispatcher {
   }
 
   _SignalingMesssageHandler(message) {
-    Logger.debug('Channel received message: ' + message);
+    Logger.debug('Channel received message: ' + JSON.stringify(message));
     switch (message.type) {
       case SignalingType.UA:
         this._handleRemoteCapability(message.data);
@@ -764,7 +764,7 @@ class P2PPeerConnectionChannel extends EventDispatcher {
     if (dc && dc.readyState === 'open') {
       for (let i = 0; i < this._pendingMessages.length; i++) {
         Logger.debug('Sending message via data channel: ' +
-            this._pendingMessages[i]);
+            JSON.stringify(this._pendingMessages[i]));
         dc.send(JSON.stringify(this._pendingMessages[i]));
       }
       this._pendingMessages.length = 0;
