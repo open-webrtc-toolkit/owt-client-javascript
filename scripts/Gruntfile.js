@@ -263,5 +263,5 @@ window.L = L;\n\
   grunt.registerTask('pack', ['browserify:dist', 'concat:rest', 'uglify:dist', 'copy:dist', 'string-replace', 'compress:dist', 'jsdoc:dist']);
   grunt.registerTask('dev', ['browserify:dev', 'connect:server']);
   grunt.registerTask('debug', ['browserify:dev']);
-  grunt.registerTask('default', ['pack']);
+  grunt.registerTask('default', ['check', 'pack']);
 };

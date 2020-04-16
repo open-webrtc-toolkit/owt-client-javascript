@@ -115,21 +115,26 @@ export class StreamConstraints {
 // eslint-disable-next-line require-jsdoc
 function isVideoConstrainsForScreenCast(constraints) {
   return (typeof constraints.video === 'object' && constraints.video.source ===
-    MediaFormatModule.VideoSourceInfo.SCREENCAST);
+      MediaFormatModule.VideoSourceInfo.SCREENCAST);
 }
 
 /**
  * @class MediaStreamFactory
- * @classDesc A factory to create MediaStream. You can also create MediaStream by yourself.
+ * @classDesc A factory to create MediaStream. You can also create MediaStream
+ * by yourself.
  * @memberof Owt.Base
  */
 export class MediaStreamFactory {
   /**
    * @function createMediaStream
    * @static
-   * @desc Create a MediaStream with given constraints. If you want to create a MediaStream for screen cast, please make sure both audio and video's source are "screen-cast".
+   * @desc Create a MediaStream with given constraints. If you want to create a
+   * MediaStream for screen cast, please make sure both audio and video's source
+   * are "screen-cast".
    * @memberof Owt.Base.MediaStreamFactory
-   * @return {Promise<MediaStream, Error>} Return a promise that is resolved when stream is successfully created, or rejected if one of the following error happened:
+   * @return {Promise<MediaStream, Error>} Return a promise that is resolved
+   * when stream is successfully created, or rejected if one of the following
+   * error happened:
    * - One or more parameters cannot be satisfied.
    * - Specified device is busy.
    * - Cannot obtain necessary permission or operation is canceled by user.
