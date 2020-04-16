@@ -209,6 +209,7 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
           0) {
           const transceiverInit = {
             direction: 'sendonly',
+            streams: [stream.mediaStream]
           };
           if (this._isRtpEncodingParameters(options.audio)) {
             transceiverInit.sendEncodings = options.audio;
@@ -227,6 +228,7 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
           0) {
           const transceiverInit = {
             direction: 'sendonly',
+            streams: [stream.mediaStream]
           };
           if (this._isRtpEncodingParameters(options.video)) {
             transceiverInit.sendEncodings = options.video;
@@ -595,6 +597,10 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
   }
 
   _createPeerConnection() {
+    if (this._pc) {
+      return;
+    }
+
     const pcConfiguration = this._config.rtcConfiguration || {};
     if (Utils.isChrome()) {
       pcConfiguration.sdpSemantics = 'unified-plan';
