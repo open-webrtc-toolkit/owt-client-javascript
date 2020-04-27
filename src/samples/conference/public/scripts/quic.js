@@ -4,10 +4,11 @@
 
 'use strict';
 
-//const conference = new Owt.Conference.ConferenceClient();
-let quicTransport=null;
+// const conference = new Owt.Conference.ConferenceClient();
+let quicTransport = null;
 let bidirectionalStream = null;
 let writeTask;
+const conference=new Owt.Conference.ConferenceClient();
 
 function updateConferenceStatus(message) {
   document.getElementById('conference-status').innerHTML +=
@@ -16,7 +17,7 @@ function updateConferenceStatus(message) {
 
 
 function joinConference() {
-  const host = 'http://' + document.location.hostname + ':3001';
+  const host = 'http://jianjunz-nuc-ubuntu.sh.intel.com:3001';
   return new Promise((resolve, reject) => {
     createToken(undefined, 'user', 'presenter', resp => {
       conference.join(resp).then(() => {
@@ -27,12 +28,22 @@ function joinConference() {
   });
 };
 
-function createQuicTransport(){
-  quicTransport= new QuicTransport('quic-transport://jianjunz-nuc-ubuntu.sh.intel.com:7700/echo');
-  quicTransport.onstatechange=()=>{
+function createQuicTransport() {
+  quicTransport = new QuicTransport(
+      'quic-transport://jianjunz-nuc-ubuntu.sh.intel.com:7700/echo');
+  quicTransport.onstatechange = () => {
     console.log('QuicTransport state changed.');
   };
   return quicTransport.ready;
+}
+
+function createRandomContentSessionId() {
+  const length = 16;
+  const id = new Uint8Array(length);
+  for (let i = 0; i < length; i++) {
+    id[i] = Math.random() * 255;
+  }
+  return id;
 }
 
 async function createSendChannel() {
@@ -41,9 +52,20 @@ async function createSendChannel() {
 }
 
 async function windowOnLoad() {
-  //await joinConference();
+  await joinConference();
   await createQuicTransport();
   await createSendChannel();
+}
+
+async function writeUuid() {
+  const uuid = createRandomContentSessionId();
+  const encoder = new TextEncoder();
+  const encoded = encoder.encode(uuid, {stream: true});
+  const writer = bidirectionalStream.writable.getWriter();
+  await writer.ready;
+  writer.write(uuid);
+  writer.releaseLock();
+  return;
 }
 
 async function writeData() {
@@ -51,7 +73,7 @@ async function writeData() {
   const encoded = encoder.encode('message', {stream: true});
   const writer = bidirectionalStream.writable.getWriter();
   await writer.ready;
-  await writer.write(new ArrayBuffer(90000000));
+  await writer.write(new ArrayBuffer(2));
   writer.releaseLock();
   return;
 }
@@ -60,12 +82,13 @@ window.addEventListener('load', () => {
   windowOnLoad();
 });
 
-document.getElementById('start-sending').addEventListener('click', () => {
+document.getElementById('start-sending').addEventListener('click', async () => {
   if (!bidirectionalStream) {
     updateConferenceStatus('Stream is not created.');
     return;
   }
-  writeTask = setInterval(writeData, 500);
+  await writeUuid();
+  // writeTask = setInterval(writeData, 500);
   updateConferenceStatus('Started sending.');
 });
 
