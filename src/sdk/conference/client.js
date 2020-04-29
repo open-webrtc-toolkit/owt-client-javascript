@@ -16,7 +16,7 @@ import * as StreamModule from '../base/stream.js'
 import { Participant } from './participant.js'
 import { ConferenceInfo } from './info.js'
 import { ConferencePeerConnectionChannel, ConferenceQuicChannel } from './channel.js'
-import { ConferenceDataChannel } from './datachannel.js'
+import { QuicChannel } from './quicchannel.js'
 import { RemoteMixedStream, ActiveAudioInputChangeEvent, LayoutChangeEvent } from './mixedstream.js'
 import * as StreamUtilsModule from './streamutils.js'
 import { timingSafeEqual, createSign } from 'crypto';
@@ -113,9 +113,7 @@ export const ConferenceClient = function(config, signalingImpl) {
   const participants = new Map(); // Key is participant ID, value is a Participant object.
   const publishChannels = new Map(); // Key is MediaStream's ID, value is pc channel.
   const channels = new Map(); // Key is channel's internal ID, value is channel.
-  let dataChannel = null;
-  let dataChannelId = null;
-  let incomingDataChannels = new Map(); // TODO: Mutiplexing.
+  const quicTransportChannels = [];
 
   /**
    * @function onSignalingMessage
@@ -491,11 +489,11 @@ export const ConferenceClient = function(config, signalingImpl) {
    * @desc Create a bidirectional stream.
    * @return {Promise<void, Error>} Returned promise will be resolved with a bidirectional stream once stream is created.
    */
-  this.createDataStream = function() {
-    dataChannel = createDataChannel();
-    dataChannel.addEventListener('id', (messageEvent) => {
-      dataChannelId = messageEvent.message;
-    });
-    return dataChannel.createStream();
+  this.createQuicChannel = function() {
+    const quicChannel = new QuicChannel(
+      'quic-transport://jianjunz-nuc-ubuntu.sh.intel.com:7700/echo',
+      createSignalingForChannel());
+    quicTransportChannels.push(quicChannel);
+    return quicChannel;
   };
 };

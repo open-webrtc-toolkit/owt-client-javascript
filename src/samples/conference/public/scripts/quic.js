@@ -4,8 +4,7 @@
 
 'use strict';
 
-// const conference = new Owt.Conference.ConferenceClient();
-let quicTransport = null;
+let quicChannel = null;
 let bidirectionalStream = null;
 let writeTask;
 const conference=new Owt.Conference.ConferenceClient();
@@ -29,8 +28,10 @@ function joinConference() {
 };
 
 function createQuicTransport() {
+  quicChannel = conference.createQuicChannel();
+  return;
   quicTransport = new QuicTransport(
-      'quic-transport://jianjunz-nuc-ubuntu.sh.intel.com:7700/echo');
+    'quic-transport://jianjunz-nuc-ubuntu.sh.intel.com:7700/echo');
   quicTransport.onstatechange = () => {
     console.log('QuicTransport state changed.');
   };
@@ -47,7 +48,7 @@ function createRandomContentSessionId() {
 }
 
 async function createSendChannel() {
-  bidirectionalStream = await quicTransport.createSendStream();
+  bidirectionalStream = await quicChannel.createSendStream();
   updateConferenceStatus('Created send channel.');
 }
 
