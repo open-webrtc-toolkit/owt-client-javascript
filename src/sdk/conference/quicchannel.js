@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 /* eslint-disable require-jsdoc */
-/* global Promise */
+/* global Promise, Map, QuicTransport, Uint8Array */
 
 'use strict';
 
@@ -24,7 +24,7 @@ export class QuicChannel extends EventDispatcher {
     super();
     this._signaling = signaling;
     this._ended = false;
-    this._quicStreams = new Map();  // Key is publication or subscription ID.
+    this._quicStreams = new Map(); // Key is publication or subscription ID.
     this._quicTransport = new QuicTransport(url);
   }
 
@@ -57,9 +57,23 @@ export class QuicChannel extends EventDispatcher {
   async createSendStream(sessionId) {
     Logger.info('Create stream.');
     await this._quicTransport.ready;
-    const quicStream=this._quicTransport.createSendStream();
-    const publicationId=await this._initializePublication();
-    // Send publication ID to quicStream.
+    // TODO: Creating quicStream and initializing publication concurrently.
+    const quicStream = await this._quicTransport.createSendStream();
+    const publicationId = await this._initializePublication();
+    const writer= quicStream.writable.getWriter();
+    await writer.ready;
+    writer.write(this.uuidToUint8Array(publicationId));
+  }
+
+  uuidToUint8Array(uuidString) {
+    if (uuidString.length != 32) {
+      throw new TypeError('Incorrect UUID.');
+    }
+    const uuidArray = new Uint8Array(16);
+    for (let i = 0; i < 16; i++) {
+      uuidArray[i] = parseInt(uuidString.substring(i * 2, i * 2 + 2), 16);
+    }
+    return uuidArray;
   }
 
   /**
