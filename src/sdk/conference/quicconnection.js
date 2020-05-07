@@ -14,12 +14,12 @@ import {
 } from '../base/event.js';
 
 /**
- * @class QuicChannel
+ * @class QuicConnection
  * @classDesc A channel for a QUIC transport between client and conference server.
  * @hideconstructor
  * @private
  */
-export class QuicChannel extends EventDispatcher {
+export class QuicConnection extends EventDispatcher {
   constructor(url, signaling) {
     super();
     this._signaling = signaling;
@@ -63,6 +63,11 @@ export class QuicChannel extends EventDispatcher {
     const writer= quicStream.writable.getWriter();
     await writer.ready;
     writer.write(this.uuidToUint8Array(publicationId));
+    this._quicStreams.set(publicationId, quicStream);
+  }
+
+  hasContentSessionId(id) {
+    return this._quicStreams.has(id);
   }
 
   uuidToUint8Array(uuidString) {
@@ -73,6 +78,7 @@ export class QuicChannel extends EventDispatcher {
     for (let i = 0; i < 16; i++) {
       uuidArray[i] = parseInt(uuidString.substring(i * 2, i * 2 + 2), 16);
     }
+    console.log(uuidArray);
     return uuidArray;
   }
 
@@ -119,8 +125,13 @@ export class QuicChannel extends EventDispatcher {
   async _initializePublication() {
     const data = await this._signaling.sendSignalingMessage('publish', {
       media: null,
-      data: true
+      data: true,
+      transport: {type:'quic'}
     });
     return data.id;
+  }
+
+  _readyHandler() {
+    // Ready message from server is useless for QuicStream since QuicStream has its own status. Do nothing here.
   }
 };

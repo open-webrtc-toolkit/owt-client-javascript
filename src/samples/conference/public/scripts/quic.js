@@ -28,7 +28,7 @@ function joinConference() {
 };
 
 function createQuicTransport() {
-  quicChannel = conference.createQuicChannel();
+  quicChannel = conference.createQuicConnection();
   return;
   quicTransport = new QuicTransport(
     'quic-transport://jianjunz-nuc-ubuntu.sh.intel.com:7700/echo');

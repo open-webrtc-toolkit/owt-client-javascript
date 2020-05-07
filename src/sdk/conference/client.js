@@ -15,11 +15,10 @@ import * as Utils from '../base/utils.js'
 import * as StreamModule from '../base/stream.js'
 import { Participant } from './participant.js'
 import { ConferenceInfo } from './info.js'
-import { ConferencePeerConnectionChannel, ConferenceQuicChannel } from './channel.js'
-import { QuicChannel } from './quicchannel.js'
+import { ConferencePeerConnectionChannel } from './channel.js'
+import { QuicConnection } from './quicconnection.js'
 import { RemoteMixedStream, ActiveAudioInputChangeEvent, LayoutChangeEvent } from './mixedstream.js'
 import * as StreamUtilsModule from './streamutils.js'
-import { timingSafeEqual, createSign } from 'crypto';
 
 const SignalingState = {
   READY: 1,
@@ -113,7 +112,7 @@ export const ConferenceClient = function(config, signalingImpl) {
   const participants = new Map(); // Key is participant ID, value is a Participant object.
   const publishChannels = new Map(); // Key is MediaStream's ID, value is pc channel.
   const channels = new Map(); // Key is channel's internal ID, value is channel.
-  const quicTransportChannels = [];
+  let quicTransportChannel = null;
 
   /**
    * @function onSignalingMessage
@@ -126,10 +125,9 @@ export const ConferenceClient = function(config, signalingImpl) {
     if (notification === 'soac' || notification === 'progress') {
       if (channels.has(data.id)) {
         channels.get(data.id).onMessage(notification, data);
-      } else if (dataChannelId === data.id) {
-        dataChannel.onMessage(notification, data);
-      } else if (incomingDataChannels.has(data.id)){
-        incomingDataChannels.get(data.id).onMessage(notification, data);
+      } else if (quicTransportChannel && quicTransportChannel
+        .hasContentSessionId(data.id)) {
+        quicTransportChannel.onMessage(notification, data);
       } else {
         Logger.warning('Cannot find a channel for incoming data.');
       }
@@ -311,12 +309,7 @@ export const ConferenceClient = function(config, signalingImpl) {
   // eslint-disable-next-line require-jsdoc
   function createPeerConnectionChannel(transport) {
     const signalingForChannel = createSignalingForChannel();
-    let channel;
-    if (transport && transport.protocol === 'quic') {
-      channel = new ConferenceQuicChannel(config, signalingForChannel);
-    } else {
-      channel = new ConferencePeerConnectionChannel(config, signalingForChannel);
-    }
+    const channel = new ConferencePeerConnectionChannel(config, signalingForChannel);
     channel.addEventListener('id', (messageEvent) => {
       channels.set(messageEvent.message, channel);
     });
@@ -489,11 +482,11 @@ export const ConferenceClient = function(config, signalingImpl) {
    * @desc Create a bidirectional stream.
    * @return {Promise<void, Error>} Returned promise will be resolved with a bidirectional stream once stream is created.
    */
-  this.createQuicChannel = function() {
-    const quicChannel = new QuicChannel(
+  this.createQuicConnection = function() {
+    const quicConnection = new QuicConnection(
       'quic-transport://jianjunz-nuc-ubuntu.sh.intel.com:7700/echo',
       createSignalingForChannel());
-    quicTransportChannels.push(quicChannel);
-    return quicChannel;
+    quicTransportChannel=quicConnection;
+    return quicConnection;
   };
 };
