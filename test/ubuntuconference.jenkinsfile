@@ -65,7 +65,7 @@ pipeline {
 
                             node('api-js-ubuntu-'+env.GIT_BRANCH) {
                                 container('test-images') {
-                                   sh "/root/startRun.sh * * ubuntu test ${env.GIT_COMMIT} ConferenceClient_API_1"
+                                   sh "/root/startRun.sh * * ubuntu test ${env.GIT_COMMIT} ConferenceClient_API_1 $env.GIT_BRANCH"
                                 }
                             }
                         }
@@ -85,7 +85,7 @@ pipeline {
 
                             node('rest-js-ubuntu-'+env.GIT_BRANCH) {
                                 container('test-images') {
-                                   sh "/root/startRun.sh * * ubuntu test ${env.GIT_COMMIT} ConferenceClient_API_2"
+                                   sh "/root/startRun.sh * * ubuntu test ${env.GIT_COMMIT} ConferenceClient_API_2 $env.GIT_BRANCH"
                                 }
                             }
                         }
