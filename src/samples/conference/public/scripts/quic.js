@@ -8,6 +8,21 @@ let quicChannel = null;
 let bidirectionalStream = null;
 let writeTask;
 const conference=new Owt.Conference.ConferenceClient();
+conference.addEventListener('streamadded', async (event) => {
+  console.log(event.stream);
+  if (event.stream.source.data) {
+    const subscription = await conference.subscribe(event.stream);
+    const reader = subscription.stream.readable.getReader();
+    while (true) {
+      const {value, done} = await reader.read();
+      if (done) {
+        console.log('Subscription ends.');
+        break;
+      }
+      console.log('Received data: '+value);
+    }
+  }
+});
 
 function updateConferenceStatus(message) {
   document.getElementById('conference-status').innerHTML +=

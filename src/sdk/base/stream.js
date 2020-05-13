@@ -25,10 +25,12 @@ function isAllowedValue(obj, allowedValues) {
  * "mic", "screen-cast", "file", "mixed" or undefined.
  * @param {?string} videoSourceInfo Video source info. Accepted values are:
  * "camera", "screen-cast", "file", "mixed" or undefined.
+ * @param {boolean} dataSourceInfo Indicates whether it is data. Accepted values
+ * are boolean.
  */
 export class StreamSourceInfo {
   // eslint-disable-next-line require-jsdoc
-  constructor(audioSourceInfo, videoSourceInfo) {
+  constructor(audioSourceInfo, videoSourceInfo, dataSourceInfo) {
     if (!isAllowedValue(audioSourceInfo, [undefined, 'mic', 'screen-cast',
       'file', 'mixed'])) {
       throw new TypeError('Incorrect value for audioSourceInfo');
@@ -39,6 +41,7 @@ export class StreamSourceInfo {
     }
     this.audio = audioSourceInfo;
     this.video = videoSourceInfo;
+    this.data = dataSourceInfo;
   }
 }
 /**

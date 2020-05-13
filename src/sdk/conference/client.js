@@ -281,9 +281,11 @@ export const ConferenceClient = function(config, signalingImpl) {
       if (streamInfo.media.video) {
         videoSourceInfo = streamInfo.media.video.source;
       }
+      const dataSourceInfo = streamInfo.data;
       const stream = new StreamModule.RemoteStream(streamInfo.id,
-          streamInfo.info.owner, undefined, new StreamModule.StreamSourceInfo(
-              audioSourceInfo, videoSourceInfo), streamInfo.info.attributes);
+        streamInfo.info.owner, undefined, new StreamModule.StreamSourceInfo(
+          audioSourceInfo, videoSourceInfo, dataSourceInfo), streamInfo.info
+        .attributes);
       stream.settings = StreamUtilsModule.convertToPublicationSettings(
           streamInfo.media);
       stream.extraCapabilities = StreamUtilsModule
@@ -434,12 +436,14 @@ export const ConferenceClient = function(config, signalingImpl) {
     if (!(stream instanceof StreamModule.RemoteStream)) {
       return Promise.reject(new ConferenceError('Invalid stream.'));
     }
-    if(!stream.source.audio&&!stream.source.video){ // QUIC stream.
-      const dataChannel=createDataChannel();
-      dataChannel.addEventListener('id',messageEvent=>{
-        incomingDataChannels.set(messageEvent.message, dataChannel);
-      });
-      return dataChannel.subscribe(stream);
+    if (stream.source.data) {
+      if (stream.source.audio || stream.source.video) {
+        return Promise.reject(new TypeError(
+          'Invalid source info. A remote stream is either a data stream or a media stream.'
+          ));
+      }
+      return quicTransportChannel.subscribe(stream);
+      // TODO
     }
     const channel = createPeerConnectionChannel(options.transport);
     return channel.subscribe(stream, options);
@@ -484,7 +488,7 @@ export const ConferenceClient = function(config, signalingImpl) {
    */
   this.createQuicConnection = function() {
     const quicConnection = new QuicConnection(
-      'quic-transport://jianjunz-nuc-ubuntu.sh.intel.com:7700/echo',
+      'quic-transport://example.com', me.id,
       createSignalingForChannel());
     quicTransportChannel=quicConnection;
     return quicConnection;
