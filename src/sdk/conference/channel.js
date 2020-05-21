@@ -428,7 +428,7 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
       id: this._internalId,
       operation: 'update',
       data: {
-        video: {parameters: videoOptions},
+        video: {from: options.video.from, parameters: videoOptions},
       },
     }).then();
   }
