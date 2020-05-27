@@ -21,14 +21,15 @@ import {Subscription} from './subscription.js';
  * @private
  */
 export class QuicConnection extends EventDispatcher {
-  constructor(url, token, signaling) {
+  constructor(url, signaling) {
     super();
     this._signaling = signaling;
     this._ended = false;
     this._quicStreams = new Map(); // Key is publication or subscription ID.
     this._quicTransport = new QuicTransport(url);
     this._subscribePromises = new Map(); // Key is subscription ID.
-    this._init(token);
+    this._transportId = undefined;
+    this._init();
   }
 
   /**
@@ -57,8 +58,7 @@ export class QuicConnection extends EventDispatcher {
     }
   }
 
-  async _init(token) {
-    this._authenticate(token);
+  async _init() {
     const receiveStreamReader =
         this._quicTransport.receiveStreams().getReader();
     Logger.info('Reader: '+receiveStreamReader);
@@ -117,14 +117,16 @@ export class QuicConnection extends EventDispatcher {
   async createSendStream(sessionId) {
     Logger.info('Create stream.');
     await this._quicTransport.ready;
-    // TODO: Creating quicStream and initializing publication concurrently.
-    const quicStream = await this._quicTransport.createSendStream();
+    // TODO: Potential failure because of publication stream is created faster
+    // than signaling stream(created by the 1st call to initiatePublication).
     const publicationId = await this._initiatePublication();
+    const quicStream = await this._quicTransport.createSendStream();
     const writer= quicStream.writable.getWriter();
     await writer.ready;
     writer.write(this._uuidToUint8Array(publicationId));
-    writer.write(this._uuidToUint8Array(publicationId));
+    writer.releaseLock();
     this._quicStreams.set(publicationId, quicStream);
+    return quicStream;
   }
 
   hasContentSessionId(id) {
@@ -178,9 +180,11 @@ export class QuicConnection extends EventDispatcher {
   subscribe(stream) {
     const p = new Promise((resolve, reject) => {
       this._signaling
-          .sendSignalingMessage(
-              'subscribe',
-              {media: null, data: {from: stream.id}, transport: {type: 'quic'}})
+          .sendSignalingMessage('subscribe', {
+            media: null,
+            data: {from: stream.id},
+            transport: {type: 'quic', id: this._transportId},
+          })
           .then((data) => {
             if (this._quicStreams.has(data.id)) {
               // QUIC stream created before signaling returns.
@@ -188,6 +192,7 @@ export class QuicConnection extends EventDispatcher {
                   data.id, this._quicStreams.get(data.id));
               resolve(subscription);
             } else {
+              this._quicStreams.set(data.id, null);
               // QUIC stream is not created yet, resolve promise after getting
               // QUIC stream.
               this._subscribePromises.set(
@@ -207,12 +212,28 @@ export class QuicConnection extends EventDispatcher {
     });
   }
 
+  _updateTransportId(id) {
+    if (this._transportId) {
+      Logger.error('Update transport ID is not supported.');
+      return;
+    }
+    this._transportId = id;
+    this._authenticate(id);
+  }
+
   async _initiatePublication() {
     const data = await this._signaling.sendSignalingMessage('publish', {
       media: null,
       data: true,
-      transport: {type:'quic'}
+      transport: {type: 'quic', id: this._transportId},
     });
+    if (data.transportId) {
+      this._updateTransportId(data.transportId);
+    } else {
+      if (this._transportId !== data.transportId) {
+        throw new Error('Transport ID not match.');
+      }
+    }
     return data.id;
   }
 

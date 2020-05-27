@@ -52,7 +52,8 @@ window.L = L;\n\
           },
           transform: [
             ["babelify", {
-              "presets": ["@babel/preset-env"]
+              "presets": ["@babel/preset-env"],
+              "plugins": ["@babel/plugin-transform-runtime"]
             }]
           ]
         },

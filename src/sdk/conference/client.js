@@ -488,9 +488,9 @@ export const ConferenceClient = function(config, signalingImpl) {
    */
   this.createQuicConnection = function() {
     const quicConnection = new QuicConnection(
-      'quic-transport://example.com', me.id,
-      createSignalingForChannel());
-    quicTransportChannel=quicConnection;
+        'quic-transport://jianjunz-nuc-ubuntu.sh.intel.com:7700/echo',
+        createSignalingForChannel());
+    quicTransportChannel = quicConnection;
     return quicConnection;
   };
 };

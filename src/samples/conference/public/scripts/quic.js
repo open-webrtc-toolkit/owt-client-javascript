@@ -26,7 +26,7 @@ conference.addEventListener('streamadded', async (event) => {
 
 function updateConferenceStatus(message) {
   document.getElementById('conference-status').innerHTML +=
-      ('<p>' + message + '</p>');
+    ('<p>' + message + '</p>');
 }
 
 
@@ -104,7 +104,7 @@ document.getElementById('start-sending').addEventListener('click', async () => {
     return;
   }
   await writeUuid();
-  // writeTask = setInterval(writeData, 500);
+  writeTask = setInterval(writeData, 2000);
   updateConferenceStatus('Started sending.');
 });
 
