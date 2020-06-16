@@ -19,7 +19,7 @@ function SignalingChannel() {
 
   var self = this;
 
-  let connectPromise=null;
+  let connectPromise = null;
 
   var MAX_TRIALS = 10;
   var reconnectTimes = 0;
@@ -72,22 +72,22 @@ function SignalingChannel() {
 
     wsServer.on('server-authenticated', function(data) {
       console.log('Authentication passed. User ID: ' + data.uid);
-      if(connectPromise){
+      if (connectPromise) {
         connectPromise.resolve(data.uid);
       }
-      connectPromise=null;
+      connectPromise = null;
     });
 
-    wsServer.on('reconnecting', function(){
+    wsServer.on('reconnecting', function() {
       reconnectTimes++;
     });
 
-    wsServer.on('reconnect_failed', function(){
+    wsServer.on('reconnect_failed', function() {
       if (self.onServerDisconnected)
         self.onServerDisconnected();
     })
 
-    wsServer.on('server-disconnect', function(){
+    wsServer.on('server-disconnect', function() {
       reconnectTimes = MAX_TRIALS;
     })
 
@@ -110,7 +110,7 @@ function SignalingChannel() {
       console.error('Socket.IO error:' + err);
       if (err == '2103' && connectPromise) {
         connectPromise.reject(err)
-        connectPromise=null;
+        connectPromise = null;
       }
     });
 
