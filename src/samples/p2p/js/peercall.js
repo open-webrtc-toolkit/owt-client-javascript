@@ -3,45 +3,48 @@
 // SPDX-License-Identifier: Apache-2.0
 
 'use strict';
-var isVideo = 1;
-var serverAddress =
-  'https://example.com:8096'; // Please change example.com to signaling server's address.
+
+// Please change example.com to signaling server's address.
+const serverAddress = 'https://example.com:8096';
+
+// Please change this STUN and TURN server information.
+const rtcConfiguration = {
+  iceServers: [{
+    urls: 'stun:example.com:3478',
+  }, {
+    urls: [
+      'turn:example.com:3478?transport=udp',
+      'turn:example.com:3478?transport=tcp',
+    ],
+    credential: 'password',
+    username: 'username',
+  }],
+};
+
 const signaling = new SignalingChannel();
 let publicationForCamera;
-let publicationForScreen;
-var p2p = new Owt.P2P.P2PClient({
+const p2p = new Owt.P2P.P2PClient({
   audioEncodings: true,
   videoEncodings: [{
     codec: {
-      name: 'h264'
-    }
+      name: 'h264',
+    },
   }, {
     codec: {
-      name: 'vp9'
-    }
+      name: 'vp9',
+    },
   }, {
     codec: {
-      name: 'vp8'
-    }
+      name: 'vp8',
+    },
   }],
-  rtcConfiguration: {
-    iceServers: [{
-      urls: 'stun:example.com:3478'
-    }, {
-      urls: [
-        'turn:example.com:3478?transport=udp',
-        'turn:example.com:3478?transport=tcp'
-      ],
-      credential: 'password',
-      username: 'username'
-    }]
-  },
+  rtcConfiguration,
 }, signaling);
-var localStream;
-var localScreen;
-var screenStream;
 
-var getTargetId = function() {
+let localStream;
+let screenStream;
+
+const getTargetId = function() {
   return $('#remote-uid').val();
 };
 
@@ -51,28 +54,27 @@ $(document).ready(function() {
   });
 
   $('#target-screen').click(function() {
-    var config = {
+    const config = {
       audio: {
-        source: 'screen-cast'
+        source: 'screen-cast',
       },
       video: {
-        source: 'screen-cast'
-      }
-    }
+        source: 'screen-cast',
+      },
+    };
     let mediaStream;
     Owt.Base.MediaStreamFactory.createMediaStream(config).then(
-      stream => {
+      (stream) => {
         mediaStream = stream;
         screenStream = new Owt.Base.LocalStream(mediaStream, new Owt
           .Base.StreamSourceInfo('screen-cast', 'screen-cast'));
         $('#local').children('video').get(0).srcObject = screenStream
           .mediaStream;
-        p2p.publish(getTargetId(), screenStream).then(publication => {
-          publicationForScreen = publication;
-        }), error => {
+        p2p.publish(getTargetId(), screenStream).then(
+          (publication) => {}), (error) => {
           console.log('Failed to share screen.');
         };
-      }, err => {
+      }, (err) => {
         console.error('Failed to create MediaStream, ' + err);
       });
   });
@@ -91,9 +93,9 @@ $(document).ready(function() {
     $('#target-video-unpublish').prop('disabled', false);
     $('#target-video-publish').prop('disabled', true);
     if (localStream) {
-      p2p.publish(getTargetId(), localStream).then(publication => {
+      p2p.publish(getTargetId(), localStream).then((publication) => {
         publicationForCamera = publication;
-      }, error => {
+      }, (error) => {
         console.log('Failed to share video.');
       }); // Publish local stream to remote client
     } else {
@@ -104,19 +106,19 @@ $(document).ready(function() {
       let mediaStream;
       Owt.Base.MediaStreamFactory.createMediaStream(new Owt.Base
         .StreamConstraints(audioConstraintsForMic,
-          videoConstraintsForCamera)).then(stream => {
+          videoConstraintsForCamera)).then((stream) => {
         mediaStream = stream;
         localStream = new Owt.Base.LocalStream(mediaStream, new Owt
           .Base.StreamSourceInfo('mic', 'camera'));
         $('#local').children('video').get(0).srcObject = localStream
           .mediaStream;
         p2p.publish(getTargetId(), localStream).then(
-          publication => {
+          (publication) => {
             publicationForCamera = publication;
-          }, error => {
+          }, (error) => {
             console.log('Failed to share video.');
           });
-      }, err => {
+      }, (err) => {
         console.error('Failed to create MediaStream, ' + err);
       });
     }
@@ -129,10 +131,10 @@ $(document).ready(function() {
   $('#login').click(function() {
     p2p.connect({
       host: serverAddress,
-      token: $('#uid').val()
+      token: $('#uid').val(),
     }).then(() => {
       $('#uid').prop('disabled', true);
-    }, error => {
+    }, (error) => {
       console.log('Failed to connect to the signaling server.');
     }); // Connect to signaling server.
   });
@@ -148,28 +150,27 @@ $(document).ready(function() {
   });
 });
 
-p2p.addEventListener('streamadded', function(
-  e) { // A remote stream is available.
-  e.stream.addEventListener('ended', () => {
-    console.log('Stream is removed.');
+p2p.addEventListener('streamadded',
+  function(e) { // A remote stream is available.
+    e.stream.addEventListener('ended', () => {
+      console.log('Stream is removed.');
+    });
+    if (e.stream.source.video === 'screen-cast') {
+      $('#screen video').show();
+      $('#screen video').get(0).srcObject = e.stream.mediaStream;
+      $('#screen video').get(0).play();
+    } else if (e.stream.source.audio || e.stream.source.video) {
+      $('#remote video').show();
+      $('#remote video').get(0).srcObject = e.stream.mediaStream;
+      $('#remote video').get(0).play();
+    }
   });
-  if (e.stream.source.video === 'screen-cast') {
-    $('#screen video').show();
-    $('#screen video').get(0).srcObject = e.stream.mediaStream;
-    $('#screen video').get(0).play();
-  } else if (e.stream.source.audio || e.stream.source.video) {
-    $('#remote video').show();
-    $('#remote video').get(0).srcObject = e.stream.mediaStream;
-    $('#remote video').get(0).play();
-  }
-  isVideo++;
-});
 
-p2p.addEventListener('messagereceived', function(
-  e) { // Received data from datachannel.
-  $('#dataReceived').val(e.origin + ': ' + e.message);
-});
+p2p.addEventListener('messagereceived',
+  function(e) { // Received data from datachannel.
+    $('#dataReceived').val(e.origin + ': ' + e.message);
+  });
 
 window.onbeforeunload = function() {
   p2p.stop($('#remote-uid').val());
-}
+};

@@ -5,9 +5,9 @@ To run the server, you need to install node and npm, then change into the [owt-s
 After the dependencies are successfully installed, you can run the peer server by using the command `node peerserver.js`. It will listen on ports 8095/8096.
 
 ## Step 2:  Deploy p2p sample page and sdk on web server
-You need to edit the sample page `peercall.html`:
+You need to edit the sample file `peercall.js`:
 
- - Set serverAddress on line 112: change `example.com` to your p2p server address.
+ - Set serverAddress on line 8: change `example.com` to your p2p server address.
  - Set correct ICE server addresses below that.
 
 Then choose a webserver such as Apache, and deploy the page and the sdk.
