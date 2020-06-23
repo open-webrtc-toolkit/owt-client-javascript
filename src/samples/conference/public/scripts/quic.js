@@ -63,13 +63,15 @@ function createRandomContentSessionId() {
 }
 
 async function createSendChannel() {
-  bidirectionalStream = await quicChannel.createSendStream();
+  bidirectionalStream = await conference.createSendStream();
+  const localStream=new Owt.Base.LocalStream(bidirectionalStream, new Owt.Base.StreamSourceInfo(undefined, undefined,true));
+  const publication = await conference.publish(localStream);
+  console.log(publication);
   updateConferenceStatus('Created send channel.');
 }
 
 async function windowOnLoad() {
   await joinConference();
-  await createQuicTransport();
   await createSendChannel();
 }
 

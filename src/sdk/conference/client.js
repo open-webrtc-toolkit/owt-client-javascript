@@ -112,7 +112,7 @@ export const ConferenceClient = function(config, signalingImpl) {
   const participants = new Map(); // Key is participant ID, value is a Participant object.
   const publishChannels = new Map(); // Key is MediaStream's ID, value is pc channel.
   const channels = new Map(); // Key is channel's internal ID, value is channel.
-  let quicTransportChannel = null;
+  let quicTransportChannel;
 
   /**
    * @function onSignalingMessage
@@ -349,6 +349,12 @@ export const ConferenceClient = function(config, signalingImpl) {
    * @param {string} tokenString Token is issued by conference server(nuve).
    */
   this.join = function(tokenString) {
+    if (QuicConnection) {
+      // TODO: Get URL from token.
+      quicTransportChannel = new QuicConnection(
+          'quic-transport://jianjunz-nuc-ubuntu.sh.intel.com:7700/echo',
+          createSignalingForChannel());
+    }
     return new Promise((resolve, reject) => {
       const token = JSON.parse(Base64.decodeBase64(tokenString));
       const isSecured = (token.secure === true);
@@ -414,6 +420,9 @@ export const ConferenceClient = function(config, signalingImpl) {
     if (!(stream instanceof StreamModule.LocalStream)) {
       return Promise.reject(new ConferenceError('Invalid stream.'));
     }
+    if (stream.source.data) {
+      return quicTransportChannel.publish(stream);
+    }
     if (publishChannels.has(stream.mediaStream.id)) {
       return Promise.reject(new ConferenceError(
           'Cannot publish a published stream.'));
@@ -478,18 +487,20 @@ export const ConferenceClient = function(config, signalingImpl) {
     });
   };
 
-    /**
-   * @function createDataStream
+  /**
+   * @function createSendStream
    * @memberOf Owt.Conference.ConferenceClient
    * @instance
-   * @desc Create a bidirectional stream.
-   * @return {Promise<void, Error>} Returned promise will be resolved with a bidirectional stream once stream is created.
+   * @desc Create a outgoing stream. Only available when WebTransport is supported by user's browser.
+   * @return {Promise<SendStream, Error>} Returned promise will be resolved with a SendStream once stream is created.
    */
-  this.createQuicConnection = function() {
-    const quicConnection = new QuicConnection(
-        'quic-transport://jianjunz-nuc-ubuntu.sh.intel.com:7700/echo',
-        createSignalingForChannel());
-    quicTransportChannel = quicConnection;
-    return quicConnection;
-  };
+  if (QuicConnection) {
+    this.createSendStream = async function() {
+      if (!quicTransportChannel) {
+        // Try to create a new one or consider it as closed?
+        throw new ConferenceError('No QUIC connection available.');
+      }
+      return quicTransportChannel.createSendStream();
+    };
+  }
 };

@@ -24,7 +24,8 @@ JavaScript SDK creates a QuicTransport with a QUIC agent when QUIC agent is enab
 
 ```
 const sendStream = conferenceClient.createSendStream();
-const publication = await conferenceClient.publish(sendStream);
+const localStream = new LocalStream(sendStream, new StreamSourceInfo(undefined, undefined, true));
+const publication = await conferenceClient.publish(localStream);
 sendStream.stream.write(somethingToWrite);
 ```
 

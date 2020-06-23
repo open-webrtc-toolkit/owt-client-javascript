@@ -12,6 +12,7 @@ import {
   EventDispatcher,
   MessageEvent,
 } from '../base/event.js';
+import {Publication} from '../base/publication.js';
 import {Subscription} from './subscription.js';
 
 /**
@@ -112,9 +113,16 @@ export class QuicConnection extends EventDispatcher {
     writer.write(new Uint8Array(16));
     const encoder = new TextEncoder();
     writer.write(encoder.encode(token));
+    Logger.info('End of auth.');
   }
 
-  async createSendStream(sessionId) {
+  async createSendStream() {
+    await this._quicTransport.ready;
+    const quicStream = await this._quicTransport.createSendStream();
+    return quicStream;
+  }
+
+  async createSendStream1(sessionId) {
     Logger.info('Create stream.');
     await this._quicTransport.ready;
     // TODO: Potential failure because of publication stream is created faster
@@ -127,6 +135,28 @@ export class QuicConnection extends EventDispatcher {
     writer.releaseLock();
     this._quicStreams.set(publicationId, quicStream);
     return quicStream;
+  }
+
+  async publish(stream) {
+    // TODO: Avoid a stream to be published twice. The first 16 bit data send to
+    // server must be it's publication ID.
+    // TODO: Potential failure because of publication stream is created faster
+    // than signaling stream(created by the 1st call to initiatePublication).
+    const publicationId = await this._initiatePublication();
+    const quicStream = stream.stream;
+    const writer = quicStream.writable.getWriter();
+    await writer.ready;
+    writer.write(this._uuidToUint8Array(publicationId));
+    writer.releaseLock();
+    Logger.info('publish id');
+    this._quicStreams.set(publicationId, quicStream);
+    const publication = new Publication(publicationId, () => {
+      this._signaling.sendSignalingMessage('unpublish', {id: publication})
+          .catch((e) => {
+            Logger.warning('MCU returns negative ack for unpublishing, ' + e);
+          });
+    } /* TODO: getStats, mute, unmute is not implemented */);
+    return publication;
   }
 
   hasContentSessionId(id) {
@@ -152,29 +182,6 @@ export class QuicConnection extends EventDispatcher {
       s += str.padStart(2, '0');
     }
     return s;
-  }
-
-  /**
-   * @function createStream
-   * @desc Create a bidirectional stream.
-   * @param {string} sessionId Publication or subscription ID.
-   * @private
-   */
-  createStream(sessionId) {
-    Logger.info('Create stream.');
-    if (this._quicTransport && this._quicTransport.state == 'connected') {
-      this._quicStreams.push(stream);
-      return Promise.resolve(stream);
-    }
-    if (!this._quicTransport) {
-      this._initialize();
-    }
-    return new Promise((resolve, reject) => {
-      this._createStreamPromise = {
-        resolve: resolve,
-        reject: reject
-      };
-    });
   }
 
   subscribe(stream) {
@@ -212,13 +219,13 @@ export class QuicConnection extends EventDispatcher {
     });
   }
 
-  _updateTransportId(id) {
+  async _updateTransportId(id) {
     if (this._transportId) {
       Logger.error('Update transport ID is not supported.');
       return;
     }
     this._transportId = id;
-    this._authenticate(id);
+    await this._authenticate(id);
   }
 
   async _initiatePublication() {
@@ -228,7 +235,7 @@ export class QuicConnection extends EventDispatcher {
       transport: {type: 'quic', id: this._transportId},
     });
     if (data.transportId) {
-      this._updateTransportId(data.transportId);
+      await this._updateTransportId(data.transportId);
     } else {
       if (this._transportId !== data.transportId) {
         throw new Error('Transport ID not match.');
