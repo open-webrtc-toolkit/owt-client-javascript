@@ -6,19 +6,20 @@
 
 'use strict';
 
-import * as EventModule from '../base/event.js'
-import { SioSignaling as Signaling } from './signaling.js'
-import Logger from '../base/logger.js'
-import { Base64 } from '../base/base64.js'
-import { ConferenceError } from './error.js'
-import * as Utils from '../base/utils.js'
-import * as StreamModule from '../base/stream.js'
-import { Participant } from './participant.js'
-import { ConferenceInfo } from './info.js'
-import { ConferencePeerConnectionChannel } from './channel.js'
-import { QuicConnection } from './quicconnection.js'
-import { RemoteMixedStream, ActiveAudioInputChangeEvent, LayoutChangeEvent } from './mixedstream.js'
-import * as StreamUtilsModule from './streamutils.js'
+import * as EventModule from '../base/event.js';
+import {SioSignaling as Signaling} from './signaling.js';
+import Logger from '../base/logger.js';
+import {Base64} from '../base/base64.js';
+import {ConferenceError} from './error.js';
+import * as Utils from '../base/utils.js';
+import * as StreamModule from '../base/stream.js';
+import {Participant} from './participant.js';
+import {ConferenceInfo} from './info.js';
+import {ConferencePeerConnectionChannel} from './channel.js';
+import {QuicConnection} from './quicconnection.js';
+import {RemoteMixedStream, ActiveAudioInputChangeEvent, LayoutChangeEvent}
+  from './mixedstream.js';
+import * as StreamUtilsModule from './streamutils.js';
 
 const SignalingState = {
   READY: 1,
@@ -311,7 +312,8 @@ export const ConferenceClient = function(config, signalingImpl) {
   // eslint-disable-next-line require-jsdoc
   function createPeerConnectionChannel(transport) {
     const signalingForChannel = createSignalingForChannel();
-    const channel = new ConferencePeerConnectionChannel(config, signalingForChannel);
+    const channel =
+        new ConferencePeerConnectionChannel(config, signalingForChannel);
     channel.addEventListener('id', (messageEvent) => {
       channels.set(messageEvent.message, channel);
     });
@@ -322,11 +324,6 @@ export const ConferenceClient = function(config, signalingImpl) {
   function clean() {
     participants.clear();
     remoteStreams.clear();
-  }
-
-  function createDataChannel() {
-    const signalingForChannel = createSignalingForChannel();
-    return new ConferenceDataChannel(config, signalingForChannel);
   }
 
   Object.defineProperty(this, 'info', {
@@ -447,8 +444,8 @@ export const ConferenceClient = function(config, signalingImpl) {
     if (stream.source.data) {
       if (stream.source.audio || stream.source.video) {
         return Promise.reject(new TypeError(
-          'Invalid source info. A remote stream is either a data stream or a media stream.'
-          ));
+            'Invalid source info. A remote stream is either a data stream or ' +
+            'a media stream.'));
       }
       return quicTransportChannel.subscribe(stream);
       // TODO

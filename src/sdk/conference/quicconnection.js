@@ -3,21 +3,19 @@
 // SPDX-License-Identifier: Apache-2.0
 
 /* eslint-disable require-jsdoc */
-/* global Promise, Map, QuicTransport, Uint8Array */
+/* global Promise, Map, QuicTransport, Uint8Array, TextEncoder */
 
 'use strict';
 
 import Logger from '../base/logger.js';
-import {
-  EventDispatcher,
-  MessageEvent,
-} from '../base/event.js';
+import {EventDispatcher} from '../base/event.js';
 import {Publication} from '../base/publication.js';
 import {Subscription} from './subscription.js';
 
 /**
  * @class QuicConnection
- * @classDesc A channel for a QUIC transport between client and conference server.
+ * @classDesc A channel for a QUIC transport between client and conference
+ * server.
  * @hideconstructor
  * @private
  */
@@ -35,7 +33,8 @@ export class QuicConnection extends EventDispatcher {
 
   /**
    * @function onMessage
-   * @desc Received a message from conference portal. Defined in client-server protocol.
+   * @desc Received a message from conference portal. Defined in client-server
+   * protocol.
    * @param {string} notification Notification type.
    * @param {object} message Message received.
    * @private
@@ -62,21 +61,18 @@ export class QuicConnection extends EventDispatcher {
   async _init() {
     const receiveStreamReader =
         this._quicTransport.receiveStreams().getReader();
-    Logger.info('Reader: '+receiveStreamReader);
-    while (true) {
-      const {
-        value: receiveStream,
-        done: readingReceiveStreamsDone
-      } = await receiveStreamReader.read();
+    Logger.info('Reader: ' + receiveStreamReader);
+    let receivingDone = false;
+    while (!receivingDone) {
+      const {value: receiveStream, done: readingReceiveStreamsDone} =
+          await receiveStreamReader.read();
       Logger.info('New stream received');
       if (readingReceiveStreamsDone) {
+        receivingDone = true;
         break;
       }
       const chunkReader = receiveStream.readable.getReader();
-      const {
-        value: uuid,
-        done: readingChunksDone
-      } = await chunkReader.read();
+      const {value: uuid, done: readingChunksDone} = await chunkReader.read();
       if (readingChunksDone) {
         Logger.error('Stream closed unexpectedly.');
         return;
@@ -129,7 +125,7 @@ export class QuicConnection extends EventDispatcher {
     // than signaling stream(created by the 1st call to initiatePublication).
     const publicationId = await this._initiatePublication();
     const quicStream = await this._quicTransport.createSendStream();
-    const writer= quicStream.writable.getWriter();
+    const writer = quicStream.writable.getWriter();
     await writer.ready;
     writer.write(this._uuidToUint8Array(publicationId));
     writer.releaseLock();
@@ -171,13 +167,12 @@ export class QuicConnection extends EventDispatcher {
     for (let i = 0; i < 16; i++) {
       uuidArray[i] = parseInt(uuidString.substring(i * 2, i * 2 + 2), 16);
     }
-    console.log(uuidArray);
     return uuidArray;
   }
 
   _uint8ArrayToUuid(uuidBytes) {
     let s = '';
-    for (let hex of uuidBytes) {
+    for (const hex of uuidBytes) {
       const str = hex.toString(16);
       s += str.padStart(2, '0');
     }
@@ -212,7 +207,7 @@ export class QuicConnection extends EventDispatcher {
 
   _readAndPrint() {
     this._quicStreams[0].waitForReadable(5).then(() => {
-      let data = new Uint8Array(this._quicStreams[0].readBufferedAmount);
+      const data = new Uint8Array(this._quicStreams[0].readBufferedAmount);
       this._quicStreams[0].readInto(data);
       Logger.info('Read data: ' + data);
       this._readAndPrint();
@@ -245,6 +240,7 @@ export class QuicConnection extends EventDispatcher {
   }
 
   _readyHandler() {
-    // Ready message from server is useless for QuicStream since QuicStream has its own status. Do nothing here.
+    // Ready message from server is useless for QuicStream since QuicStream has
+    // its own status. Do nothing here.
   }
-};
+}
