@@ -19,9 +19,8 @@ describe('P2P JS SDK', function () {
       clearTimeout(selfTimeOut);
       if (message) {
         if (message.length > 0) {
-          console.log("Event Error: ", message, "do not triggered after ", tiout);
+          console.log("Test-Error: ", message, "do not triggered after ", tiout);
           expect(0).toEqual(1);
-          console.log("Event Error2: ", message, "do not triggered after ", tiout);
           if (message instanceof Array) {
             for (var i = 0; i < message.length; i++) {
               debugFunction("expect" + message[i][2] + "to equal " + message[i][1], message[i][0]);

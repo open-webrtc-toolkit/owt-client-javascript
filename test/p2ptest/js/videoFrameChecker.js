@@ -86,7 +86,7 @@ function VideoFrameChecker(stream, canvasElement) {
 
   this.nonBlackPixelLumaThreshold = 20;
   this.previousFrame_ = [];
-  this.identicalFrameSsimThreshold = 0.985;
+  this.identicalFrameSsimThreshold = 0.7;
   if (navigator.userAgent.indexOf('Safari') >= 0 && navigator.userAgent.indexOf('Chrome') == -1){
     this.identicalFrameSsimThreshold = 0.987;
   }
