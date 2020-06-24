@@ -116,7 +116,7 @@ VideoFrameChecker.prototype = {
                 console.log("err.name:",err.name)
                 reject(err)
             })
-        }, 200)
+        }, 500)
     })
   },
 
