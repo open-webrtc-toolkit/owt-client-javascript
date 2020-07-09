@@ -1090,7 +1090,7 @@ class P2PPeerConnectionChannel extends EventDispatcher {
                 const mediaStreams = this._getStreamByTrack(event.target);
                 for (const mediaStream of mediaStreams) {
                   if (this._areAllTracksEnded(mediaStream)) {
-                    this._onRemoteStreamRemoved(mediaStream);
+                    this._onRemoteStreamRemoved({stream: mediaStream});
                   }
                 }
               });
