@@ -514,8 +514,8 @@ function setDefaultCodec(mLine, payload) {
 
 // Following codecs will not be removed from SDP event they are not in the
 // user-specified codec list.
-const audioCodecWhiteList = ['CN', 'telephone-event'];
-const videoCodecWhiteList = ['red', 'ulpfec'];
+const audioCodecAllowList = ['CN', 'telephone-event'];
+const videoCodecAllowList = ['red', 'ulpfec', 'flexfec'];
 
 // Returns a new m= line with the specified codec order.
 function setCodecOrder(mLine, payloads) {
@@ -561,8 +561,8 @@ export function reorderCodecs(sdp, type, codecs) {
     return sdp;
   }
 
-  codecs = type === 'audio' ? codecs.concat(audioCodecWhiteList) : codecs.concat(
-      videoCodecWhiteList);
+  codecs = type === 'audio' ? codecs.concat(audioCodecAllowList) : codecs.concat(
+      videoCodecAllowList);
 
   let sdpLines = sdp.split('\r\n');
 
