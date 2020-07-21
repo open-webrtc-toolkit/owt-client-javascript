@@ -33,9 +33,8 @@ export class RemoteMixedStream extends StreamModule.RemoteStream {
 
     this.settings = StreamUtilsModule.convertToPublicationSettings(info.media);
 
-    this.extraCapabilities = new StreamUtilsModule
-      .convertToSubscriptionCapabilities(
-        info.media);
+    this.extraCapabilities =
+        StreamUtilsModule.convertToSubscriptionCapabilities(info.media);
   }
 }
 

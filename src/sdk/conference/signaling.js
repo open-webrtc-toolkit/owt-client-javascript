@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-/* global io, Promise */
+/* global io, Promise, setTimeout, clearTimeout */
 import Logger from '../base/logger.js';
 import * as EventModule from '../base/event.js';
 import {ConferenceError} from './error.js';
@@ -159,6 +159,7 @@ export class SioSignaling extends EventModule.EventDispatcher {
    * @function _onReconnectionTicket
    * @instance
    * @desc Parse reconnection ticket and schedule ticket refreshing.
+   * @param {string} ticketString Reconnection ticket.
    * @memberof Owt.Conference.SioSignaling
    * @private.
    */
@@ -189,6 +190,13 @@ export class SioSignaling extends EventModule.EventDispatcher {
     }, refreshAfter);
   }
 
+  /**
+   * @function _clearReconnectionTask
+   * @instance
+   * @desc Stop trying to refresh reconnection ticket.
+   * @memberof Owt.Conference.SioSignaling
+   * @private.
+   */
   _clearReconnectionTask() {
     clearTimeout(this._refreshReconnectionTicket);
     this._refreshReconnectionTicket = null;
