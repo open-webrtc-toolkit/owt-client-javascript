@@ -5,7 +5,7 @@
 /* global navigator, window */
 
 'use strict';
-const sdkVersion = '4.2.1';
+const sdkVersion = '4.3';
 
 // eslint-disable-next-line require-jsdoc
 export function isFirefox() {
@@ -43,10 +43,10 @@ export function sysInfo() {
   };
   // Runtime info.
   const userAgent = navigator.userAgent;
-  const firefoxRegex = /Firefox\/([0-9\.]+)/;
-  const chromeRegex = /Chrome\/([0-9\.]+)/;
-  const edgeRegex = /Edge\/([0-9\.]+)/;
-  const safariVersionRegex = /Version\/([0-9\.]+) Safari/;
+  const firefoxRegex = /Firefox\/([0-9.]+)/;
+  const chromeRegex = /Chrome\/([0-9.]+)/;
+  const edgeRegex = /Edge\/([0-9.]+)/;
+  const safariVersionRegex = /Version\/([0-9.]+) Safari/;
   let result = chromeRegex.exec(userAgent);
   if (result) {
     info.runtime = {
@@ -76,11 +76,11 @@ export function sysInfo() {
     };
   }
   // OS info.
-  const windowsRegex = /Windows NT ([0-9\.]+)/;
-  const macRegex = /Intel Mac OS X ([0-9_\.]+)/;
-  const iPhoneRegex = /iPhone OS ([0-9_\.]+)/;
+  const windowsRegex = /Windows NT ([0-9.]+)/;
+  const macRegex = /Intel Mac OS X ([0-9_.]+)/;
+  const iPhoneRegex = /iPhone OS ([0-9_.]+)/;
   const linuxRegex = /X11; Linux/;
-  const androidRegex = /Android( ([0-9\.]+))?/;
+  const androidRegex = /Android( ([0-9.]+))?/;
   const chromiumOsRegex = /CrOS/;
   if (result = windowsRegex.exec(userAgent)) {
     info.os = {
@@ -122,6 +122,7 @@ export function sysInfo() {
     continualIceGathering: false,
     unifiedPlan: true,
     streamRemovable: info.runtime.name !== 'Firefox',
+    ignoreDataChannelAcks: true,
   };
   return info;
 }

@@ -4,8 +4,6 @@
 
 'use strict';
 
-import * as MediaFormatModule from '../base/mediaformat.js';
-import * as CodecModule from '../base/codec.js';
 import {EventDispatcher} from '../base/event.js';
 
 /**
@@ -121,7 +119,7 @@ export class AudioSubscriptionConstraints {
 export class VideoSubscriptionConstraints {
   // eslint-disable-next-line require-jsdoc
   constructor(codecs, resolution, frameRate, bitrateMultiplier,
-      keyFrameInterval) {
+      keyFrameInterval, rid) {
     /**
      * @member {?Array.<Owt.Base.VideoCodecParameters>} codecs
      * @instance
@@ -157,6 +155,13 @@ export class VideoSubscriptionConstraints {
      * @desc Only keyFrameIntervals listed in Owt.Conference.VideoSubscriptionCapabilities are allowed.
      */
     this.keyFrameInterval = keyFrameInterval;
+    /**
+     * @member {?number} rid
+     * @instance
+     * @memberof Owt.Conference.VideoSubscriptionConstraints
+     * @desc Restriction identifier to identify the RTP Streams within an RTP session. When rid is specified, other constraints will be ignored.
+     */
+    this.rid = rid;
   }
 }
 
@@ -169,13 +174,13 @@ export class SubscribeOptions {
   // eslint-disable-next-line require-jsdoc
   constructor(audio, video) {
     /**
-     * @member {?AudioSubscriptionConstraints} audio
+     * @member {?Owt.Conference.AudioSubscriptionConstraints} audio
      * @instance
      * @memberof Owt.Conference.SubscribeOptions
      */
     this.audio = audio;
     /**
-     * @member {?VideoSubscriptionConstraints} video
+     * @member {?Owt.Conference.VideoSubscriptionConstraints} video
      * @instance
      * @memberof Owt.Conference.SubscribeOptions
      */

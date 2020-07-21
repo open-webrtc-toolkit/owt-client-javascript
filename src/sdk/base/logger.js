@@ -26,7 +26,7 @@
 
 // This file is borrowed from lynckia/licode with some modifications.
 
-/* global console,window */
+/* global window */
 
 'use strict';
 

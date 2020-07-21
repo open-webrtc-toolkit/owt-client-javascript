@@ -2,11 +2,11 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
+/* global MediaStream */
+
 'use strict';
-import Logger from './logger.js'
-import {OwtEvent} from './event.js'
-import * as Utils from './utils.js'
-import { EventDispatcher} from './event.js';
+import * as Utils from './utils.js';
+import {EventDispatcher, OwtEvent} from './event.js';
 
 // eslint-disable-next-line require-jsdoc
 function isAllowedValue(obj, allowedValues) {
@@ -19,9 +19,12 @@ function isAllowedValue(obj, allowedValues) {
  * @memberOf Owt.Base
  * @classDesc Information of a stream's source.
  * @constructor
- * @description Audio source info or video source info could be undefined if a stream does not have audio/video track.
- * @param {?string} audioSourceInfo Audio source info. Accepted values are: "mic", "screen-cast", "file", "mixed" or undefined.
- * @param {?string} videoSourceInfo Video source info. Accepted values are: "camera", "screen-cast", "file", "mixed" or undefined.
+ * @description Audio source info or video source info could be undefined if
+ * a stream does not have audio/video track.
+ * @param {?string} audioSourceInfo Audio source info. Accepted values are:
+ * "mic", "screen-cast", "file", "mixed" or undefined.
+ * @param {?string} videoSourceInfo Video source info. Accepted values are:
+ * "camera", "screen-cast", "file", "mixed" or undefined.
  */
 export class StreamSourceInfo {
   // eslint-disable-next-line require-jsdoc
@@ -99,7 +102,8 @@ export class Stream extends EventDispatcher {
  * @extends Owt.Base.Stream
  * @constructor
  * @param {MediaStream} stream Underlying MediaStream.
- * @param {Owt.Base.StreamSourceInfo} sourceInfo Information about stream's source.
+ * @param {Owt.Base.StreamSourceInfo} sourceInfo Information about stream's
+ * source.
  * @param {object} attributes Custom attributes of the stream.
  */
 export class LocalStream extends Stream {
@@ -164,16 +168,19 @@ export class RemoteStream extends Stream {
      * @member {Owt.Base.PublicationSettings} settings
      * @instance
      * @memberof Owt.Base.RemoteStream
-     * @desc Original settings for publishing this stream. This property is only valid in conference mode.
+     * @desc Original settings for publishing this stream. This property is only
+     * valid in conference mode.
      */
     this.settings = undefined;
     /**
-     * @member {Owt.Conference.SubscriptionCapabilities} capabilities
+     * @member {Owt.Conference.SubscriptionCapabilities} extraCapabilities
      * @instance
      * @memberof Owt.Base.RemoteStream
-     * @desc Capabilities remote endpoint provides for subscription. This property is only valid in conference mode.
+     * @desc Extra capabilities remote endpoint provides for subscription. Extra
+     * capabilities don't include original settings. This property is only valid
+     * in conference mode.
      */
-    this.capabilities = undefined;
+    this.extraCapabilities = undefined;
   }
 }
 

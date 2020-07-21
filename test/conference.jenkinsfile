@@ -1,71 +1,94 @@
 void setBuildStatus(String message, String state) {
-  step([
-      $class: "GitHubCommitStatusSetter",
-      reposSource: [$class: "ManuallyEnteredRepositorySource", url: "${REPO_URL}/owt-client-javascript"],
-      contextSource: [$class: "ManuallyEnteredCommitContextSource", context: "ci/jenkins/conference"],
-      errorHandlers: [[$class: "ChangingBuildStatusErrorHandler", result: "UNSTABLE"]],
-      statusResultSource: [ $class: "ConditionalStatusResultSource", results: [[$class: "AnyBuildResult", message: message, state: state]] ]
-  ]);
+    step([
+        $class: "GitHubCommitStatusSetter",
+        reposSource: [$class: "ManuallyEnteredRepositorySource", url: "${REPO_URL}/owt-client-javascript"],
+        contextSource: [$class: "ManuallyEnteredCommitContextSource", context: "ci/jenkins/conference"],
+        errorHandlers: [[$class: "ChangingBuildStatusErrorHandler", result: "UNSTABLE"]],
+        statusResultSource: [$class: "ConditionalStatusResultSource", results: [[$class: "AnyBuildResult", message: message, state: state]]]
+    ]);
 }
+
+
 
 
 pipeline {
     agent any
+    options {
+        buildDiscarder(logRotator(numToKeepStr: '10', artifactNumToKeepStr: '10'))
+    }
     stages {
         stage('Unit test') {
             steps {
-                podTemplate(name: 'unit-test', label: 'unit-test', cloud: 'kubernetes', containers: [
-                    containerTemplate(name: 'unit-test', image: "$env.TEST_IMAGE",  ttyEnabled: true, alwaysPullImage: true, privileged: true, resourceRequestCpu: '500m', resourceLimitCpu: '1000m', network: 'host', command: 'cat')
-                    ]) {
-                    node('unit-test') {
-                        container('unit-test') {
-                           sh "cd /root/oms-client-javascript/test/unit/karma-test/ && ./start.sh"
+                podTemplate(name: 'unit-js-centos-'+env.GIT_BRANCH, label: 'unit-js-centos-'+env.GIT_BRANCH, cloud: 'kubernetes', containers: [
+                    containerTemplate(name: 'test-images', image: "$env.centos_test_images", ttyEnabled: true, alwaysPullImage: true, privileged: true, resourceRequestCpu: '1000m', resourceLimitCpu: '2000m',  resourceRequestMemory: '1.0Gi', resourceLimitMemory: '2.0Gi',command: 'cat')
+                ]) {
+                    node('unit-js-centos-'+env.GIT_BRANCH) {
+                        container('test-images') {
+                            sh "cd /root/owt-client-javascript/test/unit/karma-test/ && ./start.sh $env.GIT_BRANCH $env.CHANGE_ID"
                         }
                     }
                 }
             }
         }
         stage('Build package') {
+            options { timeout(time: 20, unit: 'MINUTES') }
             steps {
-                podTemplate(name: 'pack', label: 'pack-mcu', containers: [
-                    containerTemplate(name: 'pack-on-centos', image: "$env.PACK_IMAGE",  ttyEnabled: true, alwaysPullImage: true, privileged: true, resourceRequestCpu: '7000m', resourceLimitCpu: '8000m', network: 'host', command: 'cat')
+                podTemplate(name: 'pack-js-centos-'+env.GIT_BRANCH, label: 'pack-js-centos-'+env.GIT_BRANCH,
+                volumes: [
+                persistentVolumeClaim(claimName: 'stability-package',mountPath: '/root/stabilityPackage',readOnly: false),
+                persistentVolumeClaim(claimName: 'js-centos-package',mountPath: '/root/centos_package',readOnly: false),
+                persistentVolumeClaim(claimName: 'webrtc79',mountPath: '/root/owt-server/third_party/webrtc-m79',readOnly: false)
+                ],
+                containers: [
+                    containerTemplate(name: 'build-images', image: "$env.centos_build_images", ttyEnabled: true, alwaysPullImage: true, privileged: true, resourceRequestCpu: '5000m', resourceLimitCpu: '6000m' , command: 'cat')
                 ]){
-                    node ('pack-mcu') {
-                      container ('pack-on-centos') {
-                        sh "/root/packSDKInDocker.sh software $env.GIT_COMMIT $env.GIT_BRANCH $env.CHANGE_ID"
-                      }
+                    node('pack-js-centos-'+env.GIT_BRANCH) {
+                        container('build-images') {
+                            sh "/root/startRun.sh * * centos build javascript $env.GIT_BRANCH $env.GIT_COMMIT $env.CHANGE_ID"
+                        }
                     }
                 }
             }
         }
 
         stage('Start test') {
+            options { timeout(time: 40, unit: 'MINUTES') }
             parallel {
-                stage('API test') {
+                stage('ConferenceClient API 1') {
                     steps {
-                        podTemplate(name: 'api-test', label: 'api-test', cloud: 'kubernetes', containers: [
-                            containerTemplate(name: 'api-test', image: "$env.TEST_IMAGE",  ttyEnabled: true, alwaysPullImage: true, privileged: true, resourceRequestCpu: '3000m', resourceLimitCpu: '4000m', network: 'host', command: 'cat'),
-                            ]) {
-                        
-                            node('api-test') {
-                              container('api-test') {
-                                   sh "/root/start.sh ${env.GIT_COMMIT}1 ConferenceClient_api"
-                              }
+                        podTemplate(name: 'api-js-centos-'+env.GIT_BRANCH, label: 'api-js-centos-'+env.GIT_BRANCH, cloud: 'kubernetes',
+                        volumes: [
+                              persistentVolumeClaim(claimName: 'js-centos-package', mountPath: '/root/centos_package', readOnly: false),
+                              persistentVolumeClaim(claimName: 'js-centos-log', mountPath: '/root/centos_log', readOnly: false)
+                              ],
+                        containers: [
+                            containerTemplate(name: 'test-images', image: "$env.centos_test_images", ttyEnabled: true, alwaysPullImage: true, privileged: true, resourceRequestCpu: '3000m', resourceLimitCpu: '4000m', resourceRequestMemory: '2.0Gi', resourceLimitMemory: '3.0Gi',  command: 'cat'),
+                        ]) {
+
+                            node('api-js-centos-'+env.GIT_BRANCH) {
+                                container('test-images') {
+                                    sh "/root/startRun.sh * * centos test ${env.GIT_COMMIT} ConferenceClient_API_1 $env.GIT_BRANCH"
+                                }
                             }
                         }
                     }
                 }
 
-                stage('Subscribe test') {
+                stage('ConferenceClient API 2') {
                     steps {
-                        podTemplate(name:'subscribe-test', label: 'subscribe-test', cloud: 'kubernetes', containers: [
-                            containerTemplate(name: 'subscribe-test', image: "$env.TEST_IMAGE",  ttyEnabled: true, alwaysPullImage: true, privileged: true, resourceRequestCpu: '3000m', resourceLimitCpu: '4000m', network: 'host', command: 'cat'),
-                            ]) {
-                        
-                            node('subscribe-test') {
-                              container('subscribe-test') {
-                                  sh "/root/start.sh ${env.GIT_COMMIT}2 ConferenceClient_subscribe"
-                              }
+                        podTemplate(name: 'rest-js-centos-'+env.GIT_BRANCH, label: 'rest-js-centos-'+env.GIT_BRANCH, cloud: 'kubernetes',
+                        volumes: [
+                              persistentVolumeClaim(claimName: 'js-centos-package', mountPath: '/root/centos_package', readOnly: false),
+                              persistentVolumeClaim(claimName: 'js-centos-log', mountPath: '/root/centos_log', readOnly: false)
+                              ],
+                        containers: [
+                            containerTemplate(name: 'test-images', image: "$env.centos_test_images", ttyEnabled: true, alwaysPullImage: true, privileged: true, resourceRequestCpu: '3000m', resourceLimitCpu: '4000m', resourceRequestMemory: '2.0Gi', resourceLimitMemory: '3.0Gi', command: 'cat'),
+                        ]) {
+
+                            node('rest-js-centos-'+env.GIT_BRANCH) {
+                                container('test-images') {
+                                    sh "/root/startRun.sh * * centos test ${env.GIT_COMMIT} ConferenceClient_API_2 $env.GIT_BRANCH"
+                                }
                             }
                         }
                     }
@@ -75,6 +98,11 @@ pipeline {
     }
 
     post {
+        always {
+            script {
+                sh "curl -H \"Content-Type: application/json\" -X POST --data '{\"commit_id\":\"'$GIT_COMMIT'\",\"job_path\":\"'${env.JS_CHECK_PATH}'\",\"job_name\":\"'$JOB_BASE_NAME'\",\"build_num\":\"'$BUILD_NUMBER'\",\"os_version\":\"'$env.CENTOS_VERSION'\"}' '${env.checkServerUrl}'/runServer/JS_BUILD_CONFERENCE_STEPS"
+            }
+        }
         success {
             setBuildStatus("Build succeeded", "SUCCESS");
         }
@@ -83,3 +111,6 @@ pipeline {
         }
     }
 }
+
+
+

@@ -76,13 +76,12 @@ Ssim.prototype = {
   }
 };
 
-function VideoFrameChecker(videoElement) {
+function VideoFrameChecker(stream, canvasElement) {
   this.frameStats = {
     numFrozenFrames: 0,
     numBlackFrames: 0,
     numFrames: 0
   };
-  console.log("VideoFrameChecker videoElements is ,", videoElement);
   this.running_ = true;
 
   this.nonBlackPixelLumaThreshold = 20;
@@ -94,65 +93,67 @@ function VideoFrameChecker(videoElement) {
   this.differenceThreshold = 0;
   this.frameComparator = new Ssim();
 
-  this.canvas_ = document.createElement('canvas');
-  this.videoElement_ = videoElement;
-  console.log("VideoFrameChecker videoElements videoWith is ,", this.videoElement_.videoWidth);
-  console.log("VideoFrameChecker videoElements videoHeightis ,", this.videoElement_.videoHeight);
+  this.canvas_ = canvasElement;
+  this.stream_ = stream;
   this.listener_ = this.checkVideoFrame_.bind(this);
-  this.videoElement_.addEventListener('play', this.listener_, false);
 }
 
 VideoFrameChecker.prototype = {
-  stop: function() {
-    this.videoElement_.removeEventListener('play' , this.listener_);
+   stop: function() {
     this.running_ = false;
   },
 
   getCurrentImageData_: function() {
-    console.log("GetCurrentImageData_ videoElements videoWith is ,", this.videoElement_);
-    console.log("GetCurrentImageData_ videoElements videoHeightis ,", this.videoElement_);
-    this.canvas_.width = this.videoElement_.videoWidth;
-    this.canvas_.height = this.videoElement_.videoHeight;
-
-    if(this.canvas_.width == 0 || this.canvas_.height == 0) {
-      return;
-    }
-
-    var context = this.canvas_.getContext('2d');
-    context.drawImage(this.videoElement_, 0, 0, this.canvas_.width,
-                      this.canvas_.height);
-    return context.getImageData(0, 0, this.canvas_.width, this.canvas_.height);
+    return new Promise((resolve,reject)=>{
+        const track = this.stream_.mediaStream.getVideoTracks()[0];
+        let imageCapture = new ImageCapture(track);
+        var context = this.canvas_.getContext('2d');
+        setTimeout(()=>{
+            imageCapture.grabFrame().then((imageBitmap)=>{
+                  context.drawImage(imageBitmap, 0, 0, 320, 240);
+                  resolve(context)
+            }).catch((err)=>{
+                console.log("err.name:",err.name)
+                reject(err)
+            })
+        }, 500)
+    })
   },
 
   checkVideoFrame_: function() {
     if (!this.running_) {
       return;
     }
-    if (this.videoElement_.ended) {
-      return;
-    }
-    var imageData = this.getCurrentImageData_();
-    if(!imageData) {
-      console.log("CureentImageData is ", imageData.data);
-      return;
-    }
-    if (this.isBlackFrame_(imageData.data, imageData.data.length)) {
-      this.frameStats.numBlackFrames++;
-    }
-   console.log("This.frameComparator.calculate(this.previousFrame_, imageData.data)", this.frameComparator.calculate(this.previousFrame_, imageData.data));
-   console.log("This.differenceThreshold is ",this.differenceThreshold);
-    if (this.frameComparator.calculate(this.previousFrame_, imageData.data) >
-        this.identicalFrameSsimThreshold) {
-      this.frameStats.numFrozenFrames++;
-    }else if((this.frameComparator.calculate(this.previousFrame_, imageData.data) ==  this.differenceThreshold) && (this.frameComparator.calculate(this.previousFrame_, imageData.data) != 0 )){
-      this.frameStats.numFrozenFrames++;
-    
-    }
-    this.differenceThreshold = this.frameComparator.calculate(this.previousFrame_, imageData.data);
-    this.previousFrame_ = imageData.data;
-  
-    this.frameStats.numFrames++;
-    setTimeout(this.checkVideoFrame_.bind(this), 20);
+
+    return new Promise((resolve, reject)=>{
+        this.getCurrentImageData_().then((context)=>{
+            var imageData = context.getImageData(0, 0, 320, 240);
+            if(!imageData) {
+              console.log("CureentImageData is ", imageData.data);
+            }else{
+                if (this.isBlackFrame_(imageData.data, imageData.data.length)) {
+                  this.frameStats.numBlackFrames++;
+                }
+                let currentCalculate = this.frameComparator.calculate(this.previousFrame_, imageData.data)
+                console.log("This.frameComparator.calculate(this.previousFrame_, imageData.data)", currentCalculate);
+                if (currentCalculate > this.identicalFrameSsimThreshold) {
+                  this.frameStats.numFrozenFrames++;
+                }else if((currentCalculate ==  this.differenceThreshold) && (currentCalculate != 0 )){
+                  this.frameStats.numFrozenFrames++;
+                }
+                this.differenceThreshold = currentCalculate;
+                this.previousFrame_ = imageData.data;
+
+                this.frameStats.numFrames++;
+            }
+
+            setTimeout(this.checkVideoFrame_.bind(this), 500);
+            resolve()
+        }).catch((err)=>{
+            setTimeout(this.checkVideoFrame_.bind(this), 500);
+            resolve()
+        })
+    })
   },
 
   isBlackFrame_: function(data, length) {

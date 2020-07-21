@@ -18,10 +18,10 @@ Conference Mode:
 
 |                                 | Windows* | Ubuntu* | macOS* |
 | ------------------------------- | -------- | ------- |------- |
-| Chrome* 73                      | √        | √       | √      |
-| Firefox* 66                     | √        | √       | √      |
-| Safari* 12                      |          |         | √      |
-| Microsoft Edge* 44.17763.1.0    | √        |         |        |    |
+| Chrome* 83                      | √        | √       | √      |
+| Firefox* 77                     | √        | √       | √      |
+| Safari* 13.1                    |          |         | √      |
+| Microsoft Edge* 83.0.478.37     | √        |         |        |    |
 
 *Table 1: Browser requirements for Conference Mode*
 
@@ -30,9 +30,9 @@ P2P Mode:
 
 |                                 | Windows* | Ubuntu* | macOS* |
 | ------------------------------- | -------- | ------- |------- |
-| Chrome* 73                      | √        | √       | √      |
-| Firefox* 66                     | √        | √       | √      |
-| Safari* 12                      |          |         | √      |
+| Chrome* 83                      | √        | √       | √      |
+| Firefox* 77                     | √        | √       | √      |
+| Safari* 13.1                    |          |         | √      |
 
 *Table 2: Browser requirements for P2P Mode*
 
@@ -68,11 +68,89 @@ Signaling channel is an implementation to transmit signaling data for creating a
 
 In the customized signaling channel, you need to implement `connect`, `disconnect` and `send`, invoke `onMessage` when a new message arrives, and invoke `onServerDisconnected` when the connection is lost. Then include your customized `sc.*.js` into the HTML page.
 
-# 5 Events
+# 5 Conference mode
 
-The JavaScript objects fires events using `Ics.Base.EventDispatchers`. For more detailed events, please refer to the specific class description page.
+Conference mode is designed for applications with multiple participants through MCU conference server. To enable conference chat, copy and paste the following code into the head section of your HTML document:
+~~~~~~{.js}
+<script type="text/javascript" src="socket.io.js"></script>
+<script type="text/javascript" src="adapter.js"></script>
+<script type="text/javascript" src="owt.js"></script>
+~~~~~~
 
-# 6 Privacy and security
+The JavaScript SDK includes a demo application for whole conferencing workflow with operations including join room, publish and subscribe streams, etc. Moreover, the conference server also supports simulcast. This can be enabled through JavaScript SDK.
+
+## 5.1 Publish a simulcast stream
+~~~~~~{.js}
+// Example of simulcast publication.
+conference = new Owt.Conference.ConferenceClient();
+// ...
+conference.join(token).then(resp => {
+    // ...
+    Owt.Base.MediaStreamFactory.createMediaStream(new Owt.Base.StreamConstraints(
+            audioConstraints, videoConstraints)).then(stream => {
+        /*
+         * Use `RTCRtpEncodingParameters` as publish option
+         * (https://w3c.github.io/webrtc-pc/#dom-rtcrtpencodingparameters).
+         * The following option would create 3 streams with resolutions if browser supports:
+         * OriginResolution, OriginResolution/2.0 and OriginResolution/4.0.
+         * For current Firefox, the resolutions should be sorted in descending order(reversed sample's option).
+         * For current Safari, legacy simulcast is used and the parameters like `rid` won't take effect.
+         * Besides `scaleResolutionDownBy`, other `RTCRtpEncodingParameters` can be set
+         * if browser supports.
+         * The actual output will be determined by browsers, the outcome may not be exactly same
+         * as what is set in publishOption, e.g. For a vga video stream, there may be 2 RTP streams
+         * rather than 3.
+         */
+        const publishOption = {video:[
+            {rid: 'q', active: true, scaleResolutionDownBy: 4.0},
+            {rid: 'h', active: true, scaleResolutionDownBy: 2.0},
+            {rid: 'f', active: true, scaleResolutionDownBy: 1.0}
+        ]};
+        /*
+         * Codec priority list.
+         * Here 'vp8' will be used if enabled.
+         */
+        const codecs = ['vp8', 'h264'];
+        localStream = new Owt.Base.LocalStream(
+            stream, new Owt.Base.StreamSourceInfo(
+                'mic', 'camera'));
+        conference.publish(localStream, publishOption, codecs).then(publication => {
+            // ...
+        });
+    });
+~~~~~~
+
+## 5.2 Subscribe a simulcast stream
+~~~~~~{.js}
+// Example of subscription.
+conference = new Owt.Conference.ConferenceClient();
+// ...
+conference.join(token).then(resp => {
+    // ...
+    /*
+     * Subscribe simulcast stream with specified `rid`
+     * which can be found in `RemoteStream.settings.video[i].rid`.
+     * If `rid` is set when subscribing, other parameters will be ignored.
+     */
+    const subscribeOption = {
+        audio: true,
+        video: {rid: 'q'}
+    };
+    conference.subscribe(remoteStream, subscribeOption).then((subscription) => {
+        // ...
+    });
+~~~~~~
+
+**Note**:
+a. The simulcast stream published to conference won't be transcoded.
+b. The `rid` attribute may not be present once a 'streamadded' event triggered. Users should listen on stream's `updated` event for new `rid` added.
+c. Current browsers support VP8 simulcast well while H.264 simulcast has some limitations.
+
+# 6 Events
+
+The JavaScript objects fires events using `Owt.Base.EventDispatchers`. For more detailed events, please refer to the specific class description page.
+
+# 7 Privacy and security
 SDK will send operation system's name and version, browser name, version and abilities, SDK name and version to conference server and P2P endpoints it tries to make connection. SDK does not store this information on disk.
 
 **Note:** \* Other names and brands may be claimed as the property of others.

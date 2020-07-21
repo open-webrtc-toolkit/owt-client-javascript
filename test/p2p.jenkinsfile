@@ -27,7 +27,7 @@ pipeline {
                     withEnv(['JENKINS_NODE_COOKIE=dontkill']) {
                         sh "python ${env.startServerScript} --p2p-server-path ${env.p2pServerPath} \
                         --owner open-webrtc-toolkit --repo owt-client-javascript --commit-id ${GIT_COMMIT} \
-                        --github-script ${env.serverGithubScriptPath} --mode p2p"
+                        --git-branch ${GIT_BRANCH} --github-script ${env.serverGithubScriptPath} --mode p2p --workspace ${WORKSPACE}"
                     }
                 }
             }
@@ -43,7 +43,7 @@ pipeline {
             steps {
                 sh "python ${env.jsCiScriptPath}/runTest.py --mode ci --source-path ${env.jsSourcePath} \
                 --browsers chrome --mode ci --owner open-webrtc-toolkit --repo owt-client-javascript \
-                --commit-id ${GIT_COMMIT} --github-script ${env.jsP2PTestGithubScriptPath}"
+                --git-branch ${GIT_BRANCH} --github-script ${env.jsP2PTestGithubScriptPath}"
             }
         }
     }

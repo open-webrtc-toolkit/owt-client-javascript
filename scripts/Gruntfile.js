@@ -227,7 +227,8 @@ window.L = L;\n\
           expand: true,
           cwd: 'dist/',
           src:['samples/**','screen-sharing-chrome-extension/**','sdk/**','ThirdpartyLicenses.txt'],
-          dest:'./'
+          dest:'./',
+          dot: true
         }]
       }
     },
@@ -257,8 +258,10 @@ window.L = L;\n\
   grunt.loadNpmTasks('grunt-contrib-connect');
   grunt.loadNpmTasks('grunt-jsdoc');
 
+  grunt.registerTask('check', ['eslint:src']);
   grunt.registerTask('prepare', ['browserify:sinon', 'browserify:chai_as_promised']);
   grunt.registerTask('pack', ['browserify:dist', 'concat:rest', 'uglify:dist', 'copy:dist', 'string-replace', 'compress:dist', 'jsdoc:dist']);
   grunt.registerTask('dev', ['browserify:dev', 'connect:server']);
-  grunt.registerTask('default', ['pack']);
+  grunt.registerTask('debug', ['browserify:dev']);
+  grunt.registerTask('default', ['check', 'pack']);
 };

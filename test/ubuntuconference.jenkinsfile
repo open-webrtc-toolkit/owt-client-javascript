@@ -1,0 +1,119 @@
+void setBuildStatus(String message, String state) {
+    step([
+        $class: "GitHubCommitStatusSetter",
+        reposSource: [$class: "ManuallyEnteredRepositorySource", url: "${REPO_URL}/owt-client-javascript"],
+        contextSource: [$class: "ManuallyEnteredCommitContextSource", context: "ci/jenkins/ubuntuconference"],
+        errorHandlers: [[$class: "ChangingBuildStatusErrorHandler", result: "UNSTABLE"]],
+        statusResultSource: [$class: "ConditionalStatusResultSource", results: [[$class: "AnyBuildResult", message: message, state: state]]]
+    ]);
+}
+
+
+
+
+pipeline {
+    agent any
+    options {
+        buildDiscarder(logRotator(numToKeepStr: '10', artifactNumToKeepStr: '10'))
+    }
+    stages {
+        stage('Unit test') {
+            steps {
+                podTemplate(name: 'unit-js-ubuntu-'+env.GIT_BRANCH, label: 'unit-js-ubuntu-'+env.GIT_BRANCH, cloud: 'kubernetes', containers: [
+                    containerTemplate(name: 'test-images', image: "$env.ubuntu_test_images", ttyEnabled: true, alwaysPullImage: true, privileged: true, resourceRequestCpu: '1000m', resourceLimitCpu: '2000m',resourceRequestMemory: '1.0Gi', resourceLimitMemory: '2.0Gi',  command: 'cat')
+                ]) {
+                    node('unit-js-ubuntu-'+env.GIT_BRANCH) {
+                        container('test-images') {
+                            sh "cd /root/owt-client-javascript/test/unit/karma-test/ && ./start.sh $env.GIT_BRANCH $env.CHANGE_ID"
+                        }
+                    }
+                }
+            }
+        }
+        stage('Build package') {
+            options { timeout(time: 20, unit: 'MINUTES') }
+            steps {
+                podTemplate(name: 'pack-js-ubuntu-'+env.GIT_BRANCH, label: 'pack-js-ubuntu-'+env.GIT_BRANCH,
+                volumes: [
+                persistentVolumeClaim(claimName: 'stability-package',mountPath: '/root/stabilityPackage',readOnly: false),
+                persistentVolumeClaim(claimName: 'js-ubuntu-package',mountPath: '/root/ubuntu_package',readOnly: false),
+                persistentVolumeClaim(claimName: 'webrtc79ubuntu',mountPath: '/root/owt-server/third_party/webrtc-m79',readOnly: false)
+                ],
+                containers: [
+                    containerTemplate(name: 'build-images', image: "$env.ubuntu_build_images", ttyEnabled: true, alwaysPullImage: true, privileged: true, resourceRequestCpu: '5000m', resourceLimitCpu: '6000m' , command: 'cat')
+                ]){
+                    node('pack-js-ubuntu-'+env.GIT_BRANCH) {
+                        container('build-images') {
+                            sh "/root/startRun.sh * * ubuntu build javascript $env.GIT_BRANCH $env.GIT_COMMIT $env.CHANGE_ID"
+                        }
+                    }
+                }
+            }
+        }
+
+        stage('Start test') {
+            options { timeout(time: 40, unit: 'MINUTES') }
+            parallel {
+                stage('ConferenceClient API 1') {
+                    steps {
+                        podTemplate(name: 'api-js-ubuntu-'+env.GIT_BRANCH, label: 'api-js-ubuntu-'+env.GIT_BRANCH, cloud: 'kubernetes',
+                        volumes: [
+                              persistentVolumeClaim(claimName: 'js-ubuntu-package', mountPath: '/root/ubuntu_package', readOnly: false),
+                              persistentVolumeClaim(claimName: 'js-ubuntu-log', mountPath: '/root/ubuntu_log', readOnly: false)
+                              ],
+                        containers: [
+                            containerTemplate(name: 'test-images', image: "$env.ubuntu_test_images", ttyEnabled: true, alwaysPullImage: true, privileged: true, resourceRequestCpu: '3000m', resourceLimitCpu: '4000m', resourceRequestMemory: '2.0Gi', resourceLimitMemory: '3.0Gi', command: 'cat'),
+                        ]) {
+
+                            node('api-js-ubuntu-'+env.GIT_BRANCH) {
+                                container('test-images') {
+                                    sh "/root/startRun.sh * * ubuntu test ${env.GIT_COMMIT} ConferenceClient_API_1 $env.GIT_BRANCH"
+                                }
+                            }
+                        }
+                    }
+                }
+
+                stage('ConferenceClient API 2') {
+                    steps {
+                        podTemplate(name: 'rest-js-ubuntu-'+env.GIT_BRANCH, label: 'rest-js-ubuntu-'+env.GIT_BRANCH, cloud: 'kubernetes',
+                        volumes: [
+                              persistentVolumeClaim(claimName: 'js-ubuntu-package', mountPath: '/root/ubuntu_package', readOnly: false),
+                              persistentVolumeClaim(claimName: 'js-ubuntu-log', mountPath: '/root/ubuntu_log', readOnly: false)
+                              ],
+                        containers: [
+                            containerTemplate(name: 'test-images', image: "$env.ubuntu_test_images", ttyEnabled: true, alwaysPullImage: true, privileged: true,resourceRequestCpu: '3000m', resourceLimitCpu: '4000m', resourceRequestMemory: '2.0Gi', resourceLimitMemory: '3.0Gi', command: 'cat'),
+                        ]) {
+
+                            node('rest-js-ubuntu-'+env.GIT_BRANCH) {
+                                container('test-images') {
+                                    sh "/root/startRun.sh * * ubuntu test ${env.GIT_COMMIT} ConferenceClient_API_2 $env.GIT_BRANCH"
+                                }
+                            }
+                        }
+                    }
+                }
+            
+            }
+        }
+    }
+
+    post {
+
+        always {
+            script {
+                sh "curl -H \"Content-Type: application/json\" -X POST --data '{\"commit_id\":\"'$GIT_COMMIT'\",\"job_path\":\"'${env.JS_CHECK_UBUNTU_PATH}'\",\"job_name\":\"'$JOB_BASE_NAME'\",\"build_num\":\"'$BUILD_NUMBER'\",\"os_version\":\"'$env.UBUTUN_VERSION'\"}' '${env.checkServerUrl}'/runServer/JS_BUILD_CONFERENCE_STEPS"
+            }
+        }
+        success {
+            setBuildStatus("Build succeeded", "SUCCESS");
+        }
+        failure {
+            setBuildStatus("Build failed", "FAILURE");
+        }
+    }
+}
+
+
+
+
