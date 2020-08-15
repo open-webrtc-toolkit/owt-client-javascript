@@ -53,6 +53,11 @@ $(document).ready(function() {
     p2p.allowedRemoteIds = [getTargetId()];
   });
 
+  $('#mute-toggle').click(function () {
+    document.getElementById('remoteVideo').muted = !document.getElementById('remoteVideo').muted;
+    document.getElementById('screenVideo').muted = !document.getElementById('screenVideo').muted;
+  });
+
   $('#target-screen').click(function() {
     const config = {
       audio: {
