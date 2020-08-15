@@ -5,7 +5,7 @@ module.exports = function(grunt) {
   const sdkOutput = 'dist/sdk/owt.js';
 
   var srcFiles = [
-    'src/sdk/base/**',
+    'src/sdk/base/*.js',
     'src/sdk/p2p/**',
     'src/sdk/conference/**'
   ];
@@ -175,6 +175,8 @@ window.L = L;\n\
     copy:{
       dist:{
         files:[
+          {expand: true,cwd:'src/sdk/base/',src:['*.wasm'],dest:'dist/samples/p2p/js',flatten:false},
+          {expand: true,cwd:'src/sdk/base/',src:['*.wasm'],dest:'dist/sdk/',flatten:false},
           {expand: true,cwd:'src/samples/p2p/',src:['**'],dest:'dist/samples/p2p/',flatten:false},
           {expand: true,cwd:'src/samples/conference/',src:['**'],dest:'dist/samples/conference/',flatten:false},
           {expand: true,cwd:'src/samples/conference/',src:['initcert.js'],dest:'dist/samples/conference/',flatten:false,mode:true},

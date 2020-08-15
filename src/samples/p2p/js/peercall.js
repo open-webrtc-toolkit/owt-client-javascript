@@ -48,6 +48,10 @@ const getTargetId = function() {
   return $('#remote-uid').val();
 };
 
+function denoiseCheckboxChanged() {
+  document.getElementById("denoise-message").innerHTML=": Click 'Stop Camera' and 'share camera' if video sharing is already in progress."
+}
+
 $(document).ready(function() {
   $('#set-remote-uid').click(function() {
     p2p.allowedRemoteIds = [getTargetId()];
@@ -94,6 +98,8 @@ $(document).ready(function() {
     localStream = undefined;
   });
 
+  let denoiseCheckbox = document.getElementById('apply-denoise-checkbox');
+
   $('#target-video-publish').click(function() {
     $('#target-video-unpublish').prop('disabled', false);
     $('#target-video-publish').prop('disabled', true);
@@ -109,23 +115,44 @@ $(document).ready(function() {
       const videoConstraintsForCamera = new Owt.Base
         .VideoTrackConstraints(Owt.Base.VideoSourceInfo.CAMERA);
       let mediaStream;
-      Owt.Base.MediaStreamFactory.createMediaStream(new Owt.Base
-        .StreamConstraints(audioConstraintsForMic,
-          videoConstraintsForCamera)).then((stream) => {
-        mediaStream = stream;
-        localStream = new Owt.Base.LocalStream(mediaStream, new Owt
-          .Base.StreamSourceInfo('mic', 'camera'));
-        $('#local').children('video').get(0).srcObject = localStream
-          .mediaStream;
-        p2p.publish(getTargetId(), localStream).then(
-          (publication) => {
-            publicationForCamera = publication;
-          }, (error) => {
-            console.log('Failed to share video.');
-          });
-      }, (err) => {
-        console.error('Failed to create MediaStream, ' + err);
-      });
+      if(denoiseCheckbox.checked){
+        Owt.Base.MediaStreamFactory.createMediaStreamDenoised(new Owt.Base
+          .StreamConstraints(audioConstraintsForMic,
+            videoConstraintsForCamera)).then((stream) => {
+          mediaStream = stream;
+          localStream = new Owt.Base.LocalStream(mediaStream, new Owt
+            .Base.StreamSourceInfo('mic', 'camera'));
+          $('#local').children('video').get(0).srcObject = localStream
+            .mediaStream;
+          p2p.publish(getTargetId(), localStream).then(
+            (publication) => {
+              publicationForCamera = publication;
+            }, (error) => {
+              console.log('Failed to share video.');
+            });
+        }, (err) => {
+          console.error('Failed to create MediaStream, ' + err);
+        });
+      } 
+      else {
+        Owt.Base.MediaStreamFactory.createMediaStream(new Owt.Base
+          .StreamConstraints(audioConstraintsForMic,
+            videoConstraintsForCamera)).then((stream) => {
+          mediaStream = stream;
+          localStream = new Owt.Base.LocalStream(mediaStream, new Owt
+            .Base.StreamSourceInfo('mic', 'camera'));
+          $('#local').children('video').get(0).srcObject = localStream
+            .mediaStream;
+          p2p.publish(getTargetId(), localStream).then(
+            (publication) => {
+              publicationForCamera = publication;
+            }, (error) => {
+              console.log('Failed to share video.');
+            });
+        }, (err) => {
+          console.error('Failed to create MediaStream, ' + err);
+        });
+      }
     }
   });
 

@@ -86,6 +86,12 @@
       <button id="set-remote-uid">Set Remote ID</button>
     </p>
     <p>
+      <input id="apply-denoise-checkbox" type="checkbox" onclick="denoiseCheckboxChanged()">
+      <label for="apply-denoise-checkbox"> Enable noise reduction</label>
+      <mark><label id="denoise-message"> </label></mark>
+    </p>
+
+    <p>
       <button id="target-video-publish">Share Camera</button>
       <button id="target-video-unpublish">Stop Camera Sharing</button>
       <button id="target-peerconnection-stop">Stop Conversation</button>
