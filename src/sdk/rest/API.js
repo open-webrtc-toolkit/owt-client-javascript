@@ -855,6 +855,85 @@ OWT_REST.API = (function(OWT_REST) {
     }, callbackError);
   };
 
+  /**
+   ***
+     * @function startStreamingInSRT
+     * @desc This function adds an external SRT stream to the specified room.
+     * @memberOf OWT_REST.API
+     * @param {string} room                          -Room ID
+     * @param {Object} connection                     -Transport parameters.
+     * @param {string} connection.url             -URL of the streaming source, e.g. the source URL.
+     * @param {string} connection.mode            -SRT connection mode, "listener" or "caller", "listener" by default.
+     * @param {number} connection.latency         -Timestamp-based Packet Delivery Delay with microseconds.
+     * @param {Object} media Media requirements.
+     * @param {string='auto' | boolean}  media.video -If video is required, "auto" or true or false, "auto" by default.
+     * @param {string='auto' | boolean}  media.audio -If audio is required, "auto" or true or false, "auto" by default.
+     * @param {onStartingStreamingInOK} callback     -Callback function on success
+     * @param {function} callbackError               -Callback function on error
+     * @example
+  var roomId = '51c10d86909ad1f939000001';
+  var url = 'srt://10.239.44.7:1234';
+  var transport = {
+    mode: 'caller',
+    latency: 100000
+  };
+  var media = {
+    audio: 'auto',
+    video: true
+  };
+
+  OWT_REST.API.startStreamingInSRT(roomId, url, transport, media, function(response) {
+    console.log('Start SRT streaming-In response:', response);
+  }, function(status, error) {
+    // HTTP status and error
+    console.log(status, error);
+  });
+     */
+var startStreamingInSRT = function(room, url, options, media, callback, callbackError) {
+    console.log("Send streaming in srt request");
+    var pub_req = {
+      connection: {
+        url: url,
+        mode: options.mode,
+        latency: options.latency
+      },
+      media: media
+    };
+    send('POST', 'rooms/' + room + '/streaming-ins-srt/', pub_req, function(streamRtn) {
+      var st = JSON.parse(streamRtn);
+      callback(st);
+    }, callbackError);
+  };
+
+
+/**
+     * @function stopStreamingInSRT
+     * @desc This function stops the specified external streaming-in in the specified room.
+     * @memberOf OWT_REST.API
+     * @param {string} room                          -Room ID
+     * @param {string} stream                        -Stream ID
+     * @param {function} callback                    -Callback function on success
+     * @param {function} callbackError               -Callback function on error
+     * @example
+  var roomId = '51c10d86909ad1f939000001';
+  var streamID = '878889273471677';
+  OWT_REST.API.stopStreamingInSRT(roomId, streamID, function(result) {
+    console.log('External streaming-in:', streamID, 'in room:', roomId, 'stopped');
+  }, function(status, error) {
+    // HTTP status and error
+    console.log(status, error);
+  });
+     */
+  var stopStreamingInSRT = function(room, stream, callback, callbackError) {
+    if (typeof stream !== 'string' || stream.trim().length === 0) {
+      return callbackError('Invalid stream ID');
+    }
+    send('DELETE', 'rooms/' + room + '/streaming-ins-srt/' + stream, undefined, function(result) {
+      callback(result);
+    }, callbackError);
+  };
+
+
   /*
      * * @callback onStreamingOutList
      * * @param {Array.<id: string, protocol: string, url: string, parameters: Object, media: Object>} streamingOutList    -The list of streaming-outs.
@@ -1476,6 +1555,8 @@ OWT_REST.API = (function(OWT_REST) {
     //Streaming-ins management.
     startStreamingIn: startStreamingIn,
     stopStreamingIn: stopStreamingIn,
+    startStreamingInSRT: startStreamingInSRT,
+    stopStreamingInSRT: stopStreamingInSRT,
 
     //Streaming-outs management
     getStreamingOuts: getStreamingOuts,
