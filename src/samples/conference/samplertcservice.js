@@ -376,6 +376,31 @@ app.delete('/rooms/:room/streaming-ins/:id', function(req, res) {
   });
 });
 
+app.post('/rooms/:room/streaming-ins-srt', function(req, res) {
+  'use strict';
+  var room = req.params.room,
+    url = req.body.url,
+    transport = req.body.transport,
+    media = req.body.media;
+
+  icsREST.API.startStreamingInSRT(room, url, transport, media, function(result) {
+    res.send(result);
+  }, function(err) {
+    res.send(err);
+  });
+});
+
+app.delete('/rooms/:room/streaming-ins-srt/:id', function(req, res) {
+  'use strict';
+  var room = req.params.room,
+    stream_id = req.params.id;
+  icsREST.API.stopStreamingInSRT(room, stream_id, function(result) {
+    res.send(result);
+  }, function(err) {
+    res.send(err);
+  });
+});
+
 app.get('/rooms/:room/streaming-outs', function(req, res) {
   'use strict';
   var room = req.params.room;
