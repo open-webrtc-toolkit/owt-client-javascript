@@ -732,10 +732,12 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
       return sdp;
     }
     sdp = this._setMaxBitrate(sdp, options);
+    sdp = SdpUtils.setOpusParam(sdp, options.audio);
     return sdp;
   }
 
   _setRtpReceiverOptions(sdp, options) {
+    sdp = SdpUtils.setOpusParam(sdp, options.audio);
     // Add legacy simulcast in SDP for safari.
     if (this._isRtpEncodingParameters(options.video) && Utils.isSafari()) {
       if (options.video.length > 1) {

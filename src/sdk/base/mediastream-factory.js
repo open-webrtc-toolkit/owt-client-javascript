@@ -177,7 +177,26 @@ export class MediaStreamFactory {
       }
     } else {
       if (constraints.audio.source === MediaFormatModule.AudioSourceInfo.SCREENCAST) {
-        mediaConstraints.audio = true;
+       mediaConstraints.audio = {};
+       if (constraints.audio.echoCancellation === false) {
+           mediaConstraints.audio.echoCancellation = constraints.audio.echoCancellation;
+         }
+       if (constraints.audio.autoGainControl === false) {
+           mediaConstraints.audio.autoGainControl = constraints.audio.autoGainControl;
+         }
+       if (constraints.audio.noiseSuppression === false) {
+           mediaConstraints.audio.noiseSuppression = constraints.audio.noiseSuppression;
+         }
+       if (constraints.audio.channelCount) {
+           mediaConstraints.audio.channelCount = constraints.audio.channelCount;
+         }
+       if (constraints.audio.sampleRate) {
+          mediaConstraints.audio.sampleRate = constraints.audio.sampleRate;
+         }
+       if (!constraints.audio.echoCancellation && !constraints.audio.autoGainControl && !constraints.audio.noiseSuppression && !constraints.audio.channelCount && !constraints.audio.sampleRate) {
+           mediaConstraints.audio = true;
+         }
+
       } else {
         mediaConstraints.audio = constraints.audio;
       }
