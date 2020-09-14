@@ -685,6 +685,30 @@ export function addLegacySimulcast(sdp, type, numStreams) {
   return sdp;
 }
 
+export function setOpusParam(sdp, audioOptions) {
+    let maxAverageBitrateKB;
+    if(audioOptions.__proto__  === Array.prototype){
+      if(audioOptions[0].maxAverageBitrate !== undefined){
+        maxAverageBitrateKB = audioOptions[0].maxAverageBitrate*1000;
+        sdp = setCodecParam(
+           sdp, 'opus/48000', 'maxaveragebitrate', maxAverageBitrateKB);
+      }
+      if(audioOptions[0].stereo && audioOptions[0].stereo === true){
+        sdp = maybeSetOpusOptions(sdp, {
+           opusStereo: 'true'
+      });
+     }
+    }
+    else{
+        if(audioOptions.stereo && audioOptions.stereo === true){
+            sdp = maybeSetOpusOptions(sdp, {
+               opusStereo: 'true'
+          });
+         }
+    }
+    return sdp;
+  }
+
 export function setMaxBitrate(sdp, encodingParametersList) {
   for (const encodingParameters of encodingParametersList) {
     if (encodingParameters.maxBitrate) {
