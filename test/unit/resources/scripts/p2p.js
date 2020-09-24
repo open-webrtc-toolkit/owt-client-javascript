@@ -105,6 +105,11 @@ describe('Unit tests for P2PClient', function() {
         'user2'), p2pclient3.connect('user3')])).to.be.fulfilled.and.notify(
         done);
     });
+    afterEach((done) => {
+      setTimeout(() => {
+        done();
+      }, 0);
+    });
     it('Publish a valid stream to remote endpoint then stop the publication should be resolved.', done => {
       p2pclient1.publish('user2', localStream).then(publication=>{
         p2pclient1.getStats('user2').then((stats)=>{
@@ -126,18 +131,18 @@ describe('Unit tests for P2PClient', function() {
         expect(p2pclient3.publish('user1', localStream)).to.be.rejected.and.notify(
           done);
       });
-    it('Send message to a remote endpoint should be resolved.', done => {
+    it('Send a message to a remote endpoint should be resolved.', done => {
       expect(p2pclient1.send('user2', 'message')).to.be.fulfilled.and.notify(
         done);
     });
     it(
-      'Send message to a remote endpoint not listed in local allowedRemoteIds should be rejected.',
+      'Send a message to a remote endpoint not listed in local allowedRemoteIds should be rejected.',
       done => {
         expect(p2pclient1.send('user3', 'message')).to.be.rejected.and.notify(
           done);
       });
     it(
-      'Send message to a remote endpoint not listed in remote allowedRemoteIds should be rejected.',
+      'Send a message to a remote endpoint not listed in remote allowedRemoteIds should be rejected.',
       done => {
         expect(p2pclient3.send('user1', 'message')).to.be.rejected.and.notify(
           done);
