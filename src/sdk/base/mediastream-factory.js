@@ -2,12 +2,11 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-/* global Promise, navigator */
+/* global Promise, navigator, window, AudioContext, AudioWorkletNode */
 
 'use strict';
 import * as utils from './utils.js';
 import * as MediaFormatModule from './mediaformat.js';
-import * as denoise from './denoise.js';
 
 /**
  * @class AudioTrackConstraints
@@ -247,22 +246,33 @@ export class MediaStreamFactory {
    */
   static createMediaStreamDenoised(constraints) {
     return this.createMediaStream(constraints).then(
-      (stream) => {
-        const audioTracks = stream.getAudioTracks();
-        const videoTracks = stream.getVideoTracks();
-        const peer = denoise.audioContext.createMediaStreamDestination();
+        (stream) => {
+          window.AudioContext = window.AudioContext ||
+          window.webkitAudioContext;
+          // Rnnoise is tested for sample rate 44100. This limitation can be
+          // lifted after further testing.
+          const audioContext = new AudioContext({sampleRate: 44100});
 
-        audioTracks.forEach(function(track) {
-          const microphone =
-              denoise.audioContext.createMediaStreamSource(stream);
-          microphone.connect(denoise.audioDenoise);
-          denoise.audioDenoise.connect(peer);
-        });
-        videoTracks.forEach(function(track) {
-          peer.stream.addTrack(track);
-        });
-        return peer.stream;
-      }
+          const audioTracks = stream.getAudioTracks();
+          const videoTracks = stream.getVideoTracks();
+          const peer = audioContext.createMediaStreamDestination();
+
+          audioTracks.forEach(function(track) {
+            const microphone =
+                audioContext.createMediaStreamSource(stream);
+            audioContext.audioWorklet.addModule(
+                'js/denoise-wasm-worklet.js').then(() => {
+              const denoiserNode =
+                new AudioWorkletNode(audioContext,
+                    'rnnoise-wasm-worklet-processor');
+              microphone.connect(denoiserNode).connect(peer);
+            });
+          });
+          videoTracks.forEach(function(track) {
+            peer.stream.addTrack(track);
+          });
+          return peer.stream;
+        }
     );
   }
 }
