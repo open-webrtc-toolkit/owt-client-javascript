@@ -29,7 +29,7 @@ const SignalingState = {
   CONNECTED: 3,
 };
 
-const protocolVersion = '1.1';
+const protocolVersion = '1.2';
 
 /* eslint-disable valid-jsdoc */
 /**
@@ -115,6 +115,7 @@ export const ConferenceClient = function(config, signalingImpl) {
   const participants = new Map(); // Key is participant ID, value is a Participant object.
   const publishChannels = new Map(); // Key is MediaStream's ID, value is pc channel.
   const channels = new Map(); // Key is channel's internal ID, value is channel.
+  let mainChannel = null;
 
   /**
    * @function onSignalingMessage
@@ -304,7 +305,11 @@ export const ConferenceClient = function(config, signalingImpl) {
     const pcc = new ConferencePeerConnectionChannel(
         config, signalingForChannel);
     pcc.addEventListener('id', (messageEvent) => {
-      channels.set(messageEvent.message, pcc);
+      if (!channels.has(messageEvent.message)) {
+        channels.set(messageEvent.message, pcc);
+      } else {
+        Logger.warning('Channel already exists', messageEvent.message);
+      }
     });
     return pcc;
   }
@@ -405,8 +410,11 @@ export const ConferenceClient = function(config, signalingImpl) {
       return Promise.reject(new ConferenceError(
           'Cannot publish a published stream.'));
     }
-    const channel = createPeerConnectionChannel();
-    return channel.publish(stream, options, videoCodecs);
+    // const channel = createPeerConnectionChannel();
+    if (!mainChannel) {
+      mainChannel = createPeerConnectionChannel();
+    }
+    return mainChannel.publish(stream, options, videoCodecs);
   };
 
   /**
@@ -422,8 +430,11 @@ export const ConferenceClient = function(config, signalingImpl) {
     if (!(stream instanceof StreamModule.RemoteStream)) {
       return Promise.reject(new ConferenceError('Invalid stream.'));
     }
-    const channel = createPeerConnectionChannel();
-    return channel.subscribe(stream, options);
+    // const channel = createPeerConnectionChannel();
+    if (!mainChannel) {
+      mainChannel = createPeerConnectionChannel();
+    }
+    return mainChannel.subscribe(stream, options);
   };
 
   /**
