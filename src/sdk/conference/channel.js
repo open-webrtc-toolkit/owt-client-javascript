@@ -523,6 +523,13 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
     });
   }
 
+  close() {
+    if (this._pc && this._pc.signalingState !== 'closed') {
+      this._pc.close();
+      this._pc = null;
+    }
+  }
+
   _chainSdpPromise() {
     const prior = this._sdpPromise;
     const negotiationTimeout = 10000;
@@ -553,6 +560,15 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
         this._pc.removeTrack(transceiver.sender);
       });
       this._publishTransceivers.delete(internalId);
+      // Fire ended event
+      if (this._publications.has(id)) {
+        const event = new OwtEvent('ended');
+        this._publications.get(id).dispatchEvent(event);
+        this._publications.delete(id);
+      } else {
+        // Should not reach here
+        Logger.warning('Invalid publication to unpublish: ' + id);
+      }
       // if (this._pc && this._pc.signalingState !== 'closed') {
       //   this._pc.close();
       // }
@@ -574,6 +590,15 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
         transceiver.receiver.track.stop();
       });
       this._subscribeTransceivers.delete(internalId);
+      // Fire ended event
+      if (this._subscriptions.has(id)) {
+        const event = new OwtEvent('ended');
+        this._subscriptions.get(id).dispatchEvent(event);
+        this._subscriptions.delete(id);
+      } else {
+        // Should not reach here
+        Logger.warning('Invalid subscription to unsubscribe: ' + id);
+      }
       // Disable media in remote SDP
       // Set remoteDescription and set localDescription
     }
@@ -802,8 +827,6 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
     } else if (!sessionId) {
       // Channel ready
     }
-    // this._publishPromise = null;
-    // this._subscribePromise = null;
   }
 
   _sdpHandler(sdp) {
