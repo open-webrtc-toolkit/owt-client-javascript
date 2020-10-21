@@ -47,8 +47,5 @@
   },
   "scripts": {
     "postinstall": "cd scripts && grunt prepare"
-  },
-  "dependencies": {
-    "http-server": "^0.12.3"
   }
 }
