@@ -569,9 +569,6 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
         // Should not reach here
         Logger.warning('Invalid publication to unpublish: ' + id);
       }
-      // if (this._pc && this._pc.signalingState !== 'closed') {
-      //   this._pc.close();
-      // }
       // Create offer, set local and remote description
     }
   }
@@ -806,7 +803,9 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
       this._subscriptions.set(sessionId, subscription);
       // Fire subscription's ended event when associated stream is ended.
       this._subscribedStreams.get(sessionId).addEventListener('ended', () => {
-        this._subscriptions.get(sessionId).dispatchEvent('ended', new OwtEvent('ended'));
+        if (this._subscriptions.has(sessionId)) {
+          this._subscriptions.get(sessionId).dispatchEvent('ended', new OwtEvent('ended'));
+        }
       });
       // Resolve subscription if mediaStream is ready
       if (this._subscribedStreams.get(sessionId).mediaStream) {
