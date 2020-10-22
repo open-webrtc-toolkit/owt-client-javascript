@@ -90,6 +90,9 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
   }
 
   async publish(stream, options, videoCodecs) {
+    if (this._ended) {
+      return Promise.reject('Connection closed');
+    }
     if (options === undefined) {
       options = {
         audio: !!stream.mediaStream.getAudioTracks().length,
@@ -341,6 +344,9 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
   }
 
   async subscribe(stream, options) {
+    if (this._ended) {
+      return Promise.reject('Connection closed');
+    }
     if (options === undefined) {
       options = {
         audio: !!stream.settings.audio,
@@ -526,7 +532,6 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
   close() {
     if (this._pc && this._pc.signalingState !== 'closed') {
       this._pc.close();
-      this._pc = null;
     }
   }
 
@@ -595,6 +600,11 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
       } else {
         // Should not reach here
         Logger.warning('Invalid subscription to unsubscribe: ' + id);
+      }
+      // Clear media stream
+      if (this._subscribedStreams.has(id)) {
+        this._subscribedStreams.get(id).mediaStream = null;
+        this._subscribedStreams.delete(id);
       }
       // Disable media in remote SDP
       // Set remoteDescription and set localDescription
@@ -693,6 +703,8 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
       subscription.dispatchEvent(event);
       subscription.stop();
     }
+    this.dispatchEvent(event);
+    this.close();
   }
 
   _rejectPromise(error) {
@@ -867,15 +879,15 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
     if (this._ended) {
       return;
     }
-    const dispatcher = this._publication || this._subscription;
-    if (!dispatcher) {
-      Logger.warning('Neither publication nor subscription is available.');
-      return;
-    }
     const errorEvent = new ErrorEvent('error', {
       error: error,
     });
-    dispatcher.dispatchEvent(errorEvent);
+    for (const [/* id */, publication] of this._publications) {
+      publication.dispatchEvent(errorEvent);
+    }
+    for (const [/* id */, subscription] of this._subscriptions) {
+      subscription.dispatchEvent(errorEvent);
+    }
     // Fire ended event when error occured
     this._fireEndedEventOnPublicationOrSubscription();
   }
