@@ -41,7 +41,7 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
     this._pendingCandidates = [];
     this._subscribePromises = new Map(); // internalId => { resolve, reject }
     this._publishPromises = new Map(); // internalId => { resolve, reject }
-    this._subscribedStreams = new Map(); //
+    this._subscribedStreams = new Map(); // intenalId => RemoteStream
     this._subscribedStream = null;
     this._publishedStream = null;
     this._publications = new Map(); // PublicationId => Publication
@@ -455,6 +455,7 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
 
     const internalId = this._createInternalId();
     this._subscribeTransceivers.set(internalId, { transceivers });
+    this._subscribedStreams.set(internalId, stream);
 
     // Waiting for previous SDP negotiation if needed
     await this._chainSdpPromise();
@@ -504,7 +505,6 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
         Logger.warning('Server returns conflict ID: ' + data.transportId);
       }
       this._id = data.transportId;
-      this._subscribedStreams.set(subscriptionId, stream);
 
       // Modify local SDP before sending
       if (options) {
@@ -602,9 +602,9 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
         Logger.warning('Invalid subscription to unsubscribe: ' + id);
       }
       // Clear media stream
-      if (this._subscribedStreams.has(id)) {
-        this._subscribedStreams.get(id).mediaStream = null;
-        this._subscribedStreams.delete(id);
+      if (this._subscribedStreams.has(internalId)) {
+        this._subscribedStreams.get(internalId).mediaStream = null;
+        this._subscribedStreams.delete(internalId);
       }
       // Disable media in remote SDP
       // Set remoteDescription and set localDescription
@@ -656,9 +656,9 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
       const subscriptionId = sub.id;
       if (sub.transceivers.find((t) => t.transceiver === event.transceiver)) {
         find = true;
-        const subscribedStream = this._subscribedStreams.get(subscriptionId);
+        const subscribedStream = this._subscribedStreams.get(internalId);
         if (!subscribedStream.mediaStream) {
-          this._subscribedStreams.get(subscriptionId).mediaStream = event.streams[0];
+          this._subscribedStreams.get(internalId).mediaStream = event.streams[0];
           // Resolve subscription if ready handler has been called
           const subscription = this._subscriptions.get(subscriptionId)
           if (subscription) {
@@ -814,13 +814,13 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
       (options) => this._applyOptions(sessionId, options));
       this._subscriptions.set(sessionId, subscription);
       // Fire subscription's ended event when associated stream is ended.
-      this._subscribedStreams.get(sessionId).addEventListener('ended', () => {
+      this._subscribedStreams.get(internalId).addEventListener('ended', () => {
         if (this._subscriptions.has(sessionId)) {
           this._subscriptions.get(sessionId).dispatchEvent('ended', new OwtEvent('ended'));
         }
       });
       // Resolve subscription if mediaStream is ready
-      if (this._subscribedStreams.get(sessionId).mediaStream) {
+      if (this._subscribedStreams.get(internalId).mediaStream) {
         this._subscribePromises.get(internalId).resolve(subscription);
       }
     } else if (this._publishPromises.has(internalId)) {
@@ -962,14 +962,19 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
   // Handle stream event sent from MCU. Some stream events should be publication
   // event or subscription event. It will be handled here.
   _onStreamEvent(message) {
-    let eventTarget;
+    let eventTargets = [];
     if (this._publications.has(message.id)) {
-      eventTarget = this._publications.get(message.id);
-    } else if (
-      this._subscribedStream && message.id === this._subscribedStream.id) {
-      eventTarget = this._subscription;
+      eventTargets.push(this._publications.get(message.id));
     }
-    if (!eventTarget) {
+    for (const [internalId, subscribedStream] of this._subscribedStreams) {
+      if (message.id === subscribedStream.id) {
+        const subscriptionId = this._subscribeTransceivers.get(internalId).id;
+        eventTargets.push(this._subscriptions.get(subscriptionId));
+        break;
+      }
+    }
+
+    if (!eventTargets.length) {
       return;
     }
     let trackKind;
@@ -981,9 +986,11 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
       Logger.warning('Invalid data field for stream update info.');
     }
     if (message.data.value === 'active') {
-      eventTarget.dispatchEvent(new MuteEvent('unmute', {kind: trackKind}));
+      eventTargets.forEach(target =>
+        target.dispatchEvent(new MuteEvent('unmute', {kind: trackKind})));
     } else if (message.data.value === 'inactive') {
-      eventTarget.dispatchEvent(new MuteEvent('mute', {kind: trackKind}));
+      eventTargets.forEach(target =>
+        target.dispatchEvent(new MuteEvent('mute', {kind: trackKind})));
     } else {
       Logger.warning('Invalid data value for stream update info.');
     }
