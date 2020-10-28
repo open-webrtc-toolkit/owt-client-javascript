@@ -86,56 +86,6 @@ class ConferenceClientConfiguration { // eslint-disable-line no-unused-vars
 }
 
 /**
- * @class ClientPeerConnectionChannel
- * @classDesc PeerConnectionChannel for ConferenceClient.
- * @memberOf Owt.Conference
- * @hideconstructor
- */
-class ClientPeerConnectionChannel { // eslint-disable-line no-unused-vars
-  // eslint-disable-next-line require-jsdoc
-  constructor(channel) {
-    this._channel = channel;
-  }
-
-  /**
-   * @function publish
-   * @memberof Owt.Conference.ClientPeerConnectionChannel
-   * @instance
-   * @desc Publish a LocalStream to conference server through current channel. Other participants will be able to subscribe this stream when it is successfully published.
-   * @param {Owt.Base.LocalStream} stream The stream to be published.
-   * @param {Owt.Base.PublishOptions} options Options for publication.
-   * @param {string[]} videoCodecs Video codec names for publishing. Valid values are 'VP8', 'VP9' and 'H264'. This parameter only valid when options.video is RTCRtpEncodingParameters. Publishing with RTCRtpEncodingParameters is an experimental feature. This parameter is subject to change.
-   * @return {Promise<Publication, Error>} Returned promise will be resolved with a newly created Publication once specific stream is successfully published, or rejected with a newly created Error if stream is invalid or options cannot be satisfied. Successfully published means PeerConnection is established and server is able to process media data.
-   */
-  async publish(stream, options, videoCodecs) {
-    return this._channel.publish(stream, options, videoCodecs);
-  }
-
-  /**
-   * @function subscribe
-   * @memberof Owt.Conference.ClientPeerConnectionChannel
-   * @instance
-   * @desc Subscribe a RemoteStream from conference server through current channel.
-   * @param {Owt.Base.RemoteStream} stream The stream to be subscribed.
-   * @param {Owt.Conference.SubscribeOptions} options Options for subscription.
-   * @return {Promise<Subscription, Error>} Returned promise will be resolved with a newly created Subscription once specific stream is successfully subscribed, or rejected with a newly created Error if stream is invalid or options cannot be satisfied. Successfully subscribed means PeerConnection is established and server was started to send media data.
-   */
-  async subscribe(stream, options) {
-    return this._channel.subscribe(stream, options);
-  }
-
-  /**
-   * @function close
-   * @memberof Owt.Conference.ClientPeerConnectionChannel
-   * @instance
-   * @desc Close current channel.
-   */
-  close() {
-    return this._channel.close();
-  }
-}
-
-/**
  * @class ConferenceClient
  * @classdesc The ConferenceClient handles PeerConnections between client and server. For conference controlling, please refer to REST API guide.
  * Events:
@@ -443,18 +393,6 @@ export const ConferenceClient = function(config, signalingImpl) {
   };
 
   /**
-   * @function createClientPeerConnectionChannel
-   * @memberof Owt.Conference.ConferenceClient
-   * @instance
-   * @desc Create a peer connection channel used to communicate with conference server.
-   * @return {ClientPeerConnectionChannel} Returned ClientPeerConnectionChannel.
-   */
-  this.createClientPeerConnectionChannel = function () {
-    const channel = createPeerConnectionChannel();
-    return new ClientPeerConnectionChannel(channel);
-  };
-
-  /**
    * @function publish
    * @memberof Owt.Conference.ConferenceClient
    * @instance
@@ -472,14 +410,11 @@ export const ConferenceClient = function(config, signalingImpl) {
       return Promise.reject(new ConferenceError(
           'Cannot publish a published stream.'));
     }
-    const channel = createPeerConnectionChannel();
-    const promise = channel.publish(stream, options, videoCodecs);
-    promise.then(publication => {
-      publication.addEventListener('ended', () => {
-        channel.close();
-      });
-    });
-    return promise;
+    // const channel = createPeerConnectionChannel();
+    if (!mainChannel) {
+      mainChannel = createPeerConnectionChannel();
+    }
+    return mainChannel.publish(stream, options, videoCodecs);
   };
 
   /**
@@ -495,14 +430,11 @@ export const ConferenceClient = function(config, signalingImpl) {
     if (!(stream instanceof StreamModule.RemoteStream)) {
       return Promise.reject(new ConferenceError('Invalid stream.'));
     }
-    const channel = createPeerConnectionChannel();
-    const promise = channel.subscribe(stream, options);
-    promise.then(subscription => {
-      subscription.addEventListener('ended', () => {
-        channel.close();
-      });
-    });
-    return promise;
+    // const channel = createPeerConnectionChannel();
+    if (!mainChannel) {
+      mainChannel = createPeerConnectionChannel();
+    }
+    return mainChannel.subscribe(stream, options);
   };
 
   /**
