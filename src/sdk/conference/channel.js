@@ -42,8 +42,6 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
     this._subscribePromises = new Map(); // internalId => { resolve, reject }
     this._publishPromises = new Map(); // internalId => { resolve, reject }
     this._subscribedStreams = new Map(); // intenalId => RemoteStream
-    this._subscribedStream = null;
-    this._publishedStream = null;
     this._publications = new Map(); // PublicationId => Publication
     this._subscriptions = new Map(); // SubscriptionId => Subscription
     this._publishTransceivers = new Map(); // internalId => { id, transceivers: [Transceiver] }
@@ -78,7 +76,7 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
         } else if (message.status === 'ready') {
           this._readyHandler(message.sessionId);
         } else if (message.status === 'error') {
-          this._errorHandler(message.data);
+          this._errorHandler(message.sessionId, message.data);
         }
         break;
       case 'stream':
@@ -467,16 +465,12 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
         .catch((errorMessage) => {
           Logger.error('Set local description failed. Message: ' +
             JSON.stringify(errorMessage));
+          throw errorMessage;
         });
     }, function(error) {
       Logger.error('Create offer failed. Error info: ' + JSON.stringify(
           error));
-    }).catch((e)=>{
-      Logger.error('Failed to create offer or set SDP. Message: '
-          + e.message);
-      this._unsubscribe(internalId);
-      this._rejectPromise(e);
-      this._fireEndedEventOnPublicationOrSubscription();
+      throw error;
     }).then(() => {
       const trackOptions = [];
       transceivers.forEach(({type, transceiver, from, parameters, option}) => {
@@ -517,6 +511,7 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
         signaling: localDesc,
       });
     }).catch((e) => {
+      Logger.error('Failed to subscribe: ' + e);
       this._unsubscribe(internalId);
       this._rejectPromise(e);
       this._fireEndedEventOnPublicationOrSubscription();
@@ -622,7 +617,7 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
     }).then(() => {
       if (!isPub) {
         const muteEventName = isMute ? 'mute' : 'unmute';
-        this._subscription.dispatchEvent(
+        this._subscriptions.get(sessionId).dispatchEvent(
             new MuteEvent(muteEventName, {kind: trackKind}));
       }
     });
@@ -866,16 +861,23 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
     }
   }
 
-  _errorHandler(errorMessage) {
-    return this._handleError(errorMessage);
+  _errorHandler(sessionId, errorMessage) {
+    if (!sessionId) {
+      // Transport error
+      return this._handleError(errorMessage);
+    }
+
+    const internalId = this._reverseIdMap.get(sessionId);
+    if (this._publishTransceivers.has(internalId)) {
+      this._unpublish(internalId);
+    }
+    if (this._subscribeTransceivers.has(internalId)) {
+      this._unsubscribe(internalId);
+    }
   }
 
   _handleError(errorMessage) {
     const error = new ConferenceError(errorMessage);
-    const p = this._publishPromise || this._subscribePromise;
-    if (p) {
-      return this._rejectPromise(error);
-    }
     if (this._ended) {
       return;
     }

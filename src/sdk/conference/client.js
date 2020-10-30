@@ -115,7 +115,7 @@ export const ConferenceClient = function(config, signalingImpl) {
   const participants = new Map(); // Key is participant ID, value is a Participant object.
   const publishChannels = new Map(); // Key is MediaStream's ID, value is pc channel.
   const channels = new Map(); // Key is channel's internal ID, value is channel.
-  let mainChannel = null;
+  let mainChannel = null; // Main pc channel for the client as single pc is default.
 
   /**
    * @function onSignalingMessage
@@ -410,9 +410,11 @@ export const ConferenceClient = function(config, signalingImpl) {
       return Promise.reject(new ConferenceError(
           'Cannot publish a published stream.'));
     }
-    // const channel = createPeerConnectionChannel();
     if (!mainChannel) {
       mainChannel = createPeerConnectionChannel();
+      mainChannel.addEventListener('ended', () => {
+        mainChannel = null;
+      });
     }
     return mainChannel.publish(stream, options, videoCodecs);
   };
@@ -430,9 +432,11 @@ export const ConferenceClient = function(config, signalingImpl) {
     if (!(stream instanceof StreamModule.RemoteStream)) {
       return Promise.reject(new ConferenceError('Invalid stream.'));
     }
-    // const channel = createPeerConnectionChannel();
     if (!mainChannel) {
       mainChannel = createPeerConnectionChannel();
+      mainChannel.addEventListener('ended', () => {
+        mainChannel = null;
+      });
     }
     return mainChannel.subscribe(stream, options);
   };

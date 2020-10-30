@@ -76,7 +76,7 @@ export function convertToPublicationSettings(mediaInfo) {
         keyFrameInterval = track.parameters.keyFrameInterval;
       }
       video.push(new PublicationModule.VideoPublicationSettings(
-          videoCodec, resolution, framerate, bitrate, keyFrameInterval, rid));
+        videoCodec, resolution, framerate, bitrate, keyFrameInterval, rid));
     }
   }
 
@@ -89,7 +89,8 @@ export function convertToPublicationSettings(mediaInfo) {
  * @private
  */
 export function convertToSubscriptionCapabilities(mediaInfo) {
-  let audio; let video;
+  let audio;
+  let video;
 
   for (const track of mediaInfo.tracks) {
     if (track.type === 'audio') {
@@ -97,8 +98,8 @@ export function convertToSubscriptionCapabilities(mediaInfo) {
       if (track.optional && track.optional.format) {
         for (const audioCodecInfo of track.optional.format) {
           const audioCodec = new CodecModule.AudioCodecParameters(
-              audioCodecInfo.codec, audioCodecInfo.channelNum,
-              audioCodecInfo.sampleRate);
+            audioCodecInfo.codec, audioCodecInfo.channelNum,
+            audioCodecInfo.sampleRate);
           audioCodecs.push(audioCodec);
         }
       }
@@ -110,30 +111,29 @@ export function convertToSubscriptionCapabilities(mediaInfo) {
       if (track.optional && track.optional.format) {
         for (const videoCodecInfo of track.optional.format) {
           const videoCodec = new CodecModule.VideoCodecParameters(
-              videoCodecInfo.codec, videoCodecInfo.profile);
+            videoCodecInfo.codec, videoCodecInfo.profile);
           videoCodecs.push(videoCodec);
         }
       }
       videoCodecs.sort();
       const resolutions = Array.from(
-          track.optional.parameters.resolution,
-          (r) => new MediaFormatModule.Resolution(r.width, r.height));
+        track.optional.parameters.resolution,
+        (r) => new MediaFormatModule.Resolution(r.width, r.height));
       resolutions.sort(sortResolutions);
       const bitrates = Array.from(
-          track.optional.parameters.bitrate,
-          (bitrate) => extractBitrateMultiplier(bitrate));
+        track.optional.parameters.bitrate,
+        (bitrate) => extractBitrateMultiplier(bitrate));
       bitrates.push(1.0);
       bitrates.sort(sortNumbers);
       const frameRates = JSON.parse(
-          JSON.stringify(track.optional.parameters.framerate));
+        JSON.stringify(track.optional.parameters.framerate));
       frameRates.sort(sortNumbers);
       const keyFrameIntervals = JSON.parse(
-          JSON.stringify(track.optional.parameters.keyFrameInterval));
+        JSON.stringify(track.optional.parameters.keyFrameInterval));
       keyFrameIntervals.sort(sortNumbers);
       video = new SubscriptionModule.VideoSubscriptionCapabilities(
-          videoCodecs, resolutions, frameRates, bitrates, keyFrameIntervals);
-      }
+        videoCodecs, resolutions, frameRates, bitrates, keyFrameIntervals);
+    }
   }
-
   return new SubscriptionModule.SubscriptionCapabilities(audio, video);
 }
