@@ -262,8 +262,8 @@ export const ConferenceClient = function(config, signalingImpl) {
     stream.settings = StreamUtilsModule.convertToPublicationSettings(streamInfo
         .media);
     stream.extraCapabilities = StreamUtilsModule
-      .convertToSubscriptionCapabilities(
-        streamInfo.media);
+        .convertToSubscriptionCapabilities(
+            streamInfo.media);
     const streamEvent = new EventModule.OwtEvent('updated');
     stream.dispatchEvent(streamEvent);
   }
@@ -286,8 +286,8 @@ export const ConferenceClient = function(config, signalingImpl) {
       stream.settings = StreamUtilsModule.convertToPublicationSettings(
           streamInfo.media);
       stream.extraCapabilities = StreamUtilsModule
-        .convertToSubscriptionCapabilities(
-          streamInfo.media);
+          .convertToSubscriptionCapabilities(
+              streamInfo.media);
       return stream;
     }
   }
