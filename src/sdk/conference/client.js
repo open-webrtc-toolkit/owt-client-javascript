@@ -346,12 +346,6 @@ export const ConferenceClient = function(config, signalingImpl) {
    * @param {string} tokenString Token is issued by conference server(nuve).
    */
   this.join = function(tokenString) {
-    if (QuicConnection) {
-      // TODO: Get URL from token.
-      quicTransportChannel = new QuicConnection(
-          'quic-transport://jianjunz-nuc-ubuntu.sh.intel.com:7700/echo',
-          createSignalingForChannel());
-    }
     return new Promise((resolve, reject) => {
       const token = JSON.parse(Base64.decodeBase64(tokenString));
       const isSecured = (token.secure === true);
@@ -394,6 +388,11 @@ export const ConferenceClient = function(config, signalingImpl) {
               me = participants.get(p.id);
             }
           }
+        }
+        if (QuicConnection && token.webTransportUrl) {
+          quicTransportChannel = new QuicConnection(
+              token.webTransportUrl, resp.webTransportToken,
+              createSignalingForChannel());
         }
         resolve(new ConferenceInfo(resp.room.id, Array.from(participants
             .values()), Array.from(remoteStreams.values()), me));

@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 /* eslint-disable require-jsdoc */
-/* global Promise, Map, QuicTransport, Uint8Array, TextEncoder */
+/* global Promise, Map, QuicTransport, Uint8Array, Uint32Array, TextEncoder */
 
 'use strict';
 
@@ -11,6 +11,7 @@ import Logger from '../base/logger.js';
 import {EventDispatcher} from '../base/event.js';
 import {Publication} from '../base/publication.js';
 import {Subscription} from './subscription.js';
+import {Base64} from '../base/base64.js';
 
 /**
  * @class QuicConnection
@@ -20,15 +21,19 @@ import {Subscription} from './subscription.js';
  * @private
  */
 export class QuicConnection extends EventDispatcher {
-  constructor(url, signaling) {
+  // `tokenString` is a base64 string of the token object. It's in the return
+  // value of `ConferenceClient.join`.
+  constructor(url, tokenString, signaling) {
     super();
+    this._token = JSON.parse(Base64.decodeBase64(tokenString));
     this._signaling = signaling;
     this._ended = false;
     this._quicStreams = new Map(); // Key is publication or subscription ID.
     this._quicTransport = new QuicTransport(url);
     this._subscribePromises = new Map(); // Key is subscription ID.
-    this._transportId = undefined;
+    this._transportId = this._token.transportId;
     this._init();
+    this._authenticate(tokenString);
   }
 
   /**
@@ -106,10 +111,14 @@ export class QuicConnection extends EventDispatcher {
     const quicStream = await this._quicTransport.createSendStream();
     const writer = quicStream.writable.getWriter();
     await writer.ready;
+    // 128 bit of zero indicates this is a stream for signaling.
     writer.write(new Uint8Array(16));
+    // Send token as described in
+    // https://github.com/open-webrtc-toolkit/owt-server/blob/20e8aad216cc446095f63c409339c34c7ee770ee/doc/design/quic-transport-payload-format.md.
     const encoder = new TextEncoder();
-    writer.write(encoder.encode(token));
-    Logger.info('End of auth.');
+    const encodedToken = encoder.encode(token);
+    writer.write(Uint32Array.of(encodedToken.length));
+    writer.write(encodedToken);
   }
 
   async createSendStream() {
@@ -214,27 +223,14 @@ export class QuicConnection extends EventDispatcher {
     });
   }
 
-  async _updateTransportId(id) {
-    if (this._transportId) {
-      Logger.error('Update transport ID is not supported.');
-      return;
-    }
-    this._transportId = id;
-    await this._authenticate(id);
-  }
-
   async _initiatePublication() {
     const data = await this._signaling.sendSignalingMessage('publish', {
       media: null,
       data: true,
       transport: {type: 'quic', id: this._transportId},
     });
-    if (data.transportId) {
-      await this._updateTransportId(data.transportId);
-    } else {
-      if (this._transportId !== data.transportId) {
-        throw new Error('Transport ID not match.');
-      }
+    if (this._transportId !== data.transportId) {
+      throw new Error('Transport ID not match.');
     }
     return data.id;
   }
