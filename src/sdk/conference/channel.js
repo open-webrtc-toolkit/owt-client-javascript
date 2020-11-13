@@ -421,9 +421,14 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
         };
       }
       if (options.video.rid) {
-        mediaOptions.video.simulcastRid = options.video.rid;
-        // Ignore other settings when RID set.
-        delete mediaOptions.video.parameters;
+        // Use rid matched track ID as from if possible
+        const matchedSetting = stream.settings.video
+          .find((video) => video.rid === options.video.rid);
+        if (matchedSetting) {
+          mediaOptions.video.from = matchedSetting.id;
+          // Ignore other settings when RID set.
+          delete mediaOptions.video.parameters;
+        }
         options.video = true;
       }
     } else {

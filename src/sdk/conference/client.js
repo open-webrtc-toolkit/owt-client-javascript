@@ -274,11 +274,15 @@ export const ConferenceClient = function(config, signalingImpl) {
       return new RemoteMixedStream(streamInfo);
     } else {
       let audioSourceInfo; let videoSourceInfo;
-      if (streamInfo.media.audio) {
-        audioSourceInfo = streamInfo.media.audio.source;
+      const audioTrack = streamInfo.media.tracks
+          .find((t) => t.type === 'audio');
+      const videoTrack = streamInfo.media.tracks
+          .find((t) => t.type === 'video');
+      if (audioTrack) {
+        audioSourceInfo = audioTrack.source;
       }
-      if (streamInfo.media.video) {
-        videoSourceInfo = streamInfo.media.video.source;
+      if (videoTrack) {
+        videoSourceInfo = videoTrack.source;
       }
       const stream = new StreamModule.RemoteStream(streamInfo.id,
           streamInfo.info.owner, undefined, new StreamModule.StreamSourceInfo(

@@ -63,7 +63,8 @@ export function convertToPublicationSettings(mediaInfo) {
             track.format.codec, track.format.channelNum,
             track.format.sampleRate);
       }
-      audio.push(new PublicationModule.AudioPublicationSettings(audioCodec));
+      audio.push(new PublicationModule.AudioPublicationSettings(
+          track.id, audioCodec));
     } else if (track.type === 'video') {
       if (track.format) {
         videoCodec = new CodecModule.VideoCodecParameters(
@@ -79,8 +80,12 @@ export function convertToPublicationSettings(mediaInfo) {
         bitrate = track.parameters.bitrate * 1000;
         keyFrameInterval = track.parameters.keyFrameInterval;
       }
+      if (track.rid) {
+        rid = track.rid;
+      }
       video.push(new PublicationModule.VideoPublicationSettings(
-          videoCodec, resolution, framerate, bitrate, keyFrameInterval, rid));
+          track.id, videoCodec, resolution, framerate, bitrate,
+          keyFrameInterval, rid));
     }
   }
 
