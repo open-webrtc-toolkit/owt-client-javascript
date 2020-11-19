@@ -36,7 +36,6 @@ const runSocketIOSample = function() {
     let myId;
     let subscriptionForMixedStream;
     let myRoom;
-    let bidirectionalStream;
 
     function getParameterByName(name) {
         name = name.replace(/[\[]/, '\\\[').replace(/[\]]/, '\\\]');
@@ -144,9 +143,6 @@ const runSocketIOSample = function() {
             conference.join(token).then(resp => {
                 myId = resp.self.id;
                 myRoom = resp.id;
-                conference.createDataStream().then(stream=>{
-                    window.bidirectionalStream=stream;
-                });
                 if(mediaUrl){
                      startStreamingIn(myRoom, mediaUrl);
                 }
@@ -196,7 +192,6 @@ const runSocketIOSample = function() {
                       if (stream.source.audio === 'mixed' || stream.source.video ===
                         'mixed') {
                         subscribeAndRenderVideo(stream);
-                        return;
                       }
                     } else if (stream.source.audio !== 'mixed') {
                         subscribeAndRenderVideo(stream);

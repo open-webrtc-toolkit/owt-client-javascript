@@ -29,7 +29,13 @@ export class QuicConnection extends EventDispatcher {
     this._signaling = signaling;
     this._ended = false;
     this._quicStreams = new Map(); // Key is publication or subscription ID.
-    this._quicTransport = new QuicTransport(url);
+    this._quicTransport = new QuicTransport(url, {
+      serverCertificateFingerprints: [{
+        value:
+            '25:47:DA:10:A0:5B:BF:AE:61:A5:C0:53:BB:2E:9C:2C:80:B5:B9:6A:16:2C:97:0A:F2:A4:86:33:3F:02:FF:6A',
+        algorithm: 'sha-256',
+      }],
+    });
     this._subscribePromises = new Map(); // Key is subscription ID.
     this._transportId = this._token.transportId;
     this._init();
@@ -108,7 +114,8 @@ export class QuicConnection extends EventDispatcher {
 
   async _authenticate(token) {
     await this._quicTransport.ready;
-    const quicStream = await this._quicTransport.createSendStream();
+    const quicStream = await this._quicTransport.createBidirectionalStream();
+    const chunkReader = quicStream.readable.getReader();
     const writer = quicStream.writable.getWriter();
     await writer.ready;
     // 128 bit of zero indicates this is a stream for signaling.
@@ -119,6 +126,9 @@ export class QuicConnection extends EventDispatcher {
     const encodedToken = encoder.encode(token);
     writer.write(Uint32Array.of(encodedToken.length));
     writer.write(encodedToken);
+    // Server returns transport ID as an ack. Ignore it here.
+    await chunkReader.read();
+    Logger.info('Authentication success.');
   }
 
   async createSendStream() {
