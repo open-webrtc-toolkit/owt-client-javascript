@@ -574,8 +574,10 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
       }
       // Clean transceiver
       transceivers.forEach(({transceiver}) => {
-        transceiver.sender.replaceTrack(null);
-        this._pc.removeTrack(transceiver.sender);
+        if (this._pc.signalingState === 'stable') {
+          transceiver.sender.replaceTrack(null);
+          this._pc.removeTrack(transceiver.sender);
+        }
       });
       this._publishTransceivers.delete(internalId);
       // Fire ended event
