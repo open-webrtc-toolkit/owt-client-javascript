@@ -423,7 +423,7 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
       if (options.video.rid) {
         // Use rid matched track ID as from if possible
         const matchedSetting = stream.settings.video
-          .find((video) => video.rid === options.video.rid);
+            .find((video) => video.rid === options.video.rid);
         if (matchedSetting) {
           mediaOptions.video.from = matchedSetting.id;
           // Ignore other settings when RID set.
