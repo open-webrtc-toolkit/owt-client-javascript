@@ -890,6 +890,17 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
       return this._handleError(errorMessage);
     }
 
+    // Fire error event on publication or subscription
+    const errorEvent = new ErrorEvent('error', {
+      error: new ConferenceError(errorMessage),
+    });
+    if (this._publications.has(sessionId)) {
+      this._publications.get(sessionId).dispatchEvent(errorEvent);
+    }
+    if (this._subscriptions.has(sessionId)) {
+      this._subscriptions.get(sessionId).dispatchEvent(errorEvent);
+    }
+    // Stop publication or subscription
     const internalId = this._reverseIdMap.get(sessionId);
     if (this._publishTransceivers.has(internalId)) {
       this._unpublish(internalId);

@@ -578,7 +578,8 @@ function findMLineRangeWithMID(sdpLines, mid) {
   }
   if (midIndex >= 0) {
     // Found matched a=mid line
-    const nextMLineIndex = findLineInRange(sdpLines, midIndex, -1, 'm=');
+    const nextMLineIndex = (findLineInRange(sdpLines, midIndex, -1, 'm=')
+        || -1);
     let mLineIndex = -1;
     for (let i = midIndex; i >= 0; i--) {
       if (sdpLines[i].indexOf('m=') >= 0) {
@@ -586,7 +587,7 @@ function findMLineRangeWithMID(sdpLines, mid) {
         break;
       }
     }
-    if (mLineIndex >= 0 && nextMLineIndex > mLineIndex) {
+    if (mLineIndex >= 0) {
       return {
         start: mLineIndex,
         end: nextMLineIndex
