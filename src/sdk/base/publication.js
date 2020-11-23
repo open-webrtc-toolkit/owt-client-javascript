@@ -15,14 +15,7 @@ import {EventDispatcher} from '../base/event.js';
  */
 export class AudioPublicationSettings {
   // eslint-disable-next-line require-jsdoc
-  constructor(id, codec) {
-    /**
-     * @member {?Owt.Base.AudioCodecParameters} id
-     * @instance
-     * @classDesc Identifer for this set of publication settings.
-     * @memberof Owt.Base.AudioPublicationSettings
-     */
-    this.id=id,
+  constructor(codec) {
     /**
      * @member {?Owt.Base.AudioCodecParameters} codec
      * @instance
@@ -40,15 +33,8 @@ export class AudioPublicationSettings {
  */
 export class VideoPublicationSettings {
   // eslint-disable-next-line require-jsdoc
-  constructor(id, codec, resolution, frameRate,
+  constructor(codec, resolution, frameRate,
       bitrate, keyFrameInterval, rid) {
-    /**
-     * @member {?Owt.Base.VideoCodecParameters} id
-     * @instance
-     * @classDesc Identifer for this set of publication settings.
-     * @memberof Owt.Base.VideoPublicationSettings
-     */
-    this.id=id,
     /**
      * @member {?Owt.Base.VideoCodecParameters} codec
      * @instance

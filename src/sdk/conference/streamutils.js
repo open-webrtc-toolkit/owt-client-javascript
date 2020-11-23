@@ -63,8 +63,10 @@ export function convertToPublicationSettings(mediaInfo) {
             track.format.codec, track.format.channelNum,
             track.format.sampleRate);
       }
-      audio.push(new PublicationModule.AudioPublicationSettings(
-          track.id, audioCodec));
+      const audioPublicationSettings =
+          new PublicationModule.AudioPublicationSettings(audioCodec);
+      audioPublicationSettings._trackId = track.id;
+      audio.push(audioPublicationSettings);
     } else if (track.type === 'video') {
       if (track.format) {
         videoCodec = new CodecModule.VideoCodecParameters(
@@ -83,9 +85,12 @@ export function convertToPublicationSettings(mediaInfo) {
       if (track.rid) {
         rid = track.rid;
       }
-      video.push(new PublicationModule.VideoPublicationSettings(
-          track.id, videoCodec, resolution, framerate, bitrate,
-          keyFrameInterval, rid));
+      const videoPublicationSettings =
+          new PublicationModule.VideoPublicationSettings(
+              videoCodec, resolution, framerate, bitrate,
+              keyFrameInterval, rid);
+      videoPublicationSettings._trackId = track.id;
+      video.push(videoPublicationSettings);
     }
   }
 
