@@ -401,13 +401,23 @@ export const ConferenceClient = function(config, signalingImpl) {
     if (!(stream instanceof StreamModule.LocalStream)) {
       return Promise.reject(new ConferenceError('Invalid stream.'));
     }
-    if (publishChannels.has(stream.mediaStream.id)) {
+
+
+    let ch = publishChannels.get(stream.mediaStream.id);
+    if (ch && !ch._stopped) {
       return Promise.reject(new ConferenceError(
           'Cannot publish a published stream.'));
     }
     const channel = createPeerConnectionChannel();
+
+    publishChannels.set(stream.mediaStream.id, channel);
+
     return channel.publish(stream, options, videoCodecs);
   };
+  
+  this.getChannel = function(streamId){
+    return publishChannels.get(streamId);
+  };  
 
   /**
    * @function subscribe
