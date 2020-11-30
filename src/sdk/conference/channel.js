@@ -298,7 +298,7 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
       return this._signaling.sendSignalingMessage('publish', {
         media: {tracks: trackOptions},
         attributes: stream.attributes,
-        transportId: this._id,
+        transport: {id: this._id, type: 'webrtc'},
       });
     }).then((data) => {
       const publicationId = data.id;
@@ -498,7 +498,7 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
       });
       return this._signaling.sendSignalingMessage('subscribe', {
         media: {tracks: trackOptions},
-        transportId: this._id,
+        transport: {id: this._id, type: 'webrtc'},
       });
     }).then((data) => {
       const subscriptionId = data.id;
