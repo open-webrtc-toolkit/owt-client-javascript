@@ -54,19 +54,23 @@ const Logger = (function() {
     NONE: NONE,
   };
 
-  that.log = window.console.log.bind(window.console);
+  that.log = (...args) => {
+    window.console.log((new Date()).toISOString(), ...args);
+  };
 
   const bindType = function(type) {
     if (typeof window.console[type] === 'function') {
-      return window.console[type].bind(window.console);
+      return (...args) => {
+        window.console[type]((new Date()).toISOString(), ...args);
+      };
     } else {
-      return window.console.log.bind(window.console);
+      return that.log;
     }
   };
 
   const setLogLevel = function(level) {
     if (level <= DEBUG) {
-      that.debug = bindType('log');
+      that.debug = bindType('debug');
     } else {
       that.debug = noOp;
     }
