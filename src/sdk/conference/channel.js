@@ -56,7 +56,8 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
     // Used to create internal ID for publication/subscription
     this._internalCount = 0;
     this._sdpPromise = Promise.resolve();
-    this._sdpResolvers = []; // [ resolve ]
+    this._sdpResolverMap = new Map(); // internalId => {finish, resolve, reject}
+    this._sdpResolvers = []; // [{finish, resolve, reject}]
     this._sdpResolveNum = 0;
   }
 
@@ -278,9 +279,8 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
 
     const internalId = this._createInternalId();
     this._publishTransceivers.set(internalId, {transceivers});
-
     // Waiting for previous SDP negotiation if needed
-    await this._chainSdpPromise();
+    await this._chainSdpPromise(internalId);
 
     let localDesc;
     this._pc.createOffer(offerOptions).then((desc) => {
@@ -332,9 +332,13 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
     }).catch((e) => {
       Logger.error('Failed to create offer or set SDP. Message: '
           + e.message);
-      this._unpublish(internalId);
-      this._rejectPromise(e);
-      this._fireEndedEventOnPublicationOrSubscription();
+      if (this._publishTransceivers.get(internalId).id) {
+        this._unpublish(internalId);
+        this._rejectPromise(e);
+        this._fireEndedEventOnPublicationOrSubscription();
+      } else {
+        this._unpublish(internalId);
+      }
     });
     // .catch((e) => {
     //   this._unpublish(internalId);
@@ -471,7 +475,7 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
     this._subscribedStreams.set(internalId, stream);
 
     // Waiting for previous SDP negotiation if needed
-    await this._chainSdpPromise();
+    await this._chainSdpPromise(internalId);
 
     let localDesc;
     this._pc.createOffer(offerOptions).then((desc) => {
@@ -527,10 +531,15 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
         signaling: localDesc,
       });
     }).catch((e) => {
-      Logger.error('Failed to subscribe: ' + e);
-      this._unsubscribe(internalId);
-      this._rejectPromise(e);
-      this._fireEndedEventOnPublicationOrSubscription();
+      Logger.error('Failed to create offer or set SDP. Message: '
+          + e.message);
+      if (this._subscribeTransceivers.get(internalId).id) {
+        this._unsubscribe(internalId);
+        this._rejectPromise(e);
+        this._fireEndedEventOnPublicationOrSubscription();
+      } else {
+        this._unsubscribe(internalId);
+      }
     });
     return new Promise((resolve, reject) => {
       this._subscribePromises.set(internalId, {
@@ -546,16 +555,35 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
     }
   }
 
-  _chainSdpPromise() {
+  _chainSdpPromise(internalId) {
     const prior = this._sdpPromise;
     const negotiationTimeout = 10000;
-    this._sdpPromise = this._sdpPromise.then(
+    this._sdpPromise = prior.then(
         () => new Promise((resolve, reject) => {
-          this._sdpResolvers.push(resolve);
+          const resolver = {finish: false, resolve, reject};
+          this._sdpResolvers.push(resolver);
+          this._sdpResolverMap.set(internalId, resolver);
           setTimeout(() => reject('Timeout to get SDP answer'),
               negotiationTimeout);
         }));
-    return prior;
+    return prior.catch((e)=>{
+      //
+    });
+  }
+
+  _nextSdpPromise() {
+    let ret = false;
+    // Skip the finished sdp promise
+    while (this._sdpResolveNum < this._sdpResolvers.length) {
+      const resolver = this._sdpResolvers[this._sdpResolveNum];
+      this._sdpResolveNum++;
+      if (!resolver.finish) {
+        resolver.resolve();
+        resolver.finish = true;
+        ret = true;
+      }
+    }
+    return ret;
   }
 
   _createInternalId() {
@@ -586,8 +614,19 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
         this._publications.get(id).dispatchEvent(event);
         this._publications.delete(id);
       } else {
-        // Should not reach here
         Logger.warning('Invalid publication to unpublish: ' + id);
+        if (this._publishPromises.has(internalId)) {
+          this._publishPromises.get(internalId).reject(
+              new ConferenceError('Failed to publish'));
+        }
+      }
+      if (this._sdpResolverMap.has(internalId)) {
+        const resolver = this._sdpResolverMap.get(internalId);
+        if (!resolver.finish) {
+          resolver.resolve();
+          resolver.finish = true;
+        }
+        this._sdpResolverMap.delete(internalId);
       }
       // Create offer, set local and remote description
     }
@@ -614,13 +653,24 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
         this._subscriptions.get(id).dispatchEvent(event);
         this._subscriptions.delete(id);
       } else {
-        // Should not reach here
         Logger.warning('Invalid subscription to unsubscribe: ' + id);
+        if (this._subscribePromises.has(internalId)) {
+          this._subscribePromises.get(internalId).reject(
+              new ConferenceError('Failed to subscribe'));
+        }
       }
       // Clear media stream
       if (this._subscribedStreams.has(internalId)) {
         this._subscribedStreams.get(internalId).mediaStream = null;
         this._subscribedStreams.delete(internalId);
+      }
+      if (this._sdpResolverMap.has(internalId)) {
+        const resolver = this._sdpResolverMap.get(internalId);
+        if (!resolver.finish) {
+          resolver.resolve();
+          resolver.finish = true;
+        }
+        this._sdpResolverMap.delete(internalId);
       }
       // Disable media in remote SDP
       // Set remoteDescription and set localDescription
@@ -860,9 +910,6 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
 
   _sdpHandler(sdp) {
     if (sdp.type === 'answer') {
-      if ((this._publication || this._publishPromise) && this._pubOptions) {
-        // sdp.sdp = this._setRtpSenderOptions(sdp.sdp, this._pubOptions);
-      }
       this._pc.setRemoteDescription(sdp).then(() => {
         if (this._pendingCandidates.length > 0) {
           for (const candidate of this._pendingCandidates) {
@@ -874,11 +921,8 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
         this._rejectPromise(error);
         this._fireEndedEventOnPublicationOrSubscription();
       }).then(() => {
-        if (this._sdpResolveNum < this._sdpResolvers.length) {
-          this._sdpResolvers[this._sdpResolveNum]();
-          this._sdpResolveNum++;
-        } else {
-          Logger.error('Unexpected SDP promise state');
+        if (!this._nextSdpPromise()) {
+          Logger.warning('Unexpected SDP promise state');
         }
       });
     }
