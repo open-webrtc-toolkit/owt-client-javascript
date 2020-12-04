@@ -33,7 +33,8 @@ export class AudioPublicationSettings {
  */
 export class VideoPublicationSettings {
   // eslint-disable-next-line require-jsdoc
-  constructor(codec, resolution, frameRate, bitrate, keyFrameInterval, rid) {
+  constructor(codec, resolution, frameRate,
+      bitrate, keyFrameInterval, rid) {
     /**
      * @member {?Owt.Base.VideoCodecParameters} codec
      * @instance

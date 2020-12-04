@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 /* eslint-disable require-jsdoc */
-/* global Promise, RTCPeerConnection */
+/* global Map, Promise, setTimeout, RTCPeerConnection */
 
 'use strict';
 
@@ -34,22 +34,31 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
   constructor(config, signaling) {
     super();
     this._config = config;
-    this._options = null;
     this._videoCodecs = undefined;
     this._signaling = signaling;
     this._pc = null;
     this._internalId = null; // It's publication ID or subscription ID.
     this._pendingCandidates = [];
-    this._subscribePromise = null;
-    this._publishPromise = null;
-    this._subscribedStream = null;
-    this._publishedStream = null;
-    this._publication = null;
-    this._subscription = null;
+    this._subscribePromises = new Map(); // internalId => { resolve, reject }
+    this._publishPromises = new Map(); // internalId => { resolve, reject }
+    this._subscribedStreams = new Map(); // intenalId => RemoteStream
+    this._publications = new Map(); // PublicationId => Publication
+    this._subscriptions = new Map(); // SubscriptionId => Subscription
+    this._publishTransceivers = new Map(); // internalId => { id, transceivers: [Transceiver] }
+    this._subscribeTransceivers = new Map(); // internalId => { id, transceivers: [Transceiver] }
+    this._reverseIdMap = new Map(); // PublicationId || SubscriptionId => internalId
     // Timer for PeerConnection disconnected. Will stop connection after timer.
     this._disconnectTimer = null;
     this._ended = false;
     this._stopped = false;
+    // Channel ID assigned by conference
+    this._id = undefined;
+    // Used to create internal ID for publication/subscription
+    this._internalCount = 0;
+    this._sdpPromise = Promise.resolve();
+    this._sdpResolverMap = new Map(); // internalId => {finish, resolve, reject}
+    this._sdpResolvers = []; // [{finish, resolve, reject}]
+    this._sdpResolveNum = 0;
   }
 
   /**
@@ -66,9 +75,9 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
         if (message.status === 'soac') {
           this._sdpHandler(message.data);
         } else if (message.status === 'ready') {
-          this._readyHandler();
+          this._readyHandler(message.sessionId);
         } else if (message.status === 'error') {
-          this._errorHandler(message.data);
+          this._errorHandler(message.sessionId, message.data);
         }
         break;
       case 'stream':
@@ -79,7 +88,10 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
     }
   }
 
-  publish(stream, options, videoCodecs) {
+  async publish(stream, options, videoCodecs) {
+    if (this._ended) {
+      return Promise.reject('Connection closed');
+    }
     if (options === undefined) {
       options = {
         audio: !!stream.mediaStream.getAudioTracks().length,
@@ -131,22 +143,21 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
     }
     if (typeof options.video === 'object' && !Array.isArray(options.video)) {
       return Promise.reject(new TypeError(
-        'options.video should be a boolean or an array.'));
+          'options.video should be a boolean or an array.'));
     }
     if (this._isOwtEncodingParameters(options.video)) {
       for (const parameters of options.video) {
         if (!parameters.codec || typeof parameters.codec.name !== 'string' ||
           (
             parameters.maxBitrate !== undefined && typeof parameters
-            .maxBitrate !==
+                .maxBitrate !==
             'number') || (parameters.codec.profile !== undefined &&
             typeof parameters.codec.profile !== 'string')) {
           return Promise.reject(new TypeError(
-            'options.video has incorrect parameters.'));
+              'options.video has incorrect parameters.'));
         }
       }
     }
-    this._options = options;
     const mediaOptions = {};
     this._createPeerConnection();
     if (stream.mediaStream.getAudioTracks().length > 0 && options.audio !==
@@ -190,111 +201,162 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
     } else {
       mediaOptions.video = false;
     }
-    this._publishedStream = stream;
-    this._signaling.sendSignalingMessage('publish', {
-      media: mediaOptions,
-      attributes: stream.attributes,
+
+    const offerOptions = {};
+    const transceivers = [];
+    if (typeof this._pc.addTransceiver === 'function') {
+      // |direction| seems not working on Safari.
+      if (mediaOptions.audio && stream.mediaStream.getAudioTracks().length >
+        0) {
+        const transceiverInit = {
+          direction: 'sendonly',
+          streams: [stream.mediaStream],
+        };
+        if (this._isRtpEncodingParameters(options.audio)) {
+          transceiverInit.sendEncodings = options.audio;
+        }
+        const transceiver = this._pc.addTransceiver(
+            stream.mediaStream.getAudioTracks()[0],
+            transceiverInit);
+        transceivers.push({
+          type: 'audio',
+          transceiver,
+          source: mediaOptions.audio.source,
+          option: {audio: options.audio},
+        });
+
+        if (Utils.isFirefox()) {
+          // Firefox does not support encodings setting in addTransceiver.
+          const parameters = transceiver.sender.getParameters();
+          parameters.encodings = transceiverInit.sendEncodings;
+          await transceiver.sender.setParameters(parameters);
+        }
+      }
+      if (mediaOptions.video && stream.mediaStream.getVideoTracks().length >
+        0) {
+        const transceiverInit = {
+          direction: 'sendonly',
+          streams: [stream.mediaStream],
+        };
+        if (this._isRtpEncodingParameters(options.video)) {
+          transceiverInit.sendEncodings = options.video;
+          this._videoCodecs = videoCodecs;
+        }
+        const transceiver = this._pc.addTransceiver(
+            stream.mediaStream.getVideoTracks()[0],
+            transceiverInit);
+        transceivers.push({
+          type: 'video',
+          transceiver,
+          source: mediaOptions.video.source,
+          option: {video: options.video},
+        });
+
+        if (Utils.isFirefox()) {
+          // Firefox does not support encodings setting in addTransceiver.
+          const parameters = transceiver.sender.getParameters();
+          parameters.encodings = transceiverInit.sendEncodings;
+          await transceiver.sender.setParameters(parameters);
+        }
+      }
+    } else {
+      // Should not reach here
+      if (mediaOptions.audio &&
+          stream.mediaStream.getAudioTracks().length > 0) {
+        for (const track of stream.mediaStream.getAudioTracks()) {
+          this._pc.addTrack(track, stream.mediaStream);
+        }
+      }
+      if (mediaOptions.video &&
+          stream.mediaStream.getVideoTracks().length > 0) {
+        for (const track of stream.mediaStream.getVideoTracks()) {
+          this._pc.addTrack(track, stream.mediaStream);
+        }
+      }
+      offerOptions.offerToReceiveAudio = false;
+      offerOptions.offerToReceiveVideo = false;
+    }
+
+    const internalId = this._createInternalId();
+    this._publishTransceivers.set(internalId, {transceivers});
+    // Waiting for previous SDP negotiation if needed
+    await this._chainSdpPromise(internalId);
+
+    let localDesc;
+    this._pc.createOffer(offerOptions).then((desc) => {
+      localDesc = desc;
+      return this._pc.setLocalDescription(desc);
+    }).then(() => {
+      const trackOptions = [];
+      transceivers.forEach(({type, transceiver, source}) => {
+        trackOptions.push({
+          type,
+          mid: transceiver.mid,
+          source,
+        });
+      });
+      return this._signaling.sendSignalingMessage('publish', {
+        media: {tracks: trackOptions},
+        attributes: stream.attributes,
+        transport: {id: this._id, type: 'webrtc'},
+      });
     }).then((data) => {
+      const publicationId = data.id;
       const messageEvent = new MessageEvent('id', {
-        message: data.id,
+        message: publicationId,
         origin: this._remoteId,
       });
       this.dispatchEvent(messageEvent);
-      this._internalId = data.id;
-      const offerOptions = {};
-      if (typeof this._pc.addTransceiver === 'function') {
-        let setPromise = Promise.resolve();
-        // |direction| seems not working on Safari.
-        if (mediaOptions.audio && stream.mediaStream.getAudioTracks().length >
-          0) {
-          const transceiverInit = {
-            direction: 'sendonly',
-          };
-          if (this._isRtpEncodingParameters(options.audio)) {
-            transceiverInit.sendEncodings = options.audio;
-          }
-          const transceiver = this._pc.addTransceiver(
-              stream.mediaStream.getAudioTracks()[0], transceiverInit);
 
-          if (Utils.isFirefox()) {
-            // Firefox does not support encodings setting in addTransceiver.
-            const parameters = transceiver.sender.getParameters();
-            parameters.encodings = transceiverInit.sendEncodings;
-            setPromise = transceiver.sender.setParameters(parameters);
-          }
-        }
-        if (mediaOptions.video && stream.mediaStream.getVideoTracks().length >
-          0) {
-          const transceiverInit = {
-            direction: 'sendonly',
-          };
-          if (this._isRtpEncodingParameters(options.video)) {
-            transceiverInit.sendEncodings = options.video;
-            this._videoCodecs = videoCodecs;
-          }
-          const transceiver = this._pc.addTransceiver(
-              stream.mediaStream.getVideoTracks()[0], transceiverInit);
+      this._publishTransceivers.get(internalId).id = publicationId;
+      this._reverseIdMap.set(publicationId, internalId);
 
-          if (Utils.isFirefox()) {
-            // Firefox does not support encodings setting in addTransceiver.
-            const parameters = transceiver.sender.getParameters();
-            parameters.encodings = transceiverInit.sendEncodings;
-            setPromise = setPromise.then(
-                () => transceiver.sender.setParameters(parameters));
-          }
-        }
-        return setPromise.then(() => offerOptions);
-      } else {
-        if (mediaOptions.audio &&
-            stream.mediaStream.getAudioTracks().length > 0) {
-          for (const track of stream.mediaStream.getAudioTracks()) {
-            this._pc.addTrack(track, stream.mediaStream);
-          }
-        }
-        if (mediaOptions.video &&
-            stream.mediaStream.getVideoTracks().length > 0) {
-          for (const track of stream.mediaStream.getVideoTracks()) {
-            this._pc.addTrack(track, stream.mediaStream);
-          }
-        }
-        offerOptions.offerToReceiveAudio = false;
-        offerOptions.offerToReceiveVideo = false;
+      if (this._id && this._id !== data.transportId) {
+        Logger.warning('Server returns conflict ID: ' + data.transportId);
       }
-      return offerOptions;
-    }).then((offerOptions) => {
-      let localDesc;
-      this._pc.createOffer(offerOptions).then((desc) => {
-        if (options) {
-          desc.sdp = this._setRtpReceiverOptions(desc.sdp, options);
-        }
-        return desc;
-      }).then((desc) => {
-        localDesc = desc;
-        return this._pc.setLocalDescription(desc);
-      }).then(() => {
-        this._signaling.sendSignalingMessage('soac', {
-          id: this
-              ._internalId,
-          signaling: localDesc,
+      this._id = data.transportId;
+
+      // Modify local SDP before sending
+      if (options) {
+        transceivers.forEach(({type, transceiver, option}) => {
+          localDesc.sdp = this._setRtpReceiverOptions(
+              localDesc.sdp, option, transceiver.mid);
+          localDesc.sdp = this._setRtpSenderOptions(
+              localDesc.sdp, option, transceiver.mid);
         });
-      }).catch((e) => {
-        Logger.error('Failed to create offer or set SDP. Message: '
-            + e.message);
-        this._unpublish();
-        this._rejectPromise(e);
-        this._fireEndedEventOnPublicationOrSubscription();
+      }
+      this._signaling.sendSignalingMessage('soac', {
+        id: this._id,
+        signaling: localDesc,
       });
     }).catch((e) => {
-      this._unpublish();
-      this._rejectPromise(e);
-      this._fireEndedEventOnPublicationOrSubscription();
+      Logger.error('Failed to create offer or set SDP. Message: '
+          + e.message);
+      if (this._publishTransceivers.get(internalId).id) {
+        this._unpublish(internalId);
+        this._rejectPromise(e);
+        this._fireEndedEventOnPublicationOrSubscription();
+      } else {
+        this._unpublish(internalId);
+      }
     });
+    // .catch((e) => {
+    //   this._unpublish(internalId);
+    //   this._rejectPromise(e);
+    //   this._fireEndedEventOnPublicationOrSubscription();
+    // });
     return new Promise((resolve, reject) => {
-      this._publishPromise = {resolve: resolve, reject: reject};
+      this._publishPromises.set(internalId, {
+        resolve: resolve,
+        reject: reject,
+      });
     });
   }
 
-  subscribe(stream, options) {
+  async subscribe(stream, options) {
+    if (this._ended) {
+      return Promise.reject('Connection closed');
+    }
     if (options === undefined) {
       options = {
         audio: !!stream.settings.audio,
@@ -327,7 +389,6 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
       return Promise.reject(new ConferenceError(
           'Cannot subscribe a stream without audio and video.'));
     }
-    this._options = options;
     const mediaOptions = {};
     if (options.audio) {
       if (typeof options.audio === 'object' &&
@@ -364,120 +425,276 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
         };
       }
       if (options.video.rid) {
-        mediaOptions.video.simulcastRid = options.video.rid;
-        // Ignore other settings when RID set.
-        delete mediaOptions.video.parameters;
+        // Use rid matched track ID as from if possible
+        const matchedSetting = stream.settings.video
+            .find((video) => video.rid === options.video.rid);
+        if (matchedSetting && matchedSetting._trackId) {
+          mediaOptions.video.from = matchedSetting._trackId;
+          // Ignore other settings when RID set.
+          delete mediaOptions.video.parameters;
+        }
         options.video = true;
       }
     } else {
       mediaOptions.video = false;
     }
 
-    this._subscribedStream = stream;
-    this._signaling.sendSignalingMessage('subscribe', {
-      media: mediaOptions,
+    const offerOptions = {};
+    const transceivers = [];
+    this._createPeerConnection();
+    if (typeof this._pc.addTransceiver === 'function') {
+      // |direction| seems not working on Safari.
+      if (mediaOptions.audio) {
+        const transceiver = this._pc.addTransceiver(
+            'audio', {direction: 'recvonly'});
+        transceivers.push({
+          type: 'audio',
+          transceiver,
+          from: mediaOptions.audio.from,
+          option: {audio: options.audio},
+        });
+      }
+      if (mediaOptions.video) {
+        const transceiver = this._pc.addTransceiver(
+            'video', {direction: 'recvonly'});
+        transceivers.push({
+          type: 'video',
+          transceiver,
+          from: mediaOptions.video.from,
+          parameters: mediaOptions.video.parameters,
+          option: {video: options.video},
+        });
+      }
+    } else {
+      offerOptions.offerToReceiveAudio = !!options.audio;
+      offerOptions.offerToReceiveVideo = !!options.video;
+    }
+
+    const internalId = this._createInternalId();
+    this._subscribeTransceivers.set(internalId, {transceivers});
+    this._subscribedStreams.set(internalId, stream);
+
+    // Waiting for previous SDP negotiation if needed
+    await this._chainSdpPromise(internalId);
+
+    let localDesc;
+    this._pc.createOffer(offerOptions).then((desc) => {
+      localDesc = desc;
+      return this._pc.setLocalDescription(desc)
+          .catch((errorMessage) => {
+            Logger.error('Set local description failed. Message: ' +
+                JSON.stringify(errorMessage));
+            throw errorMessage;
+          });
+    }, function(error) {
+      Logger.error('Create offer failed. Error info: ' + JSON.stringify(
+          error));
+      throw error;
+    }).then(() => {
+      const trackOptions = [];
+      transceivers.forEach(({type, transceiver, from, parameters, option}) => {
+        trackOptions.push({
+          type,
+          mid: transceiver.mid,
+          from: from,
+          parameters: parameters,
+        });
+      });
+      return this._signaling.sendSignalingMessage('subscribe', {
+        media: {tracks: trackOptions},
+        transport: {id: this._id, type: 'webrtc'},
+      });
     }).then((data) => {
+      const subscriptionId = data.id;
       const messageEvent = new MessageEvent('id', {
-        message: data.id,
+        message: subscriptionId,
         origin: this._remoteId,
       });
       this.dispatchEvent(messageEvent);
-      this._internalId = data.id;
-      this._createPeerConnection();
-      const offerOptions = {};
-      if (typeof this._pc.addTransceiver === 'function') {
-        // |direction| seems not working on Safari.
-        if (mediaOptions.audio) {
-          this._pc.addTransceiver('audio', {direction: 'recvonly'});
-        }
-        if (mediaOptions.video) {
-          this._pc.addTransceiver('video', {direction: 'recvonly'});
-        }
-      } else {
-        offerOptions.offerToReceiveAudio = !!options.audio;
-        offerOptions.offerToReceiveVideo = !!options.video;
-      }
 
-      this._pc.createOffer(offerOptions).then((desc) => {
-        if (options) {
-          desc.sdp = this._setRtpReceiverOptions(desc.sdp, options);
-        }
-        this._pc.setLocalDescription(desc).then(() => {
-          this._signaling.sendSignalingMessage('soac', {
-            id: this
-                ._internalId,
-            signaling: desc,
-          });
-        }, function(errorMessage) {
-          Logger.error('Set local description failed. Message: ' +
-            JSON.stringify(errorMessage));
+      this._subscribeTransceivers.get(internalId).id = subscriptionId;
+      this._reverseIdMap.set(subscriptionId, internalId);
+      if (this._id && this._id !== data.transportId) {
+        Logger.warning('Server returns conflict ID: ' + data.transportId);
+      }
+      this._id = data.transportId;
+
+      // Modify local SDP before sending
+      if (options) {
+        transceivers.forEach(({type, transceiver, option}) => {
+          localDesc.sdp = this._setRtpReceiverOptions(
+              localDesc.sdp, option, transceiver.mid);
         });
-      }, function(error) {
-        Logger.error('Create offer failed. Error info: ' + JSON.stringify(
-            error));
-      }).catch((e)=>{
-        Logger.error('Failed to create offer or set SDP. Message: '
-            + e.message);
-        this._unsubscribe();
-        this._rejectPromise(e);
-        this._fireEndedEventOnPublicationOrSubscription();
+      }
+      this._signaling.sendSignalingMessage('soac', {
+        id: this._id,
+        signaling: localDesc,
       });
     }).catch((e) => {
-      this._unsubscribe();
-      this._rejectPromise(e);
-      this._fireEndedEventOnPublicationOrSubscription();
+      Logger.error('Failed to create offer or set SDP. Message: '
+          + e.message);
+      if (this._subscribeTransceivers.get(internalId).id) {
+        this._unsubscribe(internalId);
+        this._rejectPromise(e);
+        this._fireEndedEventOnPublicationOrSubscription();
+      } else {
+        this._unsubscribe(internalId);
+      }
     });
     return new Promise((resolve, reject) => {
-      this._subscribePromise = {resolve: resolve, reject: reject};
+      this._subscribePromises.set(internalId, {
+        resolve: resolve,
+        reject: reject,
+      });
     });
   }
 
-  _unpublish() {
-    if (!this._stopped) {
-      this._stopped = true;
-      this._signaling.sendSignalingMessage('unpublish', {id: this._internalId})
-          .catch((e) => {
-            Logger.warning('MCU returns negative ack for unpublishing, ' + e);
-          });
-      if (this._pc && this._pc.signalingState !== 'closed') {
-        this._pc.close();
-      }
+  close() {
+    if (this._pc && this._pc.signalingState !== 'closed') {
+      this._pc.close();
     }
   }
 
-  _unsubscribe() {
-    if (!this._stopped) {
-      this._stopped = true;
-      this._signaling.sendSignalingMessage('unsubscribe', {
-        id: this._internalId,
-      })
-          .catch((e) => {
-            Logger.warning('MCU returns negative ack for unsubscribing, ' + e);
-          });
-      if (this._pc && this._pc.signalingState !== 'closed') {
-        this._pc.close();
+  _chainSdpPromise(internalId) {
+    const prior = this._sdpPromise;
+    const negotiationTimeout = 10000;
+    this._sdpPromise = prior.then(
+        () => new Promise((resolve, reject) => {
+          const resolver = {finish: false, resolve, reject};
+          this._sdpResolvers.push(resolver);
+          this._sdpResolverMap.set(internalId, resolver);
+          setTimeout(() => reject('Timeout to get SDP answer'),
+              negotiationTimeout);
+        }));
+    return prior.catch((e)=>{
+      //
+    });
+  }
+
+  _nextSdpPromise() {
+    let ret = false;
+    // Skip the finished sdp promise
+    while (this._sdpResolveNum < this._sdpResolvers.length) {
+      const resolver = this._sdpResolvers[this._sdpResolveNum];
+      this._sdpResolveNum++;
+      if (!resolver.finish) {
+        resolver.resolve();
+        resolver.finish = true;
+        ret = true;
       }
+    }
+    return ret;
+  }
+
+  _createInternalId() {
+    return this._internalCount++;
+  }
+
+  _unpublish(internalId) {
+    if (this._publishTransceivers.has(internalId)) {
+      const {id, transceivers} = this._publishTransceivers.get(internalId);
+      if (id) {
+        this._signaling.sendSignalingMessage('unpublish', {id})
+            .catch((e) => {
+              Logger.warning('MCU returns negative ack for unpublishing, ' + e);
+            });
+        this._reverseIdMap.delete(id);
+      }
+      // Clean transceiver
+      transceivers.forEach(({transceiver}) => {
+        if (this._pc.signalingState === 'stable') {
+          transceiver.sender.replaceTrack(null);
+          this._pc.removeTrack(transceiver.sender);
+        }
+      });
+      this._publishTransceivers.delete(internalId);
+      // Fire ended event
+      if (this._publications.has(id)) {
+        const event = new OwtEvent('ended');
+        this._publications.get(id).dispatchEvent(event);
+        this._publications.delete(id);
+      } else {
+        Logger.warning('Invalid publication to unpublish: ' + id);
+        if (this._publishPromises.has(internalId)) {
+          this._publishPromises.get(internalId).reject(
+              new ConferenceError('Failed to publish'));
+        }
+      }
+      if (this._sdpResolverMap.has(internalId)) {
+        const resolver = this._sdpResolverMap.get(internalId);
+        if (!resolver.finish) {
+          resolver.resolve();
+          resolver.finish = true;
+        }
+        this._sdpResolverMap.delete(internalId);
+      }
+      // Create offer, set local and remote description
     }
   }
 
-  _muteOrUnmute(isMute, isPub, trackKind) {
+  _unsubscribe(internalId) {
+    if (this._subscribeTransceivers.has(internalId)) {
+      const {id, transceivers} = this._subscribeTransceivers.get(internalId);
+      if (id) {
+        this._signaling.sendSignalingMessage('unsubscribe', {id})
+            .catch((e) => {
+              Logger.warning(
+                  'MCU returns negative ack for unsubscribing, ' + e);
+            });
+      }
+      // Clean transceiver
+      transceivers.forEach(({transceiver}) => {
+        transceiver.receiver.track.stop();
+      });
+      this._subscribeTransceivers.delete(internalId);
+      // Fire ended event
+      if (this._subscriptions.has(id)) {
+        const event = new OwtEvent('ended');
+        this._subscriptions.get(id).dispatchEvent(event);
+        this._subscriptions.delete(id);
+      } else {
+        Logger.warning('Invalid subscription to unsubscribe: ' + id);
+        if (this._subscribePromises.has(internalId)) {
+          this._subscribePromises.get(internalId).reject(
+              new ConferenceError('Failed to subscribe'));
+        }
+      }
+      // Clear media stream
+      if (this._subscribedStreams.has(internalId)) {
+        this._subscribedStreams.get(internalId).mediaStream = null;
+        this._subscribedStreams.delete(internalId);
+      }
+      if (this._sdpResolverMap.has(internalId)) {
+        const resolver = this._sdpResolverMap.get(internalId);
+        if (!resolver.finish) {
+          resolver.resolve();
+          resolver.finish = true;
+        }
+        this._sdpResolverMap.delete(internalId);
+      }
+      // Disable media in remote SDP
+      // Set remoteDescription and set localDescription
+    }
+  }
+
+  _muteOrUnmute(sessionId, isMute, isPub, trackKind) {
     const eventName = isPub ? 'stream-control' :
       'subscription-control';
     const operation = isMute ? 'pause' : 'play';
     return this._signaling.sendSignalingMessage(eventName, {
-      id: this._internalId,
+      id: sessionId,
       operation: operation,
       data: trackKind,
     }).then(() => {
       if (!isPub) {
         const muteEventName = isMute ? 'mute' : 'unmute';
-        this._subscription.dispatchEvent(
+        this._subscriptions.get(sessionId).dispatchEvent(
             new MuteEvent(muteEventName, {kind: trackKind}));
       }
     });
   }
 
-  _applyOptions(options) {
+  _applyOptions(sessionId, options) {
     if (typeof options !== 'object' || typeof options.video !== 'object') {
       return Promise.reject(new ConferenceError(
           'Options should be an object.'));
@@ -490,7 +707,7 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
         .toString() : undefined;
     videoOptions.keyFrameInterval = options.video.keyFrameInterval;
     return this._signaling.sendSignalingMessage('subscription-control', {
-      id: this._internalId,
+      id: sessionId,
       operation: 'update',
       data: {
         video: {parameters: videoOptions},
@@ -500,9 +717,27 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
 
   _onRemoteStreamAdded(event) {
     Logger.debug('Remote stream added.');
-    if (this._subscribedStream) {
-      this._subscribedStream.mediaStream = event.streams[0];
-    } else {
+    let find = false;
+    for (const [internalId, sub] of this._subscribeTransceivers) {
+      const subscriptionId = sub.id;
+      if (sub.transceivers.find((t) => t.transceiver === event.transceiver)) {
+        find = true;
+        const subscribedStream = this._subscribedStreams.get(internalId);
+        if (!subscribedStream.mediaStream) {
+          this._subscribedStreams.get(internalId).mediaStream =
+              event.streams[0];
+          // Resolve subscription if ready handler has been called
+          const subscription = this._subscriptions.get(subscriptionId);
+          if (subscription) {
+            this._subscribePromises.get(internalId).resolve(subscription);
+          }
+        } else {
+          // Add track to the existing stream
+          subscribedStream.mediaStream.addTrack(event.track);
+        }
+      }
+    }
+    if (!find) {
       // This is not expected path. However, this is going to happen on Safari
       // because it does not support setting direction of transceiver.
       Logger.warning('Received remote stream without subscription.');
@@ -527,27 +762,35 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
     }
     this._ended = true;
     const event = new OwtEvent('ended');
-    if (this._publication) {
-      this._publication.dispatchEvent(event);
-      this._publication.stop();
-    } else if (this._subscription) {
-      this._subscription.dispatchEvent(event);
-      this._subscription.stop();
+    for (const [/* id */, publication] of this._publications) {
+      publication.dispatchEvent(event);
+      publication.stop();
     }
+    for (const [/* id */, subscription] of this._subscriptions) {
+      subscription.dispatchEvent(event);
+      subscription.stop();
+    }
+    this.dispatchEvent(event);
+    this.close();
   }
 
   _rejectPromise(error) {
     if (!error) {
       error = new ConferenceError('Connection failed or closed.');
     }
-    // Rejecting corresponding promise if publishing and subscribing is ongoing.
-    if (this._publishPromise) {
-      this._publishPromise.reject(error);
-      this._publishPromise = undefined;
-    } else if (this._subscribePromise) {
-      this._subscribePromise.reject(error);
-      this._subscribePromise = undefined;
+    if (this._pc && this._pc.iceConnectionState !== 'closed') {
+      this._pc.close();
     }
+
+    // Rejecting all corresponding promises if publishing and subscribing is ongoing.
+    for (const [/* id */, promise] of this._publishPromises) {
+      promise.reject(error);
+    }
+    this._publishPromises.clear();
+    for (const [/* id */, promise] of this._subscribePromises) {
+      promise.reject(error);
+    }
+    this._subscribePromises.clear();
   }
 
   _onIceConnectionStateChange(event) {
@@ -582,7 +825,7 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
 
   _sendCandidate(candidate) {
     this._signaling.sendSignalingMessage('soac', {
-      id: this._internalId,
+      id: this._id,
       signaling: {
         type: 'candidate',
         candidate: {
@@ -595,6 +838,10 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
   }
 
   _createPeerConnection() {
+    if (this._pc) {
+      return;
+    }
+
     const pcConfiguration = this._config.rtcConfiguration || {};
     if (Utils.isChrome()) {
       pcConfiguration.sdpSemantics = 'unified-plan';
@@ -623,40 +870,46 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
     }
   }
 
-  _readyHandler() {
-    if (this._subscribePromise) {
-      this._subscription = new Subscription(this._internalId, () => {
-        this._unsubscribe();
+  _readyHandler(sessionId) {
+    const internalId = this._reverseIdMap.get(sessionId);
+    if (this._subscribePromises.has(internalId)) {
+      const subscription = new Subscription(sessionId, () => {
+        this._unsubscribe(internalId);
       }, () => this._getStats(),
-      (trackKind) => this._muteOrUnmute(true, false, trackKind),
-      (trackKind) => this._muteOrUnmute(false, false, trackKind),
-      (options) => this._applyOptions(options));
+      (trackKind) => this._muteOrUnmute(sessionId, true, false, trackKind),
+      (trackKind) => this._muteOrUnmute(sessionId, false, false, trackKind),
+      (options) => this._applyOptions(sessionId, options));
+      this._subscriptions.set(sessionId, subscription);
       // Fire subscription's ended event when associated stream is ended.
-      this._subscribedStream.addEventListener('ended', () => {
-        this._subscription.dispatchEvent('ended', new OwtEvent('ended'));
+      this._subscribedStreams.get(internalId).addEventListener('ended', () => {
+        if (this._subscriptions.has(sessionId)) {
+          this._subscriptions.get(sessionId).dispatchEvent(
+              'ended', new OwtEvent('ended'));
+        }
       });
-      this._subscribePromise.resolve(this._subscription);
-    } else if (this._publishPromise) {
-      this._publication = new Publication(this._internalId, () => {
-        this._unpublish();
+      // Resolve subscription if mediaStream is ready
+      if (this._subscribedStreams.get(internalId).mediaStream) {
+        this._subscribePromises.get(internalId).resolve(subscription);
+      }
+    } else if (this._publishPromises.has(internalId)) {
+      const publication = new Publication(sessionId, () => {
+        this._unpublish(internalId);
         return Promise.resolve();
       }, () => this._getStats(),
-      (trackKind) => this._muteOrUnmute(true, true, trackKind),
-      (trackKind) => this._muteOrUnmute(false, true, trackKind));
-      this._publishPromise.resolve(this._publication);
+      (trackKind) => this._muteOrUnmute(sessionId, true, true, trackKind),
+      (trackKind) => this._muteOrUnmute(sessionId, false, true, trackKind));
+      this._publications.set(sessionId, publication);
+      this._publishPromises.get(internalId).resolve(publication);
       // Do not fire publication's ended event when associated stream is ended.
       // It may still sending silence or black frames.
       // Refer to https://w3c.github.io/webrtc-pc/#rtcrtpsender-interface.
+    } else if (!sessionId) {
+      // Channel ready
     }
-    this._publishPromise = null;
-    this._subscribePromise = null;
   }
 
   _sdpHandler(sdp) {
     if (sdp.type === 'answer') {
-      if ((this._publication || this._publishPromise) && this._options) {
-        sdp.sdp = this._setRtpSenderOptions(sdp.sdp, this._options);
-      }
       this._pc.setRemoteDescription(sdp).then(() => {
         if (this._pendingCandidates.length > 0) {
           for (const candidate of this._pendingCandidates) {
@@ -667,115 +920,142 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
         Logger.error('Set remote description failed: ' + error);
         this._rejectPromise(error);
         this._fireEndedEventOnPublicationOrSubscription();
+      }).then(() => {
+        if (!this._nextSdpPromise()) {
+          Logger.warning('Unexpected SDP promise state');
+        }
       });
     }
   }
 
-  _errorHandler(errorMessage) {
-    return this._handleError(errorMessage);
+  _errorHandler(sessionId, errorMessage) {
+    if (!sessionId) {
+      // Transport error
+      return this._handleError(errorMessage);
+    }
+
+    // Fire error event on publication or subscription
+    const errorEvent = new ErrorEvent('error', {
+      error: new ConferenceError(errorMessage),
+    });
+    if (this._publications.has(sessionId)) {
+      this._publications.get(sessionId).dispatchEvent(errorEvent);
+    }
+    if (this._subscriptions.has(sessionId)) {
+      this._subscriptions.get(sessionId).dispatchEvent(errorEvent);
+    }
+    // Stop publication or subscription
+    const internalId = this._reverseIdMap.get(sessionId);
+    if (this._publishTransceivers.has(internalId)) {
+      this._unpublish(internalId);
+    }
+    if (this._subscribeTransceivers.has(internalId)) {
+      this._unsubscribe(internalId);
+    }
   }
 
   _handleError(errorMessage) {
     const error = new ConferenceError(errorMessage);
-    const p = this._publishPromise || this._subscribePromise;
-    if (p) {
-      return this._rejectPromise(error);
-    }
     if (this._ended) {
-      return;
-    }
-    const dispatcher = this._publication || this._subscription;
-    if (!dispatcher) {
-      Logger.warning('Neither publication nor subscription is available.');
       return;
     }
     const errorEvent = new ErrorEvent('error', {
       error: error,
     });
-    dispatcher.dispatchEvent(errorEvent);
+    for (const [/* id */, publication] of this._publications) {
+      publication.dispatchEvent(errorEvent);
+    }
+    for (const [/* id */, subscription] of this._subscriptions) {
+      subscription.dispatchEvent(errorEvent);
+    }
     // Fire ended event when error occured
     this._fireEndedEventOnPublicationOrSubscription();
   }
 
-  _setCodecOrder(sdp, options) {
-    if (this._publication || this._publishPromise) {
-      if (options.audio) {
-        const audioCodecNames = Array.from(options.audio,
-            (encodingParameters) => encodingParameters.codec.name);
-        sdp = SdpUtils.reorderCodecs(sdp, 'audio', audioCodecNames);
-      }
-      if (options.video) {
-        const videoCodecNames = Array.from(options.video,
-            (encodingParameters) => encodingParameters.codec.name);
-        sdp = SdpUtils.reorderCodecs(sdp, 'video', videoCodecNames);
-      }
-    } else {
-      if (options.audio && options.audio.codecs) {
+  _setCodecOrder(sdp, options, mid) {
+    if (options.audio) {
+      if (options.audio.codecs) {
         const audioCodecNames = Array.from(options.audio.codecs, (codec) =>
           codec.name);
-        sdp = SdpUtils.reorderCodecs(sdp, 'audio', audioCodecNames);
+        sdp = SdpUtils.reorderCodecs(sdp, 'audio', audioCodecNames, mid);
+      } else {
+        const audioCodecNames = Array.from(options.audio,
+            (encodingParameters) => encodingParameters.codec.name);
+        sdp = SdpUtils.reorderCodecs(sdp, 'audio', audioCodecNames, mid);
       }
-      if (options.video && options.video.codecs) {
+    }
+    if (options.video) {
+      if (options.video.codecs) {
         const videoCodecNames = Array.from(options.video.codecs, (codec) =>
           codec.name);
-        sdp = SdpUtils.reorderCodecs(sdp, 'video', videoCodecNames);
+        sdp = SdpUtils.reorderCodecs(sdp, 'video', videoCodecNames, mid);
+      } else {
+        const videoCodecNames = Array.from(options.video,
+            (encodingParameters) => encodingParameters.codec.name);
+        sdp = SdpUtils.reorderCodecs(sdp, 'video', videoCodecNames, mid);
       }
     }
     return sdp;
   }
 
-  _setMaxBitrate(sdp, options) {
+  _setMaxBitrate(sdp, options, mid) {
     if (typeof options.audio === 'object') {
-      sdp = SdpUtils.setMaxBitrate(sdp, options.audio);
+      sdp = SdpUtils.setMaxBitrate(sdp, options.audio, mid);
     }
     if (typeof options.video === 'object') {
-      sdp = SdpUtils.setMaxBitrate(sdp, options.video);
+      sdp = SdpUtils.setMaxBitrate(sdp, options.video, mid);
     }
     return sdp;
   }
 
-  _setRtpSenderOptions(sdp, options) {
+  _setRtpSenderOptions(sdp, options, mid) {
     // SDP mugling is deprecated, moving to `setParameters`.
     if (this._isRtpEncodingParameters(options.audio) ||
         this._isRtpEncodingParameters(options.video)) {
       return sdp;
     }
-    sdp = this._setMaxBitrate(sdp, options);
+    sdp = this._setMaxBitrate(sdp, options, mid);
     return sdp;
   }
 
-  _setRtpReceiverOptions(sdp, options) {
+  _setRtpReceiverOptions(sdp, options, mid) {
     // Add legacy simulcast in SDP for safari.
     if (this._isRtpEncodingParameters(options.video) && Utils.isSafari()) {
       if (options.video.length > 1) {
-        sdp = SdpUtils.addLegacySimulcast(sdp, 'video', options.video.length);
+        sdp = SdpUtils.addLegacySimulcast(
+            sdp, 'video', options.video.length, mid);
       }
     }
 
     // _videoCodecs is a workaround for setting video codecs. It will be moved to RTCRtpSendParameters.
     if (this._isRtpEncodingParameters(options.video) && this._videoCodecs) {
-      sdp = SdpUtils.reorderCodecs(sdp, 'video', this._videoCodecs);
+      sdp = SdpUtils.reorderCodecs(sdp, 'video', this._videoCodecs, mid);
       return sdp;
     }
     if (this._isRtpEncodingParameters(options.audio) ||
         this._isRtpEncodingParameters(options.video)) {
       return sdp;
     }
-    sdp = this._setCodecOrder(sdp, options);
+    sdp = this._setCodecOrder(sdp, options, mid);
     return sdp;
   }
 
   // Handle stream event sent from MCU. Some stream events should be publication
   // event or subscription event. It will be handled here.
   _onStreamEvent(message) {
-    let eventTarget;
-    if (this._publication && message.id === this._publication.id) {
-      eventTarget = this._publication;
-    } else if (
-      this._subscribedStream && message.id === this._subscribedStream.id) {
-      eventTarget = this._subscription;
+    const eventTargets = [];
+    if (this._publications.has(message.id)) {
+      eventTargets.push(this._publications.get(message.id));
     }
-    if (!eventTarget) {
+    for (const [internalId, subscribedStream] of this._subscribedStreams) {
+      if (message.id === subscribedStream.id) {
+        const subscriptionId = this._subscribeTransceivers.get(internalId).id;
+        eventTargets.push(this._subscriptions.get(subscriptionId));
+        break;
+      }
+    }
+
+    if (!eventTargets.length) {
       return;
     }
     let trackKind;
@@ -787,9 +1067,11 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
       Logger.warning('Invalid data field for stream update info.');
     }
     if (message.data.value === 'active') {
-      eventTarget.dispatchEvent(new MuteEvent('unmute', {kind: trackKind}));
+      eventTargets.forEach((target) =>
+        target.dispatchEvent(new MuteEvent('unmute', {kind: trackKind})));
     } else if (message.data.value === 'inactive') {
-      eventTarget.dispatchEvent(new MuteEvent('mute', {kind: trackKind}));
+      eventTargets.forEach((target) =>
+        target.dispatchEvent(new MuteEvent('mute', {kind: trackKind})));
     } else {
       Logger.warning('Invalid data value for stream update info.');
     }
@@ -801,8 +1083,9 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
     }
     // Only check the first one.
     const param = obj[0];
-    return param.codecPayloadType || param.dtx || param.active || param
-      .ptime || param.maxFramerate || param.scaleResolutionDownBy || param.rid;
+    return param.codecPayloadType || param.dtx || param.active ||
+        param.ptime || param.maxFramerate || param.scaleResolutionDownBy ||
+        param.rid;
   }
 
   _isOwtEncodingParameters(obj) {

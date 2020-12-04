@@ -29,7 +29,7 @@ const SignalingState = {
   CONNECTED: 3,
 };
 
-const protocolVersion = '1.1';
+const protocolVersion = '1.2';
 
 /* eslint-disable valid-jsdoc */
 /**
@@ -115,6 +115,7 @@ export const ConferenceClient = function(config, signalingImpl) {
   const participants = new Map(); // Key is participant ID, value is a Participant object.
   const publishChannels = new Map(); // Key is MediaStream's ID, value is pc channel.
   const channels = new Map(); // Key is channel's internal ID, value is channel.
+  let mainChannel = null; // Main pc channel for the client as single pc is default.
 
   /**
    * @function onSignalingMessage
@@ -261,8 +262,8 @@ export const ConferenceClient = function(config, signalingImpl) {
     stream.settings = StreamUtilsModule.convertToPublicationSettings(streamInfo
         .media);
     stream.extraCapabilities = StreamUtilsModule
-      .convertToSubscriptionCapabilities(
-        streamInfo.media);
+        .convertToSubscriptionCapabilities(
+            streamInfo.media);
     const streamEvent = new EventModule.OwtEvent('updated');
     stream.dispatchEvent(streamEvent);
   }
@@ -273,11 +274,15 @@ export const ConferenceClient = function(config, signalingImpl) {
       return new RemoteMixedStream(streamInfo);
     } else {
       let audioSourceInfo; let videoSourceInfo;
-      if (streamInfo.media.audio) {
-        audioSourceInfo = streamInfo.media.audio.source;
+      const audioTrack = streamInfo.media.tracks
+          .find((t) => t.type === 'audio');
+      const videoTrack = streamInfo.media.tracks
+          .find((t) => t.type === 'video');
+      if (audioTrack) {
+        audioSourceInfo = audioTrack.source;
       }
-      if (streamInfo.media.video) {
-        videoSourceInfo = streamInfo.media.video.source;
+      if (videoTrack) {
+        videoSourceInfo = videoTrack.source;
       }
       const stream = new StreamModule.RemoteStream(streamInfo.id,
           streamInfo.info.owner, undefined, new StreamModule.StreamSourceInfo(
@@ -285,8 +290,8 @@ export const ConferenceClient = function(config, signalingImpl) {
       stream.settings = StreamUtilsModule.convertToPublicationSettings(
           streamInfo.media);
       stream.extraCapabilities = StreamUtilsModule
-        .convertToSubscriptionCapabilities(
-          streamInfo.media);
+          .convertToSubscriptionCapabilities(
+              streamInfo.media);
       return stream;
     }
   }
@@ -304,7 +309,11 @@ export const ConferenceClient = function(config, signalingImpl) {
     const pcc = new ConferencePeerConnectionChannel(
         config, signalingForChannel);
     pcc.addEventListener('id', (messageEvent) => {
-      channels.set(messageEvent.message, pcc);
+      if (!channels.has(messageEvent.message)) {
+        channels.set(messageEvent.message, pcc);
+      } else {
+        Logger.warning('Channel already exists', messageEvent.message);
+      }
     });
     return pcc;
   }
@@ -405,8 +414,13 @@ export const ConferenceClient = function(config, signalingImpl) {
       return Promise.reject(new ConferenceError(
           'Cannot publish a published stream.'));
     }
-    const channel = createPeerConnectionChannel();
-    return channel.publish(stream, options, videoCodecs);
+    if (!mainChannel) {
+      mainChannel = createPeerConnectionChannel();
+      mainChannel.addEventListener('ended', () => {
+        mainChannel = null;
+      });
+    }
+    return mainChannel.publish(stream, options, videoCodecs);
   };
 
   /**
@@ -422,8 +436,13 @@ export const ConferenceClient = function(config, signalingImpl) {
     if (!(stream instanceof StreamModule.RemoteStream)) {
       return Promise.reject(new ConferenceError('Invalid stream.'));
     }
-    const channel = createPeerConnectionChannel();
-    return channel.subscribe(stream, options);
+    if (!mainChannel) {
+      mainChannel = createPeerConnectionChannel();
+      mainChannel.addEventListener('ended', () => {
+        mainChannel = null;
+      });
+    }
+    return mainChannel.subscribe(stream, options);
   };
 
   /**
