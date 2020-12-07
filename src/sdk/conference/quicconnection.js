@@ -32,7 +32,7 @@ export class QuicConnection extends EventDispatcher {
     this._quicTransport = new QuicTransport(url, {
       serverCertificateFingerprints: [{
         value:
-            '25:47:DA:10:A0:5B:BF:AE:61:A5:C0:53:BB:2E:9C:2C:80:B5:B9:6A:16:2C:97:0A:F2:A4:86:33:3F:02:FF:6A',
+            '25:47:DA:10:A0:5B:BF:AE:61:A5:C0:53:BB:2E:9C:2C:80:B5:B9:6A:16:2C:97:0A:F2:A4:86:33:3F:02:FF:6A',  // eslint-disable-line
         algorithm: 'sha-256',
       }],
     });

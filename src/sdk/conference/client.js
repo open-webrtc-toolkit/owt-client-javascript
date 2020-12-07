@@ -321,7 +321,7 @@ export const ConferenceClient = function(config, signalingImpl) {
         new ConferencePeerConnectionChannel(config, signalingForChannel);
     channel.addEventListener('id', (messageEvent) => {
       if (!channels.has(messageEvent.message)) {
-        channels.set(messageEvent.message, pcc);
+        channels.set(messageEvent.message, channel);
       } else {
         Logger.warning('Channel already exists', messageEvent.message);
       }
