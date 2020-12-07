@@ -181,20 +181,26 @@ export class Publication extends EventDispatcher {
  */
 export class PublishOptions {
   // eslint-disable-next-line require-jsdoc
-  constructor(audio, video) {
+  constructor(audio, video, transport) {
     /**
      * @member {?Array<Owt.Base.AudioEncodingParameters> | ?Array<RTCRtpEncodingParameters>} audio
      * @instance
      * @memberof Owt.Base.PublishOptions
-     * @desc Parameters for audio RtpSender. Publishing with RTCRtpEncodingParameters is an experimental feature. It is subject to change.
+     * @desc Parameters for audio RtpSender.
      */
     this.audio = audio;
     /**
      * @member {?Array<Owt.Base.VideoEncodingParameters> | ?Array<RTCRtpEncodingParameters>} video
      * @instance
      * @memberof Owt.Base.PublishOptions
-     * @desc Parameters for video RtpSender. Publishing with RTCRtpEncodingParameters is an experimental feature. It is subject to change.
+     * @desc Parameters for video RtpSender.
      */
     this.video = video;
+    /**
+     * @member {?Owt.Base.TransportConstraints} transport
+     * @instance
+     * @memberof Owt.Base.PublishOptions
+     */
+    this.transport = transport;
   }
 }
