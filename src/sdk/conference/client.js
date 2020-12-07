@@ -419,9 +419,10 @@ export const ConferenceClient = function(config, signalingImpl) {
    * @desc Publish a LocalStream to conference server. Other participants will be able to subscribe this stream when it is successfully published.
    * @param {Owt.Base.LocalStream} stream The stream to be published.
    * @param {Owt.Base.PublishOptions} options Options for publication.
+   * @param {string[]} videoCodecs Video codec names for publishing. Valid values are 'VP8', 'VP9' and 'H264'. This parameter only valid when options.video is RTCRtpEncodingParameters. Publishing with RTCRtpEncodingParameters is an experimental feature. This parameter is subject to change.
    * @return {Promise<Publication, Error>} Returned promise will be resolved with a newly created Publication once specific stream is successfully published, or rejected with a newly created Error if stream is invalid or options cannot be satisfied. Successfully published means PeerConnection is established and server is able to process media data.
    */
-  this.publish = function(stream, options) {
+  this.publish = function(stream, options, videoCodecs) {
     if (!(stream instanceof StreamModule.LocalStream)) {
       return Promise.reject(new ConferenceError('Invalid stream.'));
     }

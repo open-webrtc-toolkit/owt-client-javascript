@@ -36,6 +36,7 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
     this._config = config;
     this._videoCodecs = undefined;
     this._options = null;
+    this._videoCodecs = undefined;
     this._signaling = signaling;
     this._pc = null;
     this._internalId = null; // It's publication ID or subscription ID.

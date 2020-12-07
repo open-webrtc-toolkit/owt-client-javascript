@@ -186,14 +186,14 @@ export class PublishOptions {
      * @member {?Array<Owt.Base.AudioEncodingParameters> | ?Array<RTCRtpEncodingParameters>} audio
      * @instance
      * @memberof Owt.Base.PublishOptions
-     * @desc Parameters for audio RtpSender.
+     * @desc Parameters for audio RtpSender. Publishing with RTCRtpEncodingParameters is an experimental feature. It is subject to change.
      */
     this.audio = audio;
     /**
      * @member {?Array<Owt.Base.VideoEncodingParameters> | ?Array<RTCRtpEncodingParameters>} video
      * @instance
      * @memberof Owt.Base.PublishOptions
-     * @desc Parameters for video RtpSender.
+     * @desc Parameters for video RtpSender. Publishing with RTCRtpEncodingParameters is an experimental feature. It is subject to change.
      */
     this.video = video;
     /**
