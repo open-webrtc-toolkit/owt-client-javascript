@@ -31,26 +31,19 @@ function updateConferenceStatus(message) {
 
 
 function joinConference() {
-  const host = 'http://jianjunz-nuc-ubuntu.sh.intel.com:3001';
   return new Promise((resolve, reject) => {
     createToken(undefined, 'user', 'presenter', resp => {
       conference.join(resp).then(() => {
         updateConferenceStatus('Connected to conference server.');
         resolve();
       });
-    }, host);
+    });
   });
 };
 
 function createQuicTransport() {
   quicChannel = conference.createQuicConnection();
   return;
-  quicTransport = new QuicTransport(
-    'quic-transport://jianjunz-nuc-ubuntu.sh.intel.com:7700/echo');
-  quicTransport.onstatechange = () => {
-    console.log('QuicTransport state changed.');
-  };
-  return quicTransport.ready;
 }
 
 function createRandomContentSessionId() {
