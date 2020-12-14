@@ -23,19 +23,13 @@ import {Base64} from '../base/base64.js';
 export class QuicConnection extends EventDispatcher {
   // `tokenString` is a base64 string of the token object. It's in the return
   // value of `ConferenceClient.join`.
-  constructor(url, tokenString, signaling) {
+  constructor(url, tokenString, signaling, webTransportOptions) {
     super();
     this._token = JSON.parse(Base64.decodeBase64(tokenString));
     this._signaling = signaling;
     this._ended = false;
     this._quicStreams = new Map(); // Key is publication or subscription ID.
-    this._quicTransport = new QuicTransport(url, {
-      serverCertificateFingerprints: [{
-        value:
-            '25:47:DA:10:A0:5B:BF:AE:61:A5:C0:53:BB:2E:9C:2C:80:B5:B9:6A:16:2C:97:0A:F2:A4:86:33:3F:02:FF:6A',  // eslint-disable-line
-        algorithm: 'sha-256',
-      }],
-    });
+    this._quicTransport = new QuicTransport(url, webTransportOptions);
     this._subscribePromises = new Map(); // Key is subscription ID.
     this._transportId = this._token.transportId;
     this._init();

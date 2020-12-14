@@ -80,6 +80,24 @@ class ConferenceClientConfiguration { // eslint-disable-line no-unused-vars
      * }
      */
     this.rtcConfiguration = undefined;
+
+    /**
+     * @member {?WebTransportOptions} webTransportConfiguration
+     * @instance
+     * @memberof Owt.Conference.ConferenceClientConfiguration
+     * @desc It will be used for creating WebTransport.
+     * @see {@link https://w3c.github.io/webtransport/#dictdef-webtransportoptions|WebTransportOptions of WebTransport}.
+     * @example
+     * // Following object can be set to conferenceClientConfiguration.webTransportConfiguration.
+     * {
+     *   serverCertificateFingerprints: [{
+     *     value:
+     *         '00:11:22:33:44:55:66:77:88:99:AA:BB:CC:DD:EE:FF:00:11:22:33:44:55:66:77:88:99:AA:BB:CC:DD:EE:FF',  // eslint-disable-line
+     *     algorithm: 'sha-256',
+     *   }],
+     * }
+     */
+    this.webTransportConfiguration = undefined;
   }
 }
 
@@ -401,7 +419,7 @@ export const ConferenceClient = function(config, signalingImpl) {
         if (QuicConnection && token.webTransportUrl) {
           quicTransportChannel = new QuicConnection(
               token.webTransportUrl, resp.webTransportToken,
-              createSignalingForChannel());
+              createSignalingForChannel(), config.webTransportConfiguration);
         }
         resolve(new ConferenceInfo(resp.room.id, Array.from(participants
             .values()), Array.from(remoteStreams.values()), me));
