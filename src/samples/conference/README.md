@@ -12,4 +12,4 @@ Conference sample
 
 ## QUIC
 
-`public\scripts\index.js` was modified to create QUIC connections between client and server. After navigating to https://hostname:3004/?publish=false, the page automatically creates a QuicStream for publishing. It also listens to `stream-added` message and creates new QuicStreams for subscribing. It doesn't subscribe streams published before joining. `window.bidirectionalStream` is the last QuicStream it created. You may write or read data in console by accessing `window.bidirectionalStream`. Please try to modify index.js if you want to try other QUIC features.
+`public\scripts\quic.js` was added to create QUIC connections between client and server. After navigating to https://hostname:3004/quic.html?publish=false, the page automatically creates a `SendStream` for publishing. It also listens to `stream-added` message and creates new `ReceiveStream` for subscribing. It doesn't subscribe streams published before joining. Please try to modify `quic.js` if you want to try other QUIC features.
