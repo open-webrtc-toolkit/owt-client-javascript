@@ -299,6 +299,13 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
         media: {tracks: trackOptions},
         attributes: stream.attributes,
         transport: {id: this._id, type: 'webrtc'},
+      }).catch((e) => {
+        // Send SDP even when failed to get Answer.
+        this._signaling.sendSignalingMessage('soac', {
+          id: this._id,
+          signaling: localDesc,
+        });
+        throw e;
       });
     }).then((data) => {
       const publicationId = data.id;
@@ -503,6 +510,13 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
       return this._signaling.sendSignalingMessage('subscribe', {
         media: {tracks: trackOptions},
         transport: {id: this._id, type: 'webrtc'},
+      }).catch((e) => {
+        // Send SDP even when failed to get Answer.
+        this._signaling.sendSignalingMessage('soac', {
+          id: this._id,
+          signaling: localDesc,
+        });
+        throw e;
       });
     }).then((data) => {
       const subscriptionId = data.id;
