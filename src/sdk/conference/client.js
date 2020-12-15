@@ -92,7 +92,7 @@ class ConferenceClientConfiguration { // eslint-disable-line no-unused-vars
      * {
      *   serverCertificateFingerprints: [{
      *     value:
-     *         '00:11:22:33:44:55:66:77:88:99:AA:BB:CC:DD:EE:FF:00:11:22:33:44:55:66:77:88:99:AA:BB:CC:DD:EE:FF',  // eslint-disable-line
+     *         '00:11:22:33:44:55:66:77:88:99:AA:BB:CC:DD:EE:FF:00:11:22:33:44:55:66:77:88:99:AA:BB:CC:DD:EE:FF',
      *     algorithm: 'sha-256',
      *   }],
      * }
@@ -525,7 +525,7 @@ export const ConferenceClient = function(config, signalingImpl) {
    * @function createSendStream
    * @memberOf Owt.Conference.ConferenceClient
    * @instance
-   * @desc Create a outgoing stream. Only available when WebTransport is supported by user's browser.
+   * @desc Create an outgoing stream. Only available when WebTransport is supported by user's browser.
    * @return {Promise<SendStream, Error>} Returned promise will be resolved with a SendStream once stream is created.
    */
   if (QuicConnection) {
