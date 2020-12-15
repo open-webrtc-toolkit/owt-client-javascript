@@ -1,6 +1,6 @@
 Change Log
 ==========
-# 4.4
+# 5.0
 * `LocalStream`'s property `mediaStream` is renamed to `stream`. It could also be a `SendStream` or `BidirectionalStream`.
 
 # 4.3
