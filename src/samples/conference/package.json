@@ -13,7 +13,7 @@
     "mcu"
   ],
   "dependencies": {
-    "body-parser": "~1.14.1",
+    "body-parser": "1.19.0",
     "errorhandler": "",
     "express": "",
     "morgan": "",
