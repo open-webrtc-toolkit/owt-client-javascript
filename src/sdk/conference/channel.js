@@ -202,6 +202,10 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
       mediaOptions.video = false;
     }
 
+    const internalId = this._createInternalId();
+    // Waiting for previous SDP negotiation if needed
+    await this._chainSdpPromise(internalId);
+
     const offerOptions = {};
     const transceivers = [];
     if (typeof this._pc.addTransceiver === 'function') {
@@ -276,11 +280,7 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
       offerOptions.offerToReceiveAudio = false;
       offerOptions.offerToReceiveVideo = false;
     }
-
-    const internalId = this._createInternalId();
     this._publishTransceivers.set(internalId, {transceivers});
-    // Waiting for previous SDP negotiation if needed
-    await this._chainSdpPromise(internalId);
 
     let localDesc;
     this._pc.createOffer(offerOptions).then((desc) => {
@@ -439,6 +439,10 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
       mediaOptions.video = false;
     }
 
+    const internalId = this._createInternalId();
+    // Waiting for previous SDP negotiation if needed
+    await this._chainSdpPromise(internalId);
+
     const offerOptions = {};
     const transceivers = [];
     this._createPeerConnection();
@@ -469,13 +473,8 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
       offerOptions.offerToReceiveAudio = !!options.audio;
       offerOptions.offerToReceiveVideo = !!options.video;
     }
-
-    const internalId = this._createInternalId();
     this._subscribeTransceivers.set(internalId, {transceivers});
     this._subscribedStreams.set(internalId, stream);
-
-    // Waiting for previous SDP negotiation if needed
-    await this._chainSdpPromise(internalId);
 
     let localDesc;
     this._pc.createOffer(offerOptions).then((desc) => {
