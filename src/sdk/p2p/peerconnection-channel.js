@@ -571,9 +571,11 @@ class P2PPeerConnectionChannel extends EventDispatcher {
 
   _onSignalingStateChange(event) {
     Logger.debug('Signaling state changed: ' + this._pc.signalingState);
-    if (this._pc.signalingState === 'closed') {
-      // stopChatLocally(peer, peer.id);
-    } else if (this._pc.signalingState === 'stable') {
+    if (this._pc.signalingState === 'have-remote-offer' ||
+        this._pc.signalingState === 'stable') {
+      this._drainPendingRemoteIceCandidates();
+    }
+    if (this._pc.signalingState === 'stable') {
       this._negotiating = false;
       if (this._isNegotiationNeeded) {
         this._onNegotiationneeded();
@@ -581,8 +583,6 @@ class P2PPeerConnectionChannel extends EventDispatcher {
         this._drainPendingStreams();
         this._drainPendingMessages();
       }
-    } else if (this._pc.signalingState === 'have-remote-offer') {
-      this._drainPendingRemoteIceCandidates();
     }
   }
 
