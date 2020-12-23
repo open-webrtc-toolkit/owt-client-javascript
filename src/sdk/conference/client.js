@@ -146,7 +146,7 @@ export const ConferenceClient = function(config, signalingImpl) {
       if (channels.has(data.id)) {
         channels.get(data.id).onMessage(notification, data);
       } else if (quicTransportChannel && quicTransportChannel
-        .hasContentSessionId(data.id)) {
+          .hasContentSessionId(data.id)) {
         quicTransportChannel.onMessage(notification, data);
       } else {
         Logger.warning('Cannot find a channel for incoming data.');
@@ -307,9 +307,9 @@ export const ConferenceClient = function(config, signalingImpl) {
       }
       const dataSourceInfo = streamInfo.data;
       const stream = new StreamModule.RemoteStream(streamInfo.id,
-        streamInfo.info.owner, undefined, new StreamModule.StreamSourceInfo(
-          audioSourceInfo, videoSourceInfo, dataSourceInfo), streamInfo.info
-        .attributes);
+          streamInfo.info.owner, undefined, new StreamModule.StreamSourceInfo(
+              audioSourceInfo, videoSourceInfo, dataSourceInfo), streamInfo.info
+              .attributes);
       stream.settings = StreamUtilsModule.convertToPublicationSettings(
           streamInfo.media);
       stream.extraCapabilities = StreamUtilsModule
