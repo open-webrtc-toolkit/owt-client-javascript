@@ -1,5 +1,8 @@
 Change Log
 ==========
+# 5.0
+* `LocalStream`'s property `mediaStream` is renamed to `stream`. It could also be a `SendStream` or `BidirectionalStream`.
+
 # 4.3
 * The type of `conferenceClient.publish` method's option is changed from `AudioEncodingParameters` and `VideoEncodingParameters` to `RTCRtpSendParameters`.
 * `audio` and `video` of `PublicationSettings` is changed from `AudioPublicationSettings` and `VideoPublicationSettings` to `AudioPublicationSettings` array and `VideoPublicationSettings` array.
