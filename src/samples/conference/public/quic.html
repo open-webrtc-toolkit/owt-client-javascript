@@ -1,0 +1,43 @@
+<!--
+ Copyright (C) <2020> Intel Corporation
+
+ SPDX-License-Identifier: Apache-2.0
+-->
+
+<html>
+<meta charset="utf-8">
+
+<head>
+  <title>Open WebRTC Toolkit QUIC Sample</title>
+  <style>
+    html {
+      font-family: "intel-clear", "tahoma", Helvetica, "helvetica", Arial, sans-serif;
+      font-size: 90%;
+    }
+
+    .operations {
+      padding: 1em 0;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>Open WebRTC Toolkit</h1>
+  <h2>Sample of QuicTransport</h2>
+  <div id="description">
+    <p>This sample works with the latest Chrome.</p>
+  </div>
+  <div class="operations">
+    <button id="start-sending">Start sending</button>
+    <button id="stop-sending">Stop sending</button>
+  </div>
+  <div id="conference-status"></div>
+  <div class="stats">
+  </div>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.2.0/socket.io.js" type="text/javascript"></script>
+  <script src="scripts/rest-sample.js" type="text/javascript"></script>
+  <script src="scripts/owt.js" type="text/javascript"></script>
+  <script src="scripts/quic.js" type="text/javascript"></script>
+</body>
+
+</html>
