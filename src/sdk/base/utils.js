@@ -5,7 +5,7 @@
 /* global navigator, window */
 
 'use strict';
-const sdkVersion = '4.3';
+const sdkVersion = '5.0';
 
 // eslint-disable-next-line require-jsdoc
 export function isFirefox() {
