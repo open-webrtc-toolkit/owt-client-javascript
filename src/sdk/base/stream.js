@@ -202,6 +202,28 @@ export class RemoteStream extends Stream {
      * in conference mode.
      */
     this.extraCapabilities = undefined;
+    /**
+     * @member {boolean} ended
+     * @instance
+     * @memberof Owt.Base.RemoteStream
+     * @desc Indicates whether this stream is ended.
+     */
+    this.ended = false;
+
+    /**
+     * @function _stop
+     * @desc Stop this stream. Once a stream is ended, it cannot be started
+     * again.
+     * @private
+     */
+    this._stop = function() {
+      if (this.ended) {
+        return;
+      }
+      this.ended = true;
+      const streamEvent = new OwtEvent('ended');
+      this.dispatchEvent(streamEvent);
+    };
   }
 }
 

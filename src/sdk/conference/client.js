@@ -350,6 +350,9 @@ export const ConferenceClient = function(config, signalingImpl) {
   // eslint-disable-next-line require-jsdoc
   function clean() {
     participants.clear();
+    for (const [id, stream] of remoteStreams.entries()) {
+      stream._stop();
+    }
     remoteStreams.clear();
   }
 
