@@ -861,6 +861,7 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
     if (Utils.isChrome()) {
       pcConfiguration.sdpSemantics = 'unified-plan';
     }
+    pcConfiguration.bundlePolicy = 'max-bundle';
     this._pc = new RTCPeerConnection(pcConfiguration);
     this._pc.onicecandidate = (event) => {
       this._onLocalIceCandidate.apply(this, [event]);
