@@ -153,7 +153,7 @@ export class LocalStream extends Stream {
  *
  * | Event Name      | Argument Type    | Fired when         |
  * | ----------------| ---------------- | ------------------ |
- * | ended           | Event            | Stream is ended.   |
+ * | ended           | Event            | Stream is no longer available on server side.   |
  * | updated         | Event            | Stream is updated. |
  *
  * @memberOf Owt.Base
