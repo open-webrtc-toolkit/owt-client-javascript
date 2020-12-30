@@ -416,7 +416,7 @@ export const ConferenceClient = function(config, signalingImpl) {
             }
           }
         }
-        if (QuicConnection && token.webTransportUrl) {
+        if (typeof QuicTransport === 'function' && token.webTransportUrl) {
           quicTransportChannel = new QuicConnection(
               token.webTransportUrl, resp.webTransportToken,
               createSignalingForChannel(), config.webTransportConfiguration);
@@ -479,8 +479,11 @@ export const ConferenceClient = function(config, signalingImpl) {
             'Invalid source info. A remote stream is either a data stream or ' +
             'a media stream.'));
       }
-      return quicTransportChannel.subscribe(stream);
-      // TODO
+      if (quicTransportChannel) {
+        return quicTransportChannel.subscribe(stream);
+      } else {
+        return Promise.reject(new TypeError('WebTransport is not supported.'));
+      }
     }
     if (!mainChannel) {
       mainChannel = createPeerConnectionChannel();
