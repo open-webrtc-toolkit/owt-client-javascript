@@ -421,8 +421,9 @@ export const ConferenceClient = function(config, signalingImpl) {
               token.webTransportUrl, resp.webTransportToken,
               createSignalingForChannel(), config.webTransportConfiguration);
         }
-        const conferenceInfo=new ConferenceInfo(resp.room.id, Array.from(participants
-          .values()), Array.from(remoteStreams.values()), me);
+        const conferenceInfo = new ConferenceInfo(
+            resp.room.id, Array.from(participants.values()),
+            Array.from(remoteStreams.values()), me);
         if (quicTransportChannel) {
           quicTransportChannel.init().then(() => {
             resolve(conferenceInfo);
