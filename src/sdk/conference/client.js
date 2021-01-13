@@ -416,13 +416,20 @@ export const ConferenceClient = function(config, signalingImpl) {
             }
           }
         }
-        if (typeof QuicTransport === 'function' && token.webTransportUrl) {
+        if (typeof WebTransport === 'function' && token.webTransportUrl) {
           quicTransportChannel = new QuicConnection(
               token.webTransportUrl, resp.webTransportToken,
               createSignalingForChannel(), config.webTransportConfiguration);
         }
-        resolve(new ConferenceInfo(resp.room.id, Array.from(participants
-            .values()), Array.from(remoteStreams.values()), me));
+        const conferenceInfo=new ConferenceInfo(resp.room.id, Array.from(participants
+          .values()), Array.from(remoteStreams.values()), me);
+        if (quicTransportChannel) {
+          quicTransportChannel.init().then(() => {
+            resolve(conferenceInfo);
+          });
+        } else {
+          resolve(conferenceInfo);
+        }
       }, (e) => {
         signalingState = SignalingState.READY;
         reject(new ConferenceError(e));

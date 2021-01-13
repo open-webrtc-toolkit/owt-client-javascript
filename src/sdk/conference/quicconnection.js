@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 /* eslint-disable require-jsdoc */
-/* global Promise, Map, QuicTransport, Uint8Array, Uint32Array, TextEncoder */
+/* global Promise, Map, WebTransport, Uint8Array, Uint32Array, TextEncoder */
 
 'use strict';
 
@@ -25,15 +25,15 @@ export class QuicConnection extends EventDispatcher {
   // value of `ConferenceClient.join`.
   constructor(url, tokenString, signaling, webTransportOptions) {
     super();
+    this._tokenString = tokenString;
     this._token = JSON.parse(Base64.decodeBase64(tokenString));
     this._signaling = signaling;
     this._ended = false;
     this._quicStreams = new Map(); // Key is publication or subscription ID.
-    this._quicTransport = new QuicTransport(url, webTransportOptions);
+    this._quicTransport = new WebTransport(url, webTransportOptions);
     this._subscribePromises = new Map(); // Key is subscription ID.
     this._transportId = this._token.transportId;
-    this._init();
-    this._authenticate(tokenString);
+    this._initReceiveStreamReader();
   }
 
   /**
@@ -63,9 +63,13 @@ export class QuicConnection extends EventDispatcher {
     }
   }
 
-  async _init() {
+  async init() {
+    await this._authenticate(this._tokenString);
+  }
+
+  async _initReceiveStreamReader() {
     const receiveStreamReader =
-        this._quicTransport.receiveStreams().getReader();
+        this._quicTransport.incomingBidirectionalStreams.getReader();
     Logger.info('Reader: ' + receiveStreamReader);
     let receivingDone = false;
     while (!receivingDone) {
@@ -127,7 +131,7 @@ export class QuicConnection extends EventDispatcher {
 
   async createSendStream() {
     await this._quicTransport.ready;
-    const quicStream = await this._quicTransport.createSendStream();
+    const quicStream = await this._quicTransport.createBidirectionalStream();
     return quicStream;
   }
 
