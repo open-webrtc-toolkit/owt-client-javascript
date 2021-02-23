@@ -18,6 +18,10 @@ Following APIs will be changed to support QuicTransport.
 
 JavaScript SDK creates a QuicTransport with a QUIC agent when QUIC agent is enabled at server side, and WebTransport is supported at client side. When app publishes or subscribes a data stream, a new QuicStream is created.
 
+## Limitations
+
+WebTransport only supported in Chrome since 87. It's not enabled by default. To enable it, you need to [register the origin trail](https://web.dev/webtransport/#register-for-ot) or start Chrome with flag `--enable-experimental-web-platform-features`.
+
 ## Examples
 
 ### Send data to a conference
