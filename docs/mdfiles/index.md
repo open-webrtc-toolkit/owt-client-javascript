@@ -6,8 +6,6 @@ Open WebRTC Toolkit Client SDK for JavaScript provides tools to help you develop
 
 Refer to the SDK release notes for the latest information on the SDK release package, including features, supported browsers, bug fixes, and known issues.
 
-Please include `adapter.js` before `owt.js` in HTML files. `adapter.js` is an open source project hosted on [Github](https://github.com/webrtc/adapter). The revision we depend on is `7.0.0`.
-
 If you want to use conference SDK, please also include `socket.io.js` before `owt.js`.
 
 # 2 Browser requirement
@@ -53,7 +51,6 @@ To enable P2P chat, copy and paste the following code into the head section of y
 ~~~~~~{.js}
 <script type="text/JavaScript" src="socket.io.js"></script>
 <script type="text/JavaScript" src="sc.websocket.js"></script>
-<script type="text/JavaScript" src="adapter.js"></script>
 <script type="text/JavaScript" src="owt.js"></script>
 ~~~~~~
 If you're using customized signling channel, please replace `socket.io.js` and `sc.websocket.js` with your own signaling channel implementation.
@@ -73,7 +70,6 @@ In the customized signaling channel, you need to implement `connect`, `disconnec
 Conference mode is designed for applications with multiple participants through MCU conference server. To enable conference chat, copy and paste the following code into the head section of your HTML document:
 ~~~~~~{.js}
 <script type="text/javascript" src="socket.io.js"></script>
-<script type="text/javascript" src="adapter.js"></script>
 <script type="text/javascript" src="owt.js"></script>
 ~~~~~~
 
@@ -146,11 +142,17 @@ a. The simulcast stream published to conference won't be transcoded.
 b. The `rid` attribute may not be present once a 'streamadded' event triggered. Users should listen on stream's `updated` event for new `rid` added.
 c. Current browsers support VP8 simulcast well while H.264 simulcast has some limitations.
 
-# 6 Events
+# 6 WebTransport
+WebTransport is supported in conference mode as an experimental feature. QUIC agent on server side is not enabled by default. Please refer to following links for more information.
+
+- [JavaScript SDK design doc for WebTransport support](https://github.com/open-webrtc-toolkit/owt-client-javascript/blob/master/docs/design/webtransport.md)
+- [QUIC programming guide for OWT server](https://github.com/open-webrtc-toolkit/owt-server/blob/master/doc/design/quic-programming-guide.md)
+
+# 7 Events
 
 The JavaScript objects fires events using `Owt.Base.EventDispatchers`. For more detailed events, please refer to the specific class description page.
 
-# 7 Privacy and security
+# 8 Privacy and security
 SDK will send operation system's name and version, browser name, version and abilities, SDK name and version to conference server and P2P endpoints it tries to make connection. SDK does not store this information on disk.
 
 **Note:** \* Other names and brands may be claimed as the property of others.

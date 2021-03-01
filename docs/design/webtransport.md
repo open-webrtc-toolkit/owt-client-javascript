@@ -2,11 +2,13 @@
 
 ## Introduction
 
-This post describes changes to OWT JavaScript SDK to support QuicTransport of WebTransport. Other APIs defined in WebTransport might be supported in the future. QuicTransport is only supported in conference mode as an experimental feature.
+This post describes changes to OWT JavaScript SDK to support WebTransport. WebTransport is only supported in conference mode as an experimental feature.
+
+The current implementation is based on QuicTransport, which was removed from WebTransport spec. Following changes will move to HTTP3 based WebTransport.
 
 ## API Changes
 
-Following APIs will be changed to support QuicTransport.
+Following APIs will be changed to support WebTransport.
 
 - `LocalStream` can be constructed with a `WritableStream`.
 - `RemoteStream` can be constructed with a `ReadableStream`.
@@ -16,7 +18,7 @@ Following APIs will be changed to support QuicTransport.
 
 ## Internal Changes
 
-JavaScript SDK creates a QuicTransport with a QUIC agent when QUIC agent is enabled at server side, and WebTransport is supported at client side. When app publishes or subscribes a data stream, a new QuicStream is created.
+JavaScript SDK creates a WebTransport with a QUIC agent when QUIC agent is enabled at server side, and WebTransport is supported at client side. When app publishes or subscribes a data stream, a new `BidirectionalStream` is created.
 
 ## Limitations
 
