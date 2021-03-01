@@ -56,8 +56,9 @@ export class Stream extends EventDispatcher {
   constructor(stream, sourceInfo, attributes) {
     super();
     if ((stream && !(stream instanceof MediaStream) &&
-         !(stream instanceof SendStream) &&
-         !(stream instanceof BidirectionalStream)) ||
+         !(typeof SendStream === 'function' && stream instanceof SendStream) &&
+         !(typeof BidirectionalStream === 'function' &&
+           stream instanceof BidirectionalStream)) ||
         (typeof sourceInfo !== 'object')) {
       throw new TypeError('Invalid stream or sourceInfo.');
     }
