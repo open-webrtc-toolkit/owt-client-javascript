@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-/* global MediaStream */
+/* global MediaStream, SendStream, BidirectionalStream */
 
 'use strict';
 import * as Utils from './utils.js';
@@ -25,10 +25,12 @@ function isAllowedValue(obj, allowedValues) {
  * "mic", "screen-cast", "file", "mixed" or undefined.
  * @param {?string} videoSourceInfo Video source info. Accepted values are:
  * "camera", "screen-cast", "file", "mixed" or undefined.
+ * @param {boolean} dataSourceInfo Indicates whether it is data. Accepted values
+ * are boolean.
  */
 export class StreamSourceInfo {
   // eslint-disable-next-line require-jsdoc
-  constructor(audioSourceInfo, videoSourceInfo) {
+  constructor(audioSourceInfo, videoSourceInfo, dataSourceInfo) {
     if (!isAllowedValue(audioSourceInfo, [undefined, 'mic', 'screen-cast',
       'file', 'mixed'])) {
       throw new TypeError('Incorrect value for audioSourceInfo');
@@ -39,6 +41,7 @@ export class StreamSourceInfo {
     }
     this.audio = audioSourceInfo;
     this.video = videoSourceInfo;
+    this.data = dataSourceInfo;
   }
 }
 /**
@@ -52,12 +55,15 @@ export class Stream extends EventDispatcher {
   // eslint-disable-next-line require-jsdoc
   constructor(stream, sourceInfo, attributes) {
     super();
-    if ((stream && !(stream instanceof MediaStream)) || (typeof sourceInfo !==
-        'object')) {
+    if ((stream && !(stream instanceof MediaStream) &&
+         !(stream instanceof SendStream) &&
+         !(stream instanceof BidirectionalStream)) ||
+        (typeof sourceInfo !== 'object')) {
       throw new TypeError('Invalid stream or sourceInfo.');
     }
-    if (stream && ((stream.getAudioTracks().length > 0 && !sourceInfo.audio) ||
-        stream.getVideoTracks().length > 0 && !sourceInfo.video)) {
+    if (stream && (stream instanceof MediaStream) &&
+        ((stream.getAudioTracks().length > 0 && !sourceInfo.audio) ||
+         stream.getVideoTracks().length > 0 && !sourceInfo.video)) {
       throw new TypeError('Missing audio source info or video source info.');
     }
     /**
@@ -65,8 +71,23 @@ export class Stream extends EventDispatcher {
      * @instance
      * @memberof Owt.Base.Stream
      * @see {@link https://www.w3.org/TR/mediacapture-streams/#mediastream|MediaStream API of Media Capture and Streams}.
+     * @desc This property is deprecated, please use stream instead.
      */
-    Object.defineProperty(this, 'mediaStream', {
+    if (stream instanceof MediaStream) {
+      Object.defineProperty(this, 'mediaStream', {
+        configurable: false,
+        writable: true,
+        value: stream,
+      });
+    }
+    /**
+     * @member {MediaStream | SendStream | BidirectionalStream | undefined} stream
+     * @instance
+     * @memberof Owt.Base.Stream
+     * @see {@link https://www.w3.org/TR/mediacapture-streams/#mediastream|MediaStream API of Media Capture and Streams}
+     * @see {@link https://wicg.github.io/web-transport/ WebTransport}.
+     */
+    Object.defineProperty(this, 'stream', {
       configurable: false,
       writable: true,
       value: stream,
@@ -109,8 +130,8 @@ export class Stream extends EventDispatcher {
 export class LocalStream extends Stream {
   // eslint-disable-next-line require-jsdoc
   constructor(stream, sourceInfo, attributes) {
-    if (!(stream instanceof MediaStream)) {
-      throw new TypeError('Invalid stream.');
+    if (!stream) {
+      throw new TypeError('Stream cannot be null.');
     }
     super(stream, sourceInfo, attributes);
     /**
@@ -132,7 +153,7 @@ export class LocalStream extends Stream {
  *
  * | Event Name      | Argument Type    | Fired when         |
  * | ----------------| ---------------- | ------------------ |
- * | ended           | Event            | Stream is ended.   |
+ * | ended           | Event            | Stream is no longer available on server side.   |
  * | updated         | Event            | Stream is updated. |
  *
  * @memberOf Owt.Base

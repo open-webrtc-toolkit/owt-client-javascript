@@ -13,11 +13,11 @@
     "mcu"
   ],
   "dependencies": {
-    "body-parser": "~1.14.1",
+    "body-parser": "1.19.0",
     "errorhandler": "",
     "express": "",
     "morgan": "",
-    "socket.io": "^2.2.0",
+    "socket.io": "^2.4.0",
     "spdy": ""
   },
   "main": "samplertcservice.js",

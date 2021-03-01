@@ -33,7 +33,8 @@ export class AudioPublicationSettings {
  */
 export class VideoPublicationSettings {
   // eslint-disable-next-line require-jsdoc
-  constructor(codec, resolution, frameRate, bitrate, keyFrameInterval, rid) {
+  constructor(codec, resolution, frameRate,
+      bitrate, keyFrameInterval, rid) {
     /**
      * @member {?Owt.Base.VideoCodecParameters} codec
      * @instance
@@ -180,7 +181,7 @@ export class Publication extends EventDispatcher {
  */
 export class PublishOptions {
   // eslint-disable-next-line require-jsdoc
-  constructor(audio, video) {
+  constructor(audio, video, transport) {
     /**
      * @member {?Array<Owt.Base.AudioEncodingParameters> | ?Array<RTCRtpEncodingParameters>} audio
      * @instance
@@ -195,5 +196,11 @@ export class PublishOptions {
      * @desc Parameters for video RtpSender. Publishing with RTCRtpEncodingParameters is an experimental feature. It is subject to change.
      */
     this.video = video;
+    /**
+     * @member {?Owt.Base.TransportConstraints} transport
+     * @instance
+     * @memberof Owt.Base.PublishOptions
+     */
+    this.transport = transport;
   }
 }

@@ -13,7 +13,7 @@ function SignalingChannel() {
   this.onServerDisconnected = null;
 
   const clientType = 'Web';
-  const clientVersion = '4.3';
+  const clientVersion = '5.0';
 
   let wsServer = null;
 
@@ -48,20 +48,7 @@ function SignalingChannel() {
 
   this.connect = function(loginInfo) {
     const serverAddress = loginInfo.host;
-    const token = loginInfo.token;
-    const parameters = [];
-    let queryString = null;
-    parameters.push('clientType=' + clientType);
-    parameters.push('clientVersion=' + clientVersion);
-    if (token) {
-      parameters.push('token=' + encodeURIComponent(token));
-    }
-    if (parameters) {
-      queryString = parameters.join('&');
-    }
-    console.log('Query string: ' + queryString);
     const opts = {
-      'query': queryString,
       'reconnection': true,
       'reconnectionAttempts': MAX_TRIALS,
       'force new connection': true,
@@ -70,15 +57,21 @@ function SignalingChannel() {
 
     wsServer.on('connect', function() {
       reconnectTimes = 0;
-      console.info('Connected to websocket server.');
-    });
-
-    wsServer.on('server-authenticated', function(data) {
-      console.log('Authentication passed. User ID: ' + data.uid);
-      if (connectPromise) {
-        connectPromise.resolve(data.uid);
-      }
-      connectPromise = null;
+      wsServer.emit('authentication', {token: loginInfo.token}, (data) => {
+        if (data.uid) {
+          console.log('Authentication passed. User ID: ' + data.uid);
+        } else {
+          console.error('Faild to connect to Socket.IO server.');
+        }
+        if (connectPromise) {
+          if (data.uid) {
+            connectPromise.resolve(data.uid);
+          } else if (data.error) {
+            connectPromise.reject(data.error);
+          }
+        }
+        connectPromise = null;
+      });
     });
 
     wsServer.on('reconnecting', function() {

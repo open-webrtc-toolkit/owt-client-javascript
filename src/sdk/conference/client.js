@@ -16,11 +16,9 @@ import * as StreamModule from '../base/stream.js';
 import {Participant} from './participant.js';
 import {ConferenceInfo} from './info.js';
 import {ConferencePeerConnectionChannel} from './channel.js';
-import {
-  RemoteMixedStream,
-  ActiveAudioInputChangeEvent,
-  LayoutChangeEvent,
-} from './mixedstream.js';
+import {QuicConnection} from './quicconnection.js';
+import {RemoteMixedStream, ActiveAudioInputChangeEvent, LayoutChangeEvent}
+  from './mixedstream.js';
 import * as StreamUtilsModule from './streamutils.js';
 
 const SignalingState = {
@@ -29,7 +27,7 @@ const SignalingState = {
   CONNECTED: 3,
 };
 
-const protocolVersion = '1.1';
+const protocolVersion = '1.2';
 
 /* eslint-disable valid-jsdoc */
 /**
@@ -82,6 +80,24 @@ class ConferenceClientConfiguration { // eslint-disable-line no-unused-vars
      * }
      */
     this.rtcConfiguration = undefined;
+
+    /**
+     * @member {?WebTransportOptions} webTransportConfiguration
+     * @instance
+     * @memberof Owt.Conference.ConferenceClientConfiguration
+     * @desc It will be used for creating WebTransport.
+     * @see {@link https://w3c.github.io/webtransport/#dictdef-webtransportoptions|WebTransportOptions of WebTransport}.
+     * @example
+     * // Following object can be set to conferenceClientConfiguration.webTransportConfiguration.
+     * {
+     *   serverCertificateFingerprints: [{
+     *     value:
+     *         '00:11:22:33:44:55:66:77:88:99:AA:BB:CC:DD:EE:FF:00:11:22:33:44:55:66:77:88:99:AA:BB:CC:DD:EE:FF',
+     *     algorithm: 'sha-256',
+     *   }],
+     * }
+     */
+    this.webTransportConfiguration = undefined;
   }
 }
 
@@ -115,6 +131,8 @@ export const ConferenceClient = function(config, signalingImpl) {
   const participants = new Map(); // Key is participant ID, value is a Participant object.
   const publishChannels = new Map(); // Key is MediaStream's ID, value is pc channel.
   const channels = new Map(); // Key is channel's internal ID, value is channel.
+  let mainChannel = null; // Main pc channel for the client as single pc is default.
+  let quicTransportChannel;
 
   /**
    * @function onSignalingMessage
@@ -125,11 +143,15 @@ export const ConferenceClient = function(config, signalingImpl) {
    */
   function onSignalingMessage(notification, data) {
     if (notification === 'soac' || notification === 'progress') {
-      if (!channels.has(data.id)) {
+      if (channels.has(data.id)) {
+        channels.get(data.id).onMessage(notification, data);
+      } else if (quicTransportChannel && quicTransportChannel
+          .hasContentSessionId(data.id)) {
+        quicTransportChannel.onMessage(notification, data);
+      } else {
         Logger.warning('Cannot find a channel for incoming data.');
-        return;
       }
-      channels.get(data.id).onMessage(notification, data);
+      return;
     } else if (notification === 'stream') {
       if (data.status === 'add') {
         fireStreamAdded(data.data);
@@ -261,8 +283,8 @@ export const ConferenceClient = function(config, signalingImpl) {
     stream.settings = StreamUtilsModule.convertToPublicationSettings(streamInfo
         .media);
     stream.extraCapabilities = StreamUtilsModule
-      .convertToSubscriptionCapabilities(
-        streamInfo.media);
+        .convertToSubscriptionCapabilities(
+            streamInfo.media);
     const streamEvent = new EventModule.OwtEvent('updated');
     stream.dispatchEvent(streamEvent);
   }
@@ -273,20 +295,26 @@ export const ConferenceClient = function(config, signalingImpl) {
       return new RemoteMixedStream(streamInfo);
     } else {
       let audioSourceInfo; let videoSourceInfo;
-      if (streamInfo.media.audio) {
-        audioSourceInfo = streamInfo.media.audio.source;
+      const audioTrack = streamInfo.media.tracks
+          .find((t) => t.type === 'audio');
+      const videoTrack = streamInfo.media.tracks
+          .find((t) => t.type === 'video');
+      if (audioTrack) {
+        audioSourceInfo = audioTrack.source;
       }
-      if (streamInfo.media.video) {
-        videoSourceInfo = streamInfo.media.video.source;
+      if (videoTrack) {
+        videoSourceInfo = videoTrack.source;
       }
+      const dataSourceInfo = streamInfo.data;
       const stream = new StreamModule.RemoteStream(streamInfo.id,
           streamInfo.info.owner, undefined, new StreamModule.StreamSourceInfo(
-              audioSourceInfo, videoSourceInfo), streamInfo.info.attributes);
+              audioSourceInfo, videoSourceInfo, dataSourceInfo), streamInfo.info
+              .attributes);
       stream.settings = StreamUtilsModule.convertToPublicationSettings(
           streamInfo.media);
       stream.extraCapabilities = StreamUtilsModule
-        .convertToSubscriptionCapabilities(
-          streamInfo.media);
+          .convertToSubscriptionCapabilities(
+              streamInfo.media);
       return stream;
     }
   }
@@ -297,16 +325,26 @@ export const ConferenceClient = function(config, signalingImpl) {
   }
 
   // eslint-disable-next-line require-jsdoc
-  function createPeerConnectionChannel() {
+  function createSignalingForChannel() {
     // Construct an signaling sender/receiver for ConferencePeerConnection.
     const signalingForChannel = Object.create(EventModule.EventDispatcher);
     signalingForChannel.sendSignalingMessage = sendSignalingMessage;
-    const pcc = new ConferencePeerConnectionChannel(
-        config, signalingForChannel);
-    pcc.addEventListener('id', (messageEvent) => {
-      channels.set(messageEvent.message, pcc);
+    return signalingForChannel;
+  }
+
+  // eslint-disable-next-line require-jsdoc
+  function createPeerConnectionChannel(transport) {
+    const signalingForChannel = createSignalingForChannel();
+    const channel =
+        new ConferencePeerConnectionChannel(config, signalingForChannel);
+    channel.addEventListener('id', (messageEvent) => {
+      if (!channels.has(messageEvent.message)) {
+        channels.set(messageEvent.message, channel);
+      } else {
+        Logger.warning('Channel already exists', messageEvent.message);
+      }
     });
-    return pcc;
+    return channel;
   }
 
   // eslint-disable-next-line require-jsdoc
@@ -378,8 +416,21 @@ export const ConferenceClient = function(config, signalingImpl) {
             }
           }
         }
-        resolve(new ConferenceInfo(resp.room.id, Array.from(participants
-            .values()), Array.from(remoteStreams.values()), me));
+        if (typeof WebTransport === 'function' && token.webTransportUrl) {
+          quicTransportChannel = new QuicConnection(
+              token.webTransportUrl, resp.webTransportToken,
+              createSignalingForChannel(), config.webTransportConfiguration);
+        }
+        const conferenceInfo = new ConferenceInfo(
+            resp.room.id, Array.from(participants.values()),
+            Array.from(remoteStreams.values()), me);
+        if (quicTransportChannel) {
+          quicTransportChannel.init().then(() => {
+            resolve(conferenceInfo);
+          });
+        } else {
+          resolve(conferenceInfo);
+        }
       }, (e) => {
         signalingState = SignalingState.READY;
         reject(new ConferenceError(e));
@@ -401,12 +452,20 @@ export const ConferenceClient = function(config, signalingImpl) {
     if (!(stream instanceof StreamModule.LocalStream)) {
       return Promise.reject(new ConferenceError('Invalid stream.'));
     }
+    if (stream.source.data) {
+      return quicTransportChannel.publish(stream);
+    }
     if (publishChannels.has(stream.mediaStream.id)) {
       return Promise.reject(new ConferenceError(
           'Cannot publish a published stream.'));
     }
-    const channel = createPeerConnectionChannel();
-    return channel.publish(stream, options, videoCodecs);
+    if (!mainChannel) {
+      mainChannel = createPeerConnectionChannel();
+      mainChannel.addEventListener('ended', () => {
+        mainChannel = null;
+      });
+    }
+    return mainChannel.publish(stream, options, videoCodecs);
   };
 
   /**
@@ -422,8 +481,25 @@ export const ConferenceClient = function(config, signalingImpl) {
     if (!(stream instanceof StreamModule.RemoteStream)) {
       return Promise.reject(new ConferenceError('Invalid stream.'));
     }
-    const channel = createPeerConnectionChannel();
-    return channel.subscribe(stream, options);
+    if (stream.source.data) {
+      if (stream.source.audio || stream.source.video) {
+        return Promise.reject(new TypeError(
+            'Invalid source info. A remote stream is either a data stream or ' +
+            'a media stream.'));
+      }
+      if (quicTransportChannel) {
+        return quicTransportChannel.subscribe(stream);
+      } else {
+        return Promise.reject(new TypeError('WebTransport is not supported.'));
+      }
+    }
+    if (!mainChannel) {
+      mainChannel = createPeerConnectionChannel();
+      mainChannel.addEventListener('ended', () => {
+        mainChannel = null;
+      });
+    }
+    return mainChannel.subscribe(stream, options);
   };
 
   /**
@@ -455,4 +531,21 @@ export const ConferenceClient = function(config, signalingImpl) {
       signalingState = SignalingState.READY;
     });
   };
+
+  /**
+   * @function createSendStream
+   * @memberOf Owt.Conference.ConferenceClient
+   * @instance
+   * @desc Create an outgoing stream. Only available when WebTransport is supported by user's browser.
+   * @return {Promise<SendStream, Error>} Returned promise will be resolved with a SendStream once stream is created.
+   */
+  if (QuicConnection) {
+    this.createSendStream = async function() {
+      if (!quicTransportChannel) {
+        // Try to create a new one or consider it as closed?
+        throw new ConferenceError('No QUIC connection available.');
+      }
+      return quicTransportChannel.createSendStream();
+    };
+  }
 };

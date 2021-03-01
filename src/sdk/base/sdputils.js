@@ -353,8 +353,20 @@ function maybePreferCodec(sdp, type, dir, codec) {
 }
 
 // Set fmtp param to specific codec in SDP. If param does not exists, add it.
-function setCodecParam(sdp, codec, param, value) {
+function setCodecParam(sdp, codec, param, value, mid) {
   let sdpLines = sdp.split('\r\n');
+  let headLines = null;
+  let tailLines = null;
+  if (typeof mid === 'string') {
+    const midRange = findMLineRangeWithMID(sdpLines, mid);
+    if (midRange) {
+      const { start, end } = midRange;
+      headLines = sdpLines.slice(0, start);
+      tailLines = sdpLines.slice(end);
+      sdpLines = sdpLines.slice(start, end);
+    }
+  }
+
   // SDPs sent from MCU use \n as line break.
   if (sdpLines.length <= 1) {
     sdpLines = sdp.split('\n');
@@ -379,6 +391,9 @@ function setCodecParam(sdp, codec, param, value) {
     sdpLines[fmtpLineIndex] = writeFmtpLine(fmtpObj);
   }
 
+  if (headLines) {
+    sdpLines = headLines.concat(sdpLines).concat(tailLines);
+  }
   sdp = sdpLines.join('\r\n');
   return sdp;
 }
@@ -553,10 +568,40 @@ function removeCodecFramALine(sdpLines, payload) {
   return sdpLines;
 }
 
+// Find m-line and next m-line with give mid, return { start, end }.
+function findMLineRangeWithMID(sdpLines, mid) {
+  const midLine = 'a=mid:' + mid;
+  let midIndex = findLine(sdpLines, midLine);
+  // Compare the whole line since findLine only compares prefix
+  while (midIndex >= 0 && sdpLines[midIndex] !== midLine) {
+    midIndex = findLineInRange(sdpLines, midIndex, -1, midLine);
+  }
+  if (midIndex >= 0) {
+    // Found matched a=mid line
+    const nextMLineIndex = (findLineInRange(sdpLines, midIndex, -1, 'm=')
+        || -1);
+    let mLineIndex = -1;
+    for (let i = midIndex; i >= 0; i--) {
+      if (sdpLines[i].indexOf('m=') >= 0) {
+        mLineIndex = i;
+        break;
+      }
+    }
+    if (mLineIndex >= 0) {
+      return {
+        start: mLineIndex,
+        end: nextMLineIndex
+      };
+    }
+  }
+  return null;
+}
+
 // Reorder codecs in m-line according the order of |codecs|. Remove codecs from
 // m-line if it is not present in |codecs|
+// Applied on specific m-line if mid is presented
 // The format of |codec| is 'NAME/RATE', e.g. 'opus/48000'.
-export function reorderCodecs(sdp, type, codecs) {
+export function reorderCodecs(sdp, type, codecs, mid) {
   if (!codecs || codecs.length === 0) {
     return sdp;
   }
@@ -565,6 +610,17 @@ export function reorderCodecs(sdp, type, codecs) {
       videoCodecAllowList);
 
   let sdpLines = sdp.split('\r\n');
+  let headLines = null;
+  let tailLines = null;
+  if (typeof mid === 'string') {
+    const midRange = findMLineRangeWithMID(sdpLines, mid);
+    if (midRange) {
+      const { start, end } = midRange;
+      headLines = sdpLines.slice(0, start);
+      tailLines = sdpLines.slice(end);
+      sdpLines = sdpLines.slice(start, end);
+    }
+  }
 
   // Search for m line.
   const mLineIndex = findLine(sdpLines, 'm=', type);
@@ -599,17 +655,32 @@ export function reorderCodecs(sdp, type, codecs) {
     }
   }
 
+  if (headLines) {
+    sdpLines = headLines.concat(sdpLines).concat(tailLines);
+  }
   sdp = sdpLines.join('\r\n');
   return sdp;
 }
 
 // Add legacy simulcast.
-export function addLegacySimulcast(sdp, type, numStreams) {
+export function addLegacySimulcast(sdp, type, numStreams, mid) {
   if (!numStreams || !(numStreams > 1)) {
     return sdp;
   }
 
   let sdpLines = sdp.split('\r\n');
+  let headLines = null;
+  let tailLines = null;
+  if (typeof mid === 'string') {
+    const midRange = findMLineRangeWithMID(sdpLines, mid);
+    if (midRange) {
+      const { start, end } = midRange;
+      headLines = sdpLines.slice(0, start);
+      tailLines = sdpLines.slice(end);
+      sdpLines = sdpLines.slice(start, end);
+    }
+  }
+
   // Search for m line.
   const mLineStart = findLine(sdpLines, 'm=', type);
   if (mLineStart === null) {
@@ -681,16 +752,19 @@ export function addLegacySimulcast(sdp, type, numStreams) {
   sdpLines.splice(insertPos, 0, ...simLines);
   sdpLines = sdpLines.filter(line => !removes.has(line));
 
+  if (headLines) {
+    sdpLines = headLines.concat(sdpLines).concat(tailLines);
+  }
   sdp = sdpLines.join('\r\n');
   return sdp;
 }
 
-export function setMaxBitrate(sdp, encodingParametersList) {
+export function setMaxBitrate(sdp, encodingParametersList, mid) {
   for (const encodingParameters of encodingParametersList) {
     if (encodingParameters.maxBitrate) {
       sdp = setCodecParam(
           sdp, encodingParameters.codec.name, 'x-google-max-bitrate',
-          (encodingParameters.maxBitrate).toString());
+          (encodingParameters.maxBitrate).toString(), mid);
     }
   }
   return sdp;

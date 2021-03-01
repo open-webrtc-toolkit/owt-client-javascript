@@ -1,5 +1,12 @@
 Change Log
 ==========
+# 5.0
+* Add WebTransport support for conference mode, see [this design doc](../../design/webtransport.md) for detailed information.
+* All publications and subscriptions for the same conference use the same `PeerConnection`.
+* `LocalStream`'s property `mediaStream` is renamed to `stream`. It could also be a `SendStream` or `BidirectionalStream`.
+* `Publication` has a new property `transport`.
+* `StreamSourceInfo` has a new property `data` for source info of non-audio and non-video data.
+
 # 4.3
 * The type of `conferenceClient.publish` method's option is changed from `AudioEncodingParameters` and `VideoEncodingParameters` to `RTCRtpSendParameters`.
 * `audio` and `video` of `PublicationSettings` is changed from `AudioPublicationSettings` and `VideoPublicationSettings` to `AudioPublicationSettings` array and `VideoPublicationSettings` array.

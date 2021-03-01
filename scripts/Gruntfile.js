@@ -51,7 +51,10 @@ window.L = L;\n\
             debug: false
           },
           transform: [
-            ["babelify", { "presets": ["@babel/preset-env"] }]
+            ["babelify", {
+              "presets": ["@babel/preset-env"],
+              "plugins": ["@babel/plugin-transform-runtime"]
+            }]
           ]
         },
       },
@@ -64,7 +67,11 @@ window.L = L;\n\
             debug: true
           },
           transform: [
-            ["babelify", { "presets": ["@babel/preset-env"] }]
+            ["babelify", {
+              "presets": ["@babel/preset-env"],
+              "plugins": ["@babel/plugin-transform-runtime"
+              ]
+            }]
           ],
           watch: true
         },
