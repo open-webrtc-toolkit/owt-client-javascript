@@ -110,12 +110,13 @@ export class SioSignaling extends EventModule.EventDispatcher {
                     let isMissingStart = false;
                     for (const msg of data.messages) {
                       if (isMissingStart) {
-                        this.dispatchEvent(new EventModule.MessageEvent('data', {
-                          message: {
-                            notification: msg.event,
-                            data: msg.data,
-                          },
-                        }));
+                        this.dispatchEvent(
+                            new EventModule.MessageEvent('data', {
+                              message: {
+                                notification: msg.event,
+                                data: msg.data,
+                              },
+                            }));
                         this._incrementMessageSequence();
                       } else if (msg.seq === this._messageSequence) {
                         isMissingStart = true;
@@ -225,6 +226,13 @@ export class SioSignaling extends EventModule.EventDispatcher {
     this._refreshReconnectionTicket = null;
   }
 
+  /**
+   * @function _clearReconnectionTask
+   * @instance
+   * @desc Increase the message sequence.
+   * @memberof Owt.Conference.SioSignaling
+   * @private.
+   */
   _incrementMessageSequence() {
     if (this._messageSequence === maxSequence) {
       this._messageSequence = 0;
