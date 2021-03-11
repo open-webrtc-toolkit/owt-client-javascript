@@ -56,7 +56,7 @@ describe('Unit tests for MediaStreamFactory', function() {
         1),
     ])).to.be.fulfilled.and.notify(done);
   });
-  it(
+  xit(
     'Create a MediaStream for screen sharing with audio and/or video should be resolved.',
     (done) => {
       const audioConstraintsForScreenCast = new MediaStreamFactoryModule.AudioTrackConstraints(MediaFormatModule.AudioSourceInfo.SCREENCAST);
