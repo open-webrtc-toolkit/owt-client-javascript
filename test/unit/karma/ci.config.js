@@ -3,18 +3,23 @@ const chromeFlags = [
   '--use-fake-ui-for-media-stream',
   '--no-sandbox',
   '--headless',
+  '--disable-gpu',
 ];
 const firefoxFlags = ['-headless'];
 const safariFlags = '';
+
+process.on('infrastructure_error', (error) => {
+  console.error('infrastructure_error', error);
+});
 
 module.exports = function (config) {
   config.set({
     basePath: '../../..',
     frameworks: ['jasmine', 'mocha', 'chai'],
-    browsers: ['ChromeWithFlags', 'SafariWithFlags'],
+    browsers: [process.env.BROWSER],
     customLaunchers: {
       ChromeWithFlags: {
-        base: 'Chrome',
+        base: 'ChromeHeadless',
         flags: chromeFlags
       },
       FirefoxWithFlags: {
@@ -53,6 +58,7 @@ module.exports = function (config) {
     reporters: ['mocha'],
     singleRun: true,
     concurrency: 1,
+    color: true,
     plugins: [
       require('karma-chrome-launcher'),
       require('karma-firefox-launcher'),

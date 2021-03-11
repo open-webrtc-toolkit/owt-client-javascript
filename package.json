@@ -57,6 +57,6 @@
   },
   "scripts": {
     "postinstall": "cd scripts && grunt prepare",
-    "unittest": "node_modules/karma/bin/karma start test/unit/karma/ci.config.js"
+    "unittest": "node ./node_modules/karma/bin/karma start test/unit/karma/ci.config.js"
   }
 }
