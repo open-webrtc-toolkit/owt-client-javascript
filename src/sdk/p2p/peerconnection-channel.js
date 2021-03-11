@@ -644,7 +644,7 @@ class P2PPeerConnectionChannel extends EventDispatcher {
       sdpSemantics: 'unified-plan',
     });
     return (pc.getConfiguration() && pc.getConfiguration().sdpSemantics ===
-      'plan-b');
+      'unified-plan');
   }
 
   _createPeerConnection() {
