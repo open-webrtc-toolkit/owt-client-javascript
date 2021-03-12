@@ -3,12 +3,15 @@ name: Continuous Integration
 on: [push, pull_request]
 
 jobs:
-  test:
+  unit-test:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
         browser: [ChromeWithFlags, FirefoxWithFlags]
+        include:
+          - os: windows-latest
+            browser: EdgeWithFlags
     steps:
     - uses: actions/checkout@v2
     - uses: actions/setup-node@v2

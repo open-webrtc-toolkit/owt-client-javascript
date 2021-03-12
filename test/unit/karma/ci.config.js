@@ -33,7 +33,11 @@ module.exports = function (config) {
       SafariWithFlags: {
         base: 'Safari',
         flags: safariFlags,
-      }
+      },
+      EdgeWithFlags: {
+        base: 'EdgeHeadless',
+        flags: chromeFlags
+      },
     },
     files: [{
         pattern: './test/unit/resources/scripts/gen/chai-as-promised-browserified.js'
@@ -67,6 +71,7 @@ module.exports = function (config) {
       require('karma-mocha'),
       require('karma-chai'),
       require('karma-mocha-reporter'),
+      require('@chiragrupani/karma-chromium-edge-launcher'),
     ],
   });
 };
