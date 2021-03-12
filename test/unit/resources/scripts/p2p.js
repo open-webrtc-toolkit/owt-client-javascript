@@ -71,7 +71,7 @@ describe('Unit tests for P2PClient', function() {
     let signaling1, signaling2, signaling3;
     let p2pclient1, p2pclient2, p2pclient3;
     let localStream;
-    beforeAll(done=>{
+    before(done=>{
       navigator.mediaDevices.getUserMedia({
         audio: true,
         video: false
@@ -83,7 +83,7 @@ describe('Unit tests for P2PClient', function() {
         done(err);
       });
     });
-    afterAll(function(done) {
+    after(function(done) {
       localStream.mediaStream.getTracks().map(function(track) {
         if (typeof track.stop === 'function') {
           track.stop();

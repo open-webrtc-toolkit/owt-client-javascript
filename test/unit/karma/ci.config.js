@@ -15,7 +15,7 @@ process.on('infrastructure_error', (error) => {
 module.exports = function (config) {
   config.set({
     basePath: '../../..',
-    frameworks: ['jasmine', 'mocha', 'chai'],
+    frameworks: ['mocha', 'chai'],
     browsers: [process.env.BROWSER],
     customLaunchers: {
       ChromeWithFlags: {
@@ -53,6 +53,7 @@ module.exports = function (config) {
     client: {
       mocha: {
         reporter: 'html',
+        ui: 'bdd',
       }
     },
     reporters: ['mocha'],
@@ -63,7 +64,6 @@ module.exports = function (config) {
       require('karma-chrome-launcher'),
       require('karma-firefox-launcher'),
       require('karma-safari-launcher'),
-      require('karma-jasmine'),
       require('karma-mocha'),
       require('karma-chai'),
       require('karma-mocha-reporter'),

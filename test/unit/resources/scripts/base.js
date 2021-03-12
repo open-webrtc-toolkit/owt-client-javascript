@@ -109,7 +109,7 @@ describe('Unit tests for StreamSourceInfo', function() {
 describe('Unit tests for Stream', function() {
   let mediaStream;
   const sourceInfo = new StreamModule.StreamSourceInfo('mic');
-  beforeAll(function(done) {
+  before(function(done) {
     navigator.mediaDevices.getUserMedia({
       audio: true,
       video: false
@@ -121,7 +121,7 @@ describe('Unit tests for Stream', function() {
       done(err);
     });
   });
-  afterAll(function(done) {
+  after(function(done) {
     mediaStream.getTracks().map(function(track) {
       if (typeof track.stop === 'function') {
         track.stop();
