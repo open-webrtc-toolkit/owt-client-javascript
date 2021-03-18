@@ -646,14 +646,22 @@ class P2PPeerConnectionChannel extends EventDispatcher {
     const pc = new RTCPeerConnection({
       sdpSemantics: 'unified-plan',
     });
-    return (pc.getConfiguration() && pc.getConfiguration().sdpSemantics ===
-      'plan-b');
+    if (typeof pc.getConfiguration === "undefined") {
+      return false;
+    }
+    return pc.getConfiguration().sdpSemantics === 'unified-plan';
   }
 
   _createPeerConnection() {
     const pcConfiguration = this._config.rtcConfiguration || {};
     if (Utils.isChrome()) {
-      pcConfiguration.sdpSemantics = 'unified-plan';
+      if (this._isUnifiedPlan()) {
+        Logger.info("Set sdpSemantics: unified-plan");
+        pcConfiguration.sdpSemantics = 'unified-plan';
+      } else {
+        Logger.info("Set sdpSemantics: plan-b");
+        pcConfiguration.sdpSemantics = 'plan-b';
+      }
     }
     this._pc = new RTCPeerConnection(pcConfiguration);
     // Firefox 59 implemented addTransceiver. However, mid in SDP will differ from track's ID in this case. And transceiver's mid is null.
