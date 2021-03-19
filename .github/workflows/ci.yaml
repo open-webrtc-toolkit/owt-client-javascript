@@ -1,0 +1,24 @@
+name: Continuous Integration
+
+on: [push, pull_request]
+
+jobs:
+  unit-test:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        browser: [ChromeWithFlags, FirefoxWithFlags]
+        include:
+          - os: windows-latest
+            browser: EdgeWithFlags
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/setup-node@v2
+      with:
+        node-version: '14'
+    - run: npm install
+    - name: Run test cases
+      env:
+        BROWSER: ${{matrix.browser}}
+      run: npm run unittest
