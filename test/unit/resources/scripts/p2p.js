@@ -66,7 +66,7 @@ describe('Unit tests for P2PClient', function() {
         done();
       });
   });
-  describe('Interop with remote endpoints', function(){
+  describe('Interop with remote endpoints (includes end to end tests)', function(){
     const sourceInfo = new StreamModule.StreamSourceInfo('mic');
     let signaling1, signaling2, signaling3;
     let p2pclient1, p2pclient2, p2pclient3;
@@ -150,5 +150,12 @@ describe('Unit tests for P2PClient', function() {
         expect(p2pclient3.send('user1', 'message')).to.be.rejected.and.notify(
           done);
       });
+    it('Signaling collisions should be resolved.', done => {
+      p2pclient1.send('user2', 'message');
+      p2pclient2.send('user1', 'message');
+      done();
+      //expect(Promise.all([p2pclient1.send('user2', 'message'), p2pclient2.send('user1', 'message')])).to.be.fulfilled.and.notify(done);
+      // TODO: Check messages are received.
+    });
   });
 });
