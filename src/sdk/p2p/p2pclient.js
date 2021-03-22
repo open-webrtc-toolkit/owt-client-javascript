@@ -85,6 +85,7 @@ const P2PClient = function(configuration, signalingChannel) {
   const config = configuration;
   const signaling = signalingChannel;
   const channels = new Map(); // Map of PeerConnectionChannels.
+  const sessionIds = new Map(); // Key is remote user ID, value is current session ID.
   const self=this;
   let state = ConnectionState.READY;
   let myId;
@@ -92,16 +93,20 @@ const P2PClient = function(configuration, signalingChannel) {
   signaling.onMessage = function(origin, message) {
     Logger.debug('Received signaling message from ' + origin + ': ' + message);
     const data = JSON.parse(message);
-    const remoteSessionId = data.sessionId;
+    const sessionId = data.sessionId;
+    if (sessionIds.has(origin) && sessionIds.get(origin) != sessionId &&
+        isControlling(origin)) {
+      // Ignore.
+    }
     if (data.type === 'chat-closed') {
       if (channels.has(origin)) {
-        getOrCreateChannel(origin, remoteSessionId).onMessage(data);
+        getOrCreateChannel(origin, sessionId).onMessage(data);
         channels.delete(origin);
       }
       return;
     }
     if (self.allowedRemoteIds.indexOf(origin) >= 0) {
-      getOrCreateChannel(origin, remoteSessionId).onMessage(data);
+      getOrCreateChannel(origin, sessionId).onMessage(data);
     } else {
       sendSignalingMessage(origin, 'chat-closed',
           ErrorModule.errors.P2P_CLIENT_DENIED);
@@ -251,12 +256,10 @@ const P2PClient = function(configuration, signalingChannel) {
   };
 
   const sendSignalingMessage = function(
-      remoteId, localSessionId, type, message) {
+      remoteId, sessionId, type, message) {
     const msg = {
       type,
-      // Sender side session ID. Sender and receiver have different identity for
-      // the same session.
-      sessionId: localSessionId,
+      sessionId,
     };
     if (message) {
       msg.data = message;
@@ -268,27 +271,32 @@ const P2PClient = function(configuration, signalingChannel) {
     });
   };
 
-  // If `remoteSessionId` is undefined, a channel for `remoteId` will be
-  // returned.
-  const getOrCreateChannel = function(remoteId, remoteSessionId) {
-    if (!channels.has(remoteId) ||
-        (!remoteSessionId && channels.get(remoteId).size() == 0) ||
-        (remoteSessionId && !channels.get(remoteId).has(remoteSessionId))) {
-      if (!channels.has(remoteId)) {
-        channels.set(new Map());
-      }
+  // Return true if current endpoint is an impolite peer, which controls the
+  // session.
+  const isControlling = function(remoteId) {
+    return myId > remoteId;
+  };
+
+  // If `session` is undefined, a channel for `remoteId` will be returned.
+  const getOrCreateChannel = function(remoteId, sessionId) {
+    if (!channels.has(remoteId)) {
+      channels.set(remoteId, new Map());
+    }
+    if (!sessionId) {
       // We expect only a single PeerConnection between two endpoints. But we
       // still check duplication to avoid potential issues.
-      let localSessionId = Math.round(Math.random() * 8);
-      while (channels.get(remoteId).has(remoteSessionId)) {
-        localSessionId = Math.round(Math.random() * 8);
+      const sessionIdLimit = 100000;
+      sessionId = Math.round(Math.random() * sessionIdLimit);
+      while (channels.get(remoteId).has(sessionId)) {
+        sessionId = Math.round(Math.random() * sessionIdLimit);
       }
+    }
+    if (!channels.get(remoteId).has(sessionId)) {
       // Construct an signaling sender/receiver for P2PPeerConnection.
       const signalingForChannel = Object.create(EventDispatcher);
       signalingForChannel.sendSignalingMessage = sendSignalingMessage;
       const pcc = new P2PPeerConnectionChannel(
-          config, myId, remoteId, localSessionId, remoteSessionId,
-          signalingForChannel);
+          config, myId, remoteId, sessionId, signalingForChannel);
       pcc.addEventListener('streamadded', (streamEvent)=>{
         self.dispatchEvent(streamEvent);
       });
@@ -296,18 +304,14 @@ const P2PClient = function(configuration, signalingChannel) {
         self.dispatchEvent(messageEvent);
       });
       pcc.addEventListener('ended', () => {
-        channels.get(remoteId).delete(localSessionId);
+        channels.get(remoteId).delete(sessionId);
         if (channels.get(remoteId).size() == 0) {
           channels.delete(remoteId);
         }
       });
-      channels.get(remoteId).get(localSessionId).set(pcc);
+      channels.get(remoteId).set(sessionId, pcc);
     }
-    if (remoteSessionId) {
-      return channels.get(remoteId).get(remoteSessionId);
-    } else {
-      return channels.get(remoteId).values().next().value;
-    }
+    return channels.get(remoteId).get(sessionId);
   };
 };
 

@@ -62,13 +62,12 @@ class P2PPeerConnectionChannel extends EventDispatcher {
   // |signaling| is an object has a method |sendSignalingMessage|.
   /* eslint-disable-next-line require-jsdoc */
   constructor(
-      config, localId, remoteId, localSessionId, remoteSessionId, signaling) {
+      config, localId, remoteId, sessionId, signaling) {
     super();
     this._config = config;
     this._localId = localId;
     this._remoteId = remoteId;
-    this._localSessionId = localSessionId;
-    this._remoteSessionId = remoteSessionId;
+    this._sessionId = sessionId;
     this._signaling = signaling;
     this._pc = null;
     this._publishedStreams = new Map(); // Key is streams published, value is its publication.
@@ -98,9 +97,6 @@ class P2PPeerConnectionChannel extends EventDispatcher {
     this._infoSent = false;
     this._disposed = false;
     this._createPeerConnection();
-    if (isInitializer) {
-      this._sendSignalingMessage(SignalingType.CLOSED);
-    }
     this._sendSignalingMessage(SignalingType.UA, sysInfo);
   }
 
@@ -230,12 +226,12 @@ class P2PPeerConnectionChannel extends EventDispatcher {
 
   _sendSdp(sdp) {
     return this._signaling.sendSignalingMessage(
-        this._remoteId, this._localSessionId, SignalingType.SDP, sdp);
+        this._remoteId, this._sessionId, SignalingType.SDP, sdp);
   }
 
   _sendSignalingMessage(type, message) {
     return this._signaling.sendSignalingMessage(
-        this._remoteId, this._localSessionId, type, message);
+        this._remoteId, this._sessionId, type, message);
   }
 
   _SignalingMesssageHandler(message) {
