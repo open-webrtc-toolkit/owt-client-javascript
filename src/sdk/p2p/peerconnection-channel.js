@@ -62,12 +62,12 @@ class P2PPeerConnectionChannel extends EventDispatcher {
   // |signaling| is an object has a method |sendSignalingMessage|.
   /* eslint-disable-next-line require-jsdoc */
   constructor(
-      config, localId, remoteId, sessionId, signaling) {
+      config, localId, remoteId, connectionId, signaling) {
     super();
     this._config = config;
     this._localId = localId;
     this._remoteId = remoteId;
-    this._sessionId = sessionId;
+    this._connectionId = connectionId;
     this._signaling = signaling;
     this._pc = null;
     this._publishedStreams = new Map(); // Key is streams published, value is its publication.
@@ -226,12 +226,12 @@ class P2PPeerConnectionChannel extends EventDispatcher {
 
   _sendSdp(sdp) {
     return this._signaling.sendSignalingMessage(
-        this._remoteId, this._sessionId, SignalingType.SDP, sdp);
+        this._remoteId, this._connectionId, SignalingType.SDP, sdp);
   }
 
   _sendSignalingMessage(type, message) {
     return this._signaling.sendSignalingMessage(
-        this._remoteId, this._sessionId, type, message);
+        this._remoteId, this._connectionId, type, message);
   }
 
   _SignalingMesssageHandler(message) {

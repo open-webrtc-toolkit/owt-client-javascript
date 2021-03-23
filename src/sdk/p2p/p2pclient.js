@@ -85,32 +85,36 @@ const P2PClient = function(configuration, signalingChannel) {
   const config = configuration;
   const signaling = signalingChannel;
   const channels = new Map(); // Map of PeerConnectionChannels.
-  const sessionIds = new Map(); // Key is remote user ID, value is current session ID.
-  const self=this;
+  const connectionIds = new Map(); // Key is remote user ID, value is current session ID.
+  const self = this;
   let state = ConnectionState.READY;
   let myId;
 
   signaling.onMessage = function(origin, message) {
     Logger.debug('Received signaling message from ' + origin + ': ' + message);
     const data = JSON.parse(message);
-    const sessionId = data.sessionId;
-    if (sessionIds.has(origin) && sessionIds.get(origin) != sessionId &&
-        isControlling(origin)) {
-      // Ignore.
+    const connectionId = data.connectionId;
+    if (self.allowedRemoteIds.indexOf(origin) < 0) {
+      sendSignalingMessage(
+          origin, data.connectionId, 'chat-closed',
+          ErrorModule.errors.P2P_CLIENT_DENIED);
+      return;
+    }
+    if (connectionIds.has(origin) &&
+        connectionIds.get(origin) != connectionId && !isPolitePeer(origin)) {
+      Logger.warning(
+          // eslint-disable-next-line max-len
+          'Collision detected, ignore this message because current endpoint is impolite peer.');
+      return;
     }
     if (data.type === 'chat-closed') {
       if (channels.has(origin)) {
-        getOrCreateChannel(origin, sessionId).onMessage(data);
+        getOrCreateChannel(origin, connectionId).onMessage(data);
         channels.delete(origin);
       }
       return;
     }
-    if (self.allowedRemoteIds.indexOf(origin) >= 0) {
-      getOrCreateChannel(origin, sessionId).onMessage(data);
-    } else {
-      sendSignalingMessage(origin, 'chat-closed',
-          ErrorModule.errors.P2P_CLIENT_DENIED);
-    }
+    getOrCreateChannel(origin, connectionId).onMessage(data);
   };
 
   signaling.onServerDisconnected = function() {
@@ -164,10 +168,8 @@ const P2PClient = function(configuration, signalingChannel) {
     if (state == ConnectionState.READY) {
       return;
     }
-    channels.forEach((sessions) => {
-      sessions.forEach((channel) => {
-        channel.stop();
-      });
+    channels.forEach((channel) => {
+      channel.stop();
     });
     channels.clear();
     signaling.disconnect();
@@ -256,10 +258,10 @@ const P2PClient = function(configuration, signalingChannel) {
   };
 
   const sendSignalingMessage = function(
-      remoteId, sessionId, type, message) {
+      remoteId, connectionId, type, message) {
     const msg = {
       type,
-      sessionId,
+      connectionId,
     };
     if (message) {
       msg.data = message;
@@ -273,30 +275,34 @@ const P2PClient = function(configuration, signalingChannel) {
 
   // Return true if current endpoint is an impolite peer, which controls the
   // session.
-  const isControlling = function(remoteId) {
-    return myId > remoteId;
+  const isPolitePeer = function(remoteId) {
+    return myId < remoteId;
   };
 
-  // If `session` is undefined, a channel for `remoteId` will be returned.
-  const getOrCreateChannel = function(remoteId, sessionId) {
+  // If a connection with remoteId with a different session ID exists, it will
+  // be stopped and a new connection will be created.
+  const getOrCreateChannel = function(remoteId, connectionId) {
+    // If `connectionId` is not defined, use the latest one or generate a new
+    // one.
+    if (!connectionId && connectionIds.has(remoteId)) {
+      connectionId = connectionIds.get(remoteId);
+    }
+    // Delete old channel if connection doesn't match.
+    if (connectionIds.has(remoteId) &&
+        connectionIds.get(remoteId) != connectionId) {
+      self.stop(remoteId);
+    }
+    if (!connectionId) {
+      const connectionIdLimit = 100000;
+      connectionId = Math.round(Math.random() * connectionIdLimit);
+      connectionIds.set(remoteId, connectionId);
+    }
     if (!channels.has(remoteId)) {
-      channels.set(remoteId, new Map());
-    }
-    if (!sessionId) {
-      // We expect only a single PeerConnection between two endpoints. But we
-      // still check duplication to avoid potential issues.
-      const sessionIdLimit = 100000;
-      sessionId = Math.round(Math.random() * sessionIdLimit);
-      while (channels.get(remoteId).has(sessionId)) {
-        sessionId = Math.round(Math.random() * sessionIdLimit);
-      }
-    }
-    if (!channels.get(remoteId).has(sessionId)) {
       // Construct an signaling sender/receiver for P2PPeerConnection.
       const signalingForChannel = Object.create(EventDispatcher);
       signalingForChannel.sendSignalingMessage = sendSignalingMessage;
       const pcc = new P2PPeerConnectionChannel(
-          config, myId, remoteId, sessionId, signalingForChannel);
+          config, myId, remoteId, connectionId, signalingForChannel);
       pcc.addEventListener('streamadded', (streamEvent)=>{
         self.dispatchEvent(streamEvent);
       });
@@ -304,14 +310,14 @@ const P2PClient = function(configuration, signalingChannel) {
         self.dispatchEvent(messageEvent);
       });
       pcc.addEventListener('ended', () => {
-        channels.get(remoteId).delete(sessionId);
-        if (channels.get(remoteId).size() == 0) {
+        if (channels.has(remoteId)) {
           channels.delete(remoteId);
         }
+        connectionIds.delete(remoteId);
       });
-      channels.get(remoteId).set(sessionId, pcc);
+      channels.set(remoteId, pcc);
     }
-    return channels.get(remoteId).get(sessionId);
+    return channels.get(remoteId);
   };
 };
 
