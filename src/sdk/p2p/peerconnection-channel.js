@@ -93,7 +93,7 @@ class P2PPeerConnectionChannel extends EventDispatcher {
     this._dataSeq = 1; // Sequence number for data channel messages.
     this._sendDataPromises = new Map(); // Key is data sequence number, value is an object has |resolve| and |reject|.
     this._addedTrackIds = []; // Tracks that have been added after receiving remote SDP but before connection is established. Draining these messages when ICE connection state is connected.
-    this._isCaller = true;
+    this._isPolitePeer = localId < remoteId;
     this._infoSent = false;
     this._disposed = false;
     this._createPeerConnection();
@@ -416,6 +416,15 @@ class P2PPeerConnectionChannel extends EventDispatcher {
   _onOffer(sdp) {
     Logger.debug('About to set remote description. Signaling state: ' +
       this._pc.signalingState);
+    if (this._pc.signalingState !== 'stable') {
+      if (this._isPolitePeer) {
+        // Rollback.
+        this._pc.setLocalDescription();
+      } else {
+        // Ignore this offer.
+        return;
+      }
+    }
     sdp.sdp = this._setRtpSenderOptions(sdp.sdp, this._config);
     // Firefox only has one codec in answer, which does not truly reflect its
     // decoding capability. So we set codec preference to remote offer, and let

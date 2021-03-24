@@ -39,7 +39,6 @@ export default class FakeP2PSignalingChannel {
   }
 
   send(targetId, message) {
-    Logger.debug(this.userId + ' -> ' + targetId + ': ' + message);
     return new Promise((resolve, reject) => {
       messageQueue.push({ target: targetId, message, resolve, reject, sender: this.userId });
       setTimeout(() => {

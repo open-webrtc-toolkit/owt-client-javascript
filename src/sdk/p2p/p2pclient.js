@@ -101,7 +101,7 @@ const P2PClient = function(configuration, signalingChannel) {
       return;
     }
     if (connectionIds.has(origin) &&
-        connectionIds.get(origin) != connectionId && !isPolitePeer(origin)) {
+        connectionIds.get(origin) !== connectionId && !isPolitePeer(origin)) {
       Logger.warning(
           // eslint-disable-next-line max-len
           'Collision detected, ignore this message because current endpoint is impolite peer.');
@@ -295,8 +295,8 @@ const P2PClient = function(configuration, signalingChannel) {
     if (!connectionId) {
       const connectionIdLimit = 100000;
       connectionId = Math.round(Math.random() * connectionIdLimit);
-      connectionIds.set(remoteId, connectionId);
     }
+    connectionIds.set(remoteId, connectionId);
     if (!channels.has(remoteId)) {
       // Construct an signaling sender/receiver for P2PPeerConnection.
       const signalingForChannel = Object.create(EventDispatcher);
