@@ -1,10 +1,10 @@
 {
-  "name": "oms-sample-conference",
+  "name": "owt-sample-conference",
   "title": "Open WebRTC Toolkit Conference Sample",
   "description": "Open WebRTC Toolkit JavaScript Conference Sample",
-  "version": "4.3.0",
+  "version": "5.0.0",
   "homepage": "http://webrtc.intel.com",
-  "author": "Intel WebRTC team",
+  "author": "Open WebRTC Toolkit authors",
   "keywords": [
     "webrtc",
     "library",
@@ -17,7 +17,6 @@
     "errorhandler": "",
     "express": "",
     "morgan": "",
-    "socket.io": "^2.4.0",
     "spdy": ""
   },
   "main": "samplertcservice.js",
