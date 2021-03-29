@@ -8,7 +8,6 @@ except:
 
 
 URLS = {'q.js': 'https://raw.githubusercontent.com/kriskowal/q/c2f5a6f35456389a806acca50bfd929cbe30c4cb/q.js',
-        'jquery.min.js': 'https://code.jquery.com/jquery-1.10.2.min.js',
         'socket.io.min.js': 'https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.1.2/socket.io.js'
         }
 
