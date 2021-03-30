@@ -107,6 +107,9 @@ describe('Unit tests for P2PClient', function() {
     });
     afterEach((done) => {
       setTimeout(() => {
+        p2pclient1.disconnect();
+        p2pclient2.disconnect();
+        p2pclient3.disconnect();
         done();
       }, 0);
     });
