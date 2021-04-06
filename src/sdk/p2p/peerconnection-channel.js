@@ -54,7 +54,10 @@ const sysInfo = Utils.sysInfo();
 
 /**
  * @class P2PPeerConnectionChannel
- * @desc A P2PPeerConnectionChannel handles all interactions between this endpoint and a remote endpoint.
+ * @desc A P2PPeerConnectionChannel manages a PeerConnection object, handles all
+ * interactions between this endpoint (local) and a remote endpoint. Only one
+ * PeerConnectionChannel is alive for a local - remote endpoint pair at any
+ * given time.
  * @memberOf Owt.P2P
  * @private
  */
@@ -65,7 +68,6 @@ class P2PPeerConnectionChannel extends EventDispatcher {
       config, localId, remoteId, connectionId, signaling) {
     super();
     this._config = config;
-    this._localId = localId;
     this._remoteId = remoteId;
     this._connectionId = connectionId;
     this._signaling = signaling;
@@ -94,7 +96,6 @@ class P2PPeerConnectionChannel extends EventDispatcher {
     this._sendDataPromises = new Map(); // Key is data sequence number, value is an object has |resolve| and |reject|.
     this._addedTrackIds = []; // Tracks that have been added after receiving remote SDP but before connection is established. Draining these messages when ICE connection state is connected.
     this._isPolitePeer = localId < remoteId;
-    this._infoSent = false;
     this._disposed = false;
     this._createPeerConnection();
     this._sendSignalingMessage(SignalingType.UA, sysInfo);
