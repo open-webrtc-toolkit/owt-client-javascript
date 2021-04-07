@@ -126,7 +126,6 @@ class P2PPeerConnectionChannel extends EventDispatcher {
         for (const track of stream.mediaStream.getTracks()) {
           this._pc.addTrack(track, stream.mediaStream);
         }
-        this._onNegotiationneeded();
         this._publishingStreams.push(stream);
         const trackIds = Array.from(stream.mediaStream.getTracks(),
             (track) => track.id);
@@ -420,6 +419,7 @@ class P2PPeerConnectionChannel extends EventDispatcher {
     if (this._pc.signalingState !== 'stable') {
       if (this._isPolitePeer) {
         // Rollback.
+        Logger.debug('Rollback.');
         this._pc.setLocalDescription();
       } else {
         // Ignore this offer.
@@ -549,12 +549,6 @@ class P2PPeerConnectionChannel extends EventDispatcher {
   }
 
   _onNegotiationneeded() {
-    // This is intented to be executed when onnegotiationneeded event is fired.
-    // However, onnegotiationneeded may fire mutiple times when more than one
-    // track is added/removed. So we manually execute this function after
-    // adding/removing track and creating data channel.
-    Logger.debug('On negotiation needed.');
-
     if (this._pc.signalingState === 'stable') {
       this._doNegotiate();
     } else {
@@ -699,43 +693,23 @@ class P2PPeerConnectionChannel extends EventDispatcher {
     this._pc.oniceconnectionstatechange = (event) => {
       this._onIceConnectionStateChange.apply(this, [event]);
     };
-    /*
-    this._pc.oniceChannelStatechange = function(event) {
-      _onIceChannelStateChange(peer, event);
+    this._pc.onnegotiationneeded = () => {
+      this._onNegotiationneeded();
     };
-     = function() {
-      onNegotiationneeded(peers[peer.id]);
-    };
-
-    //DataChannel
-    this._pc.ondatachannel = function(event) {
-      Logger.debug(myId + ': On data channel');
-      // Save remote created data channel.
-      if (!peer.dataChannels[event.channel.label]) {
-        peer.dataChannels[event.channel.label] = event.channel;
-        Logger.debug('Save remote created data channel.');
-      }
-      bindEventsToDataChannel(event.channel, peer);
-    };*/
   }
 
   _drainPendingStreams() {
-    let negotiationNeeded = false;
     Logger.debug('Draining pending streams.');
     if (this._pc && this._pc.signalingState === 'stable') {
       Logger.debug('Peer connection is ready for draining pending streams.');
       for (let i = 0; i < this._pendingStreams.length; i++) {
         const stream = this._pendingStreams[i];
-        // OnNegotiationNeeded event will be triggered immediately after adding stream to PeerConnection in Firefox.
-        // And OnNegotiationNeeded handler will execute drainPendingStreams. To avoid add the same stream multiple times,
-        // shift it from pending stream list before adding it to PeerConnection.
         this._pendingStreams.shift();
         if (!stream.mediaStream) {
           continue;
         }
         for (const track of stream.mediaStream.getTracks()) {
           this._pc.addTrack(track, stream.mediaStream);
-          negotiationNeeded = true;
         }
         Logger.debug('Added stream to peer connection.');
         this._publishingStreams.push(stream);
@@ -746,16 +720,12 @@ class P2PPeerConnectionChannel extends EventDispatcher {
           continue;
         }
         this._pc.removeStream(this._pendingUnpublishStreams[j].mediaStream);
-        negotiationNeeded = true;
         this._unpublishPromises.get(
             this._pendingUnpublishStreams[j].mediaStream.id).resolve();
         this._publishedStreams.delete(this._pendingUnpublishStreams[j]);
         Logger.debug('Remove stream.');
       }
       this._pendingUnpublishStreams.length = 0;
-    }
-    if (negotiationNeeded) {
-      this._onNegotiationneeded();
     }
   }
 
@@ -877,7 +847,6 @@ class P2PPeerConnectionChannel extends EventDispatcher {
       return;
     }
     this._isNegotiationNeeded = false;
-    this._isCaller = true;
     let localDesc;
     this._pc.createOffer().then((desc) => {
       desc.sdp = this._setRtpReceiverOptions(desc.sdp);
@@ -888,7 +857,7 @@ class P2PPeerConnectionChannel extends EventDispatcher {
         });
       }
     }).catch((e) => {
-      Logger.error(e.message + ' Please check your codec settings.');
+      Logger.error(e.message);
       const error = new ErrorModule.P2PError(ErrorModule.errors.P2P_WEBRTC_SDP,
           e.message);
       this._stop(error, true);
@@ -898,7 +867,6 @@ class P2PPeerConnectionChannel extends EventDispatcher {
   _createAndSendAnswer() {
     this._drainPendingStreams();
     this._isNegotiationNeeded = false;
-    this._isCaller = false;
     let localDesc;
     this._pc.createAnswer().then((desc) => {
       desc.sdp = this._setRtpReceiverOptions(desc.sdp);
@@ -973,7 +941,6 @@ class P2PPeerConnectionChannel extends EventDispatcher {
     const dc = this._pc.createDataChannel(label);
     this._bindEventsToDataChannel(dc);
     this._dataChannels.set(DataChannelLabel.MESSAGE, dc);
-    this._onNegotiationneeded();
   }
 
   _bindEventsToDataChannel(dc) {
