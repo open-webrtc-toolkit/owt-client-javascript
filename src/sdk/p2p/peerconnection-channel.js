@@ -418,11 +418,10 @@ class P2PPeerConnectionChannel extends EventDispatcher {
       this._pc.signalingState);
     if (this._pc.signalingState !== 'stable') {
       if (this._isPolitePeer) {
-        // Rollback.
         Logger.debug('Rollback.');
         this._pc.setLocalDescription();
       } else {
-        // Ignore this offer.
+        Logger.debug('Collision detected. Ignore this offer.');
         return;
       }
     }
