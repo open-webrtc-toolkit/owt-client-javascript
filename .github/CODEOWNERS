@@ -1,6 +1,6 @@
 # See https://help.github.com/articles/about-code-owners/ for CODEOWNERS syntax.
 
 * @jianjunz @taste1981 @lzhai @HuaChunbo
-test/ @yanbin7
+test/ @yanbin7 @taste1981
 src/sdk/rest/ @starwarfan
 src/samples/conference/public/scripts/rest-sample.js @starwarfan
