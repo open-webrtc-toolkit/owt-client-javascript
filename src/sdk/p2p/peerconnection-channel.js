@@ -54,18 +54,22 @@ const sysInfo = Utils.sysInfo();
 
 /**
  * @class P2PPeerConnectionChannel
- * @desc A P2PPeerConnectionChannel handles all interactions between this endpoint and a remote endpoint.
+ * @desc A P2PPeerConnectionChannel manages a PeerConnection object, handles all
+ * interactions between this endpoint (local) and a remote endpoint. Only one
+ * PeerConnectionChannel is alive for a local - remote endpoint pair at any
+ * given time.
  * @memberOf Owt.P2P
  * @private
  */
 class P2PPeerConnectionChannel extends EventDispatcher {
   // |signaling| is an object has a method |sendSignalingMessage|.
   /* eslint-disable-next-line require-jsdoc */
-  constructor(config, localId, remoteId, signaling, isInitializer) {
+  constructor(
+      config, localId, remoteId, connectionId, signaling) {
     super();
     this._config = config;
-    this._localId = localId;
     this._remoteId = remoteId;
+    this._connectionId = connectionId;
     this._signaling = signaling;
     this._pc = null;
     this._publishedStreams = new Map(); // Key is streams published, value is its publication.
@@ -91,13 +95,9 @@ class P2PPeerConnectionChannel extends EventDispatcher {
     this._dataSeq = 1; // Sequence number for data channel messages.
     this._sendDataPromises = new Map(); // Key is data sequence number, value is an object has |resolve| and |reject|.
     this._addedTrackIds = []; // Tracks that have been added after receiving remote SDP but before connection is established. Draining these messages when ICE connection state is connected.
-    this._isCaller = true;
-    this._infoSent = false;
+    this._isPolitePeer = localId < remoteId;
     this._disposed = false;
     this._createPeerConnection();
-    if (isInitializer) {
-      this._sendSignalingMessage(SignalingType.CLOSED);
-    }
     this._sendSignalingMessage(SignalingType.UA, sysInfo);
   }
 
@@ -126,7 +126,6 @@ class P2PPeerConnectionChannel extends EventDispatcher {
         for (const track of stream.mediaStream.getTracks()) {
           this._pc.addTrack(track, stream.mediaStream);
         }
-        this._onNegotiationneeded();
         this._publishingStreams.push(stream);
         const trackIds = Array.from(stream.mediaStream.getTracks(),
             (track) => track.id);
@@ -227,11 +226,12 @@ class P2PPeerConnectionChannel extends EventDispatcher {
 
   _sendSdp(sdp) {
     return this._signaling.sendSignalingMessage(
-        this._remoteId, SignalingType.SDP, sdp);
+        this._remoteId, this._connectionId, SignalingType.SDP, sdp);
   }
 
   _sendSignalingMessage(type, message) {
-    return this._signaling.sendSignalingMessage(this._remoteId, type, message);
+    return this._signaling.sendSignalingMessage(
+        this._remoteId, this._connectionId, type, message);
   }
 
   _SignalingMesssageHandler(message) {
@@ -416,6 +416,15 @@ class P2PPeerConnectionChannel extends EventDispatcher {
   _onOffer(sdp) {
     Logger.debug('About to set remote description. Signaling state: ' +
       this._pc.signalingState);
+    if (this._pc.signalingState !== 'stable') {
+      if (this._isPolitePeer) {
+        Logger.debug('Rollback.');
+        this._pc.setLocalDescription();
+      } else {
+        Logger.debug('Collision detected. Ignore this offer.');
+        return;
+      }
+    }
     sdp.sdp = this._setRtpSenderOptions(sdp.sdp, this._config);
     // Firefox only has one codec in answer, which does not truly reflect its
     // decoding capability. So we set codec preference to remote offer, and let
@@ -539,12 +548,6 @@ class P2PPeerConnectionChannel extends EventDispatcher {
   }
 
   _onNegotiationneeded() {
-    // This is intented to be executed when onnegotiationneeded event is fired.
-    // However, onnegotiationneeded may fire mutiple times when more than one
-    // track is added/removed. So we manually execute this function after
-    // adding/removing track and creating data channel.
-    Logger.debug('On negotiation needed.');
-
     if (this._pc.signalingState === 'stable') {
       this._doNegotiate();
     } else {
@@ -689,43 +692,23 @@ class P2PPeerConnectionChannel extends EventDispatcher {
     this._pc.oniceconnectionstatechange = (event) => {
       this._onIceConnectionStateChange.apply(this, [event]);
     };
-    /*
-    this._pc.oniceChannelStatechange = function(event) {
-      _onIceChannelStateChange(peer, event);
+    this._pc.onnegotiationneeded = () => {
+      this._onNegotiationneeded();
     };
-     = function() {
-      onNegotiationneeded(peers[peer.id]);
-    };
-
-    //DataChannel
-    this._pc.ondatachannel = function(event) {
-      Logger.debug(myId + ': On data channel');
-      // Save remote created data channel.
-      if (!peer.dataChannels[event.channel.label]) {
-        peer.dataChannels[event.channel.label] = event.channel;
-        Logger.debug('Save remote created data channel.');
-      }
-      bindEventsToDataChannel(event.channel, peer);
-    };*/
   }
 
   _drainPendingStreams() {
-    let negotiationNeeded = false;
     Logger.debug('Draining pending streams.');
     if (this._pc && this._pc.signalingState === 'stable') {
       Logger.debug('Peer connection is ready for draining pending streams.');
       for (let i = 0; i < this._pendingStreams.length; i++) {
         const stream = this._pendingStreams[i];
-        // OnNegotiationNeeded event will be triggered immediately after adding stream to PeerConnection in Firefox.
-        // And OnNegotiationNeeded handler will execute drainPendingStreams. To avoid add the same stream multiple times,
-        // shift it from pending stream list before adding it to PeerConnection.
         this._pendingStreams.shift();
         if (!stream.mediaStream) {
           continue;
         }
         for (const track of stream.mediaStream.getTracks()) {
           this._pc.addTrack(track, stream.mediaStream);
-          negotiationNeeded = true;
         }
         Logger.debug('Added stream to peer connection.');
         this._publishingStreams.push(stream);
@@ -736,16 +719,12 @@ class P2PPeerConnectionChannel extends EventDispatcher {
           continue;
         }
         this._pc.removeStream(this._pendingUnpublishStreams[j].mediaStream);
-        negotiationNeeded = true;
         this._unpublishPromises.get(
             this._pendingUnpublishStreams[j].mediaStream.id).resolve();
         this._publishedStreams.delete(this._pendingUnpublishStreams[j]);
         Logger.debug('Remove stream.');
       }
       this._pendingUnpublishStreams.length = 0;
-    }
-    if (negotiationNeeded) {
-      this._onNegotiationneeded();
     }
   }
 
@@ -867,7 +846,6 @@ class P2PPeerConnectionChannel extends EventDispatcher {
       return;
     }
     this._isNegotiationNeeded = false;
-    this._isCaller = true;
     let localDesc;
     this._pc.createOffer().then((desc) => {
       desc.sdp = this._setRtpReceiverOptions(desc.sdp);
@@ -878,7 +856,7 @@ class P2PPeerConnectionChannel extends EventDispatcher {
         });
       }
     }).catch((e) => {
-      Logger.error(e.message + ' Please check your codec settings.');
+      Logger.error(e.message);
       const error = new ErrorModule.P2PError(ErrorModule.errors.P2P_WEBRTC_SDP,
           e.message);
       this._stop(error, true);
@@ -888,7 +866,6 @@ class P2PPeerConnectionChannel extends EventDispatcher {
   _createAndSendAnswer() {
     this._drainPendingStreams();
     this._isNegotiationNeeded = false;
-    this._isCaller = false;
     let localDesc;
     this._pc.createAnswer().then((desc) => {
       desc.sdp = this._setRtpReceiverOptions(desc.sdp);
@@ -963,7 +940,6 @@ class P2PPeerConnectionChannel extends EventDispatcher {
     const dc = this._pc.createDataChannel(label);
     this._bindEventsToDataChannel(dc);
     this._dataChannels.set(DataChannelLabel.MESSAGE, dc);
-    this._onNegotiationneeded();
   }
 
   _bindEventsToDataChannel(dc) {
