@@ -1099,9 +1099,10 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
     }
     // Only check the first one.
     const param = obj[0];
-    return param.codecPayloadType || param.dtx || param.active ||
-        param.ptime || param.maxFramerate || param.scaleResolutionDownBy ||
-        param.rid;
+    return !!(
+        param.codecPayloadType || param.dtx || param.active || param.ptime ||
+        param.maxFramerate || param.scaleResolutionDownBy || param.rid ||
+        param.scalabilityMode);
   }
 
   _isOwtEncodingParameters(obj) {
