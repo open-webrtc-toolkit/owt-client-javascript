@@ -96,6 +96,8 @@ class P2PPeerConnectionChannel extends EventDispatcher {
     this._sendDataPromises = new Map(); // Key is data sequence number, value is an object has |resolve| and |reject|.
     this._addedTrackIds = []; // Tracks that have been added after receiving remote SDP but before connection is established. Draining these messages when ICE connection state is connected.
     this._isPolitePeer = localId < remoteId;
+    this._settingLocalSdp = false;
+    this._settingRemoteSdp = false;
     this._disposed = false;
     this._createPeerConnection();
     this._sendSignalingMessage(SignalingType.UA, sysInfo);
@@ -416,10 +418,13 @@ class P2PPeerConnectionChannel extends EventDispatcher {
   _onOffer(sdp) {
     Logger.debug('About to set remote description. Signaling state: ' +
       this._pc.signalingState);
-    if (this._pc.signalingState !== 'stable') {
+    if (this._pc.signalingState !== 'stable' || this._settingLocalSdp) {
       if (this._isPolitePeer) {
         Logger.debug('Rollback.');
-        this._pc.setLocalDescription();
+        this._settingLocalSdp = true;
+        this._pc.setLocalDescription().then(() => {
+          this._settingLocalSdp = false;
+        });
       } else {
         Logger.debug('Collision detected. Ignore this offer.');
         return;
@@ -434,7 +439,9 @@ class P2PPeerConnectionChannel extends EventDispatcher {
       sdp.sdp = this._setCodecOrder(sdp.sdp);
     }
     const sessionDescription = new RTCSessionDescription(sdp);
+    this._settingRemoteSdp = true;
     this._pc.setRemoteDescription(sessionDescription).then(() => {
+      this._settingRemoteSdp = false;
       this._createAndSendAnswer();
     }, (error) => {
       Logger.debug('Set remote description failed. Message: ' + error.message);
@@ -447,9 +454,11 @@ class P2PPeerConnectionChannel extends EventDispatcher {
       this._pc.signalingState);
     sdp.sdp = this._setRtpSenderOptions(sdp.sdp, this._config);
     const sessionDescription = new RTCSessionDescription(sdp);
+    this._settingRemoteSdp = true;
     this._pc.setRemoteDescription(new RTCSessionDescription(
         sessionDescription)).then(() => {
       Logger.debug('Set remote descripiton successfully.');
+      this._settingRemoteSdp = false;
       this._drainPendingMessages();
     }, (error) => {
       Logger.debug('Set remote description failed. Message: ' + error.message);
@@ -548,7 +557,8 @@ class P2PPeerConnectionChannel extends EventDispatcher {
   }
 
   _onNegotiationneeded() {
-    if (this._pc.signalingState === 'stable') {
+    if (this._pc.signalingState === 'stable' && !this._pc._settingLocalSdp &&
+        !this._settingRemoteSdp) {
       this._doNegotiate();
     } else {
       this._isNegotiationNeeded = true;
@@ -849,7 +859,9 @@ class P2PPeerConnectionChannel extends EventDispatcher {
     this._pc.createOffer().then((desc) => {
       desc.sdp = this._setRtpReceiverOptions(desc.sdp);
       if (this._pc.signalingState === 'stable') {
+        this._settingLocalSdp = true;
         return this._pc.setLocalDescription(desc).then(() => {
+          this._settingLocalSdp = false;
           return this._sendSdp(this._pc.localDescription);
         });
       }
@@ -867,7 +879,10 @@ class P2PPeerConnectionChannel extends EventDispatcher {
     this._pc.createAnswer().then((desc) => {
       desc.sdp = this._setRtpReceiverOptions(desc.sdp);
       this._logCurrentAndPendingLocalDescription();
-      return this._pc.setLocalDescription(desc);
+      this._settingLocalSdp = true;
+      return this._pc.setLocalDescription(desc).then(()=>{
+        this._settingLocalSdp = false;
+      });
     }).then(()=>{
       return this._sendSdp(this._pc.localDescription);
     }).catch((e) => {
