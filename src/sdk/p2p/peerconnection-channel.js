@@ -852,7 +852,7 @@ class P2PPeerConnectionChannel extends EventDispatcher {
       localDesc = desc;
       if (this._pc.signalingState === 'stable') {
         return this._pc.setLocalDescription(desc).then(() => {
-          return this._sendSdp(localDesc);
+          return this._sendSdp(this._pc.localDescription);
         });
       }
     }).catch((e) => {
@@ -873,7 +873,7 @@ class P2PPeerConnectionChannel extends EventDispatcher {
       this._logCurrentAndPendingLocalDescription();
       return this._pc.setLocalDescription(desc);
     }).then(()=>{
-      return this._sendSdp(localDesc);
+      return this._sendSdp(this._pc.localDescription);
     }).catch((e) => {
       Logger.error(e.message + ' Please check your codec settings.');
       const error = new ErrorModule.P2PError(ErrorModule.errors.P2P_WEBRTC_SDP,
