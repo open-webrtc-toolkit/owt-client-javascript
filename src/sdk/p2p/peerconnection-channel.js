@@ -846,13 +846,11 @@ class P2PPeerConnectionChannel extends EventDispatcher {
       return;
     }
     this._isNegotiationNeeded = false;
-    let localDesc;
     this._pc.createOffer().then((desc) => {
       desc.sdp = this._setRtpReceiverOptions(desc.sdp);
-      localDesc = desc;
       if (this._pc.signalingState === 'stable') {
         return this._pc.setLocalDescription(desc).then(() => {
-          return this._sendSdp(localDesc);
+          return this._sendSdp(this._pc.localDescription);
         });
       }
     }).catch((e) => {
@@ -866,14 +864,12 @@ class P2PPeerConnectionChannel extends EventDispatcher {
   _createAndSendAnswer() {
     this._drainPendingStreams();
     this._isNegotiationNeeded = false;
-    let localDesc;
     this._pc.createAnswer().then((desc) => {
       desc.sdp = this._setRtpReceiverOptions(desc.sdp);
-      localDesc=desc;
       this._logCurrentAndPendingLocalDescription();
       return this._pc.setLocalDescription(desc);
     }).then(()=>{
-      return this._sendSdp(localDesc);
+      return this._sendSdp(this._pc.localDescription);
     }).catch((e) => {
       Logger.error(e.message + ' Please check your codec settings.');
       const error = new ErrorModule.P2PError(ErrorModule.errors.P2P_WEBRTC_SDP,
