@@ -100,7 +100,7 @@ class P2PPeerConnectionChannel extends EventDispatcher {
     this._settingRemoteSdp = false;
     this._disposed = false;
     this._createPeerConnection();
-    this._sendSignalingMessage(SignalingType.UA, sysInfo);
+    this._sendUa(sysInfo);
   }
 
   /**
@@ -229,6 +229,11 @@ class P2PPeerConnectionChannel extends EventDispatcher {
   _sendSdp(sdp) {
     return this._signaling.sendSignalingMessage(
         this._remoteId, this._connectionId, SignalingType.SDP, sdp);
+  }
+
+  _sendUa(sysInfo) {
+    const ua = {sdk: sysInfo.sdk, capabilities: sysInfo.capabilities};
+    this._sendSignalingMessage(SignalingType.UA, ua);
   }
 
   _sendSignalingMessage(type, message) {
