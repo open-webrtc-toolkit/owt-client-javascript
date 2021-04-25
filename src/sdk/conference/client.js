@@ -391,9 +391,10 @@ export const ConferenceClient = function(config, signalingImpl) {
 
       signalingState = SignalingState.CONNECTING;
 
+      const sysInfo = Utils.sysInfo();
       const loginInfo = {
         token: tokenString,
-        userAgent: Utils.sysInfo(),
+        userAgent: {sdk: sysInfo.sdk},
         protocol: protocolVersion,
       };
 
