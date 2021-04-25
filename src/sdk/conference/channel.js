@@ -43,7 +43,6 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
     this._pendingCandidates = [];
     this._subscribePromises = new Map(); // internalId => { resolve, reject }
     this._publishPromises = new Map(); // internalId => { resolve, reject }
-    this._subscribedStreams = new Map(); // intenalId => RemoteStream
     this._publications = new Map(); // PublicationId => Publication
     this._subscriptions = new Map(); // SubscriptionId => Subscription
     this._publishTransceivers = new Map(); // internalId => { id, transceivers: [Transceiver] }
@@ -52,7 +51,6 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
     // Timer for PeerConnection disconnected. Will stop connection after timer.
     this._disconnectTimer = null;
     this._ended = false;
-    this._stopped = false;
     // Channel ID assigned by conference
     this._id = undefined;
     // Used to create internal ID for publication/subscription
@@ -61,6 +59,7 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
     this._sdpResolverMap = new Map(); // internalId => {finish, resolve, reject}
     this._sdpResolvers = []; // [{finish, resolve, reject}]
     this._sdpResolveNum = 0;
+    this._remoteMediaStreams = new Map(); // Key is subscription ID, value is MediaStream.
   }
 
   /**
@@ -483,7 +482,6 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
       offerOptions.offerToReceiveVideo = !!options.video;
     }
     this._subscribeTransceivers.set(internalId, {transceivers});
-    this._subscribedStreams.set(internalId, stream);
 
     let localDesc;
     this._pc.createOffer(offerOptions).then((desc) => {
@@ -674,11 +672,6 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
               new ConferenceError('Failed to subscribe'));
         }
       }
-      // Clear media stream
-      if (this._subscribedStreams.has(internalId)) {
-        this._subscribedStreams.get(internalId).mediaStream = null;
-        this._subscribedStreams.delete(internalId);
-      }
       if (this._sdpResolverMap.has(internalId)) {
         const resolver = this._sdpResolverMap.get(internalId);
         if (!resolver.finish) {
@@ -732,31 +725,24 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
 
   _onRemoteStreamAdded(event) {
     Logger.debug('Remote stream added.');
-    let find = false;
     for (const [internalId, sub] of this._subscribeTransceivers) {
-      const subscriptionId = sub.id;
       if (sub.transceivers.find((t) => t.transceiver === event.transceiver)) {
-        find = true;
-        const subscribedStream = this._subscribedStreams.get(internalId);
-        if (!subscribedStream.mediaStream) {
-          this._subscribedStreams.get(internalId).mediaStream =
-              event.streams[0];
-          // Resolve subscription if ready handler has been called
-          const subscription = this._subscriptions.get(subscriptionId);
-          if (subscription) {
+        if (this._subscriptions.has(sub.id)) {
+          const subscription = this._subscriptions.get(sub.id);
+          subscription.stream = event.streams[0];
+          if (this._subscribePromises.has(internalId)) {
             this._subscribePromises.get(internalId).resolve(subscription);
+            this._subscribePromises.delete(internalId);
           }
         } else {
-          // Add track to the existing stream
-          subscribedStream.mediaStream.addTrack(event.track);
+          this._remoteMediaStreams.set(sub.id, event.streams[0]);
         }
+        return;
       }
     }
-    if (!find) {
-      // This is not expected path. However, this is going to happen on Safari
-      // because it does not support setting direction of transceiver.
-      Logger.warning('Received remote stream without subscription.');
-    }
+    // This is not expected path. However, this is going to happen on Safari
+    // because it does not support setting direction of transceiver.
+    Logger.warning('Received remote stream without subscription.');
   }
 
   _onLocalIceCandidate(event) {
@@ -889,23 +875,18 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
   _readyHandler(sessionId) {
     const internalId = this._reverseIdMap.get(sessionId);
     if (this._subscribePromises.has(internalId)) {
-      const subscription = new Subscription(sessionId, () => {
+      const mediaStream = this._remoteMediaStreams.get(sessionId);
+      const subscription = new Subscription(sessionId, mediaStream, () => {
         this._unsubscribe(internalId);
       }, () => this._getStats(),
       (trackKind) => this._muteOrUnmute(sessionId, true, false, trackKind),
       (trackKind) => this._muteOrUnmute(sessionId, false, false, trackKind),
       (options) => this._applyOptions(sessionId, options));
       this._subscriptions.set(sessionId, subscription);
-      // Fire subscription's ended event when associated stream is ended.
-      this._subscribedStreams.get(internalId).addEventListener('ended', () => {
-        if (this._subscriptions.has(sessionId)) {
-          this._subscriptions.get(sessionId).dispatchEvent(
-              'ended', new OwtEvent('ended'));
-        }
-      });
-      // Resolve subscription if mediaStream is ready
-      if (this._subscribedStreams.get(internalId).mediaStream) {
+      // Resolve subscription if mediaStream is ready.
+      if (this._subscriptions.get(sessionId).stream) {
         this._subscribePromises.get(internalId).resolve(subscription);
+        this._subscribePromises.delete(internalId);
       }
     } else if (this._publishPromises.has(internalId)) {
       const publication = new Publication(sessionId, () => {
@@ -1056,21 +1037,23 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
     return sdp;
   }
 
-  // Handle stream event sent from MCU. Some stream events should be publication
-  // event or subscription event. It will be handled here.
+  // Handle stream event sent from MCU. Some stream update events sent from
+  // server, more specifically audio.status and video.status events should be
+  // publication event or subscription events. They don't change MediaStream's
+  // status. See
+  // https://github.com/open-webrtc-toolkit/owt-server/blob/master/doc/Client-Portal%20Protocol.md#339-participant-is-notified-on-streams-update-in-room
+  // for more information.
   _onStreamEvent(message) {
     const eventTargets = [];
     if (this._publications.has(message.id)) {
       eventTargets.push(this._publications.get(message.id));
     }
-    for (const [internalId, subscribedStream] of this._subscribedStreams) {
-      if (message.id === subscribedStream.id) {
-        const subscriptionId = this._subscribeTransceivers.get(internalId).id;
-        eventTargets.push(this._subscriptions.get(subscriptionId));
-        break;
+    for (const subscription of this._subscriptions) {
+      if (message.id === subscription._audioTrackId ||
+          message.id === subscription._videoTrackId) {
+        eventTargets.push(subscription);
       }
     }
-
     if (!eventTargets.length) {
       return;
     }
@@ -1100,9 +1083,9 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
     // Only check the first one.
     const param = obj[0];
     return !!(
-        param.codecPayloadType || param.dtx || param.active || param.ptime ||
-        param.maxFramerate || param.scaleResolutionDownBy || param.rid ||
-        param.scalabilityMode);
+      param.codecPayloadType || param.dtx || param.active || param.ptime ||
+      param.maxFramerate || param.scaleResolutionDownBy || param.rid ||
+      param.scalabilityMode);
   }
 
   _isOwtEncodingParameters(obj) {

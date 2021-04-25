@@ -94,7 +94,7 @@ const runSocketIOSample = function() {
             }).then((
                 subscription) => {
                     subscirptionLocal = subscription;
-                $(`#${stream.id}`).get(0).srcObject = stream.mediaStream;
+                $(`#${stream.id}`).get(0).srcObject = subscription.stream;
             });
         }
         let $p = createResolutionButtons(stream, subscribeDifferentResolution);
@@ -102,7 +102,7 @@ const runSocketIOSample = function() {
         .then((subscription)=>{
             subscirptionLocal = subscription;
             let $video = $(`<video controls autoplay id=${stream.id} style="display:block" >this browser does not supported video tag</video>`);
-           $video.get(0).srcObject = stream.mediaStream;
+           $video.get(0).srcObject = subscription.stream;
            $p.append($video);
         }, (err)=>{ console.log('subscribe failed', err);
         });

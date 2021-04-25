@@ -149,7 +149,9 @@ export class LocalStream extends Stream {
 }
 /**
  * @class RemoteStream
- * @classDesc Stream sent from a remote endpoint.
+ * @classDesc Stream sent from a remote endpoint. In conference mode,
+ * RemoteStream's stream is always undefined. Please get MediaStream or
+ * ReadableStream from subscription's stream property.
  * Events:
  *
  * | Event Name      | Argument Type    | Fired when         |
