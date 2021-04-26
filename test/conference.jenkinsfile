@@ -17,19 +17,6 @@ pipeline {
         buildDiscarder(logRotator(numToKeepStr: '10', artifactNumToKeepStr: '10'))
     }
     stages {
-        stage('Unit test') {
-            steps {
-                podTemplate(name: 'unit-js-centos-'+env.GIT_BRANCH, label: 'unit-js-centos-'+env.GIT_BRANCH, cloud: 'kubernetes', containers: [
-                    containerTemplate(name: 'test-images', image: "$env.centos_test_images", ttyEnabled: true, alwaysPullImage: true, privileged: true, resourceRequestCpu: '1000m', resourceLimitCpu: '2000m',  resourceRequestMemory: '1.0Gi', resourceLimitMemory: '2.0Gi',command: 'cat')
-                ]) {
-                    node('unit-js-centos-'+env.GIT_BRANCH) {
-                        container('test-images') {
-                            sh "cd /root/owt-client-javascript/test/unit/karma-test/ && ./start.sh $env.GIT_BRANCH $env.CHANGE_ID"
-                        }
-                    }
-                }
-            }
-        }
         stage('Build package') {
             options { timeout(time: 20, unit: 'MINUTES') }
             steps {
