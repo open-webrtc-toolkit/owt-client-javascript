@@ -123,7 +123,7 @@ export class PublicationSettings {
  */
 export class Publication extends EventDispatcher {
   // eslint-disable-next-line require-jsdoc
-  constructor(id, stop, getStats, mute, unmute) {
+  constructor(id, transceivers, stop, getStats, mute, unmute) {
     super();
     /**
      * @member {string} id
@@ -134,6 +134,33 @@ export class Publication extends EventDispatcher {
       configurable: false,
       writable: false,
       value: id ? id : Utils.createUuid(),
+    });
+    /**
+     * @member {RTCRtpTransceiver[]} _transceivers
+     * @instance
+     * @private
+     * @desc A list of RTCRtpTransceiver associated with this Publication.  For
+     * each RTCRtpTransceiver, it's `direction` should always be `sendonly`.
+     * @memberof Owt.Base.Publication
+     * @see {@link https://w3c.github.io/webrtc-pc/#rtcrtptransceiver-interface|RTCRtpTransceiver Interface of WebRTC 1.0}.
+     */
+    Object.defineProperty(this, '_transceivers', {
+      configurable: false,
+      writable: false,
+      value: transceivers,
+    });
+    /**
+     * @member {RTCRtpSenders[]} senders
+     * @instance
+     * @readonly
+     * @desc A list of RTCRtpSenders associated with this Publication.
+     * @memberof Owt.Base.Publication
+     * @see {@link https://w3c.github.io/webrtc-pc/#rtcrtpsender-interface|RTCRtpSender Interface of WebRTC 1.0}.
+     */
+    Object.defineProperty(this, 'senders', {
+      configurable: false,
+      writable: false,
+      value: Array.from(this._transceivers, (t) => t.sender),
     });
     /**
      * @function stop

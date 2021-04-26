@@ -876,12 +876,18 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
     const internalId = this._reverseIdMap.get(sessionId);
     if (this._subscribePromises.has(internalId)) {
       const mediaStream = this._remoteMediaStreams.get(sessionId);
-      const subscription = new Subscription(sessionId, mediaStream, () => {
-        this._unsubscribe(internalId);
-      }, () => this._getStats(),
-      (trackKind) => this._muteOrUnmute(sessionId, true, false, trackKind),
-      (trackKind) => this._muteOrUnmute(sessionId, false, false, trackKind),
-      (options) => this._applyOptions(sessionId, options));
+      const subscription = new Subscription(
+          sessionId, mediaStream,
+          Array.from(
+              this._subscribeTransceivers.get(internalId).transceivers,
+              (t) => t.transceiver),
+          () => {
+            this._unsubscribe(internalId);
+          },
+          () => this._getStats(),
+          (trackKind) => this._muteOrUnmute(sessionId, true, false, trackKind),
+          (trackKind) => this._muteOrUnmute(sessionId, false, false, trackKind),
+          (options) => this._applyOptions(sessionId, options));
       this._subscriptions.set(sessionId, subscription);
       // Resolve subscription if mediaStream is ready.
       if (this._subscriptions.get(sessionId).stream) {
@@ -889,12 +895,18 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
         this._subscribePromises.delete(internalId);
       }
     } else if (this._publishPromises.has(internalId)) {
-      const publication = new Publication(sessionId, () => {
-        this._unpublish(internalId);
-        return Promise.resolve();
-      }, () => this._getStats(),
-      (trackKind) => this._muteOrUnmute(sessionId, true, true, trackKind),
-      (trackKind) => this._muteOrUnmute(sessionId, false, true, trackKind));
+      const publication = new Publication(
+          sessionId,
+          Array.from(
+              this._publishTransceivers.get(internalId).transceivers,
+              (t) => t.transceiver),
+          () => {
+            this._unpublish(internalId);
+            return Promise.resolve();
+          },
+          () => this._getStats(),
+          (trackKind) => this._muteOrUnmute(sessionId, true, true, trackKind),
+          (trackKind) => this._muteOrUnmute(sessionId, false, true, trackKind));
       this._publications.set(sessionId, publication);
       this._publishPromises.get(internalId).resolve(publication);
       // Do not fire publication's ended event when associated stream is ended.

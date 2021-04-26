@@ -270,7 +270,8 @@ export class SubscriptionUpdateOptions {
  */
 export class Subscription extends EventDispatcher {
   // eslint-disable-next-line require-jsdoc
-  constructor(id, stream, stop, getStats, mute, unmute, applyOptions) {
+  constructor(
+      id, stream, transceivers, stop, getStats, mute, unmute, applyOptions) {
     super();
     if (!id) {
       throw new TypeError('ID cannot be null or undefined.');
@@ -297,6 +298,32 @@ export class Subscription extends EventDispatcher {
       // MediaStream may not be available.
       writable: true,
       value: stream,
+    });
+    /**
+     * @member {RTCRtpTransceiver[]} transceivers
+     * @instance
+     * @desc A list of RTCRtpTransceiver associated with this Subscription. For
+     * each RTCRtpTransceiver, it's `direction` should always be `recvonly`.
+     * @memberof Owt.Base.Subscription
+     * @see {@link https://w3c.github.io/webrtc-pc/#rtcrtptransceiver-interface|RTCRtpTransceiver Interface of WebRTC 1.0}.
+     */
+    Object.defineProperty(this, '_transceivers', {
+      configurable: false,
+      writable: false,
+      value: transceivers,
+    });
+    /**
+     * @member {RTCRtpReceivers[]} receivers
+     * @instance
+     * @readonly
+     * @desc A list of RTCRtpReceivers associated with this Subscription.
+     * @memberof Owt.Base.Subscription
+     * @see {@link https://w3c.github.io/webrtc-pc/#rtcrtpreceiver-interface|RTCRtpReceivers Interface of WebRTC 1.0}.
+     */
+    Object.defineProperty(this, 'receivers', {
+      configurable: false,
+      writable: false,
+      value: Array.from(this._transceivers, (t) => t.receiver),
     });
     /**
      * @function stop
