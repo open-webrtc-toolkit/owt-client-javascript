@@ -8,9 +8,9 @@ import * as MediaStreamFactoryModule from '../../../../src/sdk/base/mediastream-
 import * as StreamModule from '../../../../src/sdk/base/stream.js';
 import * as MediaFormatModule from '../../../../src/sdk/base/mediaformat.js'
 import * as SdpUtils from '../../../../src/sdk/base/sdputils.js'
+import * as PublicationModule from '../../../../src/sdk/base/publication.js'
 
 const expect = chai.expect;
-const screenSharingExtensionId = 'jniliohjdiikfjjdlpapmngebedgigjn';
 chai.use(chaiAsPromised);
 describe('Unit tests for MediaStreamFactory', function() {
   function createMediaStream(constraints, audioTracksExpected,
@@ -179,5 +179,17 @@ describe('Unit tests for SDP utils.', function() {
     let reorderedSdp = SdpUtils.reorderCodecs(sdp, 'video', ['vp9', 'h264']);
     expect(reorderedSdp.includes('m=video 9 UDP/TLS/RTP/SAVPF 98 100 102 127 125 108 99 101 124 123 107',0)).to.equal(true);
     done();
+  });
+});
+
+describe('Unit tests for Publication.', () => {
+  it('Get senders returns all transceivers\' sender.', () => {
+    const audioTransceiver = {sender: new sinon.spy(), receiver: sinon.spy()};
+    const videoTransceiver = {sender: new sinon.spy(), receiver: sinon.spy()};
+    const publication = new PublicationModule.Publication(
+        'sessionId', [audioTransceiver, videoTransceiver]);
+    expect(publication.senders).to.deep.equal([
+      audioTransceiver.sender, videoTransceiver.sender
+    ]);
   });
 });

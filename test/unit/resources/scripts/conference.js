@@ -8,9 +8,9 @@ import {ConferenceClient} from '../../../../src/sdk/conference/client.js';
 import {ConferencePeerConnectionChannel} from '../../../../src/sdk/conference/channel.js';
 import * as StreamModule from '../../../../src/sdk/base/stream.js';
 import * as EventModule from '../../../../src/sdk/base/event.js'
+import * as SubscriptionModule from '../../../../src/sdk/conference/subscription.js'
 
 const expect = chai.expect;
-const screenSharingExtensionId = 'jniliohjdiikfjjdlpapmngebedgigjn';
 chai.use(chaiAsPromised);
 
 describe('Unit tests for ConferenceClient', function() {
@@ -97,5 +97,17 @@ describe('Unit tests for ConferencePeerConnectionChannel.', () => {
             .to.equal(isOwtEncodingParameters);
       }
     });
+  });
+});
+
+describe('Unit tests for Subscription.', () => {
+  it('Get receivers returns all transceivers\' receiver.', () => {
+    const audioTransceiver = {sender: new sinon.spy(), receiver: sinon.spy()};
+    const videoTransceiver = {sender: new sinon.spy(), receiver: sinon.spy()};
+    const Subscription = new SubscriptionModule.Subscription(
+        'sessionId', undefined, [audioTransceiver, videoTransceiver]);
+    expect(Subscription.receivers).to.deep.equal([
+      audioTransceiver.receiver, videoTransceiver.receiver
+    ]);
   });
 });
