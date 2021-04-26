@@ -305,8 +305,9 @@ class P2PPeerConnectionChannel extends EventDispatcher {
                 (element) => element.mediaStream.id == mediaStreamId);
             const targetStream = this._publishingStreams[targetStreamIndex];
             this._publishingStreams.splice(targetStreamIndex, 1);
+            // TODO: Set transceivers for Publication.
             const publication = new Publication(
-                id, () => {
+                id, undefined, () => {
                   this._unpublish(targetStream).then(() => {
                     publication.dispatchEvent(new OwtEvent('ended'));
                   }, (err) => {

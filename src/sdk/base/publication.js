@@ -139,8 +139,9 @@ export class Publication extends EventDispatcher {
      * @member {RTCRtpTransceiver[]} _transceivers
      * @instance
      * @private
-     * @desc A list of RTCRtpTransceiver associated with this Publication.  For
+     * @desc A list of RTCRtpTransceiver associated with this Publication. For
      * each RTCRtpTransceiver, it's `direction` should always be `sendonly`.
+     * This member is not available in P2P mode.
      * @memberof Owt.Base.Publication
      * @see {@link https://w3c.github.io/webrtc-pc/#rtcrtptransceiver-interface|RTCRtpTransceiver Interface of WebRTC 1.0}.
      */
@@ -153,14 +154,17 @@ export class Publication extends EventDispatcher {
      * @member {RTCRtpSenders[]} senders
      * @instance
      * @readonly
-     * @desc A list of RTCRtpSenders associated with this Publication.
+     * @desc A list of RTCRtpSenders associated with this Publication. This
+     * member is not available in P2P mode.
      * @memberof Owt.Base.Publication
      * @see {@link https://w3c.github.io/webrtc-pc/#rtcrtpsender-interface|RTCRtpSender Interface of WebRTC 1.0}.
      */
     Object.defineProperty(this, 'senders', {
       configurable: false,
       writable: false,
-      value: Array.from(this._transceivers, (t) => t.sender),
+      value: this._transceivers ?
+          Array.from(this._transceivers, (t) => t.sender) :
+          undefined,
     });
     /**
      * @function stop
