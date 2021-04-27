@@ -6,29 +6,35 @@ jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
-    - uses: actions/setup-node@v2
-      with:
-        node-version: '14'
-    - run: npm install
-    - run: grunt check
-      working-directory: ./scripts
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          node-version: "14"
+      - run: npm install
+      - run: grunt check
+        working-directory: ./scripts
+  build-matrix:
+    name: Build matrix for unit test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - id: read-matrix
+        name: Read build matrix
+        run: echo "::set-output name=matrix::`jq -c . test/unit/config/run_matrix.json`"
+    outputs:
+      matrix: ${{ steps.read-matrix.outputs.matrix }}
   unit-test:
+    needs: build-matrix
     runs-on: ${{ matrix.os }}
     strategy:
-      matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
-        browser: [ChromeWithFlags, FirefoxWithFlags]
-        include:
-          - os: windows-latest
-            browser: EdgeWithFlags
+      matrix: ${{ fromJSON(needs.build-matrix.outputs.matrix)[github.event_name] }}
     steps:
-    - uses: actions/checkout@v2
-    - uses: actions/setup-node@v2
-      with:
-        node-version: '14'
-    - run: npm install
-    - name: Run test cases
-      env:
-        BROWSER: ${{matrix.browser}}
-      run: npm run unittest
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          node-version: "14"
+      - run: npm install
+      - name: Run test cases
+        env:
+          BROWSER: ${{ matrix.browser }}
+        run: npm run unittest
