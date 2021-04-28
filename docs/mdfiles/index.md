@@ -16,10 +16,10 @@ Conference Mode:
 
 |                                 | Windows* | Ubuntu* | macOS* |
 | ------------------------------- | -------- | ------- |------- |
-| Chrome* 87.0.4280.88            | √        | √       | √      |
-| Firefox* 84.0.1                 | √        | √       | √      |
+| Chrome* 89                      | √        | √       | √      |
+| Firefox* 87                     | √        | √       | √      |
 | Safari* 14.0.1                  |          |         | √      |
-| Microsoft Edge* 87.0.664.66     | √        |         |        |    |
+| Microsoft Edge* 89              | √        |         |        |    |
 
 *Table 1: Browser requirements for Conference Mode*
 
@@ -28,20 +28,14 @@ P2P Mode:
 
 |                                 | Windows* | Ubuntu* | macOS* |
 | ------------------------------- | -------- | ------- |------- |
-| Chrome* 87.0.4280.88            | √        | √       | √      |
-| Firefox* 84.0.1                 | √        | √       | √      |
+| Chrome* 89                      | √        | √       | √      |
+| Firefox* 87                     | √        | √       | √      |
 | Safari* 14.0.1                  |          |         | √      |
 
 *Table 2: Browser requirements for P2P Mode*
 
 
-Different browsers may have different supported codec list.
-
-Microsoft Edge browser supports H.264, VP8 as video codecs and OPUS, PCMA, PCMU as audio codecs. And there is some video codec capability limitation, such as no FIR support in Edge yet.
-
-Safari support is limited. Not all functions work in Safari.
-
-In P2P mode, only one stream per direction can be published between Firefox and other clients.
+Different browsers may have different supported codec list. Safari support is limited. Not all functions work in Safari.
 
 # 3 NAT and firewall traversal
 Open WebRTC Toolkit Client SDK for JavaScript fully supports NAT and firewall traversal with STUN / TURN / ICE. The Coturn TURN server from https://github.com/coturn/coturn can be one choice.
