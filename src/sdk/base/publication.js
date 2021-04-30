@@ -123,7 +123,7 @@ export class PublicationSettings {
  */
 export class Publication extends EventDispatcher {
   // eslint-disable-next-line require-jsdoc
-  constructor(id, transceivers, stop, getStats, mute, unmute) {
+  constructor(id, transport, stop, getStats, mute, unmute) {
     super();
     /**
      * @member {string} id
@@ -136,35 +136,16 @@ export class Publication extends EventDispatcher {
       value: id ? id : Utils.createUuid(),
     });
     /**
-     * @member {RTCRtpTransceiver[]} _transceivers
-     * @instance
-     * @private
-     * @desc A list of RTCRtpTransceiver associated with this Publication. For
-     * each RTCRtpTransceiver, it's `direction` should always be `sendonly`.
-     * This member is not available in P2P mode.
-     * @memberof Owt.Base.Publication
-     * @see {@link https://w3c.github.io/webrtc-pc/#rtcrtptransceiver-interface|RTCRtpTransceiver Interface of WebRTC 1.0}.
-     */
-    Object.defineProperty(this, '_transceivers', {
-      configurable: false,
-      writable: false,
-      value: transceivers,
-    });
-    /**
-     * @member {RTCRtpSenders[]} senders
+     * @member {Owt.Base.TransportSettings} transport
      * @instance
      * @readonly
-     * @desc A list of RTCRtpSenders associated with this Publication. This
-     * member is not available in P2P mode.
+     * @desc Transport settings for the publication.
      * @memberof Owt.Base.Publication
-     * @see {@link https://w3c.github.io/webrtc-pc/#rtcrtpsender-interface|RTCRtpSender Interface of WebRTC 1.0}.
      */
-    Object.defineProperty(this, 'senders', {
+    Object.defineProperty(this, 'transport', {
       configurable: false,
       writable: false,
-      value: this._transceivers ?
-          Array.from(this._transceivers, (t) => t.sender) :
-          undefined,
+      value: transport,
     });
     /**
      * @function stop

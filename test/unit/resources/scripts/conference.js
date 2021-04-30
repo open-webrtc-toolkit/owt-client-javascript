@@ -9,6 +9,7 @@ import {ConferencePeerConnectionChannel} from '../../../../src/sdk/conference/ch
 import * as StreamModule from '../../../../src/sdk/base/stream.js';
 import * as EventModule from '../../../../src/sdk/base/event.js'
 import * as SubscriptionModule from '../../../../src/sdk/conference/subscription.js'
+import { TransportSettings, TransportType } from '../../../../src/sdk/base/transport.js';
 
 const expect = chai.expect;
 chai.use(chaiAsPromised);
@@ -101,13 +102,11 @@ describe('Unit tests for ConferencePeerConnectionChannel.', () => {
 });
 
 describe('Unit tests for Subscription.', () => {
-  it('Get receivers returns all transceivers\' receiver.', () => {
-    const audioTransceiver = {sender: new sinon.spy(), receiver: sinon.spy()};
-    const videoTransceiver = {sender: new sinon.spy(), receiver: sinon.spy()};
-    const Subscription = new SubscriptionModule.Subscription(
-        'sessionId', undefined, [audioTransceiver, videoTransceiver]);
-    expect(Subscription.receivers).to.deep.equal([
-      audioTransceiver.receiver, videoTransceiver.receiver
-    ]);
+  it('Get transport returns correct TransportSettings.', () => {
+    const transportSettings =
+        new TransportSettings(TransportType.WEBRTC, 'randomId');
+    const subscription = new SubscriptionModule.Subscription(
+        'sessionId', undefined, transportSettings);
+    expect(subscription.transport).to.equal(transportSettings);
   });
 });

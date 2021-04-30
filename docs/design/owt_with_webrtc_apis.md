@@ -9,8 +9,8 @@ OWT(Open WebRTC Toolkit) Client SDKs provide convenient APIs to create, publish,
 - Set preferred codecs.
 - Disable or enable RTX / RED / FEC.
 #### API Changes
-- A new member `senders` will be added to `Publication`. It returns an array of `RTCRtpSender`s for certain `Publication`.
-- A new member `receivers` will be added to `Subscription`. It returns an array `RTCRtpReceiver`s for certain `Subscription`.
+- A new member `rtpTransceivers` will be added to `TransportSettings`. It returns an array `RTCRtpReceiver`s for RTP transport.
+- A new member `transport` will be added to `Publication` and `Subscription`. Developers could get `RTPTransceiver`s from its `rtpTransceivers` property.
 - A new method `addTransceiver(DOMString trackKind, sequence<RTCRtpEncodingParameters> sendEncodings)` will be added to `ConferenceClient`. It invokes `RTCPeerConnection.addTransceiver(trackKind, {direction:inactive, sendEncodings:sendEncodings})`, returns an `RTCRtpTransceiver`. Please note that direction is `inactive` until a `publish` with return transceiver is called.
 - The second parameter of `ConferenceClient.publish` accepts an `RTCRtpTransceiver` created by `RTCPeerConnection.addTransceiver`. When this method is called, certain `RTCRtpTransceiver`'s direction is changed to `sendonly`, and its sender's `setStreams` is called with the first parameter's `mediaStream`.
 #### Server Requirements

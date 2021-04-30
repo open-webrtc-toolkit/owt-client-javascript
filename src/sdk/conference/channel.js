@@ -21,6 +21,7 @@ import {Subscription} from './subscription.js';
 import {ConferenceError} from './error.js';
 import * as Utils from '../base/utils.js';
 import * as SdpUtils from '../base/sdputils.js';
+import {TransportSettings, TransportType} from '../base/transport.js';
 
 /**
  * @class ConferencePeerConnectionChannel
@@ -876,11 +877,12 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
     const internalId = this._reverseIdMap.get(sessionId);
     if (this._subscribePromises.has(internalId)) {
       const mediaStream = this._remoteMediaStreams.get(sessionId);
+      const transportSettings =
+          new TransportSettings(TransportType.WEBRTC, this._id);
+      transportSettings.rtpTransceivers =
+          this._subscribeTransceivers.get(internalId).transceivers;
       const subscription = new Subscription(
-          sessionId, mediaStream,
-          Array.from(
-              this._subscribeTransceivers.get(internalId).transceivers,
-              (t) => t.transceiver),
+          sessionId, mediaStream, transportSettings,
           () => {
             this._unsubscribe(internalId);
           },
@@ -895,11 +897,13 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
         this._subscribePromises.delete(internalId);
       }
     } else if (this._publishPromises.has(internalId)) {
+      const transportSettings =
+          new TransportSettings(TransportType.WEBRTC, this._id);
+      transportSettings.transceivers =
+          this._publishTransceivers.get(internalId).transceivers;
       const publication = new Publication(
           sessionId,
-          Array.from(
-              this._publishTransceivers.get(internalId).transceivers,
-              (t) => t.transceiver),
+          transportSettings,
           () => {
             this._unpublish(internalId);
             return Promise.resolve();

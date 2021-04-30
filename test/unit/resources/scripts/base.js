@@ -184,12 +184,12 @@ describe('Unit tests for SDP utils.', function() {
 
 describe('Unit tests for Publication.', () => {
   it('Get senders returns all transceivers\' sender.', () => {
-    const audioTransceiver = {sender: new sinon.spy(), receiver: sinon.spy()};
-    const videoTransceiver = {sender: new sinon.spy(), receiver: sinon.spy()};
-    const publication = new PublicationModule.Publication(
-        'sessionId', [audioTransceiver, videoTransceiver]);
-    expect(publication.senders).to.deep.equal([
-      audioTransceiver.sender, videoTransceiver.sender
-    ]);
+    it('Get transport returns correct TransportSettings.', () => {
+      const transportSettings =
+          new TransportSettings(TransportType.WEBRTC, 'randomId');
+      const publication =
+          new PublicationModule.Publication('sessionId', transportSettings);
+      expect(publication.transport).to.equal(transportSettings);
+    });
   });
 });
