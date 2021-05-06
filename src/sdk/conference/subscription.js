@@ -303,8 +303,8 @@ export class Subscription extends EventDispatcher {
      * @member {Owt.Base.TransportSettings} transport
      * @instance
      * @readonly
-     * @desc Transport settings for the publication.
-     * @memberof Owt.Base.Publication
+     * @desc Transport settings for the subscription.
+     * @memberof Owt.Base.Subscription
      */
     Object.defineProperty(this, 'transport', {
       configurable: false,
