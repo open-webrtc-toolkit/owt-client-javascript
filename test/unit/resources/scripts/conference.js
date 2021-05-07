@@ -8,9 +8,10 @@ import {ConferenceClient} from '../../../../src/sdk/conference/client.js';
 import {ConferencePeerConnectionChannel} from '../../../../src/sdk/conference/channel.js';
 import * as StreamModule from '../../../../src/sdk/base/stream.js';
 import * as EventModule from '../../../../src/sdk/base/event.js'
+import * as SubscriptionModule from '../../../../src/sdk/conference/subscription.js'
+import { TransportSettings, TransportType } from '../../../../src/sdk/base/transport.js';
 
 const expect = chai.expect;
-const screenSharingExtensionId = 'jniliohjdiikfjjdlpapmngebedgigjn';
 chai.use(chaiAsPromised);
 
 describe('Unit tests for ConferenceClient', function() {
@@ -97,5 +98,15 @@ describe('Unit tests for ConferencePeerConnectionChannel.', () => {
             .to.equal(isOwtEncodingParameters);
       }
     });
+  });
+});
+
+describe('Unit tests for Subscription.', () => {
+  it('Get transport returns correct TransportSettings.', () => {
+    const transportSettings =
+        new TransportSettings(TransportType.WEBRTC, 'randomId');
+    const subscription = new SubscriptionModule.Subscription(
+        'sessionId', undefined, transportSettings);
+    expect(subscription.transport).to.equal(transportSettings);
   });
 });
