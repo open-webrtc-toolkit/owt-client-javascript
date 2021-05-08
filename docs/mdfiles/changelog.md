@@ -2,6 +2,8 @@ Change Log
 ==========
 # 5.1
 * When subscribe a stream in conference mode, the subscribed MediaStream or BidirectionalStream is associated with a `Owt.Conference.Subscription` instead of a `Owt.Base.RemoteStream`. The `stream` property of a RemoteStream in conference mode is always undefined, while a new property `stream` is added to `Subscription`. It allows a RemoteStream to be subscribed multiple times, as well as subscribing audio and video tracks from different streams.
+* Add a new property `transport` to `Publication` for getting `TransportSettings`.
+* Add a new property `rtpTransceivers` to `TransportSettings` and `TransportConstraints`.
 # 5.0
 * Add WebTransport support for conference mode, see [this design doc](../../design/webtransport.md) for detailed information.
 * All publications and subscriptions for the same conference use the same `PeerConnection`.

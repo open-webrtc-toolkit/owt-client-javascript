@@ -123,7 +123,7 @@ export class PublicationSettings {
  */
 export class Publication extends EventDispatcher {
   // eslint-disable-next-line require-jsdoc
-  constructor(id, stop, getStats, mute, unmute) {
+  constructor(id, transport, stop, getStats, mute, unmute) {
     super();
     /**
      * @member {string} id
@@ -134,6 +134,18 @@ export class Publication extends EventDispatcher {
       configurable: false,
       writable: false,
       value: id ? id : Utils.createUuid(),
+    });
+    /**
+     * @member {Owt.Base.TransportSettings} transport
+     * @instance
+     * @readonly
+     * @desc Transport settings for the publication.
+     * @memberof Owt.Base.Publication
+     */
+    Object.defineProperty(this, 'transport', {
+      configurable: false,
+      writable: false,
+      value: transport,
     });
     /**
      * @function stop
