@@ -26,7 +26,6 @@
 
 // This file is borrowed from lynckia/licode with some modifications.
 
-/* global unescape*/
 'use strict';
 export const Base64 = (function() {
   const END_OF_INPUT = -1;
