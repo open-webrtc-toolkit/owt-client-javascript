@@ -131,8 +131,22 @@ export const ConferenceClient = function(config, signalingImpl) {
   const participants = new Map(); // Key is participant ID, value is a Participant object.
   const publishChannels = new Map(); // Key is MediaStream's ID, value is pc channel.
   const channels = new Map(); // Key is channel's internal ID, value is channel.
-  let mainChannel = null; // Main pc channel for the client as single pc is default.
-  let quicTransportChannel;
+  let peerConnectionChannel = null; // PeerConnection for WebRTC.
+  let quicTransportChannel = null;
+
+  /**
+   * @member {RTCPeerConnection} peerConnection
+   * @instance
+   * @readonly
+   * @desc PeerConnection for WebRTC connection with conference server.
+   * @memberof Owt.Conference.ConferenceClient
+   * @see {@link https://w3c.github.io/webrtc-pc/#rtcpeerconnection-interface|RTCPeerConnection Interface of WebRTC 1.0}.
+   */
+  Object.defineProperty(this, 'transport', {
+    configurable: false,
+    writable: false,
+    value: this.peerConnectionChannel.pc,
+  });
 
   /**
    * @function onSignalingMessage
@@ -417,6 +431,10 @@ export const ConferenceClient = function(config, signalingImpl) {
             }
           }
         }
+        peerConnectionChannel = createPeerConnectionChannel();
+        peerConnectionChannel.addEventListener('ended', () => {
+          peerConnectionChannel = null;
+        });
         if (typeof WebTransport === 'function' && token.webTransportUrl) {
           quicTransportChannel = new QuicConnection(
               token.webTransportUrl, resp.webTransportToken,
@@ -460,13 +478,7 @@ export const ConferenceClient = function(config, signalingImpl) {
       return Promise.reject(new ConferenceError(
           'Cannot publish a published stream.'));
     }
-    if (!mainChannel) {
-      mainChannel = createPeerConnectionChannel();
-      mainChannel.addEventListener('ended', () => {
-        mainChannel = null;
-      });
-    }
-    return mainChannel.publish(stream, options, videoCodecs);
+    return peerConnectionChannel.publish(stream, options, videoCodecs);
   };
 
   /**
@@ -494,13 +506,7 @@ export const ConferenceClient = function(config, signalingImpl) {
         return Promise.reject(new TypeError('WebTransport is not supported.'));
       }
     }
-    if (!mainChannel) {
-      mainChannel = createPeerConnectionChannel();
-      mainChannel.addEventListener('ended', () => {
-        mainChannel = null;
-      });
-    }
-    return mainChannel.subscribe(stream, options);
+    return peerConnectionChannel.subscribe(stream, options);
   };
 
   /**
