@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-/* global MediaStream, SendStream, BidirectionalStream */
+/* global SendStream, BidirectionalStream */
 
 'use strict';
 import * as Utils from './utils.js';

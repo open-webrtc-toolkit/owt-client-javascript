@@ -5,8 +5,7 @@
 // This file doesn't have public APIs.
 /* eslint-disable valid-jsdoc */
 /* eslint-disable require-jsdoc */
-/* global Event, Map, Promise, RTCIceCandidate, RTCSessionDescription,
-   RTCPeerConnection, navigator */
+/* global Event, Map, Promise, RTCIceCandidate, navigator */
 
 'use strict';
 
@@ -923,7 +922,7 @@ class P2PPeerConnectionChannel extends EventDispatcher {
       // Firefox implemented WebRTC spec while Chrome implemented an old API.
       Logger.error(
           'Stopping a publication is not supported on Firefox. Please use ' +
-          'P2PClient.stop() to stop the connection with remote endpoint.'
+          'P2PClient.stop() to stop the connection with remote endpoint.',
       );
       return Promise.reject(new ErrorModule.P2PError(
           ErrorModule.errors.P2P_CLIENT_UNSUPPORTED_METHOD));

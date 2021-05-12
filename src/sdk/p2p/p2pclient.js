@@ -231,7 +231,7 @@ const P2PClient = function(configuration, signalingChannel) {
     if (!channels.has(remoteId)) {
       Logger.warning(
           'No PeerConnection between current endpoint and specific remote ' +
-          'endpoint.'
+          'endpoint.',
       );
       return;
     }
