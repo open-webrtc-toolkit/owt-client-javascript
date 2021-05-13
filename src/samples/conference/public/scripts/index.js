@@ -29,6 +29,9 @@
 'use strict';
 var conference;
 var publicationGlobal;
+// Change to your sample server's URL if it's not deployed on the same machine
+// as this page.
+const serverUrlBase = undefined;
 const runSocketIOSample = function() {
 
     let localStream;
@@ -124,7 +127,7 @@ const runSocketIOSample = function() {
         console.log('A new stream is added ', event.stream.id);
         isSelf = isSelf?isSelf:event.stream.id != publicationGlobal.id;
         subscribeForward && isSelf && subscribeAndRenderVideo(event.stream);
-        mixStream(myRoom, event.stream.id, 'common');
+        mixStream(myRoom, event.stream.id, 'common', serverUrlBase);
         event.stream.addEventListener('ended', () => {
             console.log(event.stream.id + ' is ended.');
         });
@@ -144,7 +147,7 @@ const runSocketIOSample = function() {
                 myId = resp.self.id;
                 myRoom = resp.id;
                 if(mediaUrl){
-                     startStreamingIn(myRoom, mediaUrl);
+                     startStreamingIn(myRoom, mediaUrl, serverUrlBase);
                 }
                 if (isPublish !== 'false') {
                     // audioConstraintsForMic
@@ -174,9 +177,22 @@ const runSocketIOSample = function() {
                             mediaStream, new Owt.Base.StreamSourceInfo(
                                 'mic', 'camera'));
                         $('.local video').get(0).srcObject = stream;
+                        // Publish with RTCRtpTransceivers.
+                        // const transceivers = [];
+                        // for (const track of mediaStream.getTracks()) {
+                        //   transceivers.push(
+                        //       conference.peerConnection.addTransceiver(track, {
+                        //         direction: 'sendonly',
+                        //         streams: [stream],
+                        //       }));
+                        // }
+                        // publication =
+                        //     await conference.publish(localStream, transceivers);
+
+                        // Publish with options.
                         conference.publish(localStream, publishOption).then(publication => {
                             publicationGlobal = publication;
-                            mixStream(myRoom, publication.id, 'common')
+                            mixStream(myRoom, publication.id, 'common', serverUrlBase)
                             publication.addEventListener('error', (err) => {
                                 console.log('Publication error: ' + err.error.message);
                             });
@@ -216,7 +232,7 @@ const runSocketIOSample = function() {
                     $p.appendTo($('body'));
                 }
             });
-        });
+        }, serverUrlBase);
     };
 };
 window.onbeforeunload = function(event){

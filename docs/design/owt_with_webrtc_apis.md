@@ -11,8 +11,8 @@ OWT(Open WebRTC Toolkit) Client SDKs provide convenient APIs to create, publish,
 #### API Changes
 - A new member `rtpTransceivers` will be added to `TransportSettings`. It returns an array `RTCRtpReceiver`s for RTP transport.
 - A new member `transport` will be added to `Publication` and `Subscription`. Developers could get `RTPTransceiver`s from its `rtpTransceivers` property.
-- A new method `addTransceiver(DOMString trackKind, sequence<RTCRtpEncodingParameters> sendEncodings)` will be added to `ConferenceClient`. It invokes `RTCPeerConnection.addTransceiver(trackKind, {direction:inactive, sendEncodings:sendEncodings})`, returns an `RTCRtpTransceiver`. Please note that direction is `inactive` until a `publish` with return transceiver is called.
-- The second parameter of `ConferenceClient.publish` accepts an `RTCRtpTransceiver` created by `RTCPeerConnection.addTransceiver`. When this method is called, certain `RTCRtpTransceiver`'s direction is changed to `sendonly`, and its sender's `setStreams` is called with the first parameter's `mediaStream`.
+- A new member `peerConnection` will be added to `ConferenceClient` for developers to get the `PeerConnection`.
+- The second parameter of `ConferenceClient.publish` accepts an `RTCRtpTransceiver` created by `RTCPeerConnection.addTransceiver`. `RTCRtpTransceiver`s' direction must be `sendonly`, and its sender's `setStreams` is called with the first parameter's `mediaStream`.
 #### Server Requirements
 - `addTransceiver` and new `publish` needs renegotiation support.
 #### Remarks

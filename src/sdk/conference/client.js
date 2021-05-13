@@ -142,10 +142,11 @@ export const ConferenceClient = function(config, signalingImpl) {
    * @memberof Owt.Conference.ConferenceClient
    * @see {@link https://w3c.github.io/webrtc-pc/#rtcpeerconnection-interface|RTCPeerConnection Interface of WebRTC 1.0}.
    */
-  Object.defineProperty(this, 'transport', {
+  Object.defineProperty(this, 'peerConnection', {
     configurable: false,
-    writable: false,
-    value: this.peerConnectionChannel?.pc,
+    get() {
+      return peerConnectionChannel?.pc;
+    },
   });
 
   /**
@@ -463,7 +464,7 @@ export const ConferenceClient = function(config, signalingImpl) {
    * @instance
    * @desc Publish a LocalStream to conference server. Other participants will be able to subscribe this stream when it is successfully published.
    * @param {Owt.Base.LocalStream} stream The stream to be published.
-   * @param {(Owt.Base.PublishOptions|RTPTransceiver[])} options If options is a PublishOptions, the stream will be published as options specified. If options is a list of RTPTransceivers, each track in the first argument must have a corresponding RTPTransceiver here, and the track will be published with the RTPTransceiver associated with it.
+   * @param {(Owt.Base.PublishOptions|RTCRtpTransceiver[])} options If options is a PublishOptions, the stream will be published as options specified. If options is a list of RTCRtpTransceivers, each track in the first argument must have a corresponding RTCRtpTransceiver here, and the track will be published with the RTCRtpTransceiver associated with it.
    * @param {string[]} videoCodecs Video codec names for publishing. Valid values are 'VP8', 'VP9' and 'H264'. This parameter only valid when the second argument is PublishOptions and options.video is RTCRtpEncodingParameters. Publishing with RTCRtpEncodingParameters is an experimental feature. This parameter is subject to change.
    * @return {Promise<Publication, Error>} Returned promise will be resolved with a newly created Publication once specific stream is successfully published, or rejected with a newly created Error if stream is invalid or options cannot be satisfied. Successfully published means PeerConnection is established and server is able to process media data.
    */
