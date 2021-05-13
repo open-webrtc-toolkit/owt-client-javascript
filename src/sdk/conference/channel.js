@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 /* eslint-disable require-jsdoc */
-/* global Map, Promise, setTimeout, RTCPeerConnection */
+/* global Map, Promise, setTimeout */
 
 'use strict';
 
@@ -121,7 +121,7 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
         (!!options.video && !stream.mediaStream.getVideoTracks().length)) {
       return Promise.reject(new ConferenceError(
           'options.audio/video is inconsistent with tracks presented in the ' +
-          'MediaStream.'
+          'MediaStream.',
       ));
     }
     if ((options.audio === false || options.audio === null) &&
@@ -167,13 +167,13 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
       if (stream.mediaStream.getAudioTracks().length > 1) {
         Logger.warning(
             'Publishing a stream with multiple audio tracks is not fully'
-            + ' supported.'
+            + ' supported.',
         );
       }
       if (typeof options.audio !== 'boolean' && typeof options.audio !==
         'object') {
         return Promise.reject(new ConferenceError(
-            'Type of audio options should be boolean or an object.'
+            'Type of audio options should be boolean or an object.',
         ));
       }
       mediaOptions.audio = {};
@@ -186,7 +186,7 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
       if (stream.mediaStream.getVideoTracks().length > 1) {
         Logger.warning(
             'Publishing a stream with multiple video tracks is not fully '
-            + 'supported.'
+            + 'supported.',
         );
       }
       mediaOptions.video = {};
@@ -391,7 +391,7 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
         !stream.settings.video)) {
       return Promise.reject(new ConferenceError(
           'options.audio/video cannot be true or an object if there is no '
-          + 'audio/video track in remote stream.'
+          + 'audio/video track in remote stream.',
       ));
     }
     if (options.audio === false && options.video === false) {
