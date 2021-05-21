@@ -121,10 +121,7 @@ class P2PPeerConnectionChannel extends EventDispatcher {
     }
     return this._sendStreamInfo(stream).then(() => {
       return new Promise((resolve, reject) => {
-        // Replace |addStream| with PeerConnection.addTrack when all browsers are ready.
-        for (const track of stream.mediaStream.getTracks()) {
-          this._pc.addTrack(track, stream.mediaStream);
-        }
+        this._addStream(stream.mediaStream);
         this._publishingStreams.push(stream);
         const trackIds = Array.from(stream.mediaStream.getTracks(),
             (track) => track.id);
@@ -212,6 +209,18 @@ class P2PPeerConnectionChannel extends EventDispatcher {
         (statsReport) => {
           reportsResult.push(statsReport);
         });
+  }
+
+  /**
+   * @function _addStream
+   * @desc Create RTCRtpSenders for all tracks in the stream.
+   * @private
+   */
+  _addStream(stream) {
+    for (const track of stream.getTracks()) {
+      this._pc.addTransceiver(
+          track, {direction: 'sendonly', streams: [stream]});
+    }
   }
 
   /**
@@ -688,9 +697,7 @@ class P2PPeerConnectionChannel extends EventDispatcher {
         if (!stream.mediaStream) {
           continue;
         }
-        for (const track of stream.mediaStream.getTracks()) {
-          this._pc.addTrack(track, stream.mediaStream);
-        }
+        this._addStream(stream.mediaStream);
         Logger.debug('Added stream to peer connection.');
         this._publishingStreams.push(stream);
       }
@@ -699,12 +706,16 @@ class P2PPeerConnectionChannel extends EventDispatcher {
         if (!stream.stream) {
           continue;
         }
-        if (typeof this._pc.getSenders === 'function' &&
+        if (typeof this._pc.getTransceivers === 'function' &&
             typeof this._pc.removeTrack === 'function') {
-          for (const sender of this._pc.getSenders()) {
+          for (const transceiver of this._pc.getTransceivers()) {
             for (const track of stream.stream.getTracks()) {
-              if (sender.track == track) {
-                this._pc.removeTrack(sender);
+              if (transceiver.sender.track == track) {
+                if (transceiver.direction === 'sendonly') {
+                  transceiver.stop();
+                } else {
+                  this._pc.removeTrack(track);
+                }
               }
             }
           }
