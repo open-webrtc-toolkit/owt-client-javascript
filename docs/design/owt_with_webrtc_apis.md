@@ -42,7 +42,7 @@ for (const track of mediaStream.getTracks()) {
   }
   transceivers.push(transceiver);
 }
-const publication = await conference.publish(localStream, transceivers));
+const publication = await conference.publish(localStream, transceivers);
 ```
 
 
