@@ -848,6 +848,7 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
     if (Utils.isChrome()) {
       pcConfiguration.bundlePolicy = 'max-bundle';
     }
+    pcConfiguration.iceServers = pcConfiguration.iceServers || [{urls: "stun:stun.l.google.com:19302"}];
     this._pc = new RTCPeerConnection(pcConfiguration);
     this._pc.onicecandidate = (event) => {
       this._onLocalIceCandidate.apply(this, [event]);
