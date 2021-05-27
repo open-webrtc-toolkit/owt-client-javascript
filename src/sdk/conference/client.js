@@ -131,8 +131,23 @@ export const ConferenceClient = function(config, signalingImpl) {
   const participants = new Map(); // Key is participant ID, value is a Participant object.
   const publishChannels = new Map(); // Key is MediaStream's ID, value is pc channel.
   const channels = new Map(); // Key is channel's internal ID, value is channel.
-  let mainChannel = null; // Main pc channel for the client as single pc is default.
-  let quicTransportChannel;
+  let peerConnectionChannel = null; // PeerConnection for WebRTC.
+  let quicTransportChannel = null;
+
+  /**
+   * @member {RTCPeerConnection} peerConnection
+   * @instance
+   * @readonly
+   * @desc PeerConnection for WebRTC connection with conference server.
+   * @memberof Owt.Conference.ConferenceClient
+   * @see {@link https://w3c.github.io/webrtc-pc/#rtcpeerconnection-interface|RTCPeerConnection Interface of WebRTC 1.0}.
+   */
+  Object.defineProperty(this, 'peerConnection', {
+    configurable: false,
+    get() {
+      return peerConnectionChannel?.pc;
+    },
+  });
 
   /**
    * @function onSignalingMessage
@@ -417,6 +432,10 @@ export const ConferenceClient = function(config, signalingImpl) {
             }
           }
         }
+        peerConnectionChannel = createPeerConnectionChannel();
+        peerConnectionChannel.addEventListener('ended', () => {
+          peerConnectionChannel = null;
+        });
         if (typeof WebTransport === 'function' && token.webTransportUrl) {
           quicTransportChannel = new QuicConnection(
               token.webTransportUrl, resp.webTransportToken,
@@ -445,8 +464,8 @@ export const ConferenceClient = function(config, signalingImpl) {
    * @instance
    * @desc Publish a LocalStream to conference server. Other participants will be able to subscribe this stream when it is successfully published.
    * @param {Owt.Base.LocalStream} stream The stream to be published.
-   * @param {Owt.Base.PublishOptions} options Options for publication.
-   * @param {string[]} videoCodecs Video codec names for publishing. Valid values are 'VP8', 'VP9' and 'H264'. This parameter only valid when options.video is RTCRtpEncodingParameters. Publishing with RTCRtpEncodingParameters is an experimental feature. This parameter is subject to change.
+   * @param {(Owt.Base.PublishOptions|RTCRtpTransceiver[])} options If options is a PublishOptions, the stream will be published as options specified. If options is a list of RTCRtpTransceivers, each track in the first argument must have a corresponding RTCRtpTransceiver here, and the track will be published with the RTCRtpTransceiver associated with it.
+   * @param {string[]} videoCodecs Video codec names for publishing. Valid values are 'VP8', 'VP9' and 'H264'. This parameter only valid when the second argument is PublishOptions and options.video is RTCRtpEncodingParameters. Publishing with RTCRtpEncodingParameters is an experimental feature. This parameter is subject to change.
    * @return {Promise<Publication, Error>} Returned promise will be resolved with a newly created Publication once specific stream is successfully published, or rejected with a newly created Error if stream is invalid or options cannot be satisfied. Successfully published means PeerConnection is established and server is able to process media data.
    */
   this.publish = function(stream, options, videoCodecs) {
@@ -460,13 +479,7 @@ export const ConferenceClient = function(config, signalingImpl) {
       return Promise.reject(new ConferenceError(
           'Cannot publish a published stream.'));
     }
-    if (!mainChannel) {
-      mainChannel = createPeerConnectionChannel();
-      mainChannel.addEventListener('ended', () => {
-        mainChannel = null;
-      });
-    }
-    return mainChannel.publish(stream, options, videoCodecs);
+    return peerConnectionChannel.publish(stream, options, videoCodecs);
   };
 
   /**
@@ -494,13 +507,7 @@ export const ConferenceClient = function(config, signalingImpl) {
         return Promise.reject(new TypeError('WebTransport is not supported.'));
       }
     }
-    if (!mainChannel) {
-      mainChannel = createPeerConnectionChannel();
-      mainChannel.addEventListener('ended', () => {
-        mainChannel = null;
-      });
-    }
-    return mainChannel.subscribe(stream, options);
+    return peerConnectionChannel.subscribe(stream, options);
   };
 
   /**
