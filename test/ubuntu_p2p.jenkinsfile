@@ -1,0 +1,50 @@
+void setBuildStatus(String jsUrl, String message, String state) {
+    step([
+        $class: "GitHubCommitStatusSetter",
+        reposSource: [$class: "ManuallyEnteredRepositorySource", url: jsUrl],
+        contextSource: [$class: "ManuallyEnteredCommitContextSource", context: "ci/jenkins/p2p"],
+        errorHandlers: [[$class: "ChangingBuildStatusErrorHandler", result: "UNSTABLE"]],
+        statusResultSource: [ $class: "ConditionalStatusResultSource", results: [[$class: "AnyBuildResult", message: message, state: state]] ]
+    ]);
+}
+
+pipeline {
+    agent any
+    options {
+        disableConcurrentBuilds()
+        buildDiscarder(logRotator(numToKeepStr: '10', artifactNumToKeepStr: '10'))
+    }
+    stages {
+        stage('runJsCI') {
+            options { timeout(time: 30, unit: 'MINUTES') }
+            steps {
+                podTemplate(name: 'p2ptest-ubuntu-'+env.GIT_BRANCH, label: 'p2ptest-ubuntu-'+env.GIT_BRANCH,  
+                containers: [
+                    containerTemplate(name: 'p2ptest-images', image: "$env.ubuntu_p2p_images", ttyEnabled: true, privileged: true, resourceRequestCpu: '5000m', resourceLimitCpu: '6000m' , command: 'cat')
+                ]){
+                    node('p2ptest-ubuntu-'+env.GIT_BRANCH) {
+                        checkout scm
+                        container('p2ptest-images') {
+                            sh "python ${env.startServerScript} --p2p-server-path ${env.p2pServerPath} \
+                              --owner open-webrtc-toolkit --repo owt-client-javascript --commit-id ${GIT_COMMIT} \
+                              --git-branch ${GIT_BRANCH} --github-script ${env.GithubScriptPath} --mode p2p --workspace ${WORKSPACE}"
+                            sh "python ${env.jsCiScriptPath}/runTest.py --mode ci --source-path ${WORKSPACE} \
+                              --browsers chrome --mode ci --owner open-webrtc-toolkit --repo owt-client-javascript \
+                              --git-branch ${GIT_BRANCH} --github-script ${env.GithubScriptPath}"
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    post {
+        success {
+            setBuildStatus("${env.jsUrl}", "Build succeeded", "SUCCESS");
+        }
+        failure {
+            setBuildStatus("${env.jsUrl}", "Build failed", "FAILURE");
+        }
+    }
+}
+

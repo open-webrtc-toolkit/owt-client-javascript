@@ -270,7 +270,8 @@ export class SubscriptionUpdateOptions {
  */
 export class Subscription extends EventDispatcher {
   // eslint-disable-next-line require-jsdoc
-  constructor(id, stop, getStats, mute, unmute, applyOptions) {
+  constructor(
+      id, stream, transport, stop, getStats, mute, unmute, applyOptions) {
     super();
     if (!id) {
       throw new TypeError('ID cannot be null or undefined.');
@@ -284,6 +285,31 @@ export class Subscription extends EventDispatcher {
       configurable: false,
       writable: false,
       value: id,
+    });
+    /**
+     * @member {MediaStream | BidirectionalStream} stream
+     * @instance
+     * @memberof Owt.Conference.Subscription
+     */
+    Object.defineProperty(this, 'stream', {
+      configurable: false,
+      // TODO: It should be a readonly property, but current implementation
+      // creates Subscription after receiving 'ready' from server. At this time,
+      // MediaStream may not be available.
+      writable: true,
+      value: stream,
+    });
+    /**
+     * @member {Owt.Base.TransportSettings} transport
+     * @instance
+     * @readonly
+     * @desc Transport settings for the subscription.
+     * @memberof Owt.Base.Subscription
+     */
+    Object.defineProperty(this, 'transport', {
+      configurable: false,
+      writable: false,
+      value: transport,
     });
     /**
      * @function stop
@@ -328,5 +354,10 @@ export class Subscription extends EventDispatcher {
      * @returns {Promise<undefined, Error>}
      */
     this.applyOptions = applyOptions;
+
+    // Track is not defined in server protocol. So these IDs are equal to their
+    // stream's ID at this time.
+    this._audioTrackId = undefined;
+    this._videoTrackId = undefined;
   }
 }

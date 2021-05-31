@@ -5,8 +5,7 @@
 // This file doesn't have public APIs.
 /* eslint-disable valid-jsdoc */
 /* eslint-disable require-jsdoc */
-/* global Event, Map, Promise, RTCIceCandidate, RTCSessionDescription,
-   RTCPeerConnection, navigator */
+/* global Event, Map, Promise, RTCIceCandidate, navigator */
 
 'use strict';
 
@@ -54,18 +53,22 @@ const sysInfo = Utils.sysInfo();
 
 /**
  * @class P2PPeerConnectionChannel
- * @desc A P2PPeerConnectionChannel handles all interactions between this endpoint and a remote endpoint.
+ * @desc A P2PPeerConnectionChannel manages a PeerConnection object, handles all
+ * interactions between this endpoint (local) and a remote endpoint. Only one
+ * PeerConnectionChannel is alive for a local - remote endpoint pair at any
+ * given time.
  * @memberOf Owt.P2P
  * @private
  */
 class P2PPeerConnectionChannel extends EventDispatcher {
   // |signaling| is an object has a method |sendSignalingMessage|.
   /* eslint-disable-next-line require-jsdoc */
-  constructor(config, localId, remoteId, signaling, isInitializer) {
+  constructor(
+      config, localId, remoteId, connectionId, signaling) {
     super();
     this._config = config;
-    this._localId = localId;
     this._remoteId = remoteId;
+    this._connectionId = connectionId;
     this._signaling = signaling;
     this._pc = null;
     this._publishedStreams = new Map(); // Key is streams published, value is its publication.
@@ -82,8 +85,6 @@ class P2PPeerConnectionChannel extends EventDispatcher {
     this._publishedStreamTracks = new Map(); // Key is MediaStream's ID, value is an array of the ID of its MediaStreamTracks that haven't been removed.
     this._isNegotiationNeeded = false;
     this._remoteSideSupportsRemoveStream = true;
-    this._remoteSideSupportsPlanB = true;
-    this._remoteSideSupportsUnifiedPlan = true;
     this._remoteSideIgnoresDataChannelAcks = false;
     this._remoteIceCandidates = [];
     this._dataChannels = new Map(); // Key is data channel's label, value is a RTCDataChannel.
@@ -91,14 +92,12 @@ class P2PPeerConnectionChannel extends EventDispatcher {
     this._dataSeq = 1; // Sequence number for data channel messages.
     this._sendDataPromises = new Map(); // Key is data sequence number, value is an object has |resolve| and |reject|.
     this._addedTrackIds = []; // Tracks that have been added after receiving remote SDP but before connection is established. Draining these messages when ICE connection state is connected.
-    this._isCaller = true;
-    this._infoSent = false;
+    this._isPolitePeer = localId < remoteId;
+    this._settingLocalSdp = false;
+    this._settingRemoteSdp = false;
     this._disposed = false;
     this._createPeerConnection();
-    if (isInitializer) {
-      this._sendSignalingMessage(SignalingType.CLOSED);
-    }
-    this._sendSignalingMessage(SignalingType.UA, sysInfo);
+    this._sendUa(sysInfo);
   }
 
   /**
@@ -122,11 +121,7 @@ class P2PPeerConnectionChannel extends EventDispatcher {
     }
     return this._sendStreamInfo(stream).then(() => {
       return new Promise((resolve, reject) => {
-        // Replace |addStream| with PeerConnection.addTrack when all browsers are ready.
-        for (const track of stream.mediaStream.getTracks()) {
-          this._pc.addTrack(track, stream.mediaStream);
-        }
-        this._onNegotiationneeded();
+        this._addStream(stream.mediaStream);
         this._publishingStreams.push(stream);
         const trackIds = Array.from(stream.mediaStream.getTracks(),
             (track) => track.id);
@@ -217,6 +212,18 @@ class P2PPeerConnectionChannel extends EventDispatcher {
   }
 
   /**
+   * @function _addStream
+   * @desc Create RTCRtpSenders for all tracks in the stream.
+   * @private
+   */
+  _addStream(stream) {
+    for (const track of stream.getTracks()) {
+      this._pc.addTransceiver(
+          track, {direction: 'sendonly', streams: [stream]});
+    }
+  }
+
+  /**
    * @function onMessage
    * @desc This method is called by P2PClient when there is new signaling message arrived.
    * @private
@@ -227,11 +234,17 @@ class P2PPeerConnectionChannel extends EventDispatcher {
 
   _sendSdp(sdp) {
     return this._signaling.sendSignalingMessage(
-        this._remoteId, SignalingType.SDP, sdp);
+        this._remoteId, this._connectionId, SignalingType.SDP, sdp);
+  }
+
+  _sendUa(sysInfo) {
+    const ua = {sdk: sysInfo.sdk, capabilities: sysInfo.capabilities};
+    this._sendSignalingMessage(SignalingType.UA, ua);
   }
 
   _sendSignalingMessage(type, message) {
-    return this._signaling.sendSignalingMessage(this._remoteId, type, message);
+    return this._signaling.sendSignalingMessage(
+        this._remoteId, this._connectionId, type, message);
   }
 
   _SignalingMesssageHandler(message) {
@@ -298,8 +311,9 @@ class P2PPeerConnectionChannel extends EventDispatcher {
                 (element) => element.mediaStream.id == mediaStreamId);
             const targetStream = this._publishingStreams[targetStreamIndex];
             this._publishingStreams.splice(targetStreamIndex, 1);
+            // TODO: Set transceivers for Publication.
             const publication = new Publication(
-                id, () => {
+                id, undefined, () => {
                   this._unpublish(targetStream).then(() => {
                     publication.dispatchEvent(new OwtEvent('ended'));
                   }, (err) => {
@@ -416,16 +430,27 @@ class P2PPeerConnectionChannel extends EventDispatcher {
   _onOffer(sdp) {
     Logger.debug('About to set remote description. Signaling state: ' +
       this._pc.signalingState);
-    sdp.sdp = this._setRtpSenderOptions(sdp.sdp, this._config);
-    // Firefox only has one codec in answer, which does not truly reflect its
-    // decoding capability. So we set codec preference to remote offer, and let
-    // Firefox choose its preferred codec.
-    // Reference: https://bugzilla.mozilla.org/show_bug.cgi?id=814227.
-    if (Utils.isFirefox()) {
-      sdp.sdp = this._setCodecOrder(sdp.sdp);
+    if (this._pc.signalingState !== 'stable' || this._settingLocalSdp) {
+      if (this._isPolitePeer) {
+        Logger.debug('Rollback.');
+        this._settingLocalSdp = true;
+        // setLocalDescription(rollback) is not supported on Safari right now.
+        // Test case "WebRTC collision should be resolved." is expected to fail.
+        // See
+        // https://wpt.fyi/results/webrtc/RTCPeerConnection-setLocalDescription-rollback.html?q=webrtc&run_id=5662062321598464&run_id=5756139520131072&run_id=5754637556645888&run_id=5764334049296384.
+        this._pc.setLocalDescription().then(() => {
+          this._settingLocalSdp = false;
+        });
+      } else {
+        Logger.debug('Collision detected. Ignore this offer.');
+        return;
+      }
     }
+    sdp.sdp = this._setRtpSenderOptions(sdp.sdp, this._config);
     const sessionDescription = new RTCSessionDescription(sdp);
+    this._settingRemoteSdp = true;
     this._pc.setRemoteDescription(sessionDescription).then(() => {
+      this._settingRemoteSdp = false;
       this._createAndSendAnswer();
     }, (error) => {
       Logger.debug('Set remote description failed. Message: ' + error.message);
@@ -438,9 +463,11 @@ class P2PPeerConnectionChannel extends EventDispatcher {
       this._pc.signalingState);
     sdp.sdp = this._setRtpSenderOptions(sdp.sdp, this._config);
     const sessionDescription = new RTCSessionDescription(sdp);
+    this._settingRemoteSdp = true;
     this._pc.setRemoteDescription(new RTCSessionDescription(
         sessionDescription)).then(() => {
       Logger.debug('Set remote descripiton successfully.');
+      this._settingRemoteSdp = false;
       this._drainPendingMessages();
     }, (error) => {
       Logger.debug('Set remote description failed. Message: ' + error.message);
@@ -539,13 +566,8 @@ class P2PPeerConnectionChannel extends EventDispatcher {
   }
 
   _onNegotiationneeded() {
-    // This is intented to be executed when onnegotiationneeded event is fired.
-    // However, onnegotiationneeded may fire mutiple times when more than one
-    // track is added/removed. So we manually execute this function after
-    // adding/removing track and creating data channel.
-    Logger.debug('On negotiation needed.');
-
-    if (this._pc.signalingState === 'stable') {
+    if (this._pc.signalingState === 'stable' && !this._pc._settingLocalSdp &&
+        !this._settingRemoteSdp) {
       this._doNegotiate();
     } else {
       this._isNegotiationNeeded = true;
@@ -636,41 +658,12 @@ class P2PPeerConnectionChannel extends EventDispatcher {
     stream.dispatchEvent(event);
   }
 
-  _isUnifiedPlan() {
-    if (Utils.isFirefox()) {
-      return true;
-    }
-    const pc = new RTCPeerConnection({
-      sdpSemantics: 'unified-plan',
-    });
-    return (pc.getConfiguration() && pc.getConfiguration().sdpSemantics ===
-      'plan-b');
-  }
-
   _createPeerConnection() {
     const pcConfiguration = this._config.rtcConfiguration || {};
-    if (Utils.isChrome()) {
-      pcConfiguration.sdpSemantics = 'unified-plan';
-    }
     this._pc = new RTCPeerConnection(pcConfiguration);
-    // Firefox 59 implemented addTransceiver. However, mid in SDP will differ from track's ID in this case. And transceiver's mid is null.
-    if (typeof this._pc.addTransceiver === 'function' && Utils.isSafari()) {
-      this._pc.addTransceiver('audio');
-      this._pc.addTransceiver('video');
-    }
-    if (!this._isUnifiedPlan() && !Utils.isSafari()) {
-      this._pc.onaddstream = (event) => {
-        // TODO: Legacy API, should be removed when all UAs implemented WebRTC 1.0.
-        this._onRemoteStreamAdded.apply(this, [event]);
-      };
-      this._pc.onremovestream = (event) => {
-        this._onRemoteStreamRemoved.apply(this, [event]);
-      };
-    } else {
-      this._pc.ontrack = (event) => {
-        this._onRemoteTrackAdded.apply(this, [event]);
-      };
-    }
+    this._pc.ontrack = (event) => {
+      this._onRemoteTrackAdded.apply(this, [event]);
+    };
     this._pc.onicecandidate = (event) => {
       this._onLocalIceCandidate.apply(this, [event]);
     };
@@ -689,63 +682,53 @@ class P2PPeerConnectionChannel extends EventDispatcher {
     this._pc.oniceconnectionstatechange = (event) => {
       this._onIceConnectionStateChange.apply(this, [event]);
     };
-    /*
-    this._pc.oniceChannelStatechange = function(event) {
-      _onIceChannelStateChange(peer, event);
+    this._pc.onnegotiationneeded = () => {
+      this._onNegotiationneeded();
     };
-     = function() {
-      onNegotiationneeded(peers[peer.id]);
-    };
-
-    //DataChannel
-    this._pc.ondatachannel = function(event) {
-      Logger.debug(myId + ': On data channel');
-      // Save remote created data channel.
-      if (!peer.dataChannels[event.channel.label]) {
-        peer.dataChannels[event.channel.label] = event.channel;
-        Logger.debug('Save remote created data channel.');
-      }
-      bindEventsToDataChannel(event.channel, peer);
-    };*/
   }
 
   _drainPendingStreams() {
-    let negotiationNeeded = false;
     Logger.debug('Draining pending streams.');
     if (this._pc && this._pc.signalingState === 'stable') {
       Logger.debug('Peer connection is ready for draining pending streams.');
       for (let i = 0; i < this._pendingStreams.length; i++) {
         const stream = this._pendingStreams[i];
-        // OnNegotiationNeeded event will be triggered immediately after adding stream to PeerConnection in Firefox.
-        // And OnNegotiationNeeded handler will execute drainPendingStreams. To avoid add the same stream multiple times,
-        // shift it from pending stream list before adding it to PeerConnection.
         this._pendingStreams.shift();
         if (!stream.mediaStream) {
           continue;
         }
-        for (const track of stream.mediaStream.getTracks()) {
-          this._pc.addTrack(track, stream.mediaStream);
-          negotiationNeeded = true;
-        }
+        this._addStream(stream.mediaStream);
         Logger.debug('Added stream to peer connection.');
         this._publishingStreams.push(stream);
       }
       this._pendingStreams.length = 0;
-      for (let j = 0; j < this._pendingUnpublishStreams.length; j++) {
-        if (!this._pendingUnpublishStreams[j].mediaStream) {
+      for (const stream of this._pendingUnpublishStreams) {
+        if (!stream.stream) {
           continue;
         }
-        this._pc.removeStream(this._pendingUnpublishStreams[j].mediaStream);
-        negotiationNeeded = true;
-        this._unpublishPromises.get(
-            this._pendingUnpublishStreams[j].mediaStream.id).resolve();
-        this._publishedStreams.delete(this._pendingUnpublishStreams[j]);
-        Logger.debug('Remove stream.');
+        if (typeof this._pc.getTransceivers === 'function' &&
+            typeof this._pc.removeTrack === 'function') {
+          for (const transceiver of this._pc.getTransceivers()) {
+            for (const track of stream.stream.getTracks()) {
+              if (transceiver.sender.track == track) {
+                if (transceiver.direction === 'sendonly') {
+                  transceiver.stop();
+                } else {
+                  this._pc.removeTrack(track);
+                }
+              }
+            }
+          }
+        } else {
+          Logger.debug(
+              'getSender or removeTrack is not supported, fallback to ' +
+              'removeStream.');
+          this._pc.removeStream(stream.stream);
+        }
+        this._unpublishPromises.get(stream.stream.id).resolve();
+        this._publishedStreams.delete(stream);
       }
       this._pendingUnpublishStreams.length = 0;
-    }
-    if (negotiationNeeded) {
-      this._onNegotiationneeded();
     }
   }
 
@@ -776,7 +759,7 @@ class P2PPeerConnectionChannel extends EventDispatcher {
         }
       }
       this._pendingMessages.length = 0;
-    } else if (this._pc && !dc) {
+    } else if (this._pc && this._pc.connectionState !== 'closed' && !dc) {
       this._createDataChannel(DataChannelLabel.MESSAGE);
     }
   }
@@ -810,12 +793,8 @@ class P2PPeerConnectionChannel extends EventDispatcher {
     if (ua.sdk && ua.sdk && ua.sdk.type === 'JavaScript' && ua.runtime &&
         ua.runtime.name === 'Firefox') {
       this._remoteSideSupportsRemoveStream = false;
-      this._remoteSideSupportsPlanB = false;
-      this._remoteSideSupportsUnifiedPlan = true;
     } else { // Remote side is iOS/Android/C++ which uses Google's WebRTC stack.
       this._remoteSideSupportsRemoveStream = true;
-      this._remoteSideSupportsPlanB = true;
-      this._remoteSideSupportsUnifiedPlan = false;
     }
     if (ua.capabilities) {
       this._remoteSideIgnoresDataChannelAcks =
@@ -867,18 +846,18 @@ class P2PPeerConnectionChannel extends EventDispatcher {
       return;
     }
     this._isNegotiationNeeded = false;
-    this._isCaller = true;
-    let localDesc;
     this._pc.createOffer().then((desc) => {
       desc.sdp = this._setRtpReceiverOptions(desc.sdp);
-      localDesc = desc;
-      if (this._pc.signalingState === 'stable') {
+      if (this._pc.signalingState === 'stable' && !this._settingLocalSdp &&
+          !this._settingRemoteSdp) {
+        this._settingLocalSdp = true;
         return this._pc.setLocalDescription(desc).then(() => {
-          return this._sendSdp(localDesc);
+          this._settingLocalSdp = false;
+          return this._sendSdp(this._pc.localDescription);
         });
       }
     }).catch((e) => {
-      Logger.error(e.message + ' Please check your codec settings.');
+      Logger.error(e.message);
       const error = new ErrorModule.P2PError(ErrorModule.errors.P2P_WEBRTC_SDP,
           e.message);
       this._stop(error, true);
@@ -888,15 +867,15 @@ class P2PPeerConnectionChannel extends EventDispatcher {
   _createAndSendAnswer() {
     this._drainPendingStreams();
     this._isNegotiationNeeded = false;
-    this._isCaller = false;
-    let localDesc;
     this._pc.createAnswer().then((desc) => {
       desc.sdp = this._setRtpReceiverOptions(desc.sdp);
-      localDesc=desc;
       this._logCurrentAndPendingLocalDescription();
-      return this._pc.setLocalDescription(desc);
+      this._settingLocalSdp = true;
+      return this._pc.setLocalDescription(desc).then(()=>{
+        this._settingLocalSdp = false;
+      });
     }).then(()=>{
-      return this._sendSdp(localDesc);
+      return this._sendSdp(this._pc.localDescription);
     }).catch((e) => {
       Logger.error(e.message + ' Please check your codec settings.');
       const error = new ErrorModule.P2PError(ErrorModule.errors.P2P_WEBRTC_SDP,
@@ -929,7 +908,7 @@ class P2PPeerConnectionChannel extends EventDispatcher {
       // Firefox implemented WebRTC spec while Chrome implemented an old API.
       Logger.error(
           'Stopping a publication is not supported on Firefox. Please use ' +
-          'P2PClient.stop() to stop the connection with remote endpoint.'
+          'P2PClient.stop() to stop the connection with remote endpoint.',
       );
       return Promise.reject(new ErrorModule.P2PError(
           ErrorModule.errors.P2P_CLIENT_UNSUPPORTED_METHOD));
@@ -963,7 +942,6 @@ class P2PPeerConnectionChannel extends EventDispatcher {
     const dc = this._pc.createDataChannel(label);
     this._bindEventsToDataChannel(dc);
     this._dataChannels.set(DataChannelLabel.MESSAGE, dc);
-    this._onNegotiationneeded();
   }
 
   _bindEventsToDataChannel(dc) {
@@ -1084,17 +1062,15 @@ class P2PPeerConnectionChannel extends EventDispatcher {
           const streamEvent = new StreamModule.StreamEvent('streamadded', {
             stream: info.stream,
           });
-          if (this._isUnifiedPlan()) {
-            for (const track of info.mediaStream.getTracks()) {
-              track.addEventListener('ended', (event) => {
-                const mediaStreams = this._getStreamByTrack(event.target);
-                for (const mediaStream of mediaStreams) {
-                  if (this._areAllTracksEnded(mediaStream)) {
-                    this._onRemoteStreamRemoved({stream: mediaStream});
-                  }
+          for (const track of info.mediaStream.getTracks()) {
+            track.addEventListener('ended', (event) => {
+              const mediaStreams = this._getStreamByTrack(event.target);
+              for (const mediaStream of mediaStreams) {
+                if (this._areAllTracksEnded(mediaStream)) {
+                  this._onRemoteStreamRemoved({stream: mediaStream});
                 }
-              });
-            }
+              }
+            });
           }
           this._sendSignalingMessage(SignalingType.TRACKS_ADDED, info.trackIds);
           this._remoteStreamInfo.get(info.mediaStream.id).mediaStream = null;

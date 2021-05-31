@@ -51,7 +51,7 @@ export class SioSignaling extends EventModule.EventDispatcher {
    * @return {Promise<Object, Error>} Return a promise resolved with the data returned by portal if successfully logged in. Or return a promise rejected with a newly created Oms.Error if failed.
    * @param {string} host Host of the portal.
    * @param {string} isSecured Is secure connection or not.
-   * @param {string} loginInfo Infomation required for logging in.
+   * @param {string} loginInfo Information required for logging in.
    * @private.
    */
   connect(host, isSecured, loginInfo) {

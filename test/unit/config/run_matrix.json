@@ -1,0 +1,34 @@
+{
+  "push": {
+    "os": [
+      "ubuntu-latest",
+      "windows-latest",
+      "macos-latest"
+    ],
+    "browser": [
+      "ChromeWithFlags",
+      "FirefoxWithFlags"
+    ],
+    "include": [
+      {
+        "os": "windows-latest",
+        "browser": "EdgeWithFlags"
+      }
+    ]
+  },
+  "pull_request": {
+    "os": [
+      "ubuntu-latest"
+    ],
+    "browser": [
+      "ChromeWithFlags",
+      "FirefoxWithFlags"
+    ],
+    "include": [
+      {
+        "os": "windows-latest",
+        "browser": "EdgeWithFlags"
+      }
+    ]
+  }
+}

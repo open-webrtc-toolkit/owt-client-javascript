@@ -66,7 +66,7 @@ describe('Unit tests for P2PClient', function() {
         done();
       });
   });
-  describe('Interop with remote endpoints', function(){
+  describe('Interop with remote endpoints (includes end to end tests)', function(){
     const sourceInfo = new StreamModule.StreamSourceInfo('mic');
     let signaling1, signaling2, signaling3;
     let p2pclient1, p2pclient2, p2pclient3;
@@ -107,6 +107,9 @@ describe('Unit tests for P2PClient', function() {
     });
     afterEach((done) => {
       setTimeout(() => {
+        p2pclient1.disconnect();
+        p2pclient2.disconnect();
+        p2pclient3.disconnect();
         done();
       }, 0);
     });
@@ -147,5 +150,34 @@ describe('Unit tests for P2PClient', function() {
         expect(p2pclient3.send('user1', 'message')).to.be.rejected.and.notify(
           done);
       });
+    it('Signaling collisions should be resolved.', done => {
+      p2pclient1.send('user2', 'message');
+      p2pclient2.send('user1', 'message');
+      done();
+      //expect(Promise.all([p2pclient1.send('user2', 'message'), p2pclient2.send('user1', 'message')])).to.be.fulfilled.and.notify(done);
+      // TODO: Check messages are received.
+    });
+    it('WebRTC collision should be resolved.', async () => {
+      const c1Spy = new sinon.spy();
+      const c2Spy = new sinon.spy();
+      p2pclient1.addEventListener('messagereceived',c1Spy);
+      p2pclient2.addEventListener('messagereceived',c2Spy);
+      await p2pclient1.publish('user2', localStream);
+      // Both sides create PeerConnection. It cannot 100% sure to trigger WebRTC
+      // collision. But it has a high chance that `setRemoteDescription` get
+      // failed. However, even `setRemoteDescription` is failed, the SDK stops
+      // `PeerConnection` silently without firing an event. So this test case
+      // cannot detect failures like this.
+      await Promise.all([
+        p2pclient1.send('user2', 'message'), p2pclient2.send('user1', 'message')
+      ]);
+      await new Promise(resolve => {
+        setTimeout(() => {
+          expect(c1Spy.callCount).to.equal(1);
+          expect(c2Spy.callCount).to.equal(1);
+          resolve();
+        }, 100);
+      });
+    });
   });
 });

@@ -91,6 +91,10 @@ export const VideoCodec = {
   VP9: 'vp9',
   H264: 'h264',
   H265: 'h265',
+  AV1: 'av1',
+  // Non-standard AV1, will be renamed to AV1.
+  // https://bugs.chromium.org/p/webrtc/issues/detail?id=11042
+  AV1X: 'av1x',
 };
 
 /**

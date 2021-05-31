@@ -8,6 +8,7 @@ import Logger from '../../../../src/sdk/base/logger.js';
 
 const onMessageHandlers = new Map();
 const onServerDisconnectedHandlers = new Map();
+const messageQueue = [];
 
 /**
  * A fake P2P signaling channel.
@@ -24,27 +25,41 @@ export default class FakeP2PSignalingChannel {
     this.onServerDisconnected = onServerDisconnected;
   };
 
-  send(targetId, message) {
-    Logger.debug(this.userId + ' -> ' + targetId + ': ' + message);
-    return new Promise((resolve, reject) => {
-      if (onMessageHandlers.has(targetId)) {
-        setTimeout(() => {
-          onMessageHandlers.get(targetId)(this.userId, message)
-          return resolve();
-        }, 0);;
+  drainMessageQueue() {
+    while (messageQueue.length > 0) {
+      const m = messageQueue.shift();
+      if (onMessageHandlers.has(m.target)) {
+        onMessageHandlers.get(m.target)(m.sender, m.message);
+        m.resolve();
       } else {
-        console.error('Cannot send to message to ' + targetId);
-        return reject();
+        console.error('Cannot send to message to ' + m.target);
+        m.reject();
       }
-    })
+    }
+  }
+
+  send(targetId, message) {
+    return new Promise((resolve, reject) => {
+      messageQueue.push({ target: targetId, message, resolve, reject, sender: this.userId });
+      setTimeout(() => {
+        this.drainMessageQueue();
+      }, 0);
+    });
   };
 
   connect(loginInfo) {
-    Logger.debug(loginInfo+' connected.');
+    if(onMessageHandlers.has(loginInfo)){
+      console.error('Duplicated '+loginInfo);
+    }
+    Logger.debug(loginInfo + ' connected.');
     onMessageHandlers.set(loginInfo, this.onMessage);
     onServerDisconnectedHandlers.set(loginInfo, this.onServerDisconnected);
     this.userId = loginInfo;
-    return Promise.resolve(loginInfo);
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        return resolve(loginInfo);
+      }, 0);
+    });
   };
 
   disconnect() {
