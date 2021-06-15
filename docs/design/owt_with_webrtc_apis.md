@@ -1,6 +1,6 @@
 # OWT SDK with WebRTC APIs
 ## Introduction
-OWT(Open WebRTC Toolkit) Client SDKs provide convenient APIs to create, publish, and subscribe streams. Most of these APIs are wrappers of WebRTC APIs with signaling support. It helps WebRTC beginners easily involve WebRTC technology into their applications without too much knowledge of WebRTC evolution and browser differences. As WebRTC 1.0 is moving to PR, which means it is quite stable, we are planning to expose more WebRTC APIs to developers to enable advanced and custom usages with OWT.
+OWT(Open WebRTC Toolkit) Client SDKs provide convenient APIs to create, publish, and subscribe streams. Most of these APIs are wrappers of WebRTC APIs with signaling support. It helps WebRTC beginners easily involve WebRTC technology into their applications without too much knowledge of WebRTC evolution and browser differences. As WebRTC 1.0 was officially made a W3C Recommendation, which means it is stable, we are planning to expose more WebRTC APIs to developers to enable advanced and custom usages with OWT.
 ## Potential Usages
 - Replace a track in the middle of a call.
 - Set custom encoding parameters, perhaps for simulcast.
