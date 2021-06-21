@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-/* global Promise, navigator */
+/* global Promise, navigator, window, AudioContext, AudioWorkletNode */
 
 'use strict';
 import * as utils from './utils.js';
@@ -225,5 +225,54 @@ export class MediaStreamFactory {
     } else {
       return navigator.mediaDevices.getUserMedia(mediaConstraints);
     }
+  }
+  /**
+   * @function createMediaStreamDenoised
+   * @static
+   * @desc Create a MediaStream with given constraints. Applies Rnnoise based
+   * noise cancellation on all audio streams. If you want to create a
+   * MediaStream for screen cast, please make sure both audio and video's source
+   * are "screen-cast".
+   * @memberof Owt.Base.MediaStreamFactory
+   * @return {Promise<MediaStream, Error>} Return a promise that is resolved
+   * when stream is successfully created, or rejected if one of the following
+   * error happened:
+   * - One or more parameters cannot be satisfied.
+   * - Specified device is busy.
+   * - Cannot obtain necessary permission or operation is canceled by user.
+   * - Video source is screen cast, while audio source is not.
+   * - Audio source is screen cast, while video source is disabled.
+   * @param {Owt.Base.StreamConstraints} constraints
+   */
+  static createMediaStreamDenoised(constraints) {
+    return this.createMediaStream(constraints).then(
+        (stream) => {
+          window.AudioContext = window.AudioContext ||
+          window.webkitAudioContext;
+          // Rnnoise is tested for sample rate 44100. This limitation can be
+          // lifted after further testing.
+          const audioContext = new AudioContext({sampleRate: 44100});
+
+          const audioTracks = stream.getAudioTracks();
+          const videoTracks = stream.getVideoTracks();
+          const peer = audioContext.createMediaStreamDestination();
+
+          audioTracks.forEach(function(track) {
+            const microphone =
+                audioContext.createMediaStreamSource(stream);
+            audioContext.audioWorklet.addModule(
+                'js/denoise-wasm-worklet.js').then(() => {
+              const denoiserNode =
+                new AudioWorkletNode(audioContext,
+                    'rnnoise-wasm-worklet-processor');
+              microphone.connect(denoiserNode).connect(peer);
+            });
+          });
+          videoTracks.forEach(function(track) {
+            peer.stream.addTrack(track);
+          });
+          return peer.stream;
+        }
+    );
   }
 }
