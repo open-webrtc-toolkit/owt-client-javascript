@@ -16,6 +16,7 @@ import * as Utils from '../base/utils.js';
 import * as ErrorModule from './error.js';
 import * as StreamModule from '../base/stream.js';
 import * as SdpUtils from '../base/sdputils.js';
+import {TransportSettings, TransportType} from '../base/transport.js';
 
 /**
  * @class P2PPeerConnectionChannelEvent
@@ -98,6 +99,10 @@ class P2PPeerConnectionChannel extends EventDispatcher {
     this._disposed = false;
     this._createPeerConnection();
     this._sendUa(sysInfo);
+  }
+
+  get peerConnection() {
+    return this._pc;
   }
 
   /**
@@ -288,7 +293,7 @@ class P2PPeerConnectionChannel extends EventDispatcher {
   _tracksAddedHandler(ids) {
     // Currently, |ids| contains all track IDs of a MediaStream. Following algorithm also handles |ids| is a part of a MediaStream's tracks.
     for (const id of ids) {
-      // It could be a problem if there is a track published with different MediaStreams.
+      // It could be a problem if there is a track published with different MediaStreams, moving to mid.
       this._publishingStreamTracks.forEach((mediaTrackIds, mediaStreamId) => {
         for (let i = 0; i < mediaTrackIds.length; i++) {
           if (mediaTrackIds[i] === id) {
@@ -311,9 +316,20 @@ class P2PPeerConnectionChannel extends EventDispatcher {
                 (element) => element.mediaStream.id == mediaStreamId);
             const targetStream = this._publishingStreams[targetStreamIndex];
             this._publishingStreams.splice(targetStreamIndex, 1);
-            // TODO: Set transceivers for Publication.
+
+            // Set transceivers for Publication.
+            const transport =
+                new TransportSettings(TransportType.WEBRTC, undefined);
+            transport.rtpTransceivers = [];
+            for (const transceiver of this._pc.getTransceivers()) {
+              if (transceiver.sender?.track in
+                  this._publishedStreamTracks.get(mediaStreamId)) {
+                transport.rtpTransceivers.push(transceiver);
+              }
+            }
+
             const publication = new Publication(
-                id, undefined, () => {
+                id, transport, () => {
                   this._unpublish(targetStream).then(() => {
                     publication.dispatchEvent(new OwtEvent('ended'));
                   }, (err) => {

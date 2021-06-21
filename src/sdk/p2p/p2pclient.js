@@ -257,8 +257,28 @@ const P2PClient = function(configuration, signalingChannel) {
     return channels.get(remoteId).getStats();
   };
 
-  const sendSignalingMessage = function(
-      remoteId, connectionId, type, message) {
+  /**
+   * @function getPeerConnection
+   * @instance
+   * @desc Get underlying PeerConnection.
+   * @memberof Owt.P2P.P2PClient
+   * @param {string} remoteId Remote endpoint's ID.
+   * @return {Promise<RTCPeerConnection, Error>} It returns a promise resolved
+   *     with an RTCPeerConnection or reject with an Error if there is no
+   *     connection with specific user.
+   * @private
+   */
+  this.getPeerConnection = function(remoteId) {
+    if (!channels.has(remoteId)) {
+      return Promise.reject(new ErrorModule.P2PError(
+          ErrorModule.errors.P2P_CLIENT_INVALID_STATE,
+          'No PeerConnection between current endpoint and specific remote ' +
+              'endpoint.'));
+    }
+    return channels.get(remoteId).peerConnection;
+  };
+
+  const sendSignalingMessage = function(remoteId, connectionId, type, message) {
     const msg = {
       type,
       connectionId,

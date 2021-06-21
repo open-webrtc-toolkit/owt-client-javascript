@@ -7,7 +7,8 @@
 import P2PClient from '../../../../src/sdk/p2p/p2pclient.js';
 import SignalingChannel from './fake-p2p-signaling.js';
 import * as StreamModule from '../../../../src/sdk/base/stream.js';
-import * as EventModule from '../../../../src/sdk/base/event.js'
+import * as EventModule from '../../../../src/sdk/base/event.js';
+import {TransportSettings, TransportType} from '../../../../src/sdk/base/transport.js';
 
 const expect = chai.expect;
 const screenSharingExtensionId = 'jniliohjdiikfjjdlpapmngebedgigjn';
@@ -118,6 +119,10 @@ describe('Unit tests for P2PClient', function() {
         p2pclient1.getStats('user2').then((stats)=>{
           console.info('Stats: '+JSON.stringify(stats));
         });
+        expect(p2pclient1.getPeerConnection('user2'))
+                .to.be.an.instanceof(RTCPeerConnection);
+        expect(publication.transport.type === TransportType.WEBRTC);
+        expect(publication.transport.rtpTransceivers.length === 1);
         expect(publication.stop()).to.be.undefined;
         done();
       });
