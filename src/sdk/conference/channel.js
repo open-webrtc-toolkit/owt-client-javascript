@@ -1120,8 +1120,9 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
     if (this._publications.has(message.id)) {
       eventTargets.push(this._publications.get(message.id));
     }
-    for (const subscription of this._subscriptions) {
-      if (message.id === subscription._audioTrackId ||
+    for (const [_key, subscription] of this._subscriptions) {
+      if (message.id === subscription.transport.id ||
+          message.id === subscription._audioTrackId ||
           message.id === subscription._videoTrackId) {
         eventTargets.push(subscription);
       }
