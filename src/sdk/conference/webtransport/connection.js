@@ -3,15 +3,18 @@
 // SPDX-License-Identifier: Apache-2.0
 
 /* eslint-disable require-jsdoc */
-/* global Promise, Map, WebTransport, Uint8Array, Uint32Array, TextEncoder */
+/* global Promise, Map, WebTransport, Uint8Array, Uint32Array, TextEncoder,
+ * ArrayBuffer */
 
 'use strict';
 
-import Logger from '../base/logger.js';
-import {EventDispatcher} from '../base/event.js';
-import {Publication} from '../base/publication.js';
-import {Subscription} from './subscription.js';
-import {Base64} from '../base/base64.js';
+import Logger from '../../base/logger.js';
+import {EventDispatcher} from '../../base/event.js';
+import {Publication} from '../../base/publication.js';
+import {SubscribeOptions, Subscription} from '../subscription.js';
+import {Base64} from '../../base/base64.js';
+
+const uuidByteLength = 16;
 
 /**
  * @class QuicConnection
@@ -32,6 +35,9 @@ export class QuicConnection extends EventDispatcher {
     this._quicStreams = new Map(); // Key is publication or subscription ID.
     this._quicTransport = new WebTransport(url, webTransportOptions);
     this._subscribePromises = new Map(); // Key is subscription ID.
+    this._subscribeOptions = new Map(); // Key is subscription ID.
+    this._subscriptionInfoReady =
+        new Map();  // Key is subscription ID, value is a promise.
     this._transportId = this._token.transportId;
     this._initReceiveStreamReader();
   }
@@ -76,22 +82,84 @@ export class QuicConnection extends EventDispatcher {
       const {value: receiveStream, done: readingReceiveStreamsDone} =
           await receiveStreamReader.read();
       Logger.info('New stream received');
+      const subscriptionIdBytes = new Uint8Array(uuidByteLength);
+      let subscriptionIdBytesOffset = 0;
+      const trackIdBytes = new Uint8Array(uuidByteLength);
+      let trackIdBytesOffset = 0;
       if (readingReceiveStreamsDone) {
         receivingDone = true;
         break;
       }
+      // Use BYOB reader when it's supported to avoid copy. See
+      // https://github.com/w3c/webtransport/issues/131. Issue tracker:
+      // https://crbug.com/1182905.
       const chunkReader = receiveStream.readable.getReader();
-      const {value: uuid, done: readingChunksDone} = await chunkReader.read();
-      if (readingChunksDone) {
-        Logger.error('Stream closed unexpectedly.');
-        return;
-      }
-      if (uuid.length != 16) {
-        Logger.error('Unexpected length for UUID.');
-        return;
+      let readingChunksDone = false;
+      let readingHeaderDone = false;
+      let mediaStream = false;
+      let subscriptionId;
+      while (!readingChunksDone && !readingHeaderDone) {
+        const {value, done: readingChunksDone} = await chunkReader.read();
+        let valueOffset = 0;
+        if (subscriptionIdBytesOffset < uuidByteLength) {
+          const copyLength = Math.min(
+              uuidByteLength - subscriptionIdBytesOffset,
+              value.byteLength - valueOffset);
+          subscriptionIdBytes.set(
+              value.subarray(valueOffset, valueOffset + copyLength),
+              subscriptionIdBytesOffset);
+          subscriptionIdBytesOffset += copyLength;
+          valueOffset += copyLength;
+          if (subscriptionIdBytesOffset < uuidByteLength) {
+            continue;
+          }
+          subscriptionId =
+              this._uint8ArrayToUuid(new Uint8Array(subscriptionIdBytes));
+          if (!this._subscribeOptions.has(subscriptionId)) {
+            Logger.debug('Subscribe options is not ready.');
+            const p = new Promise((resolve) => {
+              this._subscriptionInfoReady.set(subscriptionId, resolve);
+            });
+            await p;
+            this._subscriptionInfoReady.delete(subscriptionId);
+          }
+          const subscribeOptions = this._subscribeOptions.get(subscriptionId);
+          if (subscribeOptions.audio || subscribeOptions.video) {
+            mediaStream = true;
+          }
+          if (!mediaStream) {
+            readingHeaderDone = true;
+            if (copyLength < value.byteLength) {
+              Logger.warning(
+                  'Potential data lose. Expect to be fixed when BYOB reader ' +
+                  'is supported.');
+            }
+            continue;
+          }
+        }
+        if (valueOffset < value.byteLength) {
+          const copyLength = Math.min(
+              uuidByteLength - trackIdBytesOffset,
+              value.byteLength - valueOffset);
+          trackIdBytes.set(
+              value.subarray(valueOffset, valueOffset + copyLength),
+              trackIdBytesOffset);
+          trackIdBytesOffset += copyLength;
+          valueOffset += copyLength;
+          if (trackIdBytesOffset < uuidByteLength) {
+            continue;
+          }
+          const trackId = this._uint8ArrayToUuid(trackIdBytes);
+          Logger.debug(`WebTransport stream for subscription ID ${
+            subscriptionId} and track ID ${
+            trackId} is ready to receive data.`);
+        }
+        if (readingChunksDone) {
+          Logger.error('Stream closed unexpectedly.');
+          return;
+        }
       }
       chunkReader.releaseLock();
-      const subscriptionId = this._uint8ArrayToUuid(uuid);
       this._quicStreams.set(subscriptionId, receiveStream);
       if (this._subscribePromises.has(subscriptionId)) {
         const subscription =
@@ -150,23 +218,23 @@ export class QuicConnection extends EventDispatcher {
     return quicStream;
   }
 
-  async publish(stream) {
+  async publish(stream, options) {
     // TODO: Avoid a stream to be published twice. The first 16 bit data send to
     // server must be it's publication ID.
     // TODO: Potential failure because of publication stream is created faster
     // than signaling stream(created by the 1st call to initiatePublication).
-    const publicationId = await this._initiatePublication();
+    const publicationId = await this._initiatePublication(stream, options);
     const quicStream = stream.stream;
     const writer = quicStream.writable.getWriter();
     await writer.ready;
     writer.write(this._uuidToUint8Array(publicationId));
     writer.releaseLock();
-    Logger.info('publish id');
     this._quicStreams.set(publicationId, quicStream);
     const publication = new Publication(publicationId, () => {
       this._signaling.sendSignalingMessage('unpublish', {id: publication})
           .catch((e) => {
-            Logger.warning('MCU returns negative ack for unpublishing, ' + e);
+            Logger.warning(
+                'Server returns negative ack for unpublishing, ' + e);
           });
     } /* TODO: getStats, mute, unmute is not implemented */);
     return publication;
@@ -196,15 +264,76 @@ export class QuicConnection extends EventDispatcher {
     return s;
   }
 
-  subscribe(stream) {
+  async subscribe(stream, options) {
+    // TODO: Combine this with channel.js.
+    if (options === undefined) {
+      options = {
+        audio: !!stream.settings.audio,
+        video: !!stream.settings.video,
+      };
+    }
+    if (typeof options !== 'object') {
+      return Promise.reject(new TypeError('Options should be an object.'));
+    }
+    if (options.audio === undefined) {
+      options.audio = !!stream.settings.audio;
+    }
+    if (options.video === undefined) {
+      options.video = !!stream.settings.video;
+    }
+    let mediaOptions;
+    let dataOptions;
+    if (options.audio || options.video) {
+      mediaOptions = {tracks: []};
+      dataOptions = undefined;
+      if (options.audio) {
+        const trackOptions = {type: 'audio', from: stream.id};
+        if (typeof options.audio !== 'object' ||
+            !Array.isArray(options.audio.codecs) ||
+            options.audio.codecs.length !== 1) {
+          return Promise.reject(new TypeError(
+              'Audio codec is expect to be a list with one item.'));
+        }
+        mediaOptions.tracks.push(trackOptions);
+      }
+      if (options.video) {
+        const trackOptions = {type: 'video', from: stream.id};
+        if (typeof options.video !== 'object' ||
+            !Array.isArray(options.video.codecs) ||
+            options.video.codecs.length !== 1) {
+          return Promise.reject(new TypeError(
+              'Video codec is expect to be a list with one item.'));
+        }
+        if (options.video.resolution || options.video.frameRate ||
+            (options.video.bitrateMultiplier &&
+             options.video.bitrateMultiplier !== 1) ||
+            options.video.keyFrameInterval) {
+          trackOptions.parameters = {
+            resolution: options.video.resolution,
+            framerate: options.video.frameRate,
+            bitrate: options.video.bitrateMultiplier ?
+                'x' + options.video.bitrateMultiplier.toString() :
+                undefined,
+            keyFrameInterval: options.video.keyFrameInterval,
+          };
+        }
+        mediaOptions.tracks.push(trackOptions);
+      }
+    } else {
+      // Data stream.
+      mediaOptions = null;
+      dataOptions = {from: stream.id};
+    }
     const p = new Promise((resolve, reject) => {
       this._signaling
           .sendSignalingMessage('subscribe', {
-            media: null,
-            data: {from: stream.id},
+            media: mediaOptions,
+            data: dataOptions,
             transport: {type: 'quic', id: this._transportId},
           })
           .then((data) => {
+            this._subscribeOptions.set(data.id, options);
+            Logger.debug('Subscribe info is set.');
             if (this._quicStreams.has(data.id)) {
               // QUIC stream created before signaling returns.
               const subscription = this._createSubscription(
@@ -216,6 +345,9 @@ export class QuicConnection extends EventDispatcher {
               // QUIC stream.
               this._subscribePromises.set(
                   data.id, {resolve: resolve, reject: reject});
+            }
+            if (this._subscriptionInfoReady.has(data.id)) {
+              this._subscriptionInfoReady.get(data.id)();
             }
           });
     });
@@ -231,10 +363,47 @@ export class QuicConnection extends EventDispatcher {
     });
   }
 
-  async _initiatePublication() {
+  async _initiatePublication(stream, options) {
+    const media = {tracks: []};
+    if (stream.source.audio) {
+      if (!options.audio) {
+        throw new TypeError(
+            'Options for audio is missing. Publish audio track with ' +
+            'WebTransport must have AudioEncoderConfig specified.');
+      }
+      const track = {
+        from: stream.id,
+        source: stream.source.audio,
+        type: 'audio',
+        format: {
+          codec: options.audio.codec,
+          sampleRate: options.audio.sampleRate,
+          channelNum: options.audio.numberOfChannels,
+        },
+      };
+      media.tracks.push(track);
+    }
+    if (stream.source.video) {
+      if (!options.video) {
+        throw new TypeError(
+            'Options for audio is missing. Publish video track with ' +
+            'WebTransport must have VideoEncoderConfig specified.');
+      }
+      const track = {
+        from: stream.id,
+        source: stream.source.video,
+        type: 'video',
+        // TODO: convert from MIME type to the format required by server.
+        format: {
+          codec: 'h264',
+          profile: 'B',
+        },
+      };
+      media.tracks.push(track);
+    }
     const data = await this._signaling.sendSignalingMessage('publish', {
-      media: null,
-      data: true,
+      media: stream.source.data ? null : media,
+      data: stream.source.data,
       transport: {type: 'quic', id: this._transportId},
     });
     if (this._transportId !== data.transportId) {
