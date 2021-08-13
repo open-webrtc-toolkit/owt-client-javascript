@@ -104,7 +104,7 @@ export class AudioSubscriptionConstraints {
      * @member {?Array.<Owt.Base.AudioCodecParameters>} codecs
      * @instance
      * @memberof Owt.Conference.AudioSubscriptionConstraints
-     * @desc Codecs accepted. If none of `codecs` supported by both sides, connection fails. Leave it undefined will use all possible codecs.
+     * @desc Codecs accepted. Please only include 1 item if transport is "quic". For "webrtc" transport, if none of `codecs` supported by both sides, connection fails. Leave it undefined will use all possible codecs.
      */
     this.codecs = codecs;
   }
@@ -124,7 +124,7 @@ export class VideoSubscriptionConstraints {
      * @member {?Array.<Owt.Base.VideoCodecParameters>} codecs
      * @instance
      * @memberof Owt.Conference.VideoSubscriptionConstraints
-     * @desc Codecs accepted. If none of `codecs` supported by both sides, connection fails. Leave it undefined will use all possible codecs.
+     * @desc Codecs accepted. Please only include 1 item if transport is "quic". For "webrtc" transport, if none of `codecs` supported by both sides, connection fails. Leave it undefined will use all possible codecs.
      */
     this.codecs = codecs;
     /**
