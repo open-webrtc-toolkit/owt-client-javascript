@@ -55,13 +55,13 @@ export class Stream extends EventDispatcher {
   // eslint-disable-next-line require-jsdoc
   constructor(stream, sourceInfo, attributes) {
     super();
-    if ((stream && !(stream instanceof MediaStream) &&
-         !(typeof SendStream === 'function' && stream instanceof SendStream) &&
-         !(typeof BidirectionalStream === 'function' &&
-           stream instanceof BidirectionalStream)) ||
-        (typeof sourceInfo !== 'object')) {
-      throw new TypeError('Invalid stream or sourceInfo.');
-    }
+    // if ((stream && !(stream instanceof MediaStream) &&
+    //      !(typeof SendStream === 'function' && stream instanceof SendStream) &&
+    //      !(typeof BidirectionalStream === 'function' &&
+    //        stream instanceof BidirectionalStream)) ||
+    //     (typeof sourceInfo !== 'object')) {
+    //   throw new TypeError('Invalid stream or sourceInfo.');
+    // }
     if (stream && (stream instanceof MediaStream) &&
         ((stream.getAudioTracks().length > 0 && !sourceInfo.audio) ||
          stream.getVideoTracks().length > 0 && !sourceInfo.video)) {

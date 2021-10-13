@@ -40,6 +40,7 @@ export class QuicConnection extends EventDispatcher {
         new Map();  // Key is subscription ID, value is a promise.
     this._transportId = this._token.transportId;
     this._initReceiveStreamReader();
+    //this._initDatagrams();
   }
 
   /**
@@ -71,6 +72,14 @@ export class QuicConnection extends EventDispatcher {
 
   async init() {
     await this._authenticate(this._tokenString);
+  }
+
+  async _initDatagrams() {
+    const datagramReader = this._quicTransport.datagrams.readable.getReader();
+    while (true) {
+      const value = await datagramReader.read();
+      console.log(value);
+    }
   }
 
   async _initReceiveStreamReader() {
@@ -275,12 +284,12 @@ export class QuicConnection extends EventDispatcher {
     if (typeof options !== 'object') {
       return Promise.reject(new TypeError('Options should be an object.'));
     }
-    if (options.audio === undefined) {
-      options.audio = !!stream.settings.audio;
-    }
-    if (options.video === undefined) {
-      options.video = !!stream.settings.video;
-    }
+    // if (options.audio === undefined) {
+    //   options.audio = !!stream.settings.audio;
+    // }
+    // if (options.video === undefined) {
+    //   options.video = !!stream.settings.video;
+    // }
     let mediaOptions;
     let dataOptions;
     if (options.audio || options.video) {
@@ -415,5 +424,9 @@ export class QuicConnection extends EventDispatcher {
   _readyHandler() {
     // Ready message from server is useless for QuicStream since QuicStream has
     // its own status. Do nothing here.
+  }
+
+  datagramReader() {
+    return this._quicTransport.datagrams.readable.getReader();
   }
 }
