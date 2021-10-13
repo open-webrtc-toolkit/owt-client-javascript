@@ -558,5 +558,9 @@ export const ConferenceClient = function(config, signalingImpl) {
       }
       return quicTransportChannel.createSendStream();
     };
+
+    this.datagramReader = function() {
+      return quicTransportChannel.datagramReader();
+    };
   }
 };
