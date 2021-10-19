@@ -3,21 +3,30 @@
 // SPDX-License-Identifier: Apache-2.0
 
 /* eslint-disable require-jsdoc */
-/* global VideoEncoder, VideoDecoder, EncodedVideoChunk */
+/* global AudioEncoder, EncodedAudioChunk, VideoEncoder, VideoDecoder,
+ * EncodedVideoChunk */
 
-let bidirectionalStreamWritable, videoEncoder, frameBuffer, sendStreamWriter,
-    mediaSession, datagramReceiver, videoDecoder;
+let videoBidiStreamWritable, audioEncoder, videoEncoder, frameBuffer,
+    audioSendStreamWriter, videoSendStreamWriter, mediaSession,
+    datagramReceiver, videoDecoder;
 // 4 bytes for frame size before each frame. The 1st byte is reserved, always 0.
 const sizePrefix = 4;
 
 onmessage = (e) => {
-  if (e.data[0] === 'video-source') {
-    readVideoData(e.data[1]);
-  } else if (e.data[0] === 'send-stream') {
-    bidirectionalStreamWritable = e.data[1];
-    sendStreamWriter = bidirectionalStreamWritable.getWriter();
-    writeTrackId();
-    // initVideoEncoder();
+  if (e.data[0] === 'audio-source') {
+    readMediaData(e.data[1], 'audio');
+  } else if (e.data[0] === 'video-source') {
+    readMediaData(e.data[1], 'video');
+  } else if (e.data[0] === 'send-stream-audio') {
+    const audioBidiStreamWritable = e.data[1];
+    audioSendStreamWriter = audioBidiStreamWritable.getWriter();
+    writeTrackId('audio', audioSendStreamWriter);
+    initAudioEncoder();
+  } else if (e.data[0] === 'send-stream-video') {
+    videoBidiStreamWritable = e.data[1];
+    videoSendStreamWriter = videoBidiStreamWritable.getWriter();
+    writeTrackId('video', videoSendStreamWriter);
+    initVideoEncoder();
   } else if (e.data[0] === 'datagram-receiver') {
     datagramReceiver = e.data[1];
   } else if (e.data[0] === 'encoded-video-frame') {
@@ -30,7 +39,8 @@ onmessage = (e) => {
 };
 
 async function videoOutput(chunk, metadata) {
-  if (bidirectionalStreamWritable) {
+  return;
+  if (videoBidiStreamWritable) {
     if (!frameBuffer ||
         frameBuffer.byteLength < chunk.byteLength + sizePrefix) {
       frameBuffer = new ArrayBuffer(chunk.byteLength + sizePrefix);
@@ -40,21 +50,48 @@ async function videoOutput(chunk, metadata) {
     const dataView =
         new DataView(frameBuffer, 0, chunk.byteLength + sizePrefix);
     dataView.setUint32(0, chunk.byteLength);
-    await sendStreamWriter.ready;
-    await sendStreamWriter.write(dataView);
-    console.log('Write a frame.');
+    await videoSendStreamWriter.ready;
+    await videoSendStreamWriter.write(dataView);
   }
 }
 
 function videoError(error) {
-  console.log('Encode error, ' + error);
+  console.log('Video encode error, ' + error.message);
 }
 
-async function writeTrackId() {
+async function audioOutput(chunk, metadata) {
+  if (audioSendStreamWriter) {
+    if (!frameBuffer ||
+        frameBuffer.byteLength < chunk.byteLength + sizePrefix) {
+      frameBuffer = new ArrayBuffer(chunk.byteLength + sizePrefix);
+    }
+    const bufferView = new Uint8Array(frameBuffer, sizePrefix);
+    chunk.copyTo(bufferView);
+    const dataView =
+        new DataView(frameBuffer, 0, chunk.byteLength + sizePrefix);
+    dataView.setUint32(0, chunk.byteLength);
+    await audioSendStreamWriter.ready;
+    await audioSendStreamWriter.write(dataView);
+    console.log('Wrote an audio frame. '+chunk.byteLength);
+  }
+}
+
+function audioError(error) {
+  console.log(`Audio encode error: ${error.message}`);
+}
+
+async function writeTrackId(kind, writer) {
   const id = new Uint8Array(16);
-  id[16] = 2;
-  await sendStreamWriter.ready;
-  sendStreamWriter.write(id);
+  id[15] = (kind === 'audio' ? 1 : 2);
+  await writer.ready;
+  writer.write(id);
+  console.log('Wrote track ID for '+kind);
+}
+
+function initAudioEncoder() {
+  audioEncoder = new AudioEncoder({output: audioOutput, error: audioError});
+  audioEncoder.configure(
+      {codec: 'opus', numberOfChannels: 1, sampleRate: 48000});
 }
 
 function initVideoEncoder() {
@@ -85,8 +122,8 @@ function webCodecsErrorCallback(error) {
   console.log('error: ' + error.message);
 }
 
-// Read data from video track.
-async function readVideoData(readable) {
+// Read data from media track.
+async function readMediaData(readable, kind) {
   const reader = readable.getReader();
   while (true) {
     const {value, done} = await reader.read();
@@ -94,7 +131,11 @@ async function readVideoData(readable) {
       console.log('MediaStream ends.');
       break;
     }
-    videoEncoder.encode(value);
+    if (kind === 'audio') {
+      audioEncoder.encode(value);
+    } else if (kind === 'video') {
+      videoEncoder.encode(value);
+    }
     value.close();
   }
 }
