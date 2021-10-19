@@ -22,7 +22,7 @@ JavaScript SDK creates a WebTransport with a QUIC agent when QUIC agent is enabl
 
 ## Limitations
 
-WebTransport only supported in Chrome since 87. It's not enabled by default. To enable it, you need to [register the origin trail](https://web.dev/webtransport/#register-for-ot) or start Chrome with flag `--enable-experimental-web-platform-features`.
+WebTransport is only supported in Chrome since 97. [Custom certificate](https://w3c.github.io/webtransport/#custom-certificate-requirements), includes self-signed or untrusted CA signed, is not enabled by default. It's controlled by "WebTransportCustomCertificates", see [this change](https://chromium-review.googlesource.com/c/chromium/src/+/3208466) for detailed information.
 
 ## Examples
 
