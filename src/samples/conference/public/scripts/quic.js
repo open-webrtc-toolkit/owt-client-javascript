@@ -8,6 +8,7 @@
 
 let quicChannel = null;
 let bidirectionalStream = null;
+let bidiAudioStream = null;
 let writeTask, mediaStream, mediaWorker, conferenceId, myId, mixedStream, generatorWriter;
 
 window.Module={};
@@ -114,18 +115,22 @@ async function attachReader(stream) {
 }
 
 async function createSendChannel() {
-  bidirectionalStream = await conference.createSendStream();
+  //bidirectionalStream = await conference.createSendStream();
+  bidiAudioStream = await conference.createSendStream();
+  const localStream = new Owt.Base.LocalStream(
+      bidiAudioStream,
+      new Owt.Base.StreamSourceInfo('mic', undefined, undefined));
+  attachReader(bidiAudioStream);
+  const publication = await conference.publish(localStream, {
+    audio: {codec: 'opus', numberOfChannels: 2, sampleRate: 48000},
+    video: false,
+    transport: {type: 'quic'},
+  });
   // const localStream = new Owt.Base.LocalStream(
   //     bidirectionalStream,
-  //     new Owt.Base.StreamSourceInfo(undefined, 'camera', undefined));
-  // attachReader(bidirectionalStream);
+  //     new Owt.Base.StreamSourceInfo(undefined, undefined, true));
   // const publication = await conference.publish(
-  //     localStream, {video: {codec: 'h264'}, transport: {type: 'quic'}});
-  const localStream = new Owt.Base.LocalStream(
-      bidirectionalStream,
-      new Owt.Base.StreamSourceInfo(undefined, undefined, true));
-  const publication = await conference.publish(
-      localStream, {transport: {type: 'quic'}});
+  //     localStream, {transport: {type: 'quic'}});
   console.log(publication);
   updateConferenceStatus('Created send channel.');
 }
@@ -146,13 +151,23 @@ async function writeUuid() {
   return;
 }
 
-async function writeVideoData() {
-  mediaStream = await navigator.mediaDevices.getUserMedia({video: true});
-  const track = new MediaStreamTrackProcessor(mediaStream.getVideoTracks()[0]);
-  mediaWorker.postMessage(['video-source', track.readable], [track.readable]);
+async function writeMediaData() {
+  mediaStream =
+      await navigator.mediaDevices.getUserMedia({audio: true, video: true});
+  const audioTrack =
+      new MediaStreamTrackProcessor(mediaStream.getAudioTracks()[0]);
   mediaWorker.postMessage(
-      ['send-stream', bidirectionalStream.writable],
-      [bidirectionalStream.writable]);
+      ['audio-source', audioTrack.readable], [audioTrack.readable]);
+  mediaWorker.postMessage(
+      ['send-stream-audio', bidiAudioStream.writable],
+      [bidiAudioStream.writable]);
+  // const videoTrack =
+  //     new MediaStreamTrackProcessor(mediaStream.getVideoTracks()[0]);
+  // mediaWorker.postMessage(
+  //     ['video-source', videoTrack.readable], [videoTrack.readable]);
+  // mediaWorker.postMessage(
+  //     ['send-stream-video', bidirectionalStream.writable],
+  //     [bidirectionalStream.writable]);
 }
 
 async function writeData() {
@@ -173,12 +188,12 @@ window.addEventListener('load', () => {
 });
 
 document.getElementById('start-sending').addEventListener('click', async () => {
-  if (!bidirectionalStream) {
+  if (!bidiAudioStream) {
     updateConferenceStatus('Stream is not created.');
     return;
   }
-  //writeVideoData();
-  writeTask = setInterval(writeData, 200);
+  writeMediaData();
+  //writeTask = setInterval(writeData, 200);
   updateConferenceStatus('Started sending.');
 });
 
