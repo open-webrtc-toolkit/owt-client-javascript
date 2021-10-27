@@ -3,15 +3,15 @@
 // SPDX-License-Identifier: Apache-2.0
 
 /* eslint-disable require-jsdoc */
-/* global Promise, Map, WebTransport, Uint8Array, Uint32Array, TextEncoder,
- * ArrayBuffer */
+/* global Promise, Map, WebTransport, WebTransportBidirectionalStream,
+   Uint8Array, Uint32Array, TextEncoder, Worker, MediaStreamTrackProcessor */
 
 'use strict';
 
 import Logger from '../../base/logger.js';
 import {EventDispatcher} from '../../base/event.js';
 import {Publication} from '../../base/publication.js';
-import {SubscribeOptions, Subscription} from '../subscription.js';
+import {Subscription} from '../subscription.js';
 import {Base64} from '../../base/base64.js';
 
 const uuidByteLength = 16;
@@ -26,21 +26,24 @@ const uuidByteLength = 16;
 export class QuicConnection extends EventDispatcher {
   // `tokenString` is a base64 string of the token object. It's in the return
   // value of `ConferenceClient.join`.
-  constructor(url, tokenString, signaling, webTransportOptions) {
+  constructor(url, tokenString, signaling, webTransportOptions, workerDir) {
     super();
     this._tokenString = tokenString;
     this._token = JSON.parse(Base64.decodeBase64(tokenString));
     this._signaling = signaling;
     this._ended = false;
-    this._quicStreams = new Map(); // Key is publication or subscription ID.
+    // Key is publication or subscription ID, value is a list of streams.
+    this._quicDataStreams = new Map();
+    // Key is MediaStreamTrack ID, value is a bidirectional stream.
+    this._quicMediaStreamTracks = new Map();
     this._quicTransport = new WebTransport(url, webTransportOptions);
     this._subscribePromises = new Map(); // Key is subscription ID.
     this._subscribeOptions = new Map(); // Key is subscription ID.
     this._subscriptionInfoReady =
-        new Map();  // Key is subscription ID, value is a promise.
+        new Map(); // Key is subscription ID, value is a promise.
     this._transportId = this._token.transportId;
     this._initReceiveStreamReader();
-    //this._initDatagrams();
+    this._worker = new Worker(workerDir + '/media-worker.js', {type: 'module'});
   }
 
   /**
@@ -74,14 +77,6 @@ export class QuicConnection extends EventDispatcher {
     await this._authenticate(this._tokenString);
   }
 
-  async _initDatagrams() {
-    const datagramReader = this._quicTransport.datagrams.readable.getReader();
-    while (true) {
-      const value = await datagramReader.read();
-      console.log(value);
-    }
-  }
-
   async _initReceiveStreamReader() {
     const receiveStreamReader =
         this._quicTransport.incomingBidirectionalStreams.getReader();
@@ -103,7 +98,7 @@ export class QuicConnection extends EventDispatcher {
       // https://github.com/w3c/webtransport/issues/131. Issue tracker:
       // https://crbug.com/1182905.
       const chunkReader = receiveStream.readable.getReader();
-      let readingChunksDone = false;
+      const readingChunksDone = false;
       let readingHeaderDone = false;
       let mediaStream = false;
       let subscriptionId;
@@ -169,7 +164,7 @@ export class QuicConnection extends EventDispatcher {
         }
       }
       chunkReader.releaseLock();
-      this._quicStreams.set(subscriptionId, receiveStream);
+      this._quicDataStreams.set(subscriptionId, [receiveStream]);
       if (this._subscribePromises.has(subscriptionId)) {
         const subscription =
             this._createSubscription(subscriptionId, receiveStream);
@@ -212,33 +207,71 @@ export class QuicConnection extends EventDispatcher {
     return quicStream;
   }
 
-  async createSendStream1(sessionId) {
-    Logger.info('Create stream.');
-    await this._quicTransport.ready;
-    // TODO: Potential failure because of publication stream is created faster
-    // than signaling stream(created by the 1st call to initiatePublication).
-    const publicationId = await this._initiatePublication();
-    const quicStream = await this._quicTransport.createSendStream();
-    const writer = quicStream.writable.getWriter();
-    await writer.ready;
-    writer.write(this._uuidToUint8Array(publicationId));
-    writer.releaseLock();
-    this._quicStreams.set(publicationId, quicStream);
-    return quicStream;
-  }
-
   async publish(stream, options) {
     // TODO: Avoid a stream to be published twice. The first 16 bit data send to
     // server must be it's publication ID.
     // TODO: Potential failure because of publication stream is created faster
     // than signaling stream(created by the 1st call to initiatePublication).
     const publicationId = await this._initiatePublication(stream, options);
-    const quicStream = stream.stream;
-    const writer = quicStream.writable.getWriter();
-    await writer.ready;
-    writer.write(this._uuidToUint8Array(publicationId));
-    writer.releaseLock();
-    this._quicStreams.set(publicationId, quicStream);
+    const quicStreams = [];
+    if (stream.stream instanceof WebTransportBidirectionalStream) {
+      quicStreams.push(stream.stream);
+      this._quicDataStreams.set(publicationId, stream.streams);
+    } else if (stream.stream instanceof MediaStream) {
+      if (typeof MediaStreamTrackProcessor === 'undefined') {
+        throw new TypeError(
+            'MediaStreamTrackProcessor is not supported by your browser.');
+      }
+      for (const track of stream.stream.getTracks()) {
+        const quicStream =
+            await this._quicTransport.createBidirectionalStream();
+        this._quicMediaStreamTracks.set(track.id, quicStream);
+        quicStreams.push(quicStream);
+      }
+    } else {
+      throw new TypeError('Invalid stream.');
+    }
+    for (const quicStream of quicStreams) {
+      const writer = quicStream.writable.getWriter();
+      await writer.ready;
+      writer.write(this._uuidToUint8Array(publicationId));
+      writer.releaseLock();
+    }
+    if (stream.stream instanceof MediaStream) {
+      for (const track of stream.stream.getTracks()) {
+        let encoderConfig;
+        if (track.kind === 'audio') {
+          encoderConfig = {
+            codec: 'opus',
+            numberOfChannels: 1,
+            sampleRate: 48000,
+          };
+        } else if (track.kind === 'video') {
+          encoderConfig = {
+            codec: 'avc1.4d002a',
+            width: 640,
+            height: 480,
+            framerate: 30,
+            latencyMode: 'realtime',
+            avc: {format: 'annexb'},
+          };
+        }
+        const quicStream = this._quicMediaStreamTracks.get(track.id);
+        const processor = new MediaStreamTrackProcessor(track);
+        this._worker.postMessage(
+            [
+              'media-sender',
+              [
+                track.id,
+                track.kind,
+                processor.readable,
+                quicStream.writable,
+                encoderConfig,
+              ],
+            ],
+            [processor.readable, quicStream.writable]);
+      }
+    }
     const publication = new Publication(publicationId, () => {
       this._signaling.sendSignalingMessage('unpublish', {id: publication})
           .catch((e) => {
@@ -250,7 +283,7 @@ export class QuicConnection extends EventDispatcher {
   }
 
   hasContentSessionId(id) {
-    return this._quicStreams.has(id);
+    return this._quicDataStreams.has(id);
   }
 
   _uuidToUint8Array(uuidString) {
@@ -343,13 +376,14 @@ export class QuicConnection extends EventDispatcher {
           .then((data) => {
             this._subscribeOptions.set(data.id, options);
             Logger.debug('Subscribe info is set.');
-            if (this._quicStreams.has(data.id)) {
+            if (this._quicDataStreams.has(data.id)) {
               // QUIC stream created before signaling returns.
+              // TODO: Update subscription to accept list of QUIC streams.
               const subscription = this._createSubscription(
-                  data.id, this._quicStreams.get(data.id));
+                  data.id, this._quicDataStreams.get(data.id)[0]);
               resolve(subscription);
             } else {
-              this._quicStreams.set(data.id, null);
+              this._quicDataStreams.set(data.id, null);
               // QUIC stream is not created yet, resolve promise after getting
               // QUIC stream.
               this._subscribePromises.set(
@@ -361,15 +395,6 @@ export class QuicConnection extends EventDispatcher {
           });
     });
     return p;
-  }
-
-  _readAndPrint() {
-    this._quicStreams[0].waitForReadable(5).then(() => {
-      const data = new Uint8Array(this._quicStreams[0].readBufferedAmount);
-      this._quicStreams[0].readInto(data);
-      Logger.info('Read data: ' + data);
-      this._readAndPrint();
-    });
   }
 
   async _initiatePublication(stream, options) {
@@ -410,15 +435,15 @@ export class QuicConnection extends EventDispatcher {
       };
       media.tracks.push(track);
     }
-    const data = await this._signaling.sendSignalingMessage('publish', {
+    const resp = await this._signaling.sendSignalingMessage('publish', {
       media: stream.source.data ? null : media,
       data: stream.source.data,
       transport: {type: 'quic', id: this._transportId},
     });
-    if (this._transportId !== data.transportId) {
+    if (this._transportId !== resp.transportId) {
       throw new Error('Transport ID not match.');
     }
-    return data.id;
+    return resp.id;
   }
 
   _readyHandler() {

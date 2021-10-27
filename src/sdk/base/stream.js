@@ -2,8 +2,6 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-/* global SendStream, BidirectionalStream */
-
 'use strict';
 import * as Utils from './utils.js';
 import {EventDispatcher, OwtEvent} from './event.js';

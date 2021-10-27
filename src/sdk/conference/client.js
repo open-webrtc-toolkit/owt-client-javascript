@@ -117,9 +117,10 @@ class ConferenceClientConfiguration { // eslint-disable-line no-unused-vars
  * @extends Owt.Base.EventDispatcher
  * @constructor
  * @param {?Owt.Conference.ConferenceClientConfiguration } config Configuration for ConferenceClient.
+ * @param {string} workerDir Path of the directory for workers shipped with OWT SDK. It could be an relative path to your HTML file or an absolute path.
  * @param {?Owt.Conference.SioSignaling } signalingImpl Signaling channel implementation for ConferenceClient. SDK uses default signaling channel implementation if this parameter is undefined. Currently, a Socket.IO signaling channel implementation was provided as ics.conference.SioSignaling. However, it is not recommended to directly access signaling channel or customize signaling channel for ConferenceClient as this time.
  */
-export const ConferenceClient = function(config, signalingImpl) {
+export const ConferenceClient = function(config, workerDir, signalingImpl) {
   Object.setPrototypeOf(this, new EventModule.EventDispatcher());
   config = config || {};
   const self = this;
@@ -439,7 +440,8 @@ export const ConferenceClient = function(config, signalingImpl) {
         if (typeof WebTransport === 'function' && token.webTransportUrl) {
           quicTransportChannel = new QuicConnection(
               token.webTransportUrl, resp.webTransportToken,
-              createSignalingForChannel(), config.webTransportConfiguration);
+              createSignalingForChannel(), config.webTransportConfiguration,
+              workerDir);
         }
         const conferenceInfo = new ConferenceInfo(
             resp.room.id, Array.from(participants.values()),

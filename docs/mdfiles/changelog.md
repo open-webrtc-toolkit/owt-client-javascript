@@ -6,6 +6,8 @@ Change Log
 * Add a new property `rtpTransceivers` to `TransportSettings` and `TransportConstraints`.
 * Add a new property `peerConnection` to `ConferenceClient`.
 * The second argument of `ConferenceClient.publish` could be a list of `RTCRtpTransceiver`s.
+* Add support to publish a MediaStream over WebTransport.
+
 # 5.0
 * Add WebTransport support for conference mode, see [this design doc](../../design/webtransport.md) for detailed information.
 * All publications and subscriptions for the same conference use the same `PeerConnection`.

@@ -9,27 +9,31 @@
 let quicChannel = null;
 let bidirectionalStream = null;
 let bidiAudioStream = null;
-let writeTask, mediaStream, mediaWorker, conferenceId, myId, mixedStream, generatorWriter;
+let writeTask, dataWorker, conferenceId, myId, mixedStream, generatorWriter,
+    mediaPublication;
+const isMedia = true;
 
 window.Module={};
 
-const conference = new Owt.Conference.ConferenceClient({
-  webTransportConfiguration: {
-    serverCertificateFingerprints: [{
-      value:
-          '59:74:C6:C5:2C:D8:E8:18:A9:D2:14:77:ED:94:89:87:DF:83:BA:B3:96:4C:4C:0B:B8:D3:22:58:11:55:67:1A',
-      algorithm: 'sha-256',
-    }],
-    serverCertificateHashes: [{
-      value: new Uint8Array([
-        0x59, 0x74, 0xC6, 0xC5, 0x2C, 0xD8, 0xE8, 0x18, 0xA9, 0xD2, 0x14,
-        0x77, 0xED, 0x94, 0x89, 0x87, 0xDF, 0x83, 0xBA, 0xB3, 0x96, 0x4C,
-        0x4C, 0x0B, 0xB8, 0xD3, 0x22, 0x58, 0x11, 0x55, 0x67, 0x1A
-      ]),
-      algorithm: 'sha-256',
-    }],
-  }
-});
+const conference = new Owt.Conference.ConferenceClient(
+    {
+      webTransportConfiguration: {
+        serverCertificateFingerprints: [{
+          value:
+              'FD:CD:87:EB:92:97:84:FD:D9:E9:C1:9F:AF:57:12:0E:32:AF:0D:C0:58:5F:33:BB:59:4A:2E:6E:C3:18:7A:93',
+          algorithm: 'sha-256',
+        }],
+        serverCertificateHashes: [{
+          value: new Uint8Array([
+            0xFD, 0xCD, 0x87, 0xEB, 0x92, 0x97, 0x84, 0xFD, 0xD9, 0xE9, 0xC1,
+            0x9F, 0xAF, 0x57, 0x12, 0x0E, 0x32, 0xAF, 0x0D, 0xC0, 0x58, 0x5F,
+            0x33, 0xBB, 0x59, 0x4A, 0x2E, 0x6E, 0xC3, 0x18, 0x7A, 0x93
+          ]),
+          algorithm: 'sha-256',
+        }],
+      }
+    },
+    '../../../sdk/conference/webtransport');
 conference.addEventListener('streamadded', async (event) => {
   console.log(event.stream);
   if (event.stream.origin == myId) {
@@ -60,8 +64,8 @@ function updateConferenceStatus(message) {
 }
 
 function initWorker() {
-  mediaWorker = new Worker('./scripts/media-worker.js');
-  mediaWorker.onmessage=((e) => {
+  dataWorker = new Worker('./scripts/data-worker.js');
+  dataWorker.onmessage=((e) => {
     if (e.data[0] === 'video-frame') {
       generatorWriter.write(e.data[1]);
       //console.log(e.data[1]);
@@ -115,29 +119,13 @@ async function attachReader(stream) {
 }
 
 async function createSendChannel() {
-  //bidirectionalStream = await conference.createSendStream();
-  bidiAudioStream = await conference.createSendStream();
-  const localStream = new Owt.Base.LocalStream(
-      bidiAudioStream,
-      new Owt.Base.StreamSourceInfo('mic', undefined, undefined));
-  attachReader(bidiAudioStream);
-  const publication = await conference.publish(localStream, {
-    audio: {codec: 'opus', numberOfChannels: 2, sampleRate: 48000},
-    video: false,
-    transport: {type: 'quic'},
-  });
-  // const localStream = new Owt.Base.LocalStream(
-  //     bidirectionalStream,
-  //     new Owt.Base.StreamSourceInfo(undefined, undefined, true));
-  // const publication = await conference.publish(
-  //     localStream, {transport: {type: 'quic'}});
-  console.log(publication);
+  bidirectionalStream = await conference.createSendStream();
   updateConferenceStatus('Created send channel.');
 }
 
 async function windowOnLoad() {
   await joinConference();
-  await createSendChannel();
+  //await createSendChannel();
 }
 
 async function writeUuid() {
@@ -151,31 +139,12 @@ async function writeUuid() {
   return;
 }
 
-async function writeMediaData() {
-  mediaStream =
-      await navigator.mediaDevices.getUserMedia({audio: true, video: true});
-  const audioTrack =
-      new MediaStreamTrackProcessor(mediaStream.getAudioTracks()[0]);
-  mediaWorker.postMessage(
-      ['audio-source', audioTrack.readable], [audioTrack.readable]);
-  mediaWorker.postMessage(
-      ['send-stream-audio', bidiAudioStream.writable],
-      [bidiAudioStream.writable]);
-  // const videoTrack =
-  //     new MediaStreamTrackProcessor(mediaStream.getVideoTracks()[0]);
-  // mediaWorker.postMessage(
-  //     ['video-source', videoTrack.readable], [videoTrack.readable]);
-  // mediaWorker.postMessage(
-  //     ['send-stream-video', bidirectionalStream.writable],
-  //     [bidirectionalStream.writable]);
-}
-
 async function writeData() {
   const encoder = new TextEncoder();
   const encoded = encoder.encode('message', {stream: true});
   const writer = bidirectionalStream.writable.getWriter();
   await writer.ready;
-  const ab=new Uint8Array(10000);
+  const ab = new Uint8Array(10000);
   ab.fill(1, 0);
   await writer.write(ab);
   writer.releaseLock();
@@ -188,17 +157,34 @@ window.addEventListener('load', () => {
 });
 
 document.getElementById('start-sending').addEventListener('click', async () => {
-  if (!bidiAudioStream) {
-    updateConferenceStatus('Stream is not created.');
-    return;
+  if (isMedia) {
+    const mediaStream =
+        await navigator.mediaDevices.getUserMedia({audio: true, video: true});
+    const localStream = new Owt.Base.LocalStream(
+        mediaStream, new Owt.Base.StreamSourceInfo('mic', 'camera', undefined));
+    mediaPublication = await conference.publish(localStream, {
+      audio: {codec: 'opus', numberOfChannels: 2, sampleRate: 48000},
+      video: {codec: 'h264'},
+      transport: {type: 'quic'},
+    });
+  } else {
+    if (!bidirectionalStream) {
+      updateConferenceStatus('Stream is not created.');
+      return;
+    }
+    writeTask = setInterval(writeData, 200);
   }
-  writeMediaData();
-  //writeTask = setInterval(writeData, 200);
   updateConferenceStatus('Started sending.');
 });
 
 document.getElementById('stop-sending').addEventListener('click', () => {
-  clearInterval(writeTask);
+  if (isMedia) {
+    if (mediaPublication) {
+      mediaPublication.stop();
+    }
+  } else {
+    clearInterval(writeTask);
+  }
   updateConferenceStatus('Stopped sending.');
 });
 
@@ -213,7 +199,7 @@ document.getElementById('start-receiving')
       const receiver = ms.createRtpVideoReceiver();
       receiver.setCompleteFrameCallback((frame) => {
         const copiedFrame = frame.slice(0);
-        mediaWorker.postMessage(
+        dataWorker.postMessage(
             ['encoded-video-frame', copiedFrame], [copiedFrame.buffer]);
       });
       subscribeMixedStream();

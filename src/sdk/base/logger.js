@@ -26,7 +26,7 @@
 
 // This file is borrowed from lynckia/licode with some modifications.
 
-/* global window */
+/* global console */
 
 'use strict';
 
@@ -55,13 +55,13 @@ const Logger = (function() {
   };
 
   that.log = (...args) => {
-    window.console.log((new Date()).toISOString(), ...args);
+    console.log((new Date()).toISOString(), ...args);
   };
 
   const bindType = function(type) {
-    if (typeof window.console[type] === 'function') {
+    if (typeof console[type] === 'function') {
       return (...args) => {
-        window.console[type]((new Date()).toISOString(), ...args);
+        console[type]((new Date()).toISOString(), ...args);
       };
     } else {
       return that.log;

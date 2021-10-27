@@ -5,6 +5,9 @@
 /* eslint-disable require-jsdoc */
 /* global AudioDecoder, postMessage */
 
+// TODO: Enable ESLint for this file.
+/* eslint-disable */
+
 'use strict';
 
 import Logger from '../../base/logger.js';
