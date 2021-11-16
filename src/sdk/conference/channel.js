@@ -32,6 +32,7 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
   // eslint-disable-next-line require-jsdoc
   constructor(config, signaling) {
     super();
+    this.reconnecting = false;
     this._config = config;
     this._options = null;
     this._videoCodecs = undefined;
@@ -79,18 +80,20 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
 
   publish(stream, options, videoCodecs) {
     if (options === undefined) {
-      options = {audio: !!stream.mediaStream.getAudioTracks().length, video: !!stream
-          .mediaStream.getVideoTracks().length};
+      options = {
+        audio: !!stream.mediaStream.getAudioTracks().length, video: !!stream
+          .mediaStream.getVideoTracks().length
+      };
     }
     if (typeof options !== 'object') {
       return Promise.reject(new TypeError('Options should be an object.'));
     }
     if ((this._isRtpEncodingParameters(options.audio) &&
-         this._isOwtEncodingParameters(options.video)) ||
-        (this._isOwtEncodingParameters(options.audio) &&
-         this._isRtpEncodingParameters(options.video))) {
+      this._isOwtEncodingParameters(options.video)) ||
+      (this._isOwtEncodingParameters(options.audio) &&
+        this._isRtpEncodingParameters(options.video))) {
       return Promise.reject(new ConferenceError(
-          'Mixing RTCRtpEncodingParameters and AudioEncodingParameters/VideoEncodingParameters is not allowed.'))
+        'Mixing RTCRtpEncodingParameters and AudioEncodingParameters/VideoEncodingParameters is not allowed.'))
     }
     if (options.audio === undefined) {
       options.audio = !!stream.mediaStream.getAudioTracks().length;
@@ -99,28 +102,28 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
       options.video = !!stream.mediaStream.getVideoTracks().length;
     }
     if ((!!options.audio && !stream.mediaStream.getAudioTracks().length) ||
-        (!!options.video && !stream.mediaStream.getVideoTracks().length)) {
+      (!!options.video && !stream.mediaStream.getVideoTracks().length)) {
       return Promise.reject(new ConferenceError(
-          'options.audio/video is inconsistent with tracks presented in the ' +
-          'MediaStream.'
+        'options.audio/video is inconsistent with tracks presented in the ' +
+        'MediaStream.'
       ));
     }
     if ((options.audio === false || options.audio === null) &&
       (options.video === false || options.video === null)) {
       return Promise.reject(new ConferenceError(
-          'Cannot publish a stream without audio and video.'));
+        'Cannot publish a stream without audio and video.'));
     }
     if (typeof options.audio === 'object') {
       if (!Array.isArray(options.audio)) {
         return Promise.reject(new TypeError(
-            'options.audio should be a boolean or an array.'));
+          'options.audio should be a boolean or an array.'));
       }
       for (const parameters of options.audio) {
         if (!parameters.codec || typeof parameters.codec.name !== 'string' || (
           parameters.maxBitrate !== undefined && typeof parameters.maxBitrate
           !== 'number')) {
           return Promise.reject(new TypeError(
-              'options.audio has incorrect parameters.'));
+            'options.audio has incorrect parameters.'));
         }
       }
     }
@@ -133,9 +136,9 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
         if (!parameters.codec || typeof parameters.codec.name !== 'string' ||
           (
             parameters.maxBitrate !== undefined && typeof parameters
-            .maxBitrate !==
+              .maxBitrate !==
             'number') || (parameters.codec.profile !== undefined &&
-            typeof parameters.codec.profile !== 'string')) {
+              typeof parameters.codec.profile !== 'string')) {
           return Promise.reject(new TypeError(
             'options.video has incorrect parameters.'));
         }
@@ -148,14 +151,14 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
       false && options.audio !== null) {
       if (stream.mediaStream.getAudioTracks().length > 1) {
         Logger.warning(
-            'Publishing a stream with multiple audio tracks is not fully'
-            + ' supported.'
+          'Publishing a stream with multiple audio tracks is not fully'
+          + ' supported.'
         );
       }
       if (typeof options.audio !== 'boolean' && typeof options.audio !==
         'object') {
         return Promise.reject(new ConferenceError(
-            'Type of audio options should be boolean or an object.'
+          'Type of audio options should be boolean or an object.'
         ));
       }
       mediaOptions.audio = {};
@@ -167,14 +170,14 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
       false && options.video !== null) {
       if (stream.mediaStream.getVideoTracks().length > 1) {
         Logger.warning(
-            'Publishing a stream with multiple video tracks is not fully '
-            + 'supported.'
+          'Publishing a stream with multiple video tracks is not fully '
+          + 'supported.'
         );
       }
       mediaOptions.video = {};
       mediaOptions.video.source = stream.source.video;
       const trackSettings = stream.mediaStream.getVideoTracks()[0]
-          .getSettings();
+        .getSettings();
       mediaOptions.video.parameters = {
         resolution: {
           width: trackSettings.width,
@@ -265,12 +268,12 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
       }).then(() => {
         this._signaling.sendSignalingMessage('soac', {
           id: this
-              ._internalId,
+            ._internalId,
           signaling: localDesc,
         });
       }).catch((e) => {
         Logger.error('Failed to create offer or set SDP. Message: '
-            + e.message);
+          + e.message);
         this._unpublish();
         this._rejectPromise(e);
         this._fireEndedEventOnPublicationOrSubscription();
@@ -281,7 +284,7 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
       this._fireEndedEventOnPublicationOrSubscription();
     });
     return new Promise((resolve, reject) => {
-      this._publishPromise = {resolve: resolve, reject: reject};
+      this._publishPromise = { resolve: resolve, reject: reject };
     });
   }
 
@@ -302,30 +305,30 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
       options.video = !!stream.settings.video;
     }
     if ((options.audio !== undefined && typeof options.audio !== 'object' &&
-        typeof options.audio !== 'boolean' && options.audio !== null) || (
-      options.video !== undefined && typeof options.video !== 'object' &&
+      typeof options.audio !== 'boolean' && options.audio !== null) || (
+        options.video !== undefined && typeof options.video !== 'object' &&
         typeof options.video !== 'boolean' && options.video !== null)) {
       return Promise.reject(new TypeError('Invalid options type.'));
     }
     if (options.audio && !stream.settings.audio || (options.video &&
-        !stream.settings.video)) {
+      !stream.settings.video)) {
       return Promise.reject(new ConferenceError(
-          'options.audio/video cannot be true or an object if there is no '
-          + 'audio/video track in remote stream.'
+        'options.audio/video cannot be true or an object if there is no '
+        + 'audio/video track in remote stream.'
       ));
     }
     if (options.audio === false && options.video === false) {
       return Promise.reject(new ConferenceError(
-          'Cannot subscribe a stream without audio and video.'));
+        'Cannot subscribe a stream without audio and video.'));
     }
     this._options = options;
     const mediaOptions = {};
     if (options.audio) {
       if (typeof options.audio === 'object' &&
-          Array.isArray(options.audio.codecs)) {
+        Array.isArray(options.audio.codecs)) {
         if (options.audio.codecs.length === 0) {
           return Promise.reject(new TypeError(
-              'Audio codec cannot be an empty array.'));
+            'Audio codec cannot be an empty array.'));
         }
       }
       mediaOptions.audio = {};
@@ -335,22 +338,22 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
     }
     if (options.video) {
       if (typeof options.video === 'object' &&
-          Array.isArray(options.video.codecs)) {
+        Array.isArray(options.video.codecs)) {
         if (options.video.codecs.length === 0) {
           return Promise.reject(new TypeError(
-              'Video codec cannot be an empty array.'));
+            'Video codec cannot be an empty array.'));
         }
       }
       mediaOptions.video = {};
       mediaOptions.video.from = stream.id;
       if (options.video.resolution || options.video.frameRate || (options.video
-          .bitrateMultiplier && options.video.bitrateMultiplier !== 1) ||
+        .bitrateMultiplier && options.video.bitrateMultiplier !== 1) ||
         options.video.keyFrameInterval) {
         mediaOptions.video.parameters = {
           resolution: options.video.resolution,
           framerate: options.video.frameRate,
           bitrate: options.video.bitrateMultiplier ? 'x'
-              + options.video.bitrateMultiplier.toString() : undefined,
+            + options.video.bitrateMultiplier.toString() : undefined,
           keyFrameInterval: options.video.keyFrameInterval
         };
       }
@@ -379,10 +382,10 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
       if (typeof this._pc.addTransceiver === 'function') {
         // |direction| seems not working on Safari.
         if (mediaOptions.audio) {
-          this._pc.addTransceiver('audio', {direction: 'recvonly'});
+          this._pc.addTransceiver('audio', { direction: 'recvonly' });
         }
         if (mediaOptions.video) {
-          this._pc.addTransceiver('video', {direction: 'recvonly'});
+          this._pc.addTransceiver('video', { direction: 'recvonly' });
         }
       } else {
         offerOptions.offerToReceiveAudio = !!options.audio;
@@ -396,19 +399,19 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
         this._pc.setLocalDescription(desc).then(() => {
           this._signaling.sendSignalingMessage('soac', {
             id: this
-                ._internalId,
+              ._internalId,
             signaling: desc,
           });
-        }, function(errorMessage) {
+        }, function (errorMessage) {
           Logger.error('Set local description failed. Message: ' +
             JSON.stringify(errorMessage));
         });
-      }, function(error) {
+      }, function (error) {
         Logger.error('Create offer failed. Error info: ' + JSON.stringify(
-            error));
-      }).catch((e)=>{
+          error));
+      }).catch((e) => {
         Logger.error('Failed to create offer or set SDP. Message: '
-            + e.message);
+          + e.message);
         this._unsubscribe();
         this._rejectPromise(e);
         this._fireEndedEventOnPublicationOrSubscription();
@@ -419,17 +422,17 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
       this._fireEndedEventOnPublicationOrSubscription();
     });
     return new Promise((resolve, reject) => {
-      this._subscribePromise = {resolve: resolve, reject: reject};
+      this._subscribePromise = { resolve: resolve, reject: reject };
     });
   }
 
   _unpublish() {
     if (!this._stopped) {
       this._stopped = true;
-      this._signaling.sendSignalingMessage('unpublish', {id: this._internalId})
-          .catch((e) => {
-            Logger.warning('MCU returns negative ack for unpublishing, ' + e);
-          });
+      this._signaling.sendSignalingMessage('unpublish', { id: this._internalId })
+        .catch((e) => {
+          Logger.warning('MCU returns negative ack for unpublishing, ' + e);
+        });
       if (this._pc && this._pc.signalingState !== 'closed') {
         this._pc.close();
       }
@@ -442,9 +445,9 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
       this._signaling.sendSignalingMessage('unsubscribe', {
         id: this._internalId,
       })
-          .catch((e) => {
-            Logger.warning('MCU returns negative ack for unsubscribing, ' + e);
-          });
+        .catch((e) => {
+          Logger.warning('MCU returns negative ack for unsubscribing, ' + e);
+        });
       if (this._pc && this._pc.signalingState !== 'closed') {
         this._pc.close();
       }
@@ -463,7 +466,7 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
       if (!isPub) {
         const muteEventName = isMute ? 'mute' : 'unmute';
         this._subscription.dispatchEvent(
-            new MuteEvent(muteEventName, {kind: trackKind}));
+          new MuteEvent(muteEventName, { kind: trackKind }));
       }
     });
   }
@@ -471,20 +474,20 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
   _applyOptions(options) {
     if (typeof options !== 'object' || typeof options.video !== 'object') {
       return Promise.reject(new ConferenceError(
-          'Options should be an object.'));
+        'Options should be an object.'));
     }
     const videoOptions = {};
     videoOptions.resolution = options.video.resolution;
     videoOptions.framerate = options.video.frameRate;
     videoOptions.bitrate = options.video.bitrateMultiplier ? 'x' + options.video
-        .bitrateMultiplier
-        .toString() : undefined;
+      .bitrateMultiplier
+      .toString() : undefined;
     videoOptions.keyFrameInterval = options.video.keyFrameInterval;
     return this._signaling.sendSignalingMessage('subscription-control', {
       id: this._internalId,
       operation: 'update',
       data: {
-        video: {parameters: videoOptions},
+        video: { parameters: videoOptions },
       },
     }).then();
   }
@@ -547,9 +550,9 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
     }
 
     Logger.debug('ICE connection state changed to ' +
-        event.currentTarget.iceConnectionState);
+      event.currentTarget.iceConnectionState);
     if (event.currentTarget.iceConnectionState === 'closed' ||
-        event.currentTarget.iceConnectionState === 'failed') {
+      event.currentTarget.iceConnectionState === 'failed') {
       if (event.currentTarget.iceConnectionState === 'failed') {
         this._handleError('connection failed.');
       } else {
@@ -557,11 +560,47 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
         this._fireEndedEventOnPublicationOrSubscription();
       }
     }
+
+    if ("disconnected" === event.currentTarget.iceConnectionState) {
+      console.log("Show reconnecting screen");
+      this.reconnecting = true;
+      const reconnectingEvent = new CustomEvent("reconnecting", {
+        "detail": { "value": this.reconnecting }
+      });
+      document.dispatchEvent(reconnectingEvent);
+    }
+    else {
+      if (this.reconnecting === true) {
+        switch (event.currentTarget.iceConnectionState) {
+          case "closed": case "failed": {
+            console.log("Hide reconnecting screen, end call");
+            this.reconnecting = false;
+            const reconnectingEvent = new CustomEvent("reconnecting", {
+              "detail": { "value": this.reconnecting }
+            });
+            document.dispatchEvent(reconnectingEvent);
+            break;
+          }
+          case "connected": case "completed": {
+            console.log("Hide reconnecting screen, connect call");
+            this.reconnecting = false;
+            const reconnectingEvent = new CustomEvent("reconnecting", {
+              "detail": { "value": this.reconnecting }
+            });
+            document.dispatchEvent(reconnectingEvent);
+            break;
+          }
+          default:
+          /**No action required */
+        }
+      }
+    }
+
   }
 
   _onConnectionStateChange(event) {
     if (this._pc.connectionState === 'closed' ||
-        this._pc.connectionState === 'failed') {
+      this._pc.connectionState === 'failed') {
       if (this._pc.connectionState === 'failed') {
         this._handleError('connection failed.');
       } else {
@@ -610,7 +649,7 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
       return this._pc.getStats();
     } else {
       return Promise.reject(new ConferenceError(
-          'PeerConnection is not available.'));
+        'PeerConnection is not available.'));
     }
   }
 
@@ -619,9 +658,9 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
       this._subscription = new Subscription(this._internalId, () => {
         this._unsubscribe();
       }, () => this._getStats(),
-      (trackKind) => this._muteOrUnmute(true, false, trackKind),
-      (trackKind) => this._muteOrUnmute(false, false, trackKind),
-      (options) => this._applyOptions(options));
+        (trackKind) => this._muteOrUnmute(true, false, trackKind),
+        (trackKind) => this._muteOrUnmute(false, false, trackKind),
+        (options) => this._applyOptions(options));
       // Fire subscription's ended event when associated stream is ended.
       this._subscribedStream.addEventListener('ended', () => {
         this._subscription.dispatchEvent('ended', new OwtEvent('ended'));
@@ -632,8 +671,8 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
         this._unpublish();
         return Promise.resolve();
       }, () => this._getStats(),
-      (trackKind) => this._muteOrUnmute(true, true, trackKind),
-      (trackKind) => this._muteOrUnmute(false, true, trackKind));
+        (trackKind) => this._muteOrUnmute(true, true, trackKind),
+        (trackKind) => this._muteOrUnmute(false, true, trackKind));
       this._publishPromise.resolve(this._publication);
       // Do not fire publication's ended event when associated stream is ended.
       // It may still sending silence or black frames.
@@ -666,7 +705,7 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
     return this._handleError(errorMessage);
   }
 
-  _handleError(errorMessage){
+  _handleError(errorMessage) {
     const error = new ConferenceError(errorMessage);
     const p = this._publishPromise || this._subscribePromise;
     if (p) {
@@ -692,12 +731,12 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
     if (this._publication || this._publishPromise) {
       if (options.audio) {
         const audioCodecNames = Array.from(options.audio,
-            (encodingParameters) => encodingParameters.codec.name);
+          (encodingParameters) => encodingParameters.codec.name);
         sdp = SdpUtils.reorderCodecs(sdp, 'audio', audioCodecNames);
       }
       if (options.video) {
         const videoCodecNames = Array.from(options.video,
-            (encodingParameters) => encodingParameters.codec.name);
+          (encodingParameters) => encodingParameters.codec.name);
         sdp = SdpUtils.reorderCodecs(sdp, 'video', videoCodecNames);
       }
     } else {
@@ -728,7 +767,7 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
   _setRtpSenderOptions(sdp, options) {
     // SDP mugling is deprecated, moving to `setParameters`.
     if (this._isRtpEncodingParameters(options.audio) ||
-        this._isRtpEncodingParameters(options.video)) {
+      this._isRtpEncodingParameters(options.video)) {
       return sdp;
     }
     sdp = this._setMaxBitrate(sdp, options);
@@ -749,7 +788,7 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
       return sdp;
     }
     if (this._isRtpEncodingParameters(options.audio) ||
-        this._isRtpEncodingParameters(options.video)) {
+      this._isRtpEncodingParameters(options.video)) {
       return sdp;
     }
     sdp = this._setCodecOrder(sdp, options);
@@ -778,9 +817,9 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
       Logger.warning('Invalid data field for stream update info.');
     }
     if (message.data.value === 'active') {
-      eventTarget.dispatchEvent(new MuteEvent('unmute', {kind: trackKind}));
+      eventTarget.dispatchEvent(new MuteEvent('unmute', { kind: trackKind }));
     } else if (message.data.value === 'inactive') {
-      eventTarget.dispatchEvent(new MuteEvent('mute', {kind: trackKind}));
+      eventTarget.dispatchEvent(new MuteEvent('mute', { kind: trackKind }));
     } else {
       Logger.warning('Invalid data value for stream update info.');
     }
