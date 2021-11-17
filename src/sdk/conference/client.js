@@ -334,11 +334,11 @@ export const ConferenceClient = function(config, signalingImpl) {
    * @returns {Promise<ConferenceInfo, Error>} Return a promise resolved with current conference's information if successfully join the conference. Or return a promise rejected with a newly created Owt.Error if failed to join the conference.
    * @param {string} tokenString Token is issued by conference server(nuve).
    */
-  this.join = function(tokenString) {
+  this.join = function(tokenString, options) {
     return new Promise((resolve, reject) => {
       const token = JSON.parse(Base64.decodeBase64(tokenString));
       const isSecured = (token.secure === true);
-      let host = token.host;
+      let host = options.proxyHost || token.host;
       if (typeof host !== 'string') {
         reject(new ConferenceError('Invalid host.'));
         return;
