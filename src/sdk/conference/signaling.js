@@ -52,12 +52,13 @@ export class SioSignaling extends EventModule.EventDispatcher {
    * @param {string} loginInfo Infomation required for logging in.
    * @private.
    */
-  connect(host, isSecured, loginInfo) {
+  connect(host, isSecured, loginInfo, options = {}) {
     return new Promise((resolve, reject) => {
       const opts = {
         'reconnection': true,
         'reconnectionAttempts': reconnectionAttempts,
         'force new connection': true,
+		...options,
       };
       this._socket = io(host, opts);
       ['participant', 'text', 'stream', 'progress'].forEach((

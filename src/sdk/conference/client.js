@@ -336,6 +336,7 @@ export const ConferenceClient = function(config, signalingImpl) {
    */
   this.join = function(tokenString, options) {
     return new Promise((resolve, reject) => {
+	  const signalingOptions = options.signalingOptions || {};
       const token = JSON.parse(Base64.decodeBase64(tokenString));
       const isSecured = (token.secure === true);
       let host = options.proxyHost || token.host;
@@ -359,7 +360,7 @@ export const ConferenceClient = function(config, signalingImpl) {
         protocol: protocolVersion,
       };
 
-      signaling.connect(host, isSecured, loginInfo).then((resp) => {
+      signaling.connect(host, isSecured, loginInfo, signalingOptions).then((resp) => {
         signalingState = SignalingState.CONNECTED;
         room = resp.room;
         if (room.streams !== undefined) {
