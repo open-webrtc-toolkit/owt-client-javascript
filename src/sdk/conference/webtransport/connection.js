@@ -4,7 +4,8 @@
 
 /* eslint-disable require-jsdoc */
 /* global Promise, Map, WebTransport, WebTransportBidirectionalStream,
-   Uint8Array, Uint32Array, TextEncoder, Worker, MediaStreamTrackProcessor */
+   Uint8Array, Uint32Array, TextEncoder, Worker, MediaStreamTrackProcessor,
+   MediaStreamTrackGenerator, proto */
 
 'use strict';
 
@@ -44,6 +45,10 @@ export class QuicConnection extends EventDispatcher {
     this._transportId = this._token.transportId;
     this._initReceiveStreamReader();
     this._worker = new Worker(workerDir + '/media-worker.js', {type: 'module'});
+    // Key is subscription ID, value is a MediaStreamTrackGenerator writer.
+    this._mstVideoGeneratorWriters = new Map();
+    this._initRtpModule();
+    this._initDatagramReader();
   }
 
   /**
@@ -77,15 +82,18 @@ export class QuicConnection extends EventDispatcher {
     await this._authenticate(this._tokenString);
   }
 
+  _initRtpModule() {
+    this._worker.postMessage(['init-rtp']);
+  }
+
   async _initReceiveStreamReader() {
     const receiveStreamReader =
         this._quicTransport.incomingBidirectionalStreams.getReader();
-    Logger.info('Reader: ' + receiveStreamReader);
     let receivingDone = false;
     while (!receivingDone) {
       const {value: receiveStream, done: readingReceiveStreamsDone} =
           await receiveStreamReader.read();
-      Logger.info('New stream received');
+      Logger.debug('New stream received.');
       const subscriptionIdBytes = new Uint8Array(uuidByteLength);
       let subscriptionIdBytesOffset = 0;
       const trackIdBytes = new Uint8Array(uuidByteLength);
@@ -173,6 +181,19 @@ export class QuicConnection extends EventDispatcher {
     }
   }
 
+  async _initDatagramReader() {
+    const datagramReader = this._quicTransport.datagrams.readable.getReader();
+    let receivingDone = false;
+    while (!receivingDone) {
+      const {value: datagram, done: readingDatagramsDone} =
+          await datagramReader.read();
+      this._worker.postMessage(['rtp-packet', datagram]);
+      if (readingDatagramsDone) {
+        receivingDone = true;
+      }
+    }
+  }
+
   _createSubscription(id, receiveStream) {
     // TODO: Incomplete subscription.
     const subscription = new Subscription(id, () => {
@@ -207,6 +228,95 @@ export class QuicConnection extends EventDispatcher {
     return quicStream;
   }
 
+  async bindFeedbackReader(stream, publicationId) {
+    // The receiver side of a publication stream starts with a UUID of
+    // publication ID, then each feedback message has a 4 bytes header indicates
+    // its length, and followed by protobuf encoded body.
+    const feedbackChunkReader = stream.readable.getReader();
+    let feedbackChunksDone = false;
+    let publicationIdOffset = 0;
+    const headerSize=4;
+    const header = new Uint8Array(headerSize);
+    let headerOffset = 0;
+    let bodySize = 0;
+    let bodyOffset = 0;
+    let bodyBytes;
+    while (!feedbackChunksDone) {
+      let valueOffset=0;
+      const {value, done} = await feedbackChunkReader.read();
+      Logger.debug(value);
+      while (valueOffset < value.byteLength) {
+        if (publicationIdOffset < uuidByteLength) {
+          // TODO: Check publication ID matches. For now, we just skip this ID.
+          const readLength =
+              Math.min(uuidByteLength - publicationIdOffset, value.byteLength);
+          valueOffset += readLength;
+          publicationIdOffset += readLength;
+        }
+        if (headerOffset < headerSize) {
+          // Read header.
+          const copyLength = Math.min(
+              headerSize - headerOffset, value.byteLength - valueOffset);
+          if (copyLength === 0) {
+            continue;
+          }
+          header.set(
+              value.subarray(valueOffset, valueOffset + copyLength),
+              headerOffset);
+          headerOffset += copyLength;
+          valueOffset += copyLength;
+          if (headerOffset < headerSize) {
+            continue;
+          }
+          bodySize = 0;
+          bodyOffset = 0;
+          for (let i = 0; i < headerSize; i++) {
+            bodySize += (header[i] << ((headerSize - 1 - i) * 8));
+          }
+          bodyBytes = new Uint8Array(bodySize);
+          Logger.debug('Body size ' + bodySize);
+        }
+        if (bodyOffset < bodySize) {
+          const copyLength =
+              Math.min(bodySize - bodyOffset, value.byteLength - valueOffset);
+          if (copyLength === 0) {
+            continue;
+          }
+          Logger.debug('Bytes for body: '+copyLength);
+          bodyBytes.set(
+              value.subarray(valueOffset, valueOffset + copyLength),
+              bodyOffset);
+          bodyOffset += copyLength;
+          valueOffset += copyLength;
+          if (valueOffset < bodySize) {
+            continue;
+          }
+          // Decode body.
+          const feedback =
+              proto.owt.protobuf.Feedback.deserializeBinary(bodyBytes);
+          this.handleFeedback(feedback, publicationId);
+        }
+      }
+      if (done) {
+        feedbackChunksDone = true;
+        break;
+      }
+    }
+  }
+
+  async handleFeedback(feedback, publicationId) {
+    Logger.debug(
+        'Key frame request type: ' +
+        proto.owt.protobuf.Feedback.Type.KEY_FRAME_REQUEST);
+    if (feedback.getType() ===
+        proto.owt.protobuf.Feedback.Type.KEY_FRAME_REQUEST) {
+      this._worker.postMessage(
+          ['rtcp-feedback', ['key-frame-request', publicationId]]);
+    } else {
+      Logger.warning('Unrecognized feedback type ' + feedback.getType());
+    }
+  }
+
   async publish(stream, options) {
     // TODO: Avoid a stream to be published twice. The first 16 bit data send to
     // server must be it's publication ID.
@@ -225,6 +335,7 @@ export class QuicConnection extends EventDispatcher {
       for (const track of stream.stream.getTracks()) {
         const quicStream =
             await this._quicTransport.createBidirectionalStream();
+        this.bindFeedbackReader(quicStream, publicationId);
         this._quicMediaStreamTracks.set(track.id, quicStream);
         quicStreams.push(quicStream);
       }
@@ -262,6 +373,7 @@ export class QuicConnection extends EventDispatcher {
             [
               'media-sender',
               [
+                publicationId,
                 track.id,
                 track.kind,
                 processor.readable,
@@ -317,12 +429,12 @@ export class QuicConnection extends EventDispatcher {
     if (typeof options !== 'object') {
       return Promise.reject(new TypeError('Options should be an object.'));
     }
-    // if (options.audio === undefined) {
-    //   options.audio = !!stream.settings.audio;
-    // }
-    // if (options.video === undefined) {
-    //   options.video = !!stream.settings.video;
-    // }
+    if (options.audio === undefined) {
+      options.audio = !!stream.settings.audio;
+    }
+    if (options.video === undefined) {
+      options.video = !!stream.settings.video;
+    }
     let mediaOptions;
     let dataOptions;
     if (options.audio || options.video) {
@@ -375,19 +487,38 @@ export class QuicConnection extends EventDispatcher {
           })
           .then((data) => {
             this._subscribeOptions.set(data.id, options);
-            Logger.debug('Subscribe info is set.');
-            if (this._quicDataStreams.has(data.id)) {
-              // QUIC stream created before signaling returns.
-              // TODO: Update subscription to accept list of QUIC streams.
-              const subscription = this._createSubscription(
-                  data.id, this._quicDataStreams.get(data.id)[0]);
-              resolve(subscription);
+            if (dataOptions) {
+              // A WebTransport stream is associated with a subscription for
+              // data.
+              if (this._quicDataStreams.has(data.id)) {
+                // QUIC stream created before signaling returns.
+                // TODO: Update subscription to accept list of QUIC streams.
+                const subscription = this._createSubscription(
+                    data.id, this._quicDataStreams.get(data.id)[0]);
+                resolve(subscription);
+              } else {
+                this._quicDataStreams.set(data.id, null);
+                // QUIC stream is not created yet, resolve promise after getting
+                // QUIC stream.
+                this._subscribePromises.set(
+                    data.id, {resolve: resolve, reject: reject});
+              }
             } else {
-              this._quicDataStreams.set(data.id, null);
-              // QUIC stream is not created yet, resolve promise after getting
-              // QUIC stream.
-              this._subscribePromises.set(
-                  data.id, {resolve: resolve, reject: reject});
+              // A MediaStream is associated with a subscription for media.
+              // Media packets are received over WebTransport datagram.
+              const generators = [];
+              for (const track of mediaOptions) {
+                const generator =
+                    new MediaStreamTrackGenerator({kind: track.type});
+                generators.push(generator);
+                // TODO: Update key with the correct SSRC.
+                this._mstVideoGeneratorWriters.set(
+                    '0', generator.writable.getWriter());
+              }
+              const mediaStream = new MediaStream(generators);
+              const subscription =
+                  this._createSubscription(data.id, mediaStream);
+              resolve(subscription);
             }
             if (this._subscriptionInfoReady.has(data.id)) {
               this._subscriptionInfoReady.get(data.id)();
@@ -453,5 +584,19 @@ export class QuicConnection extends EventDispatcher {
 
   datagramReader() {
     return this._quicTransport.datagrams.readable.getReader();
+  }
+
+  initHandlersForWorker() {
+    this._worker.onmessage = ((e) => {
+      const [command, args] = e.data;
+      switch (command) {
+        case 'video-frame':
+          // TODO: Use actual subscription ID.
+          this._mstVideoGeneratorWriters.get('0').getWriter.write(args);
+          break;
+        default:
+          Logger.warn('Unrecognized command ' + command);
+      }
+    });
   }
 }
