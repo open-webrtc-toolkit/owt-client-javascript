@@ -523,7 +523,7 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
 			console.log("Hide reconnecting screen, stream ended");
 			this.reconnecting = false;
 			const reconnectingEvent = new CustomEvent("reconnecting", {
-				"detail": { "value": this.reconnecting }
+				"detail": { "value": this.reconnecting, status: "ended" }
 			});
 			document.dispatchEvent(reconnectingEvent);
 		}
@@ -584,7 +584,7 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
 						console.log("Hide reconnecting screen, end call");
 						this.reconnecting = false;
 						const reconnectingEvent = new CustomEvent("reconnecting", {
-							"detail": { "value": this.reconnecting }
+							"detail": { "value": this.reconnecting, status: "ended" }
 						});
 						document.dispatchEvent(reconnectingEvent);
 						break;
@@ -593,7 +593,7 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
 						console.log("Hide reconnecting screen, connect call");
 						this.reconnecting = false;
 						const reconnectingEvent = new CustomEvent("reconnecting", {
-							"detail": { "value": this.reconnecting }
+							"detail": { "value": this.reconnecting, status: "connected" }
 						});
 						document.dispatchEvent(reconnectingEvent);
 						break;
