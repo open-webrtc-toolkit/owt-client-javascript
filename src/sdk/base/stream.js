@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-/* global SendStream, BidirectionalStream */
+/* global WebTransportBidirectionalStream */
 
 'use strict';
 import * as Utils from './utils.js';
@@ -56,9 +56,8 @@ export class Stream extends EventDispatcher {
   constructor(stream, sourceInfo, attributes) {
     super();
     if ((stream && !(stream instanceof MediaStream) &&
-         !(typeof SendStream === 'function' && stream instanceof SendStream) &&
-         !(typeof BidirectionalStream === 'function' &&
-           stream instanceof BidirectionalStream)) ||
+         !(typeof WebTransportBidirectionalStream === 'function' &&
+           stream instanceof WebTransportBidirectionalStream)) ||
         (typeof sourceInfo !== 'object')) {
       throw new TypeError('Invalid stream or sourceInfo.');
     }
@@ -82,7 +81,7 @@ export class Stream extends EventDispatcher {
       });
     }
     /**
-     * @member {MediaStream | SendStream | BidirectionalStream | undefined} stream
+     * @member {MediaStream | WebTransportBidirectionalStream | undefined} stream
      * @instance
      * @memberof Owt.Base.Stream
      * @see {@link https://www.w3.org/TR/mediacapture-streams/#mediastream|MediaStream API of Media Capture and Streams}
