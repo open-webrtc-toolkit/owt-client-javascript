@@ -20,7 +20,7 @@ const keyFrameRequested = new Map();
 let wasmModule;
 let mediaSession;
 // Key is SSRC, value is an RTP receiver.
-let rtpReceivers = new Map();
+const rtpReceivers = new Map();
 let frameBuffer;
 let videoDecoder;
 // 4 bytes for frame size before each frame. The 1st byte is reserved, always 0.

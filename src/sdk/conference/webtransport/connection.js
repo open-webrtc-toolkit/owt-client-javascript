@@ -72,7 +72,7 @@ export class QuicConnection extends EventDispatcher {
           this._readyHandler();
         } else if (message.status === 'error') {
           this._errorHandler(message.data);
-        } else if (message.status === 'rtp'){
+        } else if (message.status === 'rtp') {
           this._rtpHandler(message);
         }
         break;
@@ -528,8 +528,8 @@ export class QuicConnection extends EventDispatcher {
                 'add-subscription',
                 [
                   subscription.id, options,
-                  this._rtpConfigs.get(subscription.id)
-                ]
+                  this._rtpConfigs.get(subscription.id),
+                ],
               ]);
               resolve(subscription);
             }
