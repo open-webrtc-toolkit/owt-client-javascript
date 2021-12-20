@@ -161,8 +161,7 @@ export const ConferenceClient = function(config, workerDir, signalingImpl) {
     if (notification === 'soac' || notification === 'progress') {
       if (channels.has(data.id)) {
         channels.get(data.id).onMessage(notification, data);
-      } else if (quicTransportChannel && quicTransportChannel
-          .hasContentSessionId(data.id)) {
+      } else if (quicTransportChannel) {
         quicTransportChannel.onMessage(notification, data);
       } else {
         Logger.warning('Cannot find a channel for incoming data.');

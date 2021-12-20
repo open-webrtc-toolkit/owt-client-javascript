@@ -19,7 +19,8 @@ const keyFrameRequested = new Map();
 
 let wasmModule;
 let mediaSession;
-let rtpReceiver;
+// Key is SSRC, value is an RTP receiver.
+let rtpReceivers = new Map();
 let frameBuffer;
 let videoDecoder;
 // 4 bytes for frame size before each frame. The 1st byte is reserved, always 0.
@@ -46,6 +47,9 @@ onmessage = async (e) => {
     case 'rtp-packet':
       await handleRtpPacket(args);
       break;
+    case 'add-subscription':
+      addNewSubscription(...args);
+      break;
     default:
       console.warn('Unrecognized command ' + command);
   }
@@ -69,14 +73,8 @@ async function initMediaSender(
 }
 
 async function initRtpModule() {
-  initVideoDecoder();
   wasmModule = await fetchWasm();
   mediaSession = new wasmModule.MediaSession();
-  rtpReceiver = mediaSession.createRtpVideoReceiver();
-  rtpReceiver.setCompleteFrameCallback((frame) => {
-    videoDecoder.decode(new EncodedVideoChunk(
-        {timestamp: Date.now(), data: frame, type: 'key'}));
-  });
 }
 
 async function fetchWasm() {
@@ -157,17 +155,17 @@ function initVideoEncoder(config, writer) {
   return videoEncoder;
 }
 
-function initVideoDecoder() {
+function initVideoDecoder(subscriptionId) {
   videoDecoder = new VideoDecoder({
-    output: videoFrameOutputCallback,
+    output: videoFrameOutputCallback.bind(null, subscriptionId),
     error: webCodecsErrorCallback,
   });
   videoDecoder.configure({codec: 'avc1.42400a', optimizeForLatency: true});
 }
 
-function videoFrameOutputCallback(frame) {
+function videoFrameOutputCallback(subscriptionId, frame) {
   // eslint-disable-next-line no-undef
-  postMessage(['video-frame', frame], [frame]);
+  postMessage(['video-frame', [subscriptionId, frame]], [frame]);
   frame.close();
 }
 
@@ -196,8 +194,29 @@ async function readMediaData(trackReadable, encoder, publicationId) {
   }
 }
 
+function getSsrc(packet) {
+  // SSRC starts from the 65th bit, in network order.
+  return new DataView(packet.buffer).getUint32(8, false);
+}
+
 async function handleRtpPacket(packet) {
+  const ssrc = getSsrc(packet);
   const buffer = wasmModule._malloc(packet.byteLength);
   wasmModule.writeArrayToMemory(packet, buffer);
-  rtpReceiver.onRtpPacket(buffer, packet.byteLength);
+  rtpReceivers.get(ssrc).onRtpPacket(buffer, packet.byteLength);
+}
+
+function addNewSubscription(subscriptionId, subscribeOptions, rtpConfig) {
+  // TODO: Audio is not supported yet, ignore the audio part.
+  initVideoDecoder(subscriptionId);
+  const videoSsrc = rtpConfig.video.ssrc;
+  if (rtpReceivers.has(videoSsrc)) {
+    console.error(`RTP receiver for SSRC ${videoSsrc} exits.`);
+  }
+  const rtpReceiver = mediaSession.createRtpVideoReceiver(videoSsrc);
+  rtpReceivers.set(videoSsrc, rtpReceiver);
+  rtpReceiver.setCompleteFrameCallback((frame) => {
+    videoDecoder.decode(new EncodedVideoChunk(
+        {timestamp: Date.now(), data: frame, type: 'key'}));
+  });
 }

@@ -42,9 +42,13 @@ export class QuicConnection extends EventDispatcher {
     this._subscribeOptions = new Map(); // Key is subscription ID.
     this._subscriptionInfoReady =
         new Map(); // Key is subscription ID, value is a promise.
+    // Key is subscription ID, value is an object with audio and video RTP
+    // configs.
+    this._rtpConfigs = new Map();
     this._transportId = this._token.transportId;
     this._initReceiveStreamReader();
     this._worker = new Worker(workerDir + '/media-worker.js', {type: 'module'});
+    this._initHandlersForWorker();
     // Key is subscription ID, value is a MediaStreamTrackGenerator writer.
     this._mstVideoGeneratorWriters = new Map();
     this._initRtpModule();
@@ -68,6 +72,8 @@ export class QuicConnection extends EventDispatcher {
           this._readyHandler();
         } else if (message.status === 'error') {
           this._errorHandler(message.data);
+        } else if (message.status === 'rtp'){
+          this._rtpHandler(message);
         }
         break;
       case 'stream':
@@ -507,17 +513,24 @@ export class QuicConnection extends EventDispatcher {
               // A MediaStream is associated with a subscription for media.
               // Media packets are received over WebTransport datagram.
               const generators = [];
-              for (const track of mediaOptions) {
+              for (const track of mediaOptions.tracks) {
                 const generator =
                     new MediaStreamTrackGenerator({kind: track.type});
                 generators.push(generator);
                 // TODO: Update key with the correct SSRC.
                 this._mstVideoGeneratorWriters.set(
-                    '0', generator.writable.getWriter());
+                    data.id, generator.writable.getWriter());
               }
               const mediaStream = new MediaStream(generators);
               const subscription =
                   this._createSubscription(data.id, mediaStream);
+              this._worker.postMessage([
+                'add-subscription',
+                [
+                  subscription.id, options,
+                  this._rtpConfigs.get(subscription.id)
+                ]
+              ]);
               resolve(subscription);
             }
             if (this._subscriptionInfoReady.has(data.id)) {
@@ -582,17 +595,21 @@ export class QuicConnection extends EventDispatcher {
     // its own status. Do nothing here.
   }
 
+  _rtpHandler(message) {
+    Logger.debug(`RTP config: ${JSON.stringify(message.data)}.`);
+    this._rtpConfigs.set(message.id, message.data);
+  }
+
   datagramReader() {
     return this._quicTransport.datagrams.readable.getReader();
   }
 
-  initHandlersForWorker() {
+  _initHandlersForWorker() {
     this._worker.onmessage = ((e) => {
       const [command, args] = e.data;
       switch (command) {
         case 'video-frame':
-          // TODO: Use actual subscription ID.
-          this._mstVideoGeneratorWriters.get('0').getWriter.write(args);
+          this._mstVideoGeneratorWriters.get(args[0]).write(args[1]);
           break;
         default:
           Logger.warn('Unrecognized command ' + command);

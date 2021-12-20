@@ -63,16 +63,6 @@ function updateConferenceStatus(message) {
       ('<p>' + message + '</p>');
 }
 
-function initWorker() {
-  dataWorker = new Worker('./scripts/data-worker.js');
-  dataWorker.onmessage=((e) => {
-    if (e.data[0] === 'video-frame') {
-      generatorWriter.write(e.data[1]);
-      //console.log(e.data[1]);
-    }
-  });
-}
-
 function joinConference() {
   return new Promise((resolve, reject) => {
     createToken(undefined, 'user', 'presenter', token => {
@@ -85,7 +75,6 @@ function joinConference() {
           }
         }
         updateConferenceStatus('Connected to conference server.');
-        initWorker();
         resolve();
       });
     }, 'http://jianjunz-nuc-ubuntu.sh.intel.com:3001');
@@ -153,7 +142,6 @@ async function writeData() {
 
 window.addEventListener('load', () => {
   windowOnLoad();
-  fetchWasm();
 });
 
 document.getElementById('start-sending').addEventListener('click', async () => {
@@ -190,58 +178,12 @@ document.getElementById('stop-sending').addEventListener('click', () => {
 
 document.getElementById('start-receiving')
     .addEventListener('click', async () => {
-      const video=document.getElementById('remote-video');
-      const generator = new MediaStreamTrackGenerator({kind: 'video'});
-      generatorWriter=generator.writable.getWriter();
-      video.srcObject = new MediaStream([generator]);
-      const reader = conference.datagramReader();
-      const ms = new Module.MediaSession();
-      const receiver = ms.createRtpVideoReceiver();
-      receiver.setCompleteFrameCallback((frame) => {
-        const copiedFrame = frame.slice(0);
-        dataWorker.postMessage(
-            ['encoded-video-frame', copiedFrame], [copiedFrame.buffer]);
-      });
       subscribeMixedStream();
-      while (true) {
-        const received = await reader.read();
-        const buffer = Module._malloc(received.value.byteLength);
-        Module.writeArrayToMemory(received.value, buffer);
-        receiver.onRtpPacket(buffer, received.value.byteLength);
-      }
     });
-
-async function fetchWasm() {
-  Module['instantiateWasm'] = async (imports, successCallback) => {
-    const response = await fetch('scripts/owt.wasm');
-    const buffer = await response.arrayBuffer();
-    const module=await WebAssembly.compile(buffer);
-    const instance = await WebAssembly.instantiate(module, imports);
-    successCallback(instance, module);
-    return {};
-  };
-  const scriptPromise = new Promise((resolve, reject) => {
-    const script = document.createElement('script');
-    document.body.appendChild(script);
-    script.onload = resolve;
-    script.onerror = reject;
-    script.async = true;
-    script.src = 'scripts/owt.js';
-  });
-  await scriptPromise;
-}
 
 async function subscribeMixedStream() {
   const subscription = await conference.subscribe(
       mixedStream,
       {audio: false, video: {codecs: ['h264']}, transport: {type: 'quic'}});
-  const reader = subscription.stream.readable.getReader();
-  while (true) {
-    const {value, done} = await reader.read();
-    if (done) {
-      console.log('Subscription ends.');
-      break;
-    }
-    // console.log('Received data: ' + value);
-  }
+  document.getElementById('remote-video').srcObject = subscription.stream;
 }
