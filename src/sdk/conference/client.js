@@ -386,8 +386,9 @@ export const ConferenceClient = function(config, signalingImpl) {
    * @memberof Owt.Conference.ConferenceClient
    * @return {Promise<ConferenceInfo, Error>} Return a promise resolved with current conference's information if successfully join the conference. Or return a promise rejected with a newly created Owt.Error if failed to join the conference.
    * @param {string} tokenString Token is issued by conference server(nuve).
+   * @param {string} signalingOptions
    */
-  this.join = function(tokenString) {
+  this.join = function(tokenString, signalingOptions) {
     return new Promise((resolve, reject) => {
       const token = JSON.parse(Base64.decodeBase64(tokenString));
       const isSecured = (token.secure === true);
@@ -413,7 +414,7 @@ export const ConferenceClient = function(config, signalingImpl) {
         protocol: protocolVersion,
       };
 
-      signaling.connect(host, isSecured, loginInfo).then((resp) => {
+      signaling.connect(host, isSecured, loginInfo, signalingOptions).then((resp) => {
         signalingState = SignalingState.CONNECTED;
         room = resp.room;
         if (room.streams !== undefined) {
