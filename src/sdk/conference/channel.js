@@ -61,6 +61,8 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
     this._sdpResolvers = []; // [{finish, resolve, reject}]
     this._sdpResolveNum = 0;
     this._remoteMediaStreams = new Map(); // Key is subscription ID, value is MediaStream.
+
+    this._createPeerConnection();
   }
 
   /**
@@ -223,7 +225,6 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
       }
     }
     const mediaOptions = {};
-    this._createPeerConnection();
     if (stream.mediaStream.getAudioTracks().length > 0 && options.audio !==
       false && options.audio !== null) {
       if (stream.mediaStream.getAudioTracks().length > 1) {
@@ -511,7 +512,6 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
 
     const offerOptions = {};
     const transceivers = [];
-    this._createPeerConnection();
     if (typeof this.pc.addTransceiver === 'function') {
       // |direction| seems not working on Safari.
       if (mediaOptions.audio) {
@@ -898,6 +898,7 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
 
   _createPeerConnection() {
     if (this.pc) {
+      Logger.warning('PeerConnection exists.');
       return;
     }
 

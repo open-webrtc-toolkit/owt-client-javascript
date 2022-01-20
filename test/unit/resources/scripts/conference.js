@@ -88,7 +88,7 @@ describe('Unit tests for ConferencePeerConnectionChannel.', () => {
           false, true
         ]
       ];
-      const channel = new ConferencePeerConnectionChannel();
+      const channel = new ConferencePeerConnectionChannel({});
       for (const [p, isRtpEncodingParameters, isOwtEncodingParameters] of
                parameters) {
         expect(channel._isRtpEncodingParameters(p))
