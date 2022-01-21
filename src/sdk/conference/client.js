@@ -335,7 +335,7 @@ export const ConferenceClient = function(config, signalingImpl) {
   }
 
   // eslint-disable-next-line require-jsdoc
-  function sendSignalingMessage(type, message) {
+  async function sendSignalingMessage(type, message) {
     return signaling.send(type, message);
   }
 

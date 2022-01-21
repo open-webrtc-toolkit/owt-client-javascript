@@ -131,14 +131,29 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
           mid: t.mid,
         };
       });
-      const publicationId =
-          await this._signaling.sendSignalingMessage('publish', {
-            media: {tracks: trackOptions},
-            attributes: stream.attributes,
-            transport: {id: this._id, type: 'webrtc'},
-          }).id;
+      const publicationResp =
+        await this._signaling.sendSignalingMessage('publish', {
+          media: {tracks: trackOptions},
+          attributes: stream.attributes,
+          transport: {id: this._id, type: 'webrtc'},
+        });
+      const publicationId = publicationResp.id;
       this._publishTransceivers.get(internalId).id = publicationId;
       this._reverseIdMap.set(publicationId, internalId);
+
+      if (this._id && this._id !== publicationResp.transportId) {
+        Logger.warning('Server returns conflict ID: ' + publicationResp
+            .transportId);
+        return;
+      }
+      this._id = publicationResp.transportId;
+
+      const messageEvent = new MessageEvent('id', {
+        message: publicationId,
+        origin: this._remoteId,
+      });
+      this.dispatchEvent(messageEvent);
+
       await this._signaling.sendSignalingMessage(
           'soac', {id: this._id, signaling: offer});
       return new Promise((resolve, reject) => {
@@ -374,19 +389,20 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
       });
     }).then((data) => {
       const publicationId = data.id;
-      const messageEvent = new MessageEvent('id', {
-        message: publicationId,
-        origin: this._remoteId,
-      });
-      this.dispatchEvent(messageEvent);
-
       this._publishTransceivers.get(internalId).id = publicationId;
       this._reverseIdMap.set(publicationId, internalId);
 
       if (this._id && this._id !== data.transportId) {
         Logger.warning('Server returns conflict ID: ' + data.transportId);
+        return;
       }
       this._id = data.transportId;
+
+      const messageEvent = new MessageEvent('id', {
+        message: publicationId,
+        origin: this._remoteId,
+      });
+      this.dispatchEvent(messageEvent);
 
       // Modify local SDP before sending
       if (options) {
@@ -577,18 +593,19 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
       });
     }).then((data) => {
       const subscriptionId = data.id;
+      this._subscribeTransceivers.get(internalId).id = subscriptionId;
+      this._reverseIdMap.set(subscriptionId, internalId);
+      if (this._id && this._id !== data.transportId) {
+        Logger.warning('Server returns conflict ID: ' + data.transportId);
+        return;
+      }
+      this._id = data.transportId;
+
       const messageEvent = new MessageEvent('id', {
         message: subscriptionId,
         origin: this._remoteId,
       });
       this.dispatchEvent(messageEvent);
-
-      this._subscribeTransceivers.get(internalId).id = subscriptionId;
-      this._reverseIdMap.set(subscriptionId, internalId);
-      if (this._id && this._id !== data.transportId) {
-        Logger.warning('Server returns conflict ID: ' + data.transportId);
-      }
-      this._id = data.transportId;
 
       // Modify local SDP before sending
       if (options) {
@@ -898,7 +915,8 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
 
   _createPeerConnection() {
     if (this.pc) {
-      Logger.warning('PeerConnection exists.');
+      Logger.warning('A PeerConnection was created. Cannot create again for ' +
+        'the same PeerConnectionChannel.');
       return;
     }
 
