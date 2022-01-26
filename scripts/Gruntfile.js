@@ -144,29 +144,6 @@ window.L = L;\n\
         nonull: true
       }
     },
-    jshint: {
-      dist: 'dist/sdk/<%= pkg.name %>.js',
-      ui_dist: 'dist/sdk/<%= pkg.name %>.ui.js',
-      options: {
-        esversion: 6,
-        browser: true,
-        curly: true,
-        eqeqeq: true,
-        immed: true,
-        latedef: false,
-        newcap: false,
-        noarg: true,
-        sub: true,
-        undef: true,
-        boss: true,
-        eqnull: true,
-        onecase: true,
-        unused: true,
-        supernew: true,
-        laxcomma: true
-      },
-      globals: {}
-    },
     uglify: {
       dist: {
         files: {
@@ -256,7 +233,6 @@ window.L = L;\n\
   // Load Grunt plugins.
   grunt.loadNpmTasks('grunt-contrib-concat');
   grunt.loadNpmTasks('grunt-contrib-uglify');
-  grunt.loadNpmTasks('grunt-contrib-jshint');
   grunt.loadNpmTasks('grunt-contrib-copy');
   grunt.loadNpmTasks('grunt-string-replace');
   grunt.loadNpmTasks('grunt-contrib-compress');
