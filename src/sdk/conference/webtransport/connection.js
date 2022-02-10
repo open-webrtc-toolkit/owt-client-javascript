@@ -604,12 +604,22 @@ export class QuicConnection extends EventDispatcher {
     return this._quicTransport.datagrams.readable.getReader();
   }
 
+  async _sendRtcp(buffer) {
+    const writer = this._quicTransport.datagrams.writable.getWriter();
+    await writer.ready;
+    writer.write(buffer);
+    writer.releaseLock();
+  }
+
   _initHandlersForWorker() {
     this._worker.onmessage = ((e) => {
       const [command, args] = e.data;
       switch (command) {
         case 'video-frame':
           this._mstVideoGeneratorWriters.get(args[0]).write(args[1]);
+          break;
+        case 'rtcp-packet':
+          this._sendRtcp(...args);
           break;
         default:
           Logger.warn('Unrecognized command ' + command);

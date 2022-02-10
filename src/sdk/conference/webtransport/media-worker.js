@@ -74,7 +74,6 @@ async function initMediaSender(
 
 async function initRtpModule() {
   wasmModule = await fetchWasm();
-  mediaSession = new wasmModule.MediaSession();
 }
 
 async function fetchWasm() {
@@ -203,6 +202,10 @@ async function handleRtpPacket(packet) {
   const ssrc = getSsrc(packet);
   const buffer = wasmModule._malloc(packet.byteLength);
   wasmModule.writeArrayToMemory(packet, buffer);
+  if(!rtpReceivers.has(ssrc)){
+    console.log('RTP receiver not found.');
+    return;
+  }
   rtpReceivers.get(ssrc).onRtpPacket(buffer, packet.byteLength);
 }
 
@@ -212,6 +215,14 @@ function addNewSubscription(subscriptionId, subscribeOptions, rtpConfig) {
   const videoSsrc = rtpConfig.video.ssrc;
   if (rtpReceivers.has(videoSsrc)) {
     console.error(`RTP receiver for SSRC ${videoSsrc} exits.`);
+  }
+  if (!mediaSession) {
+    mediaSession = new wasmModule.MediaSession();
+    mediaSession.setRtcpCallback((packet) => {
+      console.log('RTCP callback.');
+      const buffer = new Uint8Array(packet);
+      postMessage(['rtcp-packet', [buffer.buffer]], [buffer.buffer]);
+    });
   }
   const rtpReceiver = mediaSession.createRtpVideoReceiver(videoSsrc);
   rtpReceivers.set(videoSsrc, rtpReceiver);
