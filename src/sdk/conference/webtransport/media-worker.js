@@ -4,7 +4,7 @@
 
 /* eslint-disable require-jsdoc */
 /* global AudioEncoder, VideoEncoder, VideoDecoder, Map, ArrayBuffer,
-   Uint8Array, DataView, console, EncodedVideoChunk */
+   Uint8Array, DataView, console, EncodedVideoChunk, postMessage */
 
 // TODO: Use relative path instead.
 import initModule from '/src/samples/conference/public/scripts/owt.js';
@@ -205,7 +205,7 @@ async function handleRtpPacket(packet) {
   const ssrc = getSsrc(packet);
   const buffer = wasmModule._malloc(packet.byteLength);
   wasmModule.writeArrayToMemory(packet, buffer);
-  if(!rtpReceivers.has(ssrc)){
+  if (!rtpReceivers.has(ssrc)) {
     console.log('RTP receiver not found.');
     return;
   }
@@ -234,9 +234,9 @@ function addNewSubscription(subscriptionId, subscribeOptions, rtpConfig) {
       startTime = Date.now()*1000;
     }
     videoDecoder.decode(new EncodedVideoChunk({
-      timestamp: Date.now()*1000 - startTime,
+      timestamp: Date.now() * 1000 - startTime,
       data: frame,
-      type: isKeyFrame ? 'key' : 'delta'
+      type: isKeyFrame ? 'key' : 'delta',
     }));
   });
 }

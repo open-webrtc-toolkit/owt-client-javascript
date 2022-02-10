@@ -898,6 +898,7 @@ export class ConferencePeerConnectionChannel extends EventDispatcher {
 
   _createPeerConnection() {
     if (this.pc) {
+      Logger.warning('PeerConnection exists.');
       return;
     }
 
