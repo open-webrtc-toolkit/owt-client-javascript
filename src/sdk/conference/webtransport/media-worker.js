@@ -26,6 +26,9 @@ let videoDecoder;
 // 4 bytes for frame size before each frame. The 1st byte is reserved, always 0.
 const sizePrefix = 4;
 
+// Timestamp of the first frame.
+let startTime = 0;
+
 /* Messages it accepts:
  * media-sender: [Publication ID, MediaStreamTrack ID, MediaStreamTrack kind,
  * MediaStreamTrackProcessor readable, WebTransportStream writable,
@@ -226,8 +229,14 @@ function addNewSubscription(subscriptionId, subscribeOptions, rtpConfig) {
   }
   const rtpReceiver = mediaSession.createRtpVideoReceiver(videoSsrc);
   rtpReceivers.set(videoSsrc, rtpReceiver);
-  rtpReceiver.setCompleteFrameCallback((frame) => {
-    videoDecoder.decode(new EncodedVideoChunk(
-        {timestamp: Date.now(), data: frame, type: 'key'}));
+  rtpReceiver.setCompleteFrameCallback((frame, isKeyFrame) => {
+    if (startTime === 0) {
+      startTime = Date.now()*1000;
+    }
+    videoDecoder.decode(new EncodedVideoChunk({
+      timestamp: Date.now()*1000 - startTime,
+      data: frame,
+      type: isKeyFrame ? 'key' : 'delta'
+    }));
   });
 }
