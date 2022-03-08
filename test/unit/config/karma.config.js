@@ -46,7 +46,7 @@ module.exports = function (config) {
         pattern: './test/unit/resources/scripts/gen/sinon-browserified.js'
       },
       {
-        pattern: './src/sdk/!(rest)/*.js',
+        pattern: './src/sdk/!(rest)/**/*.js',
         type: 'module'
       },
       {
