@@ -16,7 +16,7 @@ import * as StreamModule from '../base/stream.js';
 import {Participant} from './participant.js';
 import {ConferenceInfo} from './info.js';
 import {ConferencePeerConnectionChannel} from './channel.js';
-import {QuicConnection} from './quicconnection.js';
+import {QuicConnection} from './webtransport/connection.js';
 import {RemoteMixedStream, ActiveAudioInputChangeEvent, LayoutChangeEvent}
   from './mixedstream.js';
 import * as StreamUtilsModule from './streamutils.js';
@@ -117,9 +117,10 @@ class ConferenceClientConfiguration { // eslint-disable-line no-unused-vars
  * @extends Owt.Base.EventDispatcher
  * @constructor
  * @param {?Owt.Conference.ConferenceClientConfiguration } config Configuration for ConferenceClient.
+ * @param {string} workerDir Path of the directory for workers shipped with OWT SDK. It could be an relative path to your HTML file or an absolute path.
  * @param {?Owt.Conference.SioSignaling } signalingImpl Signaling channel implementation for ConferenceClient. SDK uses default signaling channel implementation if this parameter is undefined. Currently, a Socket.IO signaling channel implementation was provided as ics.conference.SioSignaling. However, it is not recommended to directly access signaling channel or customize signaling channel for ConferenceClient as this time.
  */
-export const ConferenceClient = function(config, signalingImpl) {
+export const ConferenceClient = function(config, workerDir, signalingImpl) {
   Object.setPrototypeOf(this, new EventModule.EventDispatcher());
   config = config || {};
   const self = this;
@@ -160,8 +161,7 @@ export const ConferenceClient = function(config, signalingImpl) {
     if (notification === 'soac' || notification === 'progress') {
       if (channels.has(data.id)) {
         channels.get(data.id).onMessage(notification, data);
-      } else if (quicTransportChannel && quicTransportChannel
-          .hasContentSessionId(data.id)) {
+      } else if (quicTransportChannel) {
         quicTransportChannel.onMessage(notification, data);
       } else {
         Logger.warning('Cannot find a channel for incoming data.');
@@ -439,7 +439,8 @@ export const ConferenceClient = function(config, signalingImpl) {
         if (typeof WebTransport === 'function' && token.webTransportUrl) {
           quicTransportChannel = new QuicConnection(
               token.webTransportUrl, resp.webTransportToken,
-              createSignalingForChannel(), config.webTransportConfiguration);
+              createSignalingForChannel(), config.webTransportConfiguration,
+              workerDir);
         }
         const conferenceInfo = new ConferenceInfo(
             resp.room.id, Array.from(participants.values()),
@@ -464,7 +465,7 @@ export const ConferenceClient = function(config, signalingImpl) {
    * @instance
    * @desc Publish a LocalStream to conference server. Other participants will be able to subscribe this stream when it is successfully published.
    * @param {Owt.Base.LocalStream} stream The stream to be published.
-   * @param {(Owt.Base.PublishOptions|RTCRtpTransceiver[])} options If options is a PublishOptions, the stream will be published as options specified. If options is a list of RTCRtpTransceivers, each track in the first argument must have a corresponding RTCRtpTransceiver here, and the track will be published with the RTCRtpTransceiver associated with it.
+   * @param {(Owt.Base.PublishOptions|RTCRtpTransceiver[])} options If options is a PublishOptions, the stream will be published as options specified. If options is a list of RTCRtpTransceivers, each track in the first argument must have a corresponding RTCRtpTransceiver here, and the track will be published with the RTCRtpTransceiver associated with it. If the type of transport is quic, PublishOptions.audio should be AudioEncoderConfig, and PublishOptions.video should be VideoEncoderConfig.
    * @param {string[]} videoCodecs Video codec names for publishing. Valid values are 'VP8', 'VP9' and 'H264'. This parameter only valid when the second argument is PublishOptions and options.video is RTCRtpEncodingParameters. Publishing with RTCRtpEncodingParameters is an experimental feature. This parameter is subject to change.
    * @return {Promise<Publication, Error>} Returned promise will be resolved with a newly created Publication once specific stream is successfully published, or rejected with a newly created Error if stream is invalid or options cannot be satisfied. Successfully published means PeerConnection is established and server is able to process media data.
    */
@@ -472,8 +473,8 @@ export const ConferenceClient = function(config, signalingImpl) {
     if (!(stream instanceof StreamModule.LocalStream)) {
       return Promise.reject(new ConferenceError('Invalid stream.'));
     }
-    if (stream.source.data) {
-      return quicTransportChannel.publish(stream);
+    if (options?.transport?.type === 'quic') {
+      return quicTransportChannel.publish(stream, options, videoCodecs);
     }
     if (publishChannels.has(stream.mediaStream.id)) {
       return Promise.reject(new ConferenceError(
@@ -501,13 +502,16 @@ export const ConferenceClient = function(config, signalingImpl) {
             'Invalid source info. A remote stream is either a data stream or ' +
             'a media stream.'));
       }
+    }
+    if (options?.transport?.type === 'quic') {
       if (quicTransportChannel) {
-        return quicTransportChannel.subscribe(stream);
+        return quicTransportChannel.subscribe(stream, options);
       } else {
         return Promise.reject(new TypeError('WebTransport is not supported.'));
       }
+    } else {
+      return peerConnectionChannel.subscribe(stream, options);
     }
-    return peerConnectionChannel.subscribe(stream, options);
   };
 
   /**
@@ -554,6 +558,10 @@ export const ConferenceClient = function(config, signalingImpl) {
         throw new ConferenceError('No QUIC connection available.');
       }
       return quicTransportChannel.createSendStream();
+    };
+
+    this.datagramReader = function() {
+      return quicTransportChannel.datagramReader();
     };
   }
 };

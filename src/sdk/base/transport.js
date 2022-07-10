@@ -29,7 +29,9 @@ export class TransportConstraints {
      * @member {Array.<Owt.Base.TransportType>} type
      * @instance
      * @memberof Owt.Base.TransportConstraints
-     * @desc Transport type for publication and subscription.
+     * @desc Transport type for publication and subscription. 'quic' is only
+     * supported in conference mode when WebTransport is supported by client and
+     * enabled at server side.
      */
     this.type = type;
     /**

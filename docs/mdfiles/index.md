@@ -142,6 +142,8 @@ WebTransport is supported in conference mode as an experimental feature. QUIC ag
 - [JavaScript SDK design doc for WebTransport support](https://github.com/open-webrtc-toolkit/owt-client-javascript/blob/master/docs/design/webtransport.md)
 - [QUIC programming guide for OWT server](https://github.com/open-webrtc-toolkit/owt-server/blob/master/doc/design/quic-programming-guide.md)
 
+Publishing a MediaStream over WebTransport requires an additional worker for I/O. The worker is a standalone ES module, not included in owt.js. As we're moving the SDK from traditional JavaScript script to ES module, there is no plan to support this worker in old browsers.
+
 # 7 Events
 
 The JavaScript objects fires events using `Owt.Base.EventDispatchers`. For more detailed events, please refer to the specific class description page.

@@ -2,42 +2,82 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
+/* eslint-disable require-jsdoc */
+
 'use strict';
 
 let quicChannel = null;
 let bidirectionalStream = null;
-let writeTask;
-const conference=new Owt.Conference.ConferenceClient();
+let bidiAudioStream = null;
+let writeTask, dataWorker, conferenceId, myId, mixedStream, generatorWriter,
+    mediaPublication;
+const isMedia = true;
+
+window.Module={};
+
+const conference = new Owt.Conference.ConferenceClient(
+    {
+      webTransportConfiguration: {
+        serverCertificateFingerprints: [{
+          value:
+              'FD:CD:87:EB:92:97:84:FD:D9:E9:C1:9F:AF:57:12:0E:32:AF:0D:C0:58:5F:33:BB:59:4A:2E:6E:C3:18:7A:93',
+          algorithm: 'sha-256',
+        }],
+        serverCertificateHashes: [{
+          value: new Uint8Array([
+            0xFD, 0xCD, 0x87, 0xEB, 0x92, 0x97, 0x84, 0xFD, 0xD9, 0xE9, 0xC1,
+            0x9F, 0xAF, 0x57, 0x12, 0x0E, 0x32, 0xAF, 0x0D, 0xC0, 0x58, 0x5F,
+            0x33, 0xBB, 0x59, 0x4A, 0x2E, 0x6E, 0xC3, 0x18, 0x7A, 0x93
+          ]),
+          algorithm: 'sha-256',
+        }],
+      }
+    },
+    '../../../sdk/conference/webtransport');
 conference.addEventListener('streamadded', async (event) => {
   console.log(event.stream);
-  if (event.stream.source.data) {
-    const subscription = await conference.subscribe(event.stream);
-    const reader = subscription.stream.readable.getReader();
-    while (true) {
-      const {value, done} = await reader.read();
-      if (done) {
-        console.log('Subscription ends.');
-        break;
-      }
-      console.log('Received data: '+value);
-    }
+  if (event.stream.origin == myId) {
+    mixStream(
+        conferenceId, event.stream.id, 'common',
+        'http://jianjunz-nuc-ubuntu.sh.intel.com:3001');
   }
+  // if (event.stream.source.data) {
+  //   const subscription = await conference.subscribe(
+  //       event.stream,
+  //       // {transport:{type: 'quic'}});
+  //       {audio: false, video: {codecs: ['h264']}, transport: {type: 'quic'}});
+  //   const reader = subscription.stream.readable.getReader();
+  //   while (true) {
+  //     const {value, done} = await reader.read();
+  //     if (done) {
+  //       console.log('Subscription ends.');
+  //       break;
+  //     }
+  //     //console.log('Received data: ' + value);
+  //   }
+  // }
 });
 
 function updateConferenceStatus(message) {
   document.getElementById('conference-status').innerHTML +=
-    ('<p>' + message + '</p>');
+      ('<p>' + message + '</p>');
 }
-
 
 function joinConference() {
   return new Promise((resolve, reject) => {
-    createToken(undefined, 'user', 'presenter', resp => {
-      conference.join(resp).then(() => {
+    createToken(undefined, 'user', 'presenter', token => {
+      conference.join(token).then((info) => {
+        conferenceId = info.id;
+        myId = info.self.id;
+        for (const stream of info.remoteStreams) {
+          if (stream.source.video === 'mixed') {
+            mixedStream = stream;
+          }
+        }
         updateConferenceStatus('Connected to conference server.');
         resolve();
       });
-    });
+    }, 'http://jianjunz-nuc-ubuntu.sh.intel.com:3001');
   });
 };
 
@@ -55,17 +95,26 @@ function createRandomContentSessionId() {
   return id;
 }
 
+async function attachReader(stream) {
+  const reader = stream.readable.getReader();
+  while (true) {
+    const {value, done} = await reader.read();
+    if (done) {
+      console.log('Ends.');
+      break;
+    }
+    console.log('Received data: ' + value);
+  }
+}
+
 async function createSendChannel() {
   bidirectionalStream = await conference.createSendStream();
-  const localStream=new Owt.Base.LocalStream(bidirectionalStream, new Owt.Base.StreamSourceInfo(undefined, undefined,true));
-  const publication = await conference.publish(localStream);
-  console.log(publication);
   updateConferenceStatus('Created send channel.');
 }
 
 async function windowOnLoad() {
   await joinConference();
-  await createSendChannel();
+  //await createSendChannel();
 }
 
 async function writeUuid() {
@@ -84,7 +133,9 @@ async function writeData() {
   const encoded = encoder.encode('message', {stream: true});
   const writer = bidirectionalStream.writable.getWriter();
   await writer.ready;
-  await writer.write(new ArrayBuffer(2));
+  const ab = new Uint8Array(10000);
+  ab.fill(1, 0);
+  await writer.write(ab);
   writer.releaseLock();
   return;
 }
@@ -94,16 +145,45 @@ window.addEventListener('load', () => {
 });
 
 document.getElementById('start-sending').addEventListener('click', async () => {
-  if (!bidirectionalStream) {
-    updateConferenceStatus('Stream is not created.');
-    return;
+  if (isMedia) {
+    const mediaStream =
+        await navigator.mediaDevices.getUserMedia({audio: true, video: true});
+    const localStream = new Owt.Base.LocalStream(
+        mediaStream, new Owt.Base.StreamSourceInfo('mic', 'camera', undefined));
+    mediaPublication = await conference.publish(localStream, {
+      audio: {codec: 'opus', numberOfChannels: 2, sampleRate: 48000},
+      video: {codec: 'h264'},
+      transport: {type: 'quic'},
+    });
+  } else {
+    if (!bidirectionalStream) {
+      updateConferenceStatus('Stream is not created.');
+      return;
+    }
+    writeTask = setInterval(writeData, 200);
   }
-  await writeUuid();
-  writeTask = setInterval(writeData, 2000);
   updateConferenceStatus('Started sending.');
 });
 
 document.getElementById('stop-sending').addEventListener('click', () => {
-  clearInterval(writeTask);
+  if (isMedia) {
+    if (mediaPublication) {
+      mediaPublication.stop();
+    }
+  } else {
+    clearInterval(writeTask);
+  }
   updateConferenceStatus('Stopped sending.');
 });
+
+document.getElementById('start-receiving')
+    .addEventListener('click', async () => {
+      subscribeMixedStream();
+    });
+
+async function subscribeMixedStream() {
+  const subscription = await conference.subscribe(
+      mixedStream,
+      {audio: false, video: {codecs: ['h264']}, transport: {type: 'quic'}});
+  document.getElementById('remote-video').srcObject = subscription.stream;
+}

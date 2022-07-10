@@ -76,6 +76,10 @@ window.L = L;\n\
           watch: true
         },
       },
+      worker:{
+        src: ['dist/sdk/conference/webtransport/media-worker.js'],
+        dest: 'dist/sdk/media-worker.js',
+      },
       sinon: {
           src: ['node_modules/sinon/lib/sinon.js'],
           dest: 'test/unit/resources/scripts/gen/sinon-browserified.js',
@@ -102,7 +106,15 @@ window.L = L;\n\
         options: {
           base: '.',
           port: 7080,
-          keepalive: true
+          keepalive: true,
+          middleware: function(connect, options, middlewares) {
+            middlewares.unshift((req, res, next) => {
+              res.setHeader('Cross-Origin-Embedder-Policy', 'require-corp');
+              res.setHeader('Cross-Origin-Opener-Policy', 'same-origin');
+              next();
+            });
+            return middlewares;
+          }
         },
       },
     },
@@ -166,7 +178,8 @@ window.L = L;\n\
           {expand: true,cwd:'src/extension/',src:['**'],dest:'dist/',flatten:false},
           {expand: true,cwd:'dist/sdk/',src:['owt.js'],dest:'dist/samples/conference/public/scripts/',flatten:false},
           {expand: true,cwd:'dist/samples/conference/public/scripts',src:['rest.js'],dest:'dist/samples/conference/',flatten:false},
-          {expand: true,cwd:'dist/sdk/',src:['owt.js'],dest:'dist/samples/p2p/js/',flatten:false}
+          {expand: true,cwd:'dist/sdk/',src:['owt.js'],dest:'dist/samples/p2p/js/',flatten:false},
+          {expand: true,cwd: 'dist/sdk/',src: ['media-worker.js'],dest: 'dist/samples/conference/public/scripts/',flatten: false},
         ]
       }
     },
@@ -243,8 +256,8 @@ window.L = L;\n\
 
   grunt.registerTask('check', ['eslint:src']);
   grunt.registerTask('prepare', ['browserify:sinon', 'browserify:chai_as_promised']);
-  grunt.registerTask('pack', ['browserify:dist', 'concat:rest', 'uglify:dist', 'copy:dist', 'string-replace', 'compress:dist', 'jsdoc:dist']);
-  grunt.registerTask('dev', ['browserify:dev', 'connect:server']);
+  grunt.registerTask('pack', ['browserify:dist', 'browserify:worker', 'concat:rest', 'uglify:dist', 'copy:dist', 'string-replace', 'compress:dist', 'jsdoc:dist']);
+  grunt.registerTask('dev', ['browserify:dev', 'browserify:worker', 'connect:server']);
   grunt.registerTask('debug', ['browserify:dev']);
   grunt.registerTask('default', ['check', 'pack']);
 };
