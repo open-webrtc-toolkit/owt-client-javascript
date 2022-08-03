@@ -161,9 +161,9 @@ export const ConferenceClient = function(config, signalingImpl) {
         // Broadcast audio/video update status to channel so specific events can be fired on publication or subscription.
         if (data.data.field === 'audio.status' || data.data.field ===
           'video.status') {
-          channels.forEach((c) => {
-            c.onMessage(notification, data);
-          });
+          if (mainChannel) {
+            mainChannel.onMessage(notification, data);
+          }
         } else if (data.data.field === 'activeInput') {
           fireActiveAudioInputChange(data);
         } else if (data.data.field === 'video.layout') {
