@@ -572,6 +572,10 @@ function removeCodecFramALine(sdpLines, payload) {
 function findMLineRangeWithMID(sdpLines, mid) {
   const midLine = 'a=mid:' + mid;
   let midIndex = findLine(sdpLines, midLine);
+  if (midIndex === null) {
+    Logger.debug('Specified MID is not found');
+    return null;
+  }
   // Compare the whole line since findLine only compares prefix
   while (midIndex >= 0 && sdpLines[midIndex] !== midLine) {
     midIndex = findLineInRange(sdpLines, midIndex, -1, midLine);
