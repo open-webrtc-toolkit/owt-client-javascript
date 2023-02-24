@@ -51,6 +51,14 @@
     "mocha": "^10.0.0",
     "sinon": "^7.5.0"
   },
+  "overrides": {
+    "grunt-jsdoc": {
+      "jsdoc": "^4.0.0"
+    },
+    "ink-docstrap": {
+      "sanitize-html": "^2.3.2"
+    }
+  },
   "engines": {
     "node": ">=16.0"
   },
