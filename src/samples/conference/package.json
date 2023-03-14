@@ -2,7 +2,7 @@
   "name": "owt-sample-conference",
   "title": "Open WebRTC Toolkit Conference Sample",
   "description": "Open WebRTC Toolkit JavaScript Conference Sample",
-  "version": "5.0.0",
+  "version": "5.1.0",
   "homepage": "http://webrtc.intel.com",
   "author": "Open WebRTC Toolkit authors",
   "keywords": [
