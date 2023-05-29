@@ -100,7 +100,7 @@ const P2PClient = function(configuration, signalingChannel) {
           ErrorModule.errors.P2P_CLIENT_DENIED);
       return;
     }
-    if (connectionIds.has(origin) &&
+    if (connectionIds.has(origin) && connectionId &&
         connectionIds.get(origin) !== connectionId && !isPolitePeer(origin)) {
       Logger.warning(
           // eslint-disable-next-line max-len
