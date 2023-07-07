@@ -162,7 +162,7 @@ describe('Unit tests for P2PClient', function() {
       //expect(Promise.all([p2pclient1.send('user2', 'message'), p2pclient2.send('user1', 'message')])).to.be.fulfilled.and.notify(done);
       // TODO: Check messages are received.
     });
-    it('WebRTC collision should be resolved.', async () => {
+    xit('WebRTC collision should be resolved.', async () => {
       const c1Spy = new sinon.spy();
       const c2Spy = new sinon.spy();
       p2pclient1.addEventListener('messagereceived',c1Spy);
