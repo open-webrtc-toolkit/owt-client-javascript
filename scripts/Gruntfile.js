@@ -36,9 +36,6 @@ window.L = L;\n\
 }(window));\n\n\n'
     },
     eslint: {
-      options: {
-        configFile: 'src/.eslintrc.json'
-      },
       src: srcFiles
     },
     browserify: {
