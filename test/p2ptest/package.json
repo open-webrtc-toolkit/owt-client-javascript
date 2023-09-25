@@ -21,5 +21,10 @@
   },
   "scripts": {
     "postinstall": "python fetch_dependencies.py"
+  },
+  "overrides": {
+    "karma-coverage": {
+      "istanbul-lib-instrument": "^6.0.0"
+    }
   }
 }
