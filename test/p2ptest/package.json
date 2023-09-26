@@ -28,6 +28,8 @@
     },
     "underscore": "^1.12.1",
     "growl": "^1.10.0",
+    "minimatch": "^3.0.5",
+    "semver": "^6.3.1",
     "jasmine-node": {
       "underscore": "^1.12.1",
       "jasmine-growl-reporter": {
