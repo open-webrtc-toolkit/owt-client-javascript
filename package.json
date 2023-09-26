@@ -15,7 +15,7 @@
     "@babel/core": "^7.22.8",
     "@babel/plugin-transform-async-to-generator": "^7.8.3",
     "@babel/plugin-transform-runtime": "^7.12.1",
-    "@babel/preset-env": "^7.11.5",
+    "@babel/preset-env": "^7.22.20",
     "@babel/runtime": "^7.12.1",
     "@chiragrupani/karma-chromium-edge-launcher": "^2.1.0",
     "babelify": "^10.0.0",
@@ -52,7 +52,8 @@
     },
     "ink-docstrap": {
       "sanitize-html": "^2.3.2"
-    }
+    },
+    "semver": "^7.5.2"
   },
   "engines": {
     "node": ">=16.0"
