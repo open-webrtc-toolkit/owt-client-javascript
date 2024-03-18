@@ -50,15 +50,19 @@ export class SioSignaling extends EventModule.EventDispatcher {
    * @param {string} host Host of the portal.
    * @param {string} isSecured Is secure connection or not.
    * @param {string} loginInfo Information required for logging in.
+   * @param {string} options Additional options for IO.
    * @private.
    */
-  connect(host, isSecured, loginInfo) {
+  connect(host, isSecured, loginInfo, options) {
     return new Promise((resolve, reject) => {
-      const opts = {
+      
+      const opts = Object.assign({
         'reconnection': true,
         'reconnectionAttempts': reconnectionAttempts,
-        'force new connection': true,
-      };
+        'force new connection': true,        
+      }, options);
+      
+      
       this._socket = io(host, opts);
       ['participant', 'text', 'stream', 'progress'].forEach((
           notification) => {
