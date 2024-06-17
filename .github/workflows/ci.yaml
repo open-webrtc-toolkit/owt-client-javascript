@@ -7,7 +7,7 @@ jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - uses: actions/setup-node@v2
         with:
           node-version: "20"
@@ -18,7 +18,7 @@ jobs:
     name: Build matrix for unit test
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - id: read-matrix
         name: Read build matrix
         run: echo "::set-output name=matrix::`jq -c . test/unit/config/run_matrix.json`"
@@ -30,11 +30,14 @@ jobs:
     strategy:
       matrix: ${{ fromJSON(needs.build-matrix.outputs.matrix)[github.event_name] }}
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - uses: actions/setup-node@v2
         with:
           node-version: "20"
       - run: npm install
+      - name: Set Firefox path for macOS
+        if: ${{ runner.os == 'macOS' && matrix.browser == 'FirefoxWithFlags' }}
+        run: echo "FIREFOX_BIN=/Applications/Firefox.app/Contents/MacOS/firefox">> $GITHUB_ENV
       - name: Run test cases
         env:
           BROWSER: ${{ matrix.browser }}
