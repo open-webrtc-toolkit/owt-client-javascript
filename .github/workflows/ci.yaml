@@ -1,7 +1,7 @@
 name: Continuous Integration
 permissions: read-all
 
-on: [push, pull_request]
+on: [push, merge_group, pull_request]
 
 jobs:
   lint:

@@ -16,6 +16,23 @@
       }
     ]
   },
+  "merge_group": {
+    "os": [
+      "ubuntu-latest",
+      "windows-latest",
+      "macos-13"
+    ],
+    "browser": [
+      "ChromeWithFlags",
+      "FirefoxWithFlags"
+    ],
+    "include": [
+      {
+        "os": "windows-latest",
+        "browser": "EdgeWithFlags"
+      }
+    ]
+  },
   "pull_request": {
     "os": [
       "ubuntu-latest"
