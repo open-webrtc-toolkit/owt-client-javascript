@@ -1,3 +1,9 @@
+# DISCONTINUATION OF PROJECT #
+This project will no longer be maintained by Intel.  
+This project has been identified as having known security escapes.  
+Intel has ceased development and contributions including, but not limited to, maintenance, bug fixes, new releases, or updates, to this project.  
+Intel no longer accepts patches to this project.  
+
 # Open WebRTC Toolkit JavaScript SDK
 
 Open WebRTC Toolkit JavaScript SDK builds on top of the W3C standard WebRTC APIs to accelerate development of real-time communications (RTC) for web applications, including peer-to-peer, broadcasting, and conference mode communications.
